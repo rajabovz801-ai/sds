@@ -11,6 +11,7 @@ export function Header() {
           <a href="#mock">Mock</a>
           <a href="#tracks">Yo‘nalishlar</a>
           <a href="#how">Qanday ishlaydi</a>
+          <Link href="/dashboard">Dashboard</Link>
         </nav>
         <Link className="signupBtn" href="https://t.me/arkedu_bot" target="_blank" rel="noopener noreferrer">Sign up <span>↗</span></Link>
       </div>
