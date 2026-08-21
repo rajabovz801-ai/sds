@@ -1,0 +1,34 @@
+import { getPublicSupabase } from '@/lib/supabase/server';
+
+export type TestTrack = 'ielts' | 'cefr';
+export type TestSkill = 'reading' | 'listening' | 'writing' | 'speaking' | 'full-mock';
+export type TestStatus = 'published' | 'draft';
+
+export type CloudTest = {
+  id: string;
+  title: string;
+  description: string;
+  track: TestTrack;
+  skill: TestSkill;
+  status: TestStatus;
+  fileName: string;
+  filePath: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type TestRow = {
+  id:string; title:string; description:string|null; track:TestTrack; skill:TestSkill; status:TestStatus;
+  file_name:string; file_path:string; created_at:string; updated_at:string;
+};
+
+export function mapTest(row: TestRow): CloudTest {
+  return {id:row.id,title:row.title,description:row.description||'',track:row.track,skill:row.skill,status:row.status,fileName:row.file_name,filePath:row.file_path,createdAt:row.created_at,updatedAt:row.updated_at};
+}
+
+export async function listPublishedTests(): Promise<CloudTest[]> {
+  const supabase = getPublicSupabase();
+  const {data,error} = await supabase.from('tests').select('*').eq('status','published').order('updated_at',{ascending:false});
+  if(error) throw error;
+  return ((data||[]) as TestRow[]).map(mapTest);
+}
