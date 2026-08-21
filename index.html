@@ -1,273 +1,276 @@
 <!doctype html>
 <html lang="uz">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="ARK Education — IELTS va CEFR kurslari uchun zamonaviy ta'lim markazi." />
-  <title>ARK Education</title>
-  <style>
-    :root{
-      --navy:#0b1f3a;
-      --navy2:#12335a;
-      --gold:#e7b64a;
-      --white:#ffffff;
-      --soft:#f5f7fb;
-      --text:#172033;
-      --muted:#6b7280;
-      --radius:22px;
-      --shadow:0 18px 50px rgba(11,31,58,.12);
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:Arial,Helvetica,sans-serif;
-      color:var(--text);
-      background:var(--white);
-      line-height:1.6;
-    }
-    a{text-decoration:none;color:inherit}
-    .container{width:min(1120px,92%);margin:auto}
-
-    header{
-      position:sticky;top:0;z-index:50;
-      background:rgba(255,255,255,.92);
-      backdrop-filter:blur(12px);
-      border-bottom:1px solid rgba(11,31,58,.08);
-    }
-    nav{
-      min-height:72px;
-      display:flex;align-items:center;justify-content:space-between;gap:24px;
-    }
-    .brand{display:flex;align-items:center;gap:12px;font-weight:800;color:var(--navy)}
-    .logo{
-      width:42px;height:42px;border-radius:14px;
-      background:linear-gradient(145deg,var(--navy),var(--navy2));
-      color:var(--gold);display:grid;place-items:center;
-      font-weight:900;box-shadow:0 8px 18px rgba(11,31,58,.2)
-    }
-    .nav-links{display:flex;gap:26px;font-size:14px;font-weight:700;color:#40506a}
-    .nav-links a:hover{color:var(--navy)}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;
-      padding:13px 20px;border-radius:14px;font-weight:800;
-      transition:.2s ease;border:1px solid transparent;cursor:pointer;
-    }
-    .btn-primary{background:var(--gold);color:var(--navy)}
-    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(231,182,74,.25)}
-    .btn-outline{border-color:rgba(255,255,255,.3);color:white}
-    .btn-outline:hover{background:rgba(255,255,255,.08)}
-
-    .hero{
-      background:
-        radial-gradient(circle at 85% 20%,rgba(231,182,74,.22),transparent 26%),
-        linear-gradient(135deg,var(--navy) 0%,#0d2a4d 62%,#173f6e 100%);
-      color:white;padding:92px 0 76px;overflow:hidden;
-    }
-    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
-    .tag{
-      display:inline-flex;align-items:center;gap:8px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.07);
-      padding:8px 13px;border-radius:999px;font-size:13px;font-weight:800;
-      color:#f7d98d;
-    }
-    h1{font-size:clamp(42px,6vw,74px);line-height:1.02;margin:22px 0 20px;letter-spacing:-2.5px}
-    .hero p{font-size:18px;color:#d6dfeb;max-width:650px;margin:0 0 30px}
-    .actions{display:flex;gap:12px;flex-wrap:wrap}
-    .hero-card{
-      background:rgba(255,255,255,.09);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:30px;padding:26px;box-shadow:0 28px 70px rgba(0,0,0,.18);
-      backdrop-filter:blur(12px);
-    }
-    .score{
-      background:white;color:var(--navy);border-radius:22px;padding:25px;margin-bottom:14px
-    }
-    .score small{color:var(--muted);font-weight:700}
-    .score strong{display:block;font-size:45px;line-height:1.1;margin-top:8px}
-    .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .mini{
-      padding:18px;border-radius:18px;background:rgba(255,255,255,.09);
-      border:1px solid rgba(255,255,255,.11)
-    }
-    .mini strong{font-size:22px;display:block;color:#f7d98d}
-    .mini span{font-size:13px;color:#d6dfeb}
-
-    section{padding:82px 0}
-    .section-head{max-width:700px;margin-bottom:38px}
-    .eyebrow{color:#a57412;font-weight:900;font-size:13px;letter-spacing:1.7px;text-transform:uppercase}
-    h2{color:var(--navy);font-size:clamp(30px,4vw,46px);line-height:1.08;margin:10px 0 12px;letter-spacing:-1.4px}
-    .section-head p{color:var(--muted);margin:0;font-size:17px}
-
-    .courses{background:var(--soft)}
-    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-    .card{
-      background:white;border:1px solid #e9edf5;border-radius:var(--radius);
-      padding:26px;box-shadow:0 10px 30px rgba(11,31,58,.05);
-      transition:.2s ease;
-    }
-    .card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-    .icon{
-      width:48px;height:48px;border-radius:15px;background:#fff7df;
-      color:#9a6b08;display:grid;place-items:center;font-size:22px;font-weight:900;
-      margin-bottom:18px;
-    }
-    .card h3{font-size:22px;color:var(--navy);margin:0 0 9px}
-    .card p{color:var(--muted);margin:0}
-
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-    .stat{
-      border:1px solid #e8edf4;border-radius:18px;padding:24px;text-align:center
-    }
-    .stat strong{display:block;color:var(--navy);font-size:34px}
-    .stat span{color:var(--muted);font-size:14px;font-weight:700}
-
-    .cta-wrap{
-      background:linear-gradient(135deg,var(--navy),#163f6d);
-      color:white;border-radius:32px;padding:48px;
-      display:flex;align-items:center;justify-content:space-between;gap:28px;
-      box-shadow:var(--shadow)
-    }
-    .cta-wrap h2{color:white;margin:0 0 8px}
-    .cta-wrap p{margin:0;color:#d6dfeb;max-width:650px}
-
-    footer{padding:34px 0;border-top:1px solid #edf0f5;color:var(--muted);font-size:14px}
-    .footer-row{display:flex;justify-content:space-between;gap:20px;align-items:center}
-    .footer-row strong{color:var(--navy)}
-
-    @media (max-width:850px){
-      .hero-grid{grid-template-columns:1fr}
-      .hero-card{max-width:580px}
-      .cards{grid-template-columns:1fr}
-      .stats{grid-template-columns:1fr 1fr}
-      .nav-links{display:none}
-      .cta-wrap{flex-direction:column;align-items:flex-start}
-    }
-    @media (max-width:520px){
-      .hero{padding-top:68px}
-      .stats{grid-template-columns:1fr}
-      .mini-grid{grid-template-columns:1fr}
-      .cta-wrap{padding:30px}
-      h1{letter-spacing:-1.6px}
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071a33">
+  <meta name="description" content="ARK Education — IELTS, CEFR va General English bo‘yicha tizimli tayyorgarlik.">
+  <meta property="og:title" content="ARK Education">
+  <meta property="og:description" content="Aniq reja. Kuchli practice. Muntazam feedback. Real progress.">
+  <meta property="og:type" content="website">
+  <title>ARK Education — IELTS & CEFR</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Asosiy mazmunga o‘tish</a>
 
-<header>
-  <div class="container">
-    <nav>
-      <a class="brand" href="#home">
-        <span class="logo">A</span>
-        <span>ARK EDUCATION</span>
+  <header class="site-header" id="top">
+    <div class="container nav-wrap">
+      <a class="brand" href="#top" aria-label="ARK Education bosh sahifa">
+        <span class="brand-mark" aria-hidden="true">A</span>
+        <span class="brand-copy">
+          <strong>ARK EDUCATION</strong>
+          <small>English • IELTS • CEFR</small>
+        </span>
       </a>
-      <div class="nav-links">
+
+      <button class="menu-toggle" type="button" aria-label="Menyuni ochish" aria-expanded="false" aria-controls="main-nav">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="main-nav" id="main-nav" aria-label="Asosiy navigatsiya">
         <a href="#courses">Kurslar</a>
-        <a href="#results">Natijalar</a>
+        <a href="#system">Tizim</a>
+        <a href="#results">Natija</a>
+        <a href="#faq">FAQ</a>
         <a href="#contact">Bog‘lanish</a>
-      </div>
-      <a class="btn btn-primary" href="#contact">Kursga yozilish</a>
-    </nav>
-  </div>
-</header>
+      </nav>
 
-<main id="home">
-  <section class="hero">
-    <div class="container hero-grid">
+      <a class="button button-gold nav-cta" href="#contact">Kursga yozilish</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-glow hero-glow-one"></div>
+      <div class="hero-glow hero-glow-two"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <div class="pill"><span class="pulse-dot"></span> IELTS • CEFR • General English</div>
+          <h1 id="hero-title">Ingliz tilini shunchaki o‘rganmang. <span>Natija uchun o‘rganing.</span></h1>
+          <p class="hero-lead">ARK Education’da darslar aniq reja, kuchli practice, muntazam nazorat va individual feedback asosida olib boriladi.</p>
+
+          <div class="hero-actions">
+            <a class="button button-gold" href="#courses">Kurslarni ko‘rish</a>
+            <a class="button button-ghost" href="#system">Qanday ishlaymiz?</a>
+          </div>
+
+          <ul class="hero-points" aria-label="Afzalliklar">
+            <li><span>✓</span> Haftalik progress nazorati</li>
+            <li><span>✓</span> Imtihon formatidagi practice</li>
+            <li><span>✓</span> Tushunarli va aniq feedback</li>
+          </ul>
+        </div>
+
+        <div class="hero-panel reveal" aria-label="ARK Education o‘quv tizimi">
+          <div class="panel-topline">
+            <div>
+              <span class="overline">STUDY SYSTEM</span>
+              <strong>Progress Dashboard</strong>
+            </div>
+            <span class="status"><i></i> Active</span>
+          </div>
+
+          <div class="target-card">
+            <div>
+              <span class="muted">Maqsad</span>
+              <strong>IELTS 7.0+</strong>
+            </div>
+            <div class="ring" aria-label="Progress illustration"><span>75%</span></div>
+          </div>
+
+          <div class="skill-list">
+            <div class="skill-row"><span>Reading</span><div class="bar"><i style="--w:82%"></i></div><b>82%</b></div>
+            <div class="skill-row"><span>Listening</span><div class="bar"><i style="--w:88%"></i></div><b>88%</b></div>
+            <div class="skill-row"><span>Writing</span><div class="bar"><i style="--w:70%"></i></div><b>70%</b></div>
+            <div class="skill-row"><span>Speaking</span><div class="bar"><i style="--w:76%"></i></div><b>76%</b></div>
+          </div>
+
+          <div class="panel-footer">
+            <span><b>4</b> skills</span>
+            <span><b>Weekly</b> review</span>
+            <span><b>1:1</b> feedback</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="container trust-strip reveal">
+        <span>Structured learning</span><i></i><span>Exam practice</span><i></i><span>Teacher feedback</span><i></i><span>Progress tracking</span>
+      </div>
+    </section>
+
+    <section class="section section-light" id="courses">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div>
+            <span class="eyebrow">KURSLAR</span>
+            <h2>Maqsadingizga mos yo‘nalishni tanlang</h2>
+          </div>
+          <p>Har bir yo‘nalishda nazariya va amaliyot birga olib boriladi. O‘quvchi nimani, nima uchun va qanday yaxshilashini aniq biladi.</p>
+        </div>
+
+        <div class="course-grid">
+          <article class="course-card featured reveal">
+            <div class="course-icon">I</div>
+            <span class="course-tag">Eng intensiv</span>
+            <h3>IELTS Intensive</h3>
+            <p>Reading, Listening, Writing va Speaking bo‘yicha exam-focused tayyorgarlik.</p>
+            <ul>
+              <li>Cambridge formatidagi practice</li>
+              <li>Writing uchun batafsil feedback</li>
+              <li>Speaking mock va correction</li>
+              <li>Progress test va tahlil</li>
+            </ul>
+            <a href="#contact" class="text-link">Batafsil ma’lumot <span>→</span></a>
+          </article>
+
+          <article class="course-card reveal">
+            <div class="course-icon">C</div>
+            <span class="course-tag">A2 → C1</span>
+            <h3>CEFR Preparation</h3>
+            <p>CEFR imtihoniga bosqichma-bosqich va tartibli tayyorgarlik.</p>
+            <ul>
+              <li>Reading va Listening practice</li>
+              <li>Writing structure va vocabulary</li>
+              <li>Speaking fluency va accuracy</li>
+              <li>Grammar va active vocabulary</li>
+            </ul>
+            <a href="#contact" class="text-link">Batafsil ma’lumot <span>→</span></a>
+          </article>
+
+          <article class="course-card reveal">
+            <div class="course-icon">G</div>
+            <span class="course-tag">Strong foundation</span>
+            <h3>General English</h3>
+            <p>Mustahkam baza, faol lug‘at va ravon muloqot uchun zamonaviy kurs.</p>
+            <ul>
+              <li>Essential grammar</li>
+              <li>Daily speaking practice</li>
+              <li>Useful vocabulary & collocations</li>
+              <li>Reading va listening skills</li>
+            </ul>
+            <a href="#contact" class="text-link">Batafsil ma’lumot <span>→</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section system-section" id="system">
+      <div class="container system-grid">
+        <div class="system-copy reveal">
+          <span class="eyebrow eyebrow-light">BIZNING TIZIM</span>
+          <h2>O‘sish tasodif emas. U tizim bilan keladi.</h2>
+          <p>Har bir dars faqat mavzu o‘tish uchun emas, o‘quvchining keyingi aniq qadamini belgilash uchun quriladi.</p>
+          <a class="button button-gold" href="#contact">Boshlash</a>
+        </div>
+
+        <div class="steps">
+          <article class="step reveal"><span>01</span><div><h3>Diagnostika</h3><p>Hozirgi daraja va asosiy bo‘shliqlar aniqlanadi.</p></div></article>
+          <article class="step reveal"><span>02</span><div><h3>Aniq reja</h3><p>Daraja va maqsadga mos study plan tuziladi.</p></div></article>
+          <article class="step reveal"><span>03</span><div><h3>Practice</h3><p>Darsdagi bilim real test va topshiriqlarda qo‘llanadi.</p></div></article>
+          <article class="step reveal"><span>04</span><div><h3>Feedback</h3><p>Xatolar sababi tushuntiriladi va keyingi fokus belgilanadi.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="results">
+      <div class="container">
+        <div class="center-heading reveal">
+          <span class="eyebrow">NATIJA</span>
+          <h2>O‘quv jarayoni doim nazoratda</h2>
+          <p>Progress ko‘rinadigan, o‘lchanadigan va tushunarli bo‘lishi kerak.</p>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card reveal"><strong>4</strong><span>IELTS skill bir tizimda</span></article>
+          <article class="metric-card reveal"><strong>Weekly</strong><span>progress test va review</span></article>
+          <article class="metric-card reveal"><strong>1:1</strong><span>individual feedback</span></article>
+          <article class="metric-card reveal"><strong>A2–C1</strong><span>CEFR bosqichlari</span></article>
+        </div>
+
+        <div class="result-panel reveal">
+          <div class="result-copy">
+            <span class="eyebrow">SMART PRACTICE</span>
+            <h3>Faqat test yechish emas — xatoni tushunish muhim.</h3>
+            <p>Har bir practice’dan keyin xatolar tahlil qilinadi, zaif skill aniqlanadi va keyingi mashq aynan shu nuqtaga qaratiladi.</p>
+          </div>
+          <div class="result-checks">
+            <div><span>01</span><p><b>Test</b><small>Real formatda ishlash</small></p></div>
+            <div><span>02</span><p><b>Analysis</b><small>Xato sababini topish</small></p></div>
+            <div><span>03</span><p><b>Correction</b><small>To‘g‘ri usulni mustahkamlash</small></p></div>
+            <div><span>04</span><p><b>Repeat</b><small>Natijani barqaror qilish</small></p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-light" id="faq">
+      <div class="container faq-grid">
+        <div class="faq-intro reveal">
+          <span class="eyebrow">FAQ</span>
+          <h2>Ko‘p beriladigan savollar</h2>
+          <p>Kurs tanlashdan oldin eng muhim savollarga qisqa javoblar.</p>
+          <a class="text-link" href="#contact">Boshqa savolim bor <span>→</span></a>
+        </div>
+
+        <div class="accordion">
+          <article class="faq-item reveal">
+            <button class="faq-question" type="button" aria-expanded="false"><span>Qaysi kurs menga mos?</span><i>+</i></button>
+            <div class="faq-answer"><p>Bu hozirgi darajangiz va maqsadingizga bog‘liq. IELTS maqsadi bo‘lsa IELTS Intensive, daraja oshirish va CEFR uchun CEFR Preparation, baza uchun General English mos keladi.</p></div>
+          </article>
+          <article class="faq-item reveal">
+            <button class="faq-question" type="button" aria-expanded="false"><span>Progress qanday nazorat qilinadi?</span><i>+</i></button>
+            <div class="faq-answer"><p>Darsdagi topshiriqlar, uy vazifasi, mini-testlar va haftalik progress review orqali kuchli va zaif tomonlar muntazam kuzatiladi.</p></div>
+          </article>
+          <article class="faq-item reveal">
+            <button class="faq-question" type="button" aria-expanded="false"><span>Writing va Speaking feedback bormi?</span><i>+</i></button>
+            <div class="faq-answer"><p>Ha. Writing’da structure, grammar, vocabulary va task response, Speaking’da esa fluency, vocabulary, grammar va pronunciation bo‘yicha feedback beriladi.</p></div>
+          </article>
+          <article class="faq-item reveal">
+            <button class="faq-question" type="button" aria-expanded="false"><span>Kursga qanday yozilaman?</span><i>+</i></button>
+            <div class="faq-answer"><p>Quyidagi Telegram tugmasi orqali bog‘laning. Sizga mos guruh va yo‘nalish bo‘yicha ma’lumot beriladi.</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+      <div class="container">
+        <div class="contact-card reveal">
+          <div class="contact-copy">
+            <span class="eyebrow eyebrow-light">BOSHLASHGA TAYYORMISIZ?</span>
+            <h2>Keyingi natija sizniki bo‘lishi mumkin.</h2>
+            <p>O‘zingizga mos kursni tanlang va tartibli o‘quv yo‘lini boshlang.</p>
+          </div>
+          <div class="contact-actions">
+            <a class="button button-gold button-large" href="https://t.me/ark_educat1on" target="_blank" rel="noopener noreferrer">Telegram orqali yozilish <span>↗</span></a>
+            <small>Javob olish uchun Telegram orqali yozing.</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-main">
       <div>
-        <span class="tag">● IELTS • CEFR • General English</span>
-        <h1>Ingliz tilini natija uchun o‘rganing.</h1>
-        <p>
-          ARK Education’da zamonaviy metodika, aniq o‘quv rejasi va muntazam
-          nazorat orqali o‘quvchilar o‘z maqsadiga tezroq yetadi.
-        </p>
-        <div class="actions">
-          <a class="btn btn-primary" href="#courses">Kurslarni ko‘rish</a>
-          <a class="btn btn-outline" href="#results">Natijalar</a>
-        </div>
+        <a class="brand footer-brand" href="#top">
+          <span class="brand-mark">A</span>
+          <span class="brand-copy"><strong>ARK EDUCATION</strong><small>Learn with a system.</small></span>
+        </a>
       </div>
-
-      <aside class="hero-card">
-        <div class="score">
-          <small>IELTS maqsadi</small>
-          <strong>7.0+</strong>
-          <span>Reja • Practice • Feedback • Progress</span>
-        </div>
-        <div class="mini-grid">
-          <div class="mini"><strong>4</strong><span>asosiy skill</span></div>
-          <div class="mini"><strong>100%</strong><span>progress nazorati</span></div>
-          <div class="mini"><strong>CEFR</strong><span>A2 → C1</span></div>
-          <div class="mini"><strong>IELTS</strong><span>exam practice</span></div>
-        </div>
-      </aside>
-    </div>
-  </section>
-
-  <section id="courses" class="courses">
-    <div class="container">
-      <div class="section-head">
-        <div class="eyebrow">Kurslar</div>
-        <h2>Maqsadingizga mos yo‘nalishni tanlang</h2>
-        <p>Har bir kursda nazariya, amaliy mashqlar, testlar va doimiy feedback bir tizimda ishlaydi.</p>
-      </div>
-
-      <div class="cards">
-        <article class="card">
-          <div class="icon">I</div>
-          <h3>IELTS Intensive</h3>
-          <p>Reading, Listening, Writing va Speaking bo‘yicha intensiv tayyorgarlik va mock testlar.</p>
-        </article>
-        <article class="card">
-          <div class="icon">C</div>
-          <h3>CEFR Preparation</h3>
-          <p>CEFR imtihoniga strukturali tayyorgarlik: vocabulary, grammar va barcha asosiy ko‘nikmalar.</p>
-        </article>
-        <article class="card">
-          <div class="icon">G</div>
-          <h3>General English</h3>
-          <p>Mustahkam baza, faol lug‘at, ravon speaking va kundalik ingliz tili uchun zamonaviy kurs.</p>
-        </article>
+      <div class="footer-links">
+        <a href="#courses">Kurslar</a>
+        <a href="#system">Tizim</a>
+        <a href="#results">Natija</a>
+        <a href="#faq">FAQ</a>
       </div>
     </div>
-  </section>
-
-  <section id="results">
-    <div class="container">
-      <div class="section-head">
-        <div class="eyebrow">Natijalar</div>
-        <h2>Progressni raqamlar bilan kuzatamiz</h2>
-        <p>Har bir o‘quvchi uchun dars, vazifa va test natijalari muntazam nazorat qilinadi.</p>
-      </div>
-
-      <div class="stats">
-        <div class="stat"><strong>4</strong><span>IELTS Skills</span></div>
-        <div class="stat"><strong>Weekly</strong><span>Progress Test</span></div>
-        <div class="stat"><strong>1:1</strong><span>Feedback</span></div>
-        <div class="stat"><strong>A2–C1</strong><span>CEFR Levels</span></div>
-      </div>
+    <div class="container footer-bottom">
+      <span>© <span id="year">2026</span> ARK Education. Barcha huquqlar himoyalangan.</span>
+      <a href="#top">Yuqoriga ↑</a>
     </div>
-  </section>
-
-  <section id="contact">
-    <div class="container">
-      <div class="cta-wrap">
-        <div>
-          <h2>Keyingi natija sizniki bo‘lishi mumkin.</h2>
-          <p>Kursga yoziling va ingliz tili bo‘yicha aniq, tartibli o‘quv yo‘lini boshlang.</p>
-        </div>
-        <a class="btn btn-primary" href="https://t.me/ark_educat1on" target="_blank" rel="noopener">Telegram orqali yozilish</a>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <div class="container footer-row">
-    <strong>ARK EDUCATION</strong>
-    <span>© 2026. Barcha huquqlar himoyalangan.</span>
-  </div>
-</footer>
-
+  </footer>
 </body>
 </html>
