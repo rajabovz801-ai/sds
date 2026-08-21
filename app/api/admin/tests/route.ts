@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase, HTML_TESTS_BUCKET } from '@/lib/supabase/server';
+import { checkAdminRequest } from '@/lib/adminAuth';
 
-function authorized(request:NextRequest){
-  const expected=process.env.ADMIN_ACCESS_KEY;
-  const received=request.headers.get('x-admin-key');
-  return Boolean(expected && received && received===expected);
+function authResponse(request:NextRequest){
+  const auth=checkAdminRequest(request);
+  if(!auth.ok) return NextResponse.json({error:auth.error},{status:auth.status});
+  return null;
 }
 
 export async function GET(request:NextRequest){
-  if(!authorized(request)) return NextResponse.json({error:'Unauthorized'},{status:401});
+  const denied=authResponse(request); if(denied) return denied;
   try{
     const supabase=getServiceSupabase();
     const {data,error}=await supabase.from('tests').select('*').order('updated_at',{ascending:false});
@@ -18,7 +19,7 @@ export async function GET(request:NextRequest){
 }
 
 export async function POST(request:NextRequest){
-  if(!authorized(request)) return NextResponse.json({error:'Unauthorized'},{status:401});
+  const denied=authResponse(request); if(denied) return denied;
   try{
     const form=await request.formData();
     const title=String(form.get('title')||'').trim();
