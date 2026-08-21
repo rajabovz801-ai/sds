@@ -3,10 +3,17 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
+type ResultDetails = {
+  correct?: number | null;
+  wrong?: number | null;
+  unanswered?: number | null;
+  [key: string]: unknown;
+};
+
 type Section = {
   section: string;
   test: { id: string; title: string; skill: string; file_name: string } | null;
-  result: { raw_score: number | null; max_score: number | null; band: number | null } | null;
+  result: { raw_score: number | null; max_score: number | null; band: number | null; details?: ResultDetails } | null;
 };
 
 type AttemptData = {
@@ -20,9 +27,12 @@ const labels: Record<string, string> = { reading: 'Reading', listening: 'Listeni
 export function MockAttemptClient({ id }: { id: string }) {
   const [data, setData] = useState<AttemptData | null | undefined>(undefined);
   const [error, setError] = useState('');
+  const [finishing, setFinishing] = useState(false);
+  const [finishError, setFinishError] = useState('');
 
-  useEffect(() => {
-    fetch(`/api/mock/attempts/${id}`)
+  const load = () => {
+    setError('');
+    return fetch(`/api/mock/attempts/${id}`)
       .then(async (response) => {
         const body = await response.json();
         if (!response.ok) throw new Error(body.error || 'Mock attempt topilmadi.');
@@ -32,9 +42,29 @@ export function MockAttemptClient({ id }: { id: string }) {
         setError(err instanceof Error ? err.message : 'Mock attempt topilmadi.');
         setData(null);
       });
-  }, [id]);
+  };
+
+  useEffect(() => { void load(); }, [id]);
 
   const completed = useMemo(() => data?.sections.filter((item) => item.result).length || 0, [data]);
+  const allDone = Boolean(data?.sections.length && completed === data.sections.length);
+
+  const finishMock = async () => {
+    if (!allDone || finishing) return;
+    setFinishing(true);
+    setFinishError('');
+    try {
+      const response = await fetch(`/api/mock/attempts/${id}/finish`, { method: 'POST' });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || 'Mock yakunlanmadi.');
+      window.location.href = `/result/${id}`;
+    } catch (err) {
+      setFinishError(err instanceof Error ? err.message : 'Mock yakunlanmadi.');
+      await load();
+    } finally {
+      setFinishing(false);
+    }
+  };
 
   if (data === undefined) return <div className="mockLoading">Mock session yuklanmoqda…</div>;
   if (!data) return <div className="mockAccessGate"><div className="mockGateIcon">!</div><h1>Mock session topilmadi</h1><p>{error}</p><Link className="authPrimary" href="/mock">Mock bo‘limiga qaytish</Link></div>;
@@ -60,17 +90,19 @@ export function MockAttemptClient({ id }: { id: string }) {
           <div className="mockSectionList">
             {data.sections.map((item, index) => {
               const sectionLabel = labels[item.section] || item.section;
+              const correct = item.result?.details?.correct;
+              const wrong = item.result?.details?.wrong;
               return (
-                <article className="mockSectionCard" key={item.section}>
+                <article className={`mockSectionCard ${item.result ? 'isComplete' : ''}`} key={item.section}>
                   <div className="mockSectionIndex">{String(index + 1).padStart(2, '0')}</div>
                   <div className="mockSectionInfo">
                     <span>{sectionLabel.toUpperCase()}</span>
                     <h3>{item.test?.title || `${sectionLabel} test`}</h3>
-                    <p>{item.result ? 'Section yakunlangan va natija saqlangan.' : item.test ? 'Test mock session bilan bog‘langan.' : 'Test hali mock’ga biriktirilmagan.'}</p>
+                    <p>{item.result ? `Saved${correct != null ? ` · ${correct} correct` : ''}${wrong != null ? ` · ${wrong} wrong` : ''}` : item.test ? 'Test mock session bilan bog‘langan.' : 'Test hali mock’ga biriktirilmagan.'}</p>
                   </div>
                   <div className="mockSectionAction">
                     {item.result ? (
-                      <div className="mockResultMini"><b>{item.result.band ?? item.result.raw_score ?? '✓'}</b><span>{item.result.band != null ? 'Band' : 'Score'}</span></div>
+                      <div className="mockResultMini"><b>{item.result.band ?? (item.result.raw_score != null ? `${item.result.raw_score}/${item.result.max_score ?? '—'}` : '✓')}</b><span>{item.result.band != null ? 'Band' : 'Score'}</span></div>
                     ) : item.test ? (
                       <Link className="pButton pButtonPrimary" href={`/test/${item.test.id}?attempt=${data.attempt.id}&mode=mock&section=${item.section}`}>Start {sectionLabel}</Link>
                     ) : (
@@ -89,10 +121,20 @@ export function MockAttemptClient({ id }: { id: string }) {
           <div className="mockSummaryRows">
             <div><span>Status</span><b>{data.attempt.status.replace('_', ' ')}</b></div>
             <div><span>Completed</span><b>{completed}/{data.sections.length}</b></div>
-            <div><span>Overall</span><b>{data.attempt.overallBand ?? data.attempt.overallScore ?? '—'}</b></div>
+            <div><span>Overall</span><b>{data.attempt.overallBand ?? (data.attempt.overallScore != null ? `${data.attempt.overallScore}%` : '—')}</b></div>
           </div>
           <div className="mockProgressTrack"><span style={{ width: `${data.sections.length ? (completed / data.sections.length) * 100 : 0}%` }} /></div>
-          <p className="mockSummaryNote">Reading va Listening testlaridan natija kelgach, final result shu session ichida hisoblanadi va keyingi bosqichda Telegram botga ham yuboriladi.</p>
+
+          {data.attempt.status === 'completed' ? (
+            <Link className="authPrimary mockFinishButton" href={`/result/${id}`}>Final resultni ko‘rish <span>→</span></Link>
+          ) : (
+            <button className="authPrimary mockFinishButton" type="button" disabled={!allDone || finishing} onClick={finishMock}>
+              {finishing ? 'Yakunlanmoqda…' : 'Mockni yakunlash'}
+            </button>
+          )}
+
+          {!allDone && data.attempt.status !== 'completed' && <p className="mockSummaryNote">Final submit barcha biriktirilgan section natijalari saqlangandan keyin ochiladi.</p>}
+          {finishError && <p className="mockFinishError">{finishError}</p>}
           <Link className="authSecondary mockBackLink" href="/mock">← Mock access</Link>
         </aside>
       </section>

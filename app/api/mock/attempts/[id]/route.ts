@@ -51,7 +51,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const { data: results, error: resultError } = await supabase
       .from('section_results')
-      .select('section,raw_score,max_score,band,created_at')
+      .select('section,raw_score,max_score,band,details,created_at')
       .eq('attempt_id', attempt.id);
     if (resultError) throw resultError;
 

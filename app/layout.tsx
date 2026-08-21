@@ -3,6 +3,7 @@ import './globals.css';
 import './platform.css';
 import './polish.css';
 import './auth.css';
+import './mock-results.css';
 
 export const metadata: Metadata = {
   title: 'ARK Mock — IELTS & CEFR Exam Platform',
