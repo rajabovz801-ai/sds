@@ -2,18 +2,33 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+type Student = { firstName: string; lastName: string };
 
 const items = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/practice', label: 'Practice' },
-  { href: '/study-tools', label: 'Study tools' },
-  { href: '/ai-tutor', label: 'AI Tutor' },
-  { href: '/live-chat', label: 'Live Chat' },
-  { href: '/billing', label: 'Billing' },
+  { href: '/dashboard', label: 'Dashboard', soon: false },
+  { href: '/mock', label: 'Mock', soon: false },
+  { href: '/practice', label: 'Practice', soon: true },
+  { href: '/study-tools', label: 'Study tools', soon: true },
+  { href: '/ai-tutor', label: 'AI Tutor', soon: true },
+  { href: '/live-chat', label: 'Live Chat', soon: true },
+  { href: '/billing', label: 'Billing', soon: true },
 ];
 
 export function PlatformNav() {
   const pathname = usePathname();
+  const [student, setStudent] = useState<Student | null>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((response) => response.json())
+      .then((data) => setStudent(data.student || null))
+      .catch(() => setStudent(null));
+  }, [pathname]);
+
+  const isAdmin = pathname.startsWith('/admin');
+
   return (
     <div className="platformBarWrap">
       <header className="platformBar">
@@ -21,16 +36,25 @@ export function PlatformNav() {
           <span className="platformBrandMark">A</span>
           <span className="platformBrandText"><strong>ARK MOCK</strong><small>IELTS • CEFR</small></span>
         </Link>
+
         <nav className="platformNav" aria-label="Platforma">
           {items.map((item) => {
-            const active = pathname === item.href;
-            const soon = item.href !== '/dashboard';
-            return <Link key={item.href} href={item.href} className={active ? 'active' : ''}>{item.label}{soon && <span className="soonDot">SOON</span>}</Link>;
+            const active = pathname === item.href || (item.href === '/mock' && pathname.startsWith('/mock/'));
+            return (
+              <Link key={item.href} href={item.href} className={active ? 'active' : ''}>
+                {item.label}
+                {item.soon && <span className="soonDot">SOON</span>}
+              </Link>
+            );
           })}
         </nav>
+
         <div className="platformActions">
-          <Link className="adminShortcut" href="/admin"><b>⚙</b><span>Admin</span></Link>
-          <div className="profileChip"><span className="profileAvatar">U</span><span className="profileLabel">Student</span></div>
+          {isAdmin && <span className="adminModeChip"><b>ADM</b><span>Admin mode</span></span>}
+          <Link className="profileChip" href="/login">
+            <span className="profileAvatar">{student?.firstName?.charAt(0).toUpperCase() || 'U'}</span>
+            <span className="profileLabel">{student ? `${student.firstName} ${student.lastName}` : 'Kirish'}</span>
+          </Link>
         </div>
       </header>
     </div>

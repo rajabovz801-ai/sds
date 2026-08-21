@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import './platform.css';
 import './polish.css';
+import './auth.css';
 
 export const metadata: Metadata = {
   title: 'ARK Mock — IELTS & CEFR Exam Platform',
