@@ -9,24 +9,28 @@ export function LandingMotion() {
     const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
 
     if (reduceMotion) {
-      elements.forEach(el => el.classList.add('is-visible'));
+      elements.forEach((el) => el.classList.add('is-visible'));
       return;
     }
 
     root.classList.add('motion-ready');
 
-    const observer = 'IntersectionObserver' in window
-      ? new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
+    let observer: IntersectionObserver | null = null;
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
             if (entry.isIntersecting) {
               (entry.target as HTMLElement).classList.add('is-visible');
-              observer.unobserve(entry.target);
+              observer?.unobserve(entry.target);
             }
           });
-        }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' })
-      : null;
+        },
+        { threshold: 0.14, rootMargin: '0px 0px -6% 0px' },
+      );
+    }
 
-    elements.forEach(el => {
+    elements.forEach((el) => {
       if (observer) observer.observe(el);
       else el.classList.add('is-visible');
     });
@@ -40,6 +44,7 @@ export function LandingMotion() {
       preview.style.setProperty('--tilt-x', `${(x * 2.2).toFixed(2)}deg`);
       preview.style.setProperty('--tilt-y', `${(y * -1.8).toFixed(2)}deg`);
     };
+
     const resetTilt = () => {
       if (!preview) return;
       preview.style.setProperty('--tilt-x', '0deg');
