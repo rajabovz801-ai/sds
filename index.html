@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="ARK Education — IELTS va CEFR kurslari uchun zamonaviy ta'lim markazi." />
+  <title>ARK Education</title>
+  <style>
+    :root{
+      --navy:#0b1f3a;
+      --navy2:#12335a;
+      --gold:#e7b64a;
+      --white:#ffffff;
+      --soft:#f5f7fb;
+      --text:#172033;
+      --muted:#6b7280;
+      --radius:22px;
+      --shadow:0 18px 50px rgba(11,31,58,.12);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--text);
+      background:var(--white);
+      line-height:1.6;
+    }
+    a{text-decoration:none;color:inherit}
+    .container{width:min(1120px,92%);margin:auto}
+
+    header{
+      position:sticky;top:0;z-index:50;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(11,31,58,.08);
+    }
+    nav{
+      min-height:72px;
+      display:flex;align-items:center;justify-content:space-between;gap:24px;
+    }
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;color:var(--navy)}
+    .logo{
+      width:42px;height:42px;border-radius:14px;
+      background:linear-gradient(145deg,var(--navy),var(--navy2));
+      color:var(--gold);display:grid;place-items:center;
+      font-weight:900;box-shadow:0 8px 18px rgba(11,31,58,.2)
+    }
+    .nav-links{display:flex;gap:26px;font-size:14px;font-weight:700;color:#40506a}
+    .nav-links a:hover{color:var(--navy)}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:13px 20px;border-radius:14px;font-weight:800;
+      transition:.2s ease;border:1px solid transparent;cursor:pointer;
+    }
+    .btn-primary{background:var(--gold);color:var(--navy)}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(231,182,74,.25)}
+    .btn-outline{border-color:rgba(255,255,255,.3);color:white}
+    .btn-outline:hover{background:rgba(255,255,255,.08)}
+
+    .hero{
+      background:
+        radial-gradient(circle at 85% 20%,rgba(231,182,74,.22),transparent 26%),
+        linear-gradient(135deg,var(--navy) 0%,#0d2a4d 62%,#173f6e 100%);
+      color:white;padding:92px 0 76px;overflow:hidden;
+    }
+    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.07);
+      padding:8px 13px;border-radius:999px;font-size:13px;font-weight:800;
+      color:#f7d98d;
+    }
+    h1{font-size:clamp(42px,6vw,74px);line-height:1.02;margin:22px 0 20px;letter-spacing:-2.5px}
+    .hero p{font-size:18px;color:#d6dfeb;max-width:650px;margin:0 0 30px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
+    .hero-card{
+      background:rgba(255,255,255,.09);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:30px;padding:26px;box-shadow:0 28px 70px rgba(0,0,0,.18);
+      backdrop-filter:blur(12px);
+    }
+    .score{
+      background:white;color:var(--navy);border-radius:22px;padding:25px;margin-bottom:14px
+    }
+    .score small{color:var(--muted);font-weight:700}
+    .score strong{display:block;font-size:45px;line-height:1.1;margin-top:8px}
+    .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .mini{
+      padding:18px;border-radius:18px;background:rgba(255,255,255,.09);
+      border:1px solid rgba(255,255,255,.11)
+    }
+    .mini strong{font-size:22px;display:block;color:#f7d98d}
+    .mini span{font-size:13px;color:#d6dfeb}
+
+    section{padding:82px 0}
+    .section-head{max-width:700px;margin-bottom:38px}
+    .eyebrow{color:#a57412;font-weight:900;font-size:13px;letter-spacing:1.7px;text-transform:uppercase}
+    h2{color:var(--navy);font-size:clamp(30px,4vw,46px);line-height:1.08;margin:10px 0 12px;letter-spacing:-1.4px}
+    .section-head p{color:var(--muted);margin:0;font-size:17px}
+
+    .courses{background:var(--soft)}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .card{
+      background:white;border:1px solid #e9edf5;border-radius:var(--radius);
+      padding:26px;box-shadow:0 10px 30px rgba(11,31,58,.05);
+      transition:.2s ease;
+    }
+    .card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+    .icon{
+      width:48px;height:48px;border-radius:15px;background:#fff7df;
+      color:#9a6b08;display:grid;place-items:center;font-size:22px;font-weight:900;
+      margin-bottom:18px;
+    }
+    .card h3{font-size:22px;color:var(--navy);margin:0 0 9px}
+    .card p{color:var(--muted);margin:0}
+
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .stat{
+      border:1px solid #e8edf4;border-radius:18px;padding:24px;text-align:center
+    }
+    .stat strong{display:block;color:var(--navy);font-size:34px}
+    .stat span{color:var(--muted);font-size:14px;font-weight:700}
+
+    .cta-wrap{
+      background:linear-gradient(135deg,var(--navy),#163f6d);
+      color:white;border-radius:32px;padding:48px;
+      display:flex;align-items:center;justify-content:space-between;gap:28px;
+      box-shadow:var(--shadow)
+    }
+    .cta-wrap h2{color:white;margin:0 0 8px}
+    .cta-wrap p{margin:0;color:#d6dfeb;max-width:650px}
+
+    footer{padding:34px 0;border-top:1px solid #edf0f5;color:var(--muted);font-size:14px}
+    .footer-row{display:flex;justify-content:space-between;gap:20px;align-items:center}
+    .footer-row strong{color:var(--navy)}
+
+    @media (max-width:850px){
+      .hero-grid{grid-template-columns:1fr}
+      .hero-card{max-width:580px}
+      .cards{grid-template-columns:1fr}
+      .stats{grid-template-columns:1fr 1fr}
+      .nav-links{display:none}
+      .cta-wrap{flex-direction:column;align-items:flex-start}
+    }
+    @media (max-width:520px){
+      .hero{padding-top:68px}
+      .stats{grid-template-columns:1fr}
+      .mini-grid{grid-template-columns:1fr}
+      .cta-wrap{padding:30px}
+      h1{letter-spacing:-1.6px}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <nav>
+      <a class="brand" href="#home">
+        <span class="logo">A</span>
+        <span>ARK EDUCATION</span>
+      </a>
+      <div class="nav-links">
+        <a href="#courses">Kurslar</a>
+        <a href="#results">Natijalar</a>
+        <a href="#contact">Bog‘lanish</a>
+      </div>
+      <a class="btn btn-primary" href="#contact">Kursga yozilish</a>
+    </nav>
+  </div>
+</header>
+
+<main id="home">
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="tag">● IELTS • CEFR • General English</span>
+        <h1>Ingliz tilini natija uchun o‘rganing.</h1>
+        <p>
+          ARK Education’da zamonaviy metodika, aniq o‘quv rejasi va muntazam
+          nazorat orqali o‘quvchilar o‘z maqsadiga tezroq yetadi.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#courses">Kurslarni ko‘rish</a>
+          <a class="btn btn-outline" href="#results">Natijalar</a>
+        </div>
+      </div>
+
+      <aside class="hero-card">
+        <div class="score">
+          <small>IELTS maqsadi</small>
+          <strong>7.0+</strong>
+          <span>Reja • Practice • Feedback • Progress</span>
+        </div>
+        <div class="mini-grid">
+          <div class="mini"><strong>4</strong><span>asosiy skill</span></div>
+          <div class="mini"><strong>100%</strong><span>progress nazorati</span></div>
+          <div class="mini"><strong>CEFR</strong><span>A2 → C1</span></div>
+          <div class="mini"><strong>IELTS</strong><span>exam practice</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="courses" class="courses">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Kurslar</div>
+        <h2>Maqsadingizga mos yo‘nalishni tanlang</h2>
+        <p>Har bir kursda nazariya, amaliy mashqlar, testlar va doimiy feedback bir tizimda ishlaydi.</p>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <div class="icon">I</div>
+          <h3>IELTS Intensive</h3>
+          <p>Reading, Listening, Writing va Speaking bo‘yicha intensiv tayyorgarlik va mock testlar.</p>
+        </article>
+        <article class="card">
+          <div class="icon">C</div>
+          <h3>CEFR Preparation</h3>
+          <p>CEFR imtihoniga strukturali tayyorgarlik: vocabulary, grammar va barcha asosiy ko‘nikmalar.</p>
+        </article>
+        <article class="card">
+          <div class="icon">G</div>
+          <h3>General English</h3>
+          <p>Mustahkam baza, faol lug‘at, ravon speaking va kundalik ingliz tili uchun zamonaviy kurs.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Natijalar</div>
+        <h2>Progressni raqamlar bilan kuzatamiz</h2>
+        <p>Har bir o‘quvchi uchun dars, vazifa va test natijalari muntazam nazorat qilinadi.</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><strong>4</strong><span>IELTS Skills</span></div>
+        <div class="stat"><strong>Weekly</strong><span>Progress Test</span></div>
+        <div class="stat"><strong>1:1</strong><span>Feedback</span></div>
+        <div class="stat"><strong>A2–C1</strong><span>CEFR Levels</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container">
+      <div class="cta-wrap">
+        <div>
+          <h2>Keyingi natija sizniki bo‘lishi mumkin.</h2>
+          <p>Kursga yoziling va ingliz tili bo‘yicha aniq, tartibli o‘quv yo‘lini boshlang.</p>
+        </div>
+        <a class="btn btn-primary" href="https://t.me/ark_educat1on" target="_blank" rel="noopener">Telegram orqali yozilish</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container footer-row">
+    <strong>ARK EDUCATION</strong>
+    <span>© 2026. Barcha huquqlar himoyalangan.</span>
+  </div>
+</footer>
+
+</body>
+</html>
