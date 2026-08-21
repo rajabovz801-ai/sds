@@ -10,10 +10,15 @@ export function Header() {
           <a href="#platform">Platforma</a>
           <a href="#mock">Mock</a>
           <a href="#tracks">Yo‘nalishlar</a>
-          <a href="#how">Qanday ishlaydi</a>
-          <Link href="/dashboard">Dashboard</Link>
+          <a href="#features">Imkoniyatlar</a>
+          <a href="#how">Jarayon</a>
         </nav>
-        <Link className="signupBtn" href="https://t.me/arkedu_bot" target="_blank" rel="noopener noreferrer">Sign up <span>↗</span></Link>
+        <div className="headerActions">
+          <Link className="dashboardBtn" href="/dashboard">Dashboard</Link>
+          <Link className="signupBtn" href="https://t.me/arkedu_bot" target="_blank" rel="noopener noreferrer">
+            <span className="ctaLabel">Telegram orqali kirish</span><span>↗</span>
+          </Link>
+        </div>
       </div>
     </header>
   );
