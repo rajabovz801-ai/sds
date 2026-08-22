@@ -1,0 +1,192 @@
+/* ARK Education — iOS 26 inspired Liquid Glass landing */
+.arkIosPage{
+  --ios-ink:#f8fbff;
+  --ios-muted:rgba(231,239,249,.68);
+  --ios-line:rgba(255,255,255,.17);
+  --ios-line-strong:rgba(255,255,255,.28);
+  --ios-glass:rgba(255,255,255,.095);
+  --ios-glass-soft:rgba(255,255,255,.075);
+  --ios-red:#ff4e62;
+  --ios-red-deep:#db2439;
+  --ios-blue:#58b9ff;
+  --ios-blue-deep:#237fc9;
+  --ios-violet:#8470ff;
+  --ios-night:#080d18;
+  --ios-night-2:#10182a;
+  --ios-shadow:0 30px 90px rgba(0,0,0,.32);
+  --ios-ease:cubic-bezier(.2,.8,.2,1);
+  min-height:100svh;
+  height:100svh;
+  overflow:hidden;
+  position:relative;
+  isolation:isolate;
+  color:var(--ios-ink);
+  background:
+    radial-gradient(circle at 14% 2%,rgba(58,127,255,.21),transparent 30%),
+    radial-gradient(circle at 86% 8%,rgba(255,82,120,.17),transparent 29%),
+    linear-gradient(145deg,#080d18 0%,#0a1120 42%,#0a0f1c 100%);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,Manrope,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.arkIosPage *{box-sizing:border-box}
+.arkIosPage a{text-decoration:none;color:inherit}
+.arkIosPage svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.arkIosBackdrop{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:-5;background:
+  radial-gradient(circle at 50% 38%,rgba(255,255,255,.035),transparent 38%),
+  linear-gradient(180deg,rgba(255,255,255,.015),transparent 40%)}
+.arkIosBackdrop::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:52px 52px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.5),transparent 78%);opacity:.34}
+.arkIosOrb{position:absolute;border-radius:999px;filter:blur(90px);opacity:.9;will-change:transform}
+.arkIosOrbBlue{width:44vw;height:44vw;left:-18vw;top:-15vw;background:rgba(55,126,255,.22);transform:translate(calc(var(--mx,.5)*20px),calc(var(--my,.5)*18px))}
+.arkIosOrbRed{width:40vw;height:40vw;right:-17vw;top:-11vw;background:rgba(255,69,102,.18);transform:translate(calc(var(--mx,.5)*-18px),calc(var(--my,.5)*18px))}
+.arkIosOrbViolet{width:31vw;height:31vw;left:44%;bottom:-20vw;background:rgba(126,95,255,.12);transform:translate(calc(var(--mx,.5)*10px),calc(var(--my,.5)*-16px))}
+.arkIosNoise{position:absolute;inset:0;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.82'/%3E%3C/svg%3E")}
+
+.arkIosGlass{background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.06) 52%,rgba(255,255,255,.085));border:1px solid var(--ios-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(255,255,255,.035),0 18px 58px rgba(0,0,0,.22);backdrop-filter:blur(30px) saturate(145%);-webkit-backdrop-filter:blur(30px) saturate(145%)}
+.arkIosGlassSoft{background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.055));border:1px solid rgba(255,255,255,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 10px 30px rgba(0,0,0,.14);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%)}
+
+.arkIosNavWrap{position:absolute;z-index:40;left:50%;top:max(18px,env(safe-area-inset-top));transform:translateX(-50%);width:min(1450px,calc(100% - 48px))}
+.arkIosNav{min-height:72px;padding:9px 10px 9px 12px;border-radius:999px;display:flex;align-items:center;gap:16px}
+.arkIosBrand{display:flex;align-items:center;gap:13px;min-width:290px}
+.arkIosLogo{width:50px;height:50px;border-radius:17px;display:grid;place-items:center;position:relative;overflow:hidden;background:linear-gradient(145deg,#ff6b79 0%,#e62136 68%,#c91629 100%);color:#fff;font-family:Georgia,"Times New Roman",serif;font-size:35px;line-height:1;box-shadow:inset 0 1px 1px rgba(255,255,255,.52),0 12px 28px rgba(217,32,53,.28)}
+.arkIosLogo::after{content:"";position:absolute;width:64px;height:64px;border-radius:50%;left:-25px;top:-33px;background:rgba(255,255,255,.17)}
+.arkIosBrandCopy{display:grid;gap:3px}
+.arkIosBrandCopy strong{font-size:16px;letter-spacing:-.025em;font-weight:780;color:#fff}
+.arkIosBrandCopy small{font-size:9px;color:rgba(230,238,249,.56);letter-spacing:.035em}
+.arkIosNavStatus{margin-left:auto;display:flex;align-items:center;gap:8px;min-height:42px;padding:0 15px;border-radius:999px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);font-size:11px;color:rgba(238,244,252,.62);font-weight:650}
+.arkIosLiveDot{width:7px!important;height:7px!important;border-radius:50%;background:#5ef0b2;box-shadow:0 0 0 5px rgba(94,240,178,.10),0 0 18px rgba(94,240,178,.42);display:inline-block;flex:0 0 auto}
+.arkIosOfficial{min-height:46px;padding:0 18px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(145deg,rgba(255,88,105,.18),rgba(255,255,255,.06));border:1px solid rgba(255,115,128,.27);font-size:11px;font-weight:850;letter-spacing:.08em;box-shadow:inset 0 1px 0 rgba(255,255,255,.17)}
+
+.arkIosHero{position:relative;z-index:3;width:min(1500px,calc(100% - 60px));height:100svh;margin:0 auto;padding:120px 0 60px;display:grid;grid-template-columns:minmax(290px,.78fr) minmax(520px,1.28fr) minmax(355px,.88fr);gap:28px;align-items:center}
+
+.arkIosCopy{align-self:center;padding:8px 0 24px}
+.arkIosKicker{display:inline-flex;align-items:center;gap:9px;width:max-content;max-width:100%;padding:7px 12px 7px 8px;border-radius:999px;color:rgba(237,244,252,.72);font-size:9px;font-weight:800;letter-spacing:.13em;white-space:nowrap}
+.arkIosKicker>span{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;padding:6px;background:linear-gradient(145deg,#fff,#cde8ff);color:#0b1d32;box-shadow:0 7px 20px rgba(83,174,240,.24)}
+.arkIosCopy h1{display:grid;gap:0;margin:28px 0 20px;max-width:520px;font-size:clamp(48px,4vw,72px);line-height:.91;letter-spacing:-.064em;font-weight:790;text-wrap:balance;text-shadow:0 14px 50px rgba(0,0,0,.22)}
+.arkIosCopy h1 span{display:block;background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.83) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.arkIosCopy h1 .accent{background:linear-gradient(180deg,#ff7886,#ff3950 78%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 9px 24px rgba(255,55,78,.16))}
+.arkIosLead{max-width:440px;margin:0;color:rgba(229,237,248,.64);font-size:13px;line-height:1.7;letter-spacing:-.01em}
+.arkIosBenefits{display:grid;gap:9px;margin-top:28px;max-width:420px}
+.arkIosBenefit{min-height:54px;padding:7px 12px 7px 8px;border-radius:17px;display:flex;align-items:center;gap:10px;transition:transform .25s var(--ios-ease),background .25s var(--ios-ease),border-color .25s var(--ios-ease)}
+.arkIosBenefit:hover{transform:translateX(4px);background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.21)}
+.arkIosBenefit i{width:38px;height:38px;border-radius:13px;padding:9px;display:grid;place-items:center;color:#dff2ff;background:linear-gradient(145deg,rgba(83,185,255,.30),rgba(70,122,255,.13));border:1px solid rgba(117,198,255,.22);font-style:normal;box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
+.arkIosBenefit>span{display:grid;gap:1px}
+.arkIosBenefit strong{font-size:11px;color:#f8fbff;font-weight:760}
+.arkIosBenefit small{font-size:9px;color:rgba(229,238,248,.49)}
+
+.arkIosProduct{position:relative;min-width:0;align-self:center;perspective:1200px}
+.arkIosProductHalo{position:absolute;left:50%;top:48%;width:90%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(79,163,255,.16),rgba(105,96,255,.08) 34%,transparent 68%);filter:blur(18px);pointer-events:none}
+.arkIosStage{position:relative;z-index:3;min-height:510px;padding:14px;border-radius:33px;overflow:hidden;transform:rotateX(var(--tilt-y,0deg)) rotateY(var(--tilt-x,0deg));transform-style:preserve-3d;transition:transform .3s var(--ios-ease),box-shadow .3s var(--ios-ease);box-shadow:inset 0 1px 0 rgba(255,255,255,.31),0 35px 90px rgba(0,0,0,.30),0 0 0 1px rgba(255,255,255,.03)}
+.arkIosStage::before{content:"";position:absolute;inset:-35%;z-index:-1;background:conic-gradient(from 145deg,transparent 0 22%,rgba(100,187,255,.15) 29%,transparent 40% 59%,rgba(255,76,99,.13) 67%,transparent 77%);animation:arkIosRotate 18s linear infinite;opacity:.7}
+.arkIosStage::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(125deg,rgba(255,255,255,.13),transparent 22%,transparent 72%,rgba(255,255,255,.045));mix-blend-mode:screen}
+.arkIosStageTop{min-height:55px;padding:0 13px 0 9px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.arkIosStageBrand{display:flex;align-items:center;gap:10px}
+.arkIosStageBrand>span{width:35px;height:35px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#ff6a77,#d91d33);font-family:Georgia,"Times New Roman",serif;font-size:24px;color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.45),0 8px 18px rgba(215,32,52,.22)}
+.arkIosStageBrand>div{display:grid;gap:1px}.arkIosStageBrand strong{font-size:10px;letter-spacing:.08em}.arkIosStageBrand small{font-size:8px;color:rgba(235,242,251,.53)}
+.arkIosStageTimer{height:35px;padding:0 11px;border-radius:999px;display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.79);font-size:10px;font-variant-numeric:tabular-nums;font-weight:760}
+.arkIosStageTimer svg{width:14px;height:14px;color:#8ed0ff}
+.arkIosSkillTabs{height:43px;margin:3px 2px 10px;padding:4px;border-radius:15px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:rgba(5,10,20,.32);border:1px solid rgba(255,255,255,.07)}
+.arkIosSkillTabs span{display:grid;place-items:center;border-radius:11px;font-size:9px;color:rgba(237,244,251,.47);font-weight:700}
+.arkIosSkillTabs .active{background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.085));color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 7px 18px rgba(0,0,0,.14)}
+.arkIosExamCanvas{height:355px;border-radius:23px;overflow:hidden;background:rgba(250,253,255,.95);display:grid;grid-template-columns:1.12fr .88fr;color:#13243d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.78),0 18px 45px rgba(0,0,0,.22)}
+.arkIosPassage,.arkIosQuestion{padding:24px 22px;min-width:0}
+.arkIosPassage{border-right:1px solid #dce5ee;background:linear-gradient(180deg,#fff,#f8fbfd)}
+.arkIosQuestion{background:linear-gradient(180deg,#f7fafc,#eef4f8)}
+.arkIosMeta{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#73859b;font-size:7px;font-weight:750;text-transform:uppercase;letter-spacing:.08em}
+.arkIosMeta>span{color:#197fbd}.arkIosMeta>b{font-weight:650;color:#8797aa}
+.arkIosPassage h2{margin:16px 0 13px;font-size:25px;line-height:1;letter-spacing:-.04em;color:#0d203a}
+.arkIosPassage p{margin:0 0 12px;color:#50647c;font-family:Georgia,"Times New Roman",serif;font-size:11px;line-height:1.65}
+.arkIosPassage mark{background:#cceeff;color:#19577c;padding:2px 3px;border-radius:3px}
+.arkIosTextLines{display:grid;gap:7px;margin-top:15px}.arkIosTextLines i{height:5px;border-radius:999px;background:#dce6ed}.arkIosTextLines i:nth-child(1){width:94%}.arkIosTextLines i:nth-child(2){width:82%}.arkIosTextLines i:nth-child(3){width:91%}.arkIosTextLines i:nth-child(4){width:68%}
+.arkIosQuestion h3{margin:16px 0 17px;font-size:14px;line-height:1.35;letter-spacing:-.02em;color:#172a43}
+.arkIosQuestion label{min-height:48px;margin-top:8px;padding:8px 10px;border:1px solid #d5e0e8;border-radius:13px;background:rgba(255,255,255,.82);display:flex;align-items:center;gap:9px;color:#53667a;font-size:9px;box-shadow:0 3px 9px rgba(21,47,69,.03)}
+.arkIosQuestion label>i{width:24px;height:24px;border-radius:9px;display:grid;place-items:center;background:#eef3f6;border:1px solid #d4dee5;font-style:normal;color:#65778a;font-size:8px;font-weight:850;flex:0 0 auto}
+.arkIosQuestion label.selected{background:#eaf7ff;border-color:#72bae7;color:#1c5f88;box-shadow:0 0 0 2px rgba(51,154,218,.08)}
+.arkIosQuestion label.selected>i{background:linear-gradient(145deg,#4eb5f0,#2589c9);border-color:#2589c9;color:#fff}
+.arkIosQuestionRail{display:flex;gap:5px;margin-top:17px}.arkIosQuestionRail span{width:23px;height:23px;border-radius:8px;display:grid;place-items:center;background:#e7edf2;color:#708196;font-size:7px;font-weight:850}.arkIosQuestionRail .done{background:#d8f4e8;color:#2d7a5b}.arkIosQuestionRail .current{background:#2089c9;color:#fff;box-shadow:0 6px 15px rgba(32,137,201,.24)}
+.arkIosStageFooter{height:39px;padding:0 8px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;color:rgba(237,243,250,.47);font-size:7px;letter-spacing:.03em}.arkIosStageFooter>span{display:flex;align-items:center;gap:7px}.arkIosStageFooter>strong{font-size:7px;letter-spacing:.14em;color:rgba(255,255,255,.55)}.arkIosStageFooter>span:last-child{justify-content:flex-end}.arkIosStageFooter b{color:#70e9ae}
+.arkIosFloat{position:absolute;z-index:8;border-radius:22px;transition:transform .35s var(--ios-ease)}
+.arkIosFloatScore{left:-20px;bottom:36px;width:118px;padding:14px 15px;display:grid;gap:2px;animation:arkIosFloat 5s ease-in-out infinite}
+.arkIosFloatScore small{font-size:7px;color:rgba(238,244,252,.48);letter-spacing:.08em;font-weight:800}.arkIosFloatScore strong{font-size:31px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff,#bfe8ff);-webkit-background-clip:text;background-clip:text;color:transparent}.arkIosFloatScore span{font-size:7px;color:rgba(239,245,252,.48)}
+.arkIosFloatSecure{right:-17px;top:68px;min-width:153px;padding:10px 13px;display:flex;align-items:center;gap:10px;animation:arkIosFloat 5.7s ease-in-out infinite reverse}
+.arkIosFloatSecure>i{width:35px;height:35px;padding:9px;border-radius:12px;background:linear-gradient(145deg,rgba(255,84,102,.35),rgba(255,84,102,.12));border:1px solid rgba(255,124,137,.24);color:#ffdce1;font-style:normal}.arkIosFloatSecure>span{display:grid;gap:2px}.arkIosFloatSecure strong{font-size:9px}.arkIosFloatSecure small{font-size:7px;color:rgba(235,243,250,.48)}
+
+.arkIosAccess.arkGateCard{align-self:center;min-height:430px;padding:26px;border-radius:31px;justify-content:flex-start;color:#fff;background:linear-gradient(145deg,rgba(255,255,255,.145),rgba(255,255,255,.065));border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 32px 80px rgba(0,0,0,.27);backdrop-filter:blur(32px) saturate(145%);-webkit-backdrop-filter:blur(32px) saturate(145%);overflow:hidden;position:relative}
+.arkIosAccess::before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-75px;top:-80px;background:rgba(255,55,78,.14);filter:blur(12px);pointer-events:none}
+.arkIosAccess::after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;left:-110px;bottom:-110px;background:rgba(63,168,255,.12);filter:blur(15px);pointer-events:none}
+.arkIosAccessHead{position:relative;z-index:2;grid-template-columns:1fr auto;gap:16px}
+.arkIosAccessEyebrow{display:block;margin-bottom:9px;color:#80cfff;font-size:8px;letter-spacing:.13em;font-weight:850}
+.arkIosAccess .arkGateCardHead h2{margin:0 0 10px;color:#fff;font-size:31px;line-height:1;letter-spacing:-.045em;font-weight:780}
+.arkIosAccess .arkGateCardHead p{margin:0;max-width:320px;color:rgba(229,238,248,.58);font-size:10px;line-height:1.6}
+.arkIosLock.arkGateLock{width:48px;height:48px;border-radius:16px;padding:13px;background:linear-gradient(145deg,#ff5366,#d91d34);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 1px rgba(255,255,255,.42),0 14px 30px rgba(215,29,51,.25)}
+.arkIosAccess .arkGateRegisterBlock{position:relative;z-index:2;margin-top:24px;gap:7px}
+.arkIosAccess .arkGateRegisterBlock label,.arkIosAccess .arkGateCodeBlock>label{color:rgba(238,244,252,.64);font-size:9px;font-weight:760;letter-spacing:.02em}
+.arkIosAccess .arkGateRegisterField{height:55px;padding:0 14px;border:1px solid rgba(255,255,255,.15);border-radius:16px;background:rgba(255,255,255,.085);box-shadow:inset 0 1px 0 rgba(255,255,255,.13);color:#fff!important;font-size:10px;font-weight:690;transition:.25s var(--ios-ease)}
+.arkIosAccess .arkGateRegisterField:hover{transform:translateY(-2px);background:rgba(255,255,255,.13);border-color:rgba(101,195,255,.34)}
+.arkIosAccess .arkGateRegisterField b{width:32px;height:32px;border-radius:11px;background:rgba(88,185,255,.14);color:#7ed1ff;font-size:16px}
+.arkIosAccess .arkGateCodeBlock{position:relative;z-index:2;margin-top:14px;gap:7px}
+.arkIosAccess .arkGateCodeField{height:55px;padding:5px 6px 5px 14px;border:1px solid rgba(255,255,255,.16);border-radius:16px;background:rgba(255,255,255,.075);box-shadow:inset 0 1px 0 rgba(255,255,255,.11);grid-template-columns:1fr 42px}
+.arkIosAccess .arkGateCodeField:focus-within{border-color:rgba(104,198,255,.48);box-shadow:0 0 0 4px rgba(67,166,230,.10),inset 0 1px 0 rgba(255,255,255,.14)}
+.arkIosAccess .arkGateCodeField input{color:#fff;font-size:11px;font-weight:720;letter-spacing:.06em}
+.arkIosAccess .arkGateCodeField input::placeholder{color:rgba(230,238,248,.34);letter-spacing:0}
+.arkIosAccess .arkGateCodeField button{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#75cfff,#2d8dd0);color:#06111e;box-shadow:inset 0 1px 1px rgba(255,255,255,.58),0 8px 20px rgba(43,143,207,.22);font-size:17px}
+.arkIosAccess .arkGateCodeField button:hover:not(:disabled){box-shadow:inset 0 1px 1px rgba(255,255,255,.58),0 12px 25px rgba(43,143,207,.32)}
+.arkIosAccess .arkGateCodeError{position:relative;z-index:2;color:#ff9ca6;font-size:8px}
+.arkIosAccess .arkGateNote{position:relative;z-index:2;margin-top:14px;color:rgba(228,237,247,.40);gap:7px}
+.arkIosAccess .arkGateNote>span{width:16px;height:16px;display:grid!important;place-items:center;border:1px solid rgba(126,208,255,.25)!important;border-radius:50%;color:#82d4ff!important;background:rgba(81,178,239,.08);font-size:7px}
+.arkIosAccess .arkGateNote p{font-size:8px;line-height:1.4}
+
+.arkIosAccess .arkGateAccessReady{position:relative;z-index:2;display:grid;gap:8px;margin-top:22px;padding:19px;border:1px solid rgba(255,255,255,.13);border-radius:21px;background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.05));box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.arkIosAccess .arkGateAccessLabel{font-size:8px;letter-spacing:.13em;color:#67e0a5;font-weight:850}
+.arkIosAccess .arkGateAccessReady>strong{font-size:20px;line-height:1.08;color:#fff;letter-spacing:-.03em}
+.arkIosAccess .arkGateAccessReady>p{margin:0;color:rgba(230,238,248,.53);font-size:9px;line-height:1.55}
+.arkIosAccess .arkGateContinue{height:50px;margin-top:4px;padding:0 15px;border-radius:15px;background:linear-gradient(145deg,#f9fcff,#d7edff);color:#07182a!important;box-shadow:inset 0 1px 1px #fff,0 12px 28px rgba(59,160,222,.20);font-size:10px;font-weight:800;transition:.25s var(--ios-ease)}
+.arkIosAccess .arkGateContinue:hover{transform:translateY(-2px);box-shadow:inset 0 1px 1px #fff,0 16px 34px rgba(59,160,222,.28)}
+.arkIosAccess .arkGateContinue b{font-size:17px;color:#1c84c3}
+
+.arkIosFooter{position:absolute;z-index:5;left:0;right:0;bottom:16px;display:flex;align-items:center;justify-content:center;gap:9px;color:rgba(225,234,245,.36);font-size:8px;letter-spacing:.01em}
+.arkIosFooter b{color:rgba(233,241,251,.55)}.arkIosFooter i{font-style:normal;color:rgba(255,255,255,.18)}
+
+.motion-ready [data-reveal]{opacity:0;transform:translateY(20px);transition:opacity .8s var(--ios-ease),transform .8s var(--ios-ease)}
+.motion-ready [data-reveal].is-visible{opacity:1;transform:none}
+.motion-ready .arkIosProduct[data-reveal]{transition-delay:.08s}.motion-ready .arkIosAccess[data-reveal]{transition-delay:.16s}
+
+@keyframes arkIosRotate{to{transform:rotate(360deg)}}
+@keyframes arkIosFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+@media(max-width:1380px){
+  .arkIosNavWrap{width:calc(100% - 34px)}
+  .arkIosHero{width:calc(100% - 38px);grid-template-columns:minmax(260px,.72fr) minmax(470px,1.2fr) minmax(330px,.88fr);gap:18px;padding-top:108px}
+  .arkIosCopy h1{font-size:clamp(43px,3.8vw,61px)}
+  .arkIosLead{font-size:11px;max-width:380px}.arkIosBenefits{margin-top:21px}.arkIosBenefit{min-height:49px}
+  .arkIosStage{min-height:470px}.arkIosExamCanvas{height:325px}.arkIosPassage,.arkIosQuestion{padding:20px 18px}
+  .arkIosAccess.arkGateCard{min-height:402px;padding:23px}.arkIosAccess .arkGateCardHead h2{font-size:28px}
+}
+
+@media(max-width:1120px){
+  .arkIosPage{height:auto;min-height:100svh;overflow:auto}
+  .arkIosNavWrap{position:relative;top:auto;left:auto;transform:none;margin:14px auto 0}
+  .arkIosNavStatus{display:none}
+  .arkIosHero{height:auto;min-height:calc(100svh - 100px);padding:54px 0 90px;grid-template-columns:1fr 1fr;grid-template-areas:"copy access" "product product";gap:32px}
+  .arkIosCopy{grid-area:copy}.arkIosProduct{grid-area:product;width:min(760px,90%);margin:0 auto}.arkIosAccess{grid-area:access}
+  .arkIosCopy h1{font-size:clamp(50px,7vw,68px)}
+  .arkIosFloatScore{left:-5px}.arkIosFloatSecure{right:-5px}
+  .arkIosFooter{position:static;padding:0 20px 24px;flex-wrap:wrap}
+}
+
+@media(max-width:720px){
+  .arkIosNavWrap{width:calc(100% - 20px);margin-top:10px}
+  .arkIosNav{min-height:62px;padding:7px 8px;border-radius:22px}
+  .arkIosBrand{min-width:0}.arkIosLogo{width:46px;height:46px;border-radius:15px;font-size:31px}.arkIosBrandCopy strong{font-size:14px}.arkIosBrandCopy small{font-size:8px}.arkIosOfficial{display:none}
+  .arkIosHero{width:calc(100% - 24px);padding:38px 0 62px;display:block}
+  .arkIosCopy{padding:0}.arkIosKicker{font-size:8px}.arkIosCopy h1{font-size:clamp(49px,15vw,68px);margin:25px 0 17px}.arkIosLead{font-size:12px;max-width:94%}.arkIosBenefits{max-width:none}
+  .arkIosProduct{width:100%;margin:52px auto 46px}.arkIosStage{min-height:430px;padding:10px;border-radius:26px}.arkIosExamCanvas{height:303px;grid-template-columns:1fr}.arkIosPassage{display:none}.arkIosQuestion{padding:20px}.arkIosQuestion h3{font-size:16px}.arkIosQuestion label{font-size:10px;min-height:50px}.arkIosStageFooter{grid-template-columns:1fr 1fr}.arkIosStageFooter>strong{display:none}
+  .arkIosFloatScore{left:-5px;bottom:22px}.arkIosFloatSecure{right:-4px;top:66px;min-width:140px}
+  .arkIosAccess.arkGateCard{min-height:auto;margin:0;padding:23px;border-radius:26px}.arkIosAccess .arkGateCardHead h2{font-size:30px}
+  .arkIosFooter{font-size:7px;text-align:center;gap:6px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .arkIosPage *,.arkIosPage *::before,.arkIosPage *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
