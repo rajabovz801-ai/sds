@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import { getServerSession } from '@/lib/auth/server-session';
@@ -81,9 +82,16 @@ export default async function HomePage() {
 
           <div className="peakHeroVisual" aria-label="ARK Education exam platformasi">
             <div className="peakVisualGlass">
-              <div className="peakVisualTopline"><span><i /> LIVE EXAM ENVIRONMENT</span><b>ARK • 2026</b></div>
               <div className="peakArtworkStage">
-                <img className="peakHeroArtwork" src="/assets/ark-hero-premium.png" alt="IELTS va CEFR tayyorgarligini ifodalovchi premium 3D o‘quv jihozlari" />
+                <Image
+                  className="peakHeroArtwork"
+                  src="/assets/ark-hero-cream.png"
+                  alt="IELTS va CEFR tayyorgarligini ifodalovchi premium 3D o‘quv jihozlari"
+                  width={1200}
+                  height={800}
+                  sizes="(max-width: 720px) 108vw, (max-width: 1180px) 92vw, 58vw"
+                  priority
+                />
               </div>
               <div className="peakScoreFloat"><small>TARGET BAND</small><strong>8.0</strong><span>On track</span></div>
               <div className="peakSkillsFloat"><span>Reading</span><i /><span>Listening</span><i /><span>Writing</span><i /><span>Speaking</span></div>
