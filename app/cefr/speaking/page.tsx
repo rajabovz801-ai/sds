@@ -1,6 +1,8 @@
 import { SkillLibraryClient } from '@/components/SkillLibraryClient';
+import { requireServerSession } from '@/lib/auth/server-session';
 
-export default function CefrSpeakingPage() {
+export default async function CefrSpeakingPage() {
+  await requireServerSession('/cefr/speaking');
   return (
     <SkillLibraryClient
       track="cefr"

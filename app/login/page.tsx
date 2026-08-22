@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { Brand } from '@/components/Brand';
 import { LoginClient } from '@/components/LoginClient';
+import { getServerSession } from '@/lib/auth/server-session';
+import { redirect } from 'next/navigation';
 
 function ArrowLeft() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6M8 12h11" /></svg>;
@@ -18,7 +20,15 @@ function LoginIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-3" /><path d="M10 12h11M17 8l4 4-4 4" /></svg>;
 }
 
-export default function LoginPage() {
+function safeNext(value: string | string[] | undefined) {
+  const path = Array.isArray(value) ? value[0] : value;
+  return path?.startsWith('/') && !path.startsWith('//') ? path : '/mock';
+}
+
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
+  const nextPath = safeNext((await searchParams).next);
+  if (await getServerSession()) redirect(nextPath);
+
   return (
     <div className="authRoot">
       <header className="authTopbar">
@@ -46,7 +56,7 @@ export default function LoginPage() {
 
         <section className="authCard">
           <div className="authCardDecor" aria-hidden="true"><span /><span /><span /></div>
-          <LoginClient />
+          <LoginClient nextPath={nextPath} />
           <div className="authPrivacy">Protected by ARK secure access • One-time code</div>
         </section>
       </main>

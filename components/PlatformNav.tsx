@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 
 type Student = { firstName: string; lastName: string };
 
@@ -32,7 +33,7 @@ export function PlatformNav() {
     <div className="platformBarWrap">
       <header className="platformBar">
         <Link href="/" className="platformBrand" aria-label="ARK Mock bosh sahifa">
-          <span className="platformBrandMark">A</span>
+          <span className="platformBrandMark"><ArkLogoIcon /></span>
           <span className="platformBrandText"><strong>ARK MOCK</strong><small>IELTS • CEFR</small></span>
         </Link>
 

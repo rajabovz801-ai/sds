@@ -1,4 +1,5 @@
 import { TestViewerClient } from '@/components/TestViewerClient';
+import { requireServerSession } from '@/lib/auth/server-session';
 
 type Search = Record<string, string | string[] | undefined>;
 
@@ -15,12 +16,20 @@ export default async function TestPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
+  const nextQuery = new URLSearchParams();
+  const attempt = first(query.attempt);
+  const mode = first(query.mode);
+  const section = first(query.section);
+  if (attempt) nextQuery.set('attempt', attempt);
+  if (mode) nextQuery.set('mode', mode);
+  if (section) nextQuery.set('section', section);
+  await requireServerSession(`/test/${id}${nextQuery.size ? `?${nextQuery.toString()}` : ''}`);
   return (
     <TestViewerClient
       id={id}
-      attemptId={first(query.attempt)}
-      mode={first(query.mode)}
-      section={first(query.section)}
+      attemptId={attempt}
+      mode={mode}
+      section={section}
     />
   );
 }

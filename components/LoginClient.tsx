@@ -18,7 +18,7 @@ function CheckIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12 4 4 8-8" /></svg>;
 }
 
-export function LoginClient() {
+export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
   const router = useRouter();
   const [student, setStudent] = useState<Student | null | undefined>(undefined);
   const [code, setCode] = useState('');
@@ -46,7 +46,7 @@ export function LoginClient() {
       if (!response.ok) throw new Error(data.error || 'Kirish amalga oshmadi.');
       setStudent(data.student);
       setCode('');
-      router.push(data.next || '/mock');
+      router.replace(nextPath || data.next || '/mock');
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Kirish amalga oshmadi.');

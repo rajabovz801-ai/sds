@@ -1,6 +1,8 @@
 import { SkillLibraryClient } from '@/components/SkillLibraryClient';
+import { requireServerSession } from '@/lib/auth/server-session';
 
-export default function IeltsWritingPage() {
+export default async function IeltsWritingPage() {
+  await requireServerSession('/ielts/writing');
   return (
     <SkillLibraryClient
       track="ielts"
