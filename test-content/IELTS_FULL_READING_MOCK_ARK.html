@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Academic Reading — Full Mock</title>
+<style>
+:root{--navy:#10213d;--navy-2:#19345f;--coral:#ff695d;--coral-dark:#e94f46;--cream:#f6f1e9;--paper:#fffdf9;--ink:#172034;--muted:#6d7482;--line:#dedbd5;--soft:#f1ede6;--answered:#15345e;--green:#18865f;--red:var(--coral);}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--cream);color:var(--ink);font-family:"Times New Roman",Times,serif;font-size:16px}
+button,input,select,textarea{font:inherit}
+button{border:0}
+
+/* start */
+.start-screen{position:fixed;inset:0;z-index:5000;background:radial-gradient(circle at 18% 18%,rgba(255,105,93,.14),transparent 32%),linear-gradient(135deg,#fbf8f2 0%,#efe9df 100%);display:flex;align-items:center;justify-content:center;padding:24px}
+.start-screen.hidden{display:none}
+.start-card{width:min(560px,94vw);background:rgba(255,253,249,.96);border:1px solid rgba(16,33,61,.12);border-radius:28px;padding:38px;box-shadow:0 28px 80px rgba(49,38,29,.16)}
+.brand-lockup{display:flex;align-items:center;gap:12px;font-family:Inter,"Segoe UI",Arial,sans-serif;margin-bottom:28px}
+.ark-mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#ff8075,var(--coral));color:#fff;display:grid;place-items:center;box-shadow:0 10px 25px rgba(255,105,93,.25)}
+.ark-mark svg{width:25px;height:25px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.brand-lockup b{display:block;font-size:15px;letter-spacing:.2px;color:var(--navy)}
+.brand-lockup small{display:block;margin-top:2px;font-size:9px;letter-spacing:1.6px;font-weight:800;color:#8b8f98}
+.exam-badge{display:inline-flex;align-items:center;border:1px solid rgba(16,33,61,.14);border-radius:999px;padding:7px 10px;color:var(--navy-2);font:800 10px/1 Inter,"Segoe UI",Arial,sans-serif;letter-spacing:1.2px;background:#fff}
+.start-card h1{font:750 35px/1.08 Inter,"Segoe UI",Arial,sans-serif;letter-spacing:-1.3px;margin:17px 0 12px;color:var(--navy)}
+.start-card p{color:#656b76;line-height:1.6;margin-bottom:18px;font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:14px}
+.start-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 24px}
+.start-meta div{border:1px solid rgba(16,33,61,.1);background:#f9f6f0;border-radius:13px;padding:13px;text-align:center;font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:11px;color:#727782}
+.start-meta b{display:block;color:var(--navy);font-size:18px;margin-bottom:2px}
+.start-btn{width:100%;background:var(--navy);color:#fff;padding:15px 18px;border-radius:14px;font-family:Inter,"Segoe UI",Arial,sans-serif;font-weight:800;cursor:pointer;box-shadow:0 14px 30px rgba(16,33,61,.18);transition:.2s ease}
+.start-btn:hover{background:var(--navy-2);transform:translateY(-1px)}
+
+/* shell */
+.app{height:100%;display:flex;flex-direction:column}
+.topbar{height:66px;flex:0 0 66px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(255,253,249,.96)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .ark-mark{width:38px;height:38px;border-radius:12px;box-shadow:none}
+.brand .ark-mark svg{width:21px;height:21px}
+.mock-title{font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:12px;font-weight:850;color:var(--navy);letter-spacing:.7px}
+.mock-title small{display:block;color:#9296a0;font-size:8px;letter-spacing:1.5px;margin-top:2px}
+.top-actions{display:flex;align-items:center;gap:10px;font-family:Inter,"Segoe UI",Arial,sans-serif}
+.timer{min-width:92px;text-align:center;border:1px solid #d4d6dc;background:#fff;border-radius:11px;padding:8px 11px;font-weight:850;font-size:14px;font-variant-numeric:tabular-nums;color:var(--navy)}
+.timer.warn{border-color:var(--red);color:var(--red);background:#fff7f7}
+.submit{background:var(--coral);color:#fff;border-radius:11px;padding:10px 16px;font-weight:850;font-size:12px;cursor:pointer;transition:.2s ease}
+.submit:hover{background:var(--coral-dark);transform:translateY(-1px)}
+
+.part-header{flex:0 0 auto;background:#f2eee7;border-bottom:1px solid var(--line);padding:9px 20px;font-family:Inter,"Segoe UI",Arial,sans-serif}
+.part-header strong{font-size:14px;display:block}
+.part-header span{font-size:12px;color:#606060}
+
+.split{flex:1;min-height:0;display:flex;overflow:hidden}
+.left{width:52%;min-width:300px;overflow-y:auto;padding:32px 38px 76px;line-height:1.74;scrollbar-gutter:stable;background:var(--paper)}
+.left h2{font-size:22px;line-height:1.25;text-align:center;margin-bottom:18px}
+.left p{margin:0 0 14px;text-align:justify}
+.left b{font-weight:700}
+.right{flex:1;min-width:320px;overflow-y:auto;padding:28px 30px 76px;scrollbar-gutter:stable;background:#f8f5ef}
+.handle{width:8px;flex:0 0 8px;background:#e9e9e9;border-left:1px solid #d3d3d3;border-right:1px solid #d3d3d3;cursor:col-resize;position:relative}
+.handle:after{content:"";position:absolute;left:2px;top:50%;width:2px;height:42px;background:#b8b8b8;border-radius:3px;transform:translateY(-50%)}
+.handle.active{background:#eee}
+.passage-section,.question-section{display:none}
+.passage-section.active,.question-section.active{display:block}
+
+/* question system */
+.right h3{font-size:17px;margin:0 0 10px;font-weight:700}
+.right h3:not(:first-child){margin-top:26px}
+.instr{font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:13px;line-height:1.58;color:#30394b;background:#fff;border:1px solid #e0ddd6;border-left:4px solid var(--coral);border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:18px}
+.qblock{margin-bottom:14px;scroll-margin-top:18px}
+.qrow{display:flex;align-items:flex-start;gap:9px;margin-bottom:8px}
+.qnum{min-width:32px;height:32px;border:1px solid #9da6b5;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:12px;font-weight:850;flex-shrink:0;border-radius:7px;color:var(--navy)}
+.qtext{line-height:1.55;padding-top:3px}
+.q-select{border:1px solid #bbb;border-radius:6px;background:#fff;padding:6px 8px;outline:none;font-family:Arial,sans-serif;font-size:16px}
+.q-select:focus,.q-input:focus,.word-input:focus{border-color:var(--navy-2);box-shadow:0 0 0 3px rgba(25,52,95,.10)}
+.q-input,.word-input{border:1px solid #aaa;border-radius:5px;background:#fff;padding:5px 8px;outline:none;font-family:Arial,sans-serif;font-size:16px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;align-items:flex-start;gap:9px;border:1px solid #d1d1d1;border-radius:7px;padding:9px 11px;cursor:pointer;font-family:Arial,sans-serif;font-size:16px;line-height:1.45;background:#fff}
+.opt:hover{background:#fafafa}
+.opt.sel{border-color:var(--navy-2);background:#edf3fb}
+.opt input{accent-color:var(--navy-2);margin-top:2px}
+.mcq-head{display:grid;grid-template-columns:46px minmax(0,1fr);align-items:stretch;border:1px solid #d0d0d0;border-radius:7px;overflow:hidden;margin-bottom:8px}
+.mcq-head .qnum{height:auto;min-height:50px;border:0;border-right:1px solid #d0d0d0;background:#f4f6f8}
+.mcq-head .person{padding:10px 12px;display:flex;align-items:center;font-weight:700;line-height:1.45}
+.idea-box{border:1px solid #d5d5d5;background:#fafafa;padding:9px;border-radius:7px;margin-bottom:13px}
+.idea-line{display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:8px;margin:5px 0;padding:8px 9px;font-family:Arial,sans-serif;font-size:16px;line-height:1.45}
+.idea-line.mcq-option{border:1px solid #d3d3d3;border-radius:6px;background:#fff;cursor:pointer}
+.idea-line.mcq-option:hover{border-color:#999}
+.idea-line.mcq-option.selected{border-color:var(--navy-2);background:#edf3fb}
+.idea-line.mcq-option b{display:flex;align-items:center;justify-content:center;min-width:25px;height:25px;border:1px solid #aaa;border-radius:4px;font-size:12px}
+.idea-line.mcq-option.selected b{border-color:var(--navy-2);color:var(--navy-2)}
+.tf-options{padding:8px}
+.completion-card{display:grid;grid-template-columns:46px minmax(0,1fr);align-items:stretch;border:1px solid #d0d0d0;border-radius:7px;overflow:hidden;margin-bottom:10px}
+.completion-card .qnum{height:auto;min-height:62px;border:0;border-right:1px solid #d0d0d0;background:#f4f6f8}
+.completion-text{padding:11px 12px;line-height:1.6}
+.headings-list{font-family:Arial,sans-serif;font-size:16px;line-height:1.6;background:#fafafa;border:1px solid #ddd;border-radius:7px;padding:12px 14px;margin-bottom:14px}
+
+/* navigation */
+.bottom{flex:0 0 auto;border-top:1px solid var(--line);background:rgba(255,253,249,.98);padding:9px 14px;display:flex;align-items:center;gap:12px;font-family:Inter,"Segoe UI",Arial,sans-serif;box-shadow:0 -8px 28px rgba(16,33,61,.05)}
+.passage-tabs{display:flex;gap:5px;flex-shrink:0}
+.passage-tab{padding:8px 12px;border:1px solid #c6cad1;background:#fff;border-radius:9px;font-size:11px;font-weight:850;cursor:pointer;color:#566074}
+.passage-tab.active{border-color:var(--navy-2);color:#fff;background:var(--navy-2);box-shadow:none}
+.qnav{display:flex;align-items:center;gap:4px;flex:1;overflow-x:auto;padding:1px 0}
+.qdot{width:29px;height:29px;flex:0 0 29px;border:1px solid #aaa;background:#fff;border-radius:5px;font-size:11px;font-weight:800;cursor:pointer;color:#444}
+.qdot.answered{background:var(--answered);border-color:var(--answered);color:#fff}
+.qdot.current{outline:2px solid var(--coral);outline-offset:1px;background:#fff;color:var(--coral)}
+.nav-arrows{display:flex;gap:5px}
+.nav-arrow{width:38px;height:34px;border-radius:9px;background:var(--navy);color:#fff;font-size:18px;cursor:pointer}
+.nav-arrow:disabled{opacity:.3;cursor:default}
+
+/* highlight */
+mark.hl{padding:1px 0;border-radius:2px;color:inherit;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+mark.hl-yellow{background:#ffe58b}
+mark.hl-blue{background:#bcdcff}
+.hlbar{position:fixed;z-index:4500;display:none;background:var(--navy);color:#fff;border-radius:11px;padding:6px;box-shadow:0 8px 28px rgba(16,33,61,.28);font-family:Inter,"Segoe UI",Arial,sans-serif;gap:4px;align-items:center}
+.hlbar.show{display:flex}
+.hlbar button{padding:7px 9px;border-radius:7px;background:rgba(255,255,255,.1);color:#fff;font-size:10px;font-weight:800;cursor:pointer}
+.hlbar button:hover{background:rgba(255,255,255,.2)}
+.hlbar button[data-action="remove"]{color:#ffd2ce}
+
+/* final submit confirmation */
+.submit-modal{position:fixed;inset:0;z-index:5800;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,22,42,.54);backdrop-filter:blur(8px)}
+.submit-modal.show{display:flex}
+.submit-dialog{width:min(470px,94vw);background:var(--paper);border:1px solid rgba(255,255,255,.4);border-radius:24px;padding:28px;box-shadow:0 30px 90px rgba(9,21,40,.3);font-family:Inter,"Segoe UI",Arial,sans-serif}
+.submit-dialog .dialog-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:#fff0ed;color:var(--coral);font-size:22px;font-weight:900;margin-bottom:17px}
+.submit-dialog h2{font-size:23px;line-height:1.15;letter-spacing:-.5px;color:var(--navy);margin-bottom:9px}
+.submit-dialog p{font-size:13px;line-height:1.55;color:#687080}
+.submit-review{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:20px 0}
+.submit-review div{border:1px solid #e1ddd6;background:#f8f5ef;border-radius:13px;padding:13px}
+.submit-review b{display:block;font-size:21px;color:var(--navy)}
+.submit-review span{font-size:10px;color:#7a808b;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+.dialog-actions{display:flex;justify-content:flex-end;gap:9px}
+.dialog-actions button{padding:11px 15px;border-radius:11px;font-size:12px;font-weight:850;cursor:pointer}
+.dialog-cancel{background:#ece9e3;color:var(--navy)}
+.dialog-confirm{background:var(--coral);color:#fff;min-width:145px}
+
+/* results */
+.result-screen{position:fixed;inset:0;z-index:6000;background:radial-gradient(circle at 20% 10%,rgba(255,105,93,.12),transparent 28%),var(--cream);display:none;overflow:auto;padding:32px 18px}
+.result-screen.show{display:block}
+.result-card{width:min(780px,96vw);margin:0 auto;background:var(--paper);border:1px solid rgba(16,33,61,.1);border-radius:24px;padding:32px;box-shadow:0 24px 70px rgba(38,29,23,.13)}
+.result-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:24px}
+.result-card h2{font-size:25px}
+.score-big{font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:48px;font-weight:900;color:var(--coral);line-height:1}
+.score-sub{font-family:Arial,sans-serif;font-size:12px;color:#666;margin-top:5px}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat{border:1px solid #ddd;background:#fafafa;border-radius:8px;padding:13px;font-family:Arial,sans-serif;text-align:center}
+.stat b{display:block;font-size:20px;margin-bottom:2px}
+.result-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin:18px 0 24px}
+.resq{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-size:11px;font-weight:800;border:1px solid #ccc}
+.resq.ok{background:#edf8ef;border-color:#94c49b;color:#246a31}
+.resq.bad{background:#fff0f0;border-color:#d9a0a0;color:#a01818}
+.resq.empty{background:#f1f1f1;color:#888}
+.delivery-status{display:none;align-items:center;gap:10px;border:1px solid #dfe4eb;border-radius:12px;background:#f5f8fb;padding:12px 14px;margin:0 0 18px;font:750 12px/1.4 Inter,"Segoe UI",Arial,sans-serif;color:var(--navy)}
+.delivery-status:before{content:"";width:9px;height:9px;border:2px solid #aab5c4;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;flex:0 0 auto}
+.delivery-status.saved{display:none}
+.delivery-status.saved:before{border:0;background:var(--green);animation:none}
+.delivery-status.error{display:flex;background:#fff2f0;border-color:#f2cbc6;color:#a93c33}
+.delivery-status.error:before{border:0;background:var(--coral);animation:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.result-actions{display:flex;gap:8px;justify-content:flex-end}
+.result-actions button{border-radius:7px;padding:10px 15px;font-family:Arial,sans-serif;font-size:13px;font-weight:800;cursor:pointer}
+.retry{background:var(--coral);color:#fff;display:none}
+.retry.show{display:inline-block}
+.return{background:#eee;color:#222}
+
+@media(max-width:800px){
+  html,body{font-size:16px}
+  .mock-title{display:none}
+  .topbar{padding:0 10px}
+  .left{width:50%;min-width:220px;padding:20px 18px 65px}
+  .right{min-width:250px;padding:18px 16px 65px}
+  .passage-tabs{gap:3px}
+  .passage-tab{padding:7px 8px}
+  .bottom{padding:7px 8px;gap:7px}
+  .result-grid{grid-template-columns:repeat(8,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="start-screen" id="startScreen">
+  <div class="start-card">
+    <div class="brand-lockup">
+      <span class="ark-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 5l9 4.5-9 4.5-9-4.5Z"/><path d="M6.5 11.4v4.1c2.8 2.1 8.2 2.1 11 0v-4.1M21 9.5V15"/></svg></span>
+      <span><b>ARK Education</b><small>IELTS &amp; CEFR EXAM PLATFORM</small></span>
+    </div>
+    <span class="exam-badge">IELTS ACADEMIC · READING</span>
+    <h1>Academic Reading — Full Mock</h1>
+    <p>Haqiqiy imtihon tartibidagi 3 ta passage va 40 ta savol. Vaqt Start bosilgandan keyin boshlanadi va yakuniy javoblar serverda saqlanadi.</p>
+    <div class="start-meta"><div><b>3</b>Passages</div><div><b>40</b>Questions</div><div><b>60</b>Minutes</div></div>
+    <button class="start-btn" id="startBtn">Full mockni boshlash →</button>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="ark-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 5l9 4.5-9 4.5-9-4.5Z"/><path d="M6.5 11.4v4.1c2.8 2.1 8.2 2.1 11 0v-4.1M21 9.5V15"/></svg></span>
+      <div class="mock-title">ARK EDUCATION<small>IELTS ACADEMIC READING · FULL MOCK</small></div>
+    </div>
+    <div class="top-actions"><div class="timer" id="timer" aria-label="Time remaining">60:00</div><button class="submit" id="submitBtn">Submit test</button></div>
+  </header>
+  <div class="part-header"><strong id="partTitle">Reading Passage 1</strong><span id="partSub">Questions 1–13</span></div>
+
+  <main class="split" id="splitWrap">
+    <section class="left" id="passagePane">
+      <div class="passage-section active" data-passage="1">
+<h2>A Corridor in a New City</h2>
+<p>When fourteen-year-old Kalamkas moved from Taraz to Astana, the decision was neither an educational strategy nor an attempt to escape an unhappy life. Her elder sister was already studying in the capital, and previous holiday visits had given Kalamkas the impression that the city offered a wider, more energetic world. The move nevertheless required her to enter a new school, establish a place in an unfamiliar class and learn the habits of teachers whose expectations she did not yet understand.</p>
+<p>During the first fortnight she made friends quickly. This early social success, however, did not prevent her attention from repeatedly settling on one particular student she saw in the corridors. The boy was Sanzhar, a student in class 11G. Kalamkas did not know his timetable and initially failed to locate his social-media accounts. Friends who had studied at the school for longer supplied his name, although she found it difficult to believe them: in her own experience, people called Sanzhar had rarely made a favourable impression. Her judgement was based on association rather than evidence, a distinction she would later recognise.</p>
+<p>For several days she merely noticed him at a distance. Then, while missing a lesson with a friend, she saw him leaving a quiet corridor. Encouraged by her companion, she approached him at a moment when no crowd was present and asked to get acquainted. He gave her his TikTok account.</p>
+<p>Their first conversations revealed both similarities and significant differences. Sanzhar was sixteen and would turn seventeen in November; Kalamkas was born in 2011 and would turn fifteen the following February. He was in his final year of school, whereas she was in Year 9 and intended to remain until Year 11. Sanzhar had played football for nine years. Both were Kazakh, both were studying English, and both were considering higher education abroad. Sanzhar had already been attending classes with the aim of applying to Italy. Kalamkas had not previously been curious about that destination, but the possibility gradually became relevant as their ambitions began to converge around one practical objective: taking IELTS.</p>
+<p>After several days of daily messaging, Kalamkas invited Sanzhar to walk after school. Since both had seven lessons, the arrangement was convenient, and the conversation gave them their first opportunity to know one another beyond brief online exchanges. A week later, however, a small misunderstanding almost ended the friendship. Kalamkas wanted to meet during every break and interpreted Sanzhar's reluctance as evidence that he no longer wished to communicate. When she asked him to come outside and he replied, 'Why?', she blocked him. She expected an apology before the end of the school day. Instead, by evening he had blocked her in return.</p>
+<p>Kalamkas soon regretted acting impulsively. Because they had exchanged only social-media details, she asked several of Sanzhar's classmates for his phone number. Her first message and calls received no immediate response, but he eventually accepted her apology and agreed to resume contact. Their renewed conversations were less fragile.</p>
+<p>One source of connection was their affection for animals. Sanzhar owned a cat named Zara and sent new pictures of her eating, sleeping or playing. Kalamkas's own cat remained in Taraz, so the images she shared were older. The difference was minor, but the daily exchange became a routine through which each person offered the other a view of ordinary life.</p>
+<p>English study provided a more purposeful routine. At first, both attended separate courses, yet each concluded that the classes were insufficiently informative and inconveniently distant from school. They therefore designed a shared study plan, focusing first on grammar and then on the skills required for IELTS. Their progress did not come from equal ability: Sanzhar's English was stronger, and he often explained structures that Kalamkas found confusing. Nevertheless, she contributed persistence and a willingness to organise their work. The arrangement changed the meaning of their time together. Meetings were no longer only romantic or social; they also became a form of mutual academic accountability.</p>
+<p>Small objects acquired symbolic importance. Sanzhar had chewed gum regularly for about two years and had tried several brands without finding one he particularly liked. Kalamkas preferred Mentos and gave him a piece when he asked whether she had any gum. He enjoyed it, tried additional flavours, and eventually adopted the brand himself. Thereafter, a packet of Mentos could function as a practical gift, a private joke and a reminder of attention paid to another person's preferences. To an outsider, the detail was trivial. Within the relationship, it marked the way repeated, inexpensive gestures can accumulate emotional meaning.</p>
+<p>By winter, they were walking together after school frequently and sometimes avoiding lessons in order to talk. The school was small, and a staircase above the fourth floor offered a view over the surrounding area. Because there were no cameras there, the pair occasionally sat on the steps when their timetables allowed it. They discussed school, English and future plans, and their physical closeness increased. Although classmates increasingly described them as a couple, neither had formally defined the relationship. Sanzhar assumed their commitment was already understood; Kalamkas, by contrast, waited for an explicit question. This difference between implicit and stated commitment would become important later.</p>
+</div>
+      <div class="passage-section" data-passage="2">
+<h2>Save Endangered Language</h2>
+<p style="font-style:italic; color:#555; margin-bottom:16px; border-left:3px solid #ccc; padding-left:12px;">“Obviously we must do some serious rethinking of our priorities, lest linguistics go down in history as the only science that presided obviously over the disappearance of 90 percent of the very field to which it is dedicated.” – Michael Krauss, “The World’s Languages in Crisis”.</p>
+<p><b>A</b> Ten years ago Michael Krauss sent a shudder through the discipline of linguistics with his prediction that half the 6,000 or so languages spoken in the world would cease to be uttered within a century. Unless scientists and community leaders directed a worldwide effort to stabilize the decline of local languages, he warned, nine-tenths of the linguistic diversity of humankind would probably be doomed to extinction. Krauss’s prediction was little more than an educated guess, but other respected linguists had been clanging out similar alarms. Keneth L. Hale of the Massachusetts Institute of Technology noted in the same journal issue that eight languages on which he had done fieldwork had since passed into extinction. A 1990 survey in Australia found that 70 of the 90 surviving Aboriginal languages were no longer used regularly by all age groups. The same was true for all but 20 of the 175 Native American languages spoken or remembered in the US., Krauss told a congressional panel in 1992.</p>
+<p><b>B</b> Many experts in the field mourn the loss of rare languages, for several reasons. To start, there is scientific self-interest: some of the most basic questions in linguistics have to do with the limits of human speech, which are far from fully explored. Many researchers would like to know which structural elements of grammar and vocabulary – if any – are truly universal and probably, therefore, hardwired into the human brain. Other scientists try to reconstruct ancient migration patterns by comparing borrowed words that appear in otherwise unrelated languages. In each of these cases, the wider the portfolio of languages you study, the more likely you are to get the right answers.</p>
+<p><b>C</b> Despite the near-constant buzz in linguistics about endangered languages over the past 10 years, the field has accomplished depressingly little. “You would think that there would be some organized response to this dire situation,” some attempt to determine which language can be saved and which should be documented before they disappear, says Sarah G. Thomason, a linguist at the University of Michigan at Ann Arbor. “But there isn’t any such effort organized in the profession. It is only recently that it has become fashionable enough to work on endangered languages.” Six years ago, recalls Douglas H. Whalen of Yale University, “when I asked linguists who were raising money to deal with these problems, I mostly got blank stares.” So Whalen and a few other linguists founded the Endangered Languages Fund. In the five years to 2001, they were able to collect only $80,000 for research grants. A similar foundation in England, directed by Nicholas Ostler, has raised just $8,000 since 1995.</p>
+<p><b>D</b> But there are encouraging signs that the field has turned a corner. The Volkswagen Foundation, a German charity, just issued its second round of grants totaling more than $2 million. It has created a multimedia archive at the Max Planck Institute for Psycholinguistics in the Netherlands that can house recordings, grammars, dictionaries and other data on endangered languages. To fill the archive, the foundation has dispatched field linguists to document Aweti (100 or so speakers in Brazil), Ega (about 300 speakers in Ivory Coast), Waima’a (a few hundred speakers in East Timor), and a dozen or so other languages unlikely to survive the century. The Ford Foundation has also edged into the arena. Its contributions helped to reinvigorate a master-apprentice program created in 1992 by Leanne Hinton of Berkeley and Native Americans worried about the imminent demise of about 50 indigenous languages in California. Fluent speakers receive $3,000 to teach a younger relative (who is also paid) their native tongue through 360 hours of shared activities, spread over six months. So far about 5 teams have completed the program, Hinton says, transmitting a least some knowledge of 25 languages. “It’s too early to call this language revitalization,” Hinton admits. “In California, the death rate of elderly speakers will always be greater than the recruitment rate of young speakers. But at least we prolong the survival of the language.” That will give linguists more time to record these tongues before they vanish.</p>
+<p><b>E</b> But the master-apprentice approach hasn’t caught on outside the U.S., and Hinton’s effort is a drop in the sea. At least 440 languages have been reduced to a mere handful of elders, according to the Ethnologue, a catalogue of languages produced by the Dallas-based group SIL International that comes closest to global coverage. For the vast majority of these languages, there is little or no record of their grammar, vocabulary, pronunciation or use in daily life. Even if a language has been fully documented, all that remains once it vanishes from active use is a fossil skeleton, a scattering of features that the scientist was lucky and astute enough to capture. Linguists may be able to sketch an outline of the forgotten language and fix its place on the evolutionary tree, but little more. “How did people start conversations and talk to babies? How did husbands and wives converse?” Hinton asks. “Those are the first things you want to learn when you want to revitalize the language.”</p>
+<p><b>F</b> But there is as yet no discipline of “conservation linguistics,” as there is for biology. Almost every strategy tried so far has succeeded in some places but failed in others, and there seems to be no way to predict with certainty what will work where. Twenty years ago in New Zealand, Maori speakers set up “language nests,” in which preschoolers were immersed in the native language. Additional Maori-only classes were added as the children progressed through elementary and secondary school. A similar approach was tried in Hawaii, with some success – the number of native speakers has stabilized at 1,000 or so, reports Joseph E. Grimes of SIL International, who is working on Oahu. Students can now get instruction in Hawaiian all the way through university.</p>
+<p><b>G</b> One factor that always seems to occur in the demise of a language is that the speakers begin to have collective doubts about the usefulness of language loyalty. Once they start regarding their own language as inferior to the majority language, people stop using it in all situations. Kids pick up on the attitude and prefer the dominant language. In many cases, people don’t notice until they suddenly realize that their kids never speak the language, even at home. This is how Cornish and some dialects of Scottish Gaelic is still only rarely used for daily home life in Ireland, 80 years after the republic was founded with Irish as its first official language.</p>
+<p><b>H</b> Linguists agree that ultimately, the answer to the problem of language extinction is multilingualism. Even uneducated people can learn several languages, as long as they start as children. Indeed, most people in the world speak more than one tongue, and in places such as Cameroon (279 languages), Papua New Guinea (823) and India (387) it is common to speak three of four distinct languages and a dialect or two as well. Most Americans and Canadians, to the west of Quebec, have a gut reaction that anyone speaking another language in front of them is committing an immoral act. You get the same reaction in Australia and Russia. It is no coincidence that these are the areas where languages are disappearing the fastest. The first step in saving dying languages is to persuade the world’s majorities to allow the minorities among them to speak with their own voices.</p>
+</div>
+      <div class="passage-section" data-passage="3">
+<h2>Looking for inspiration</h2>
+<p style="font-style:italic;margin-bottom:18px;">Helen Phillips asks what makes one person more creative than another</p>
+<p>People have speculated about their own creativity for centuries—perhaps ever since we became able to think about thinking. Whatever creativity is, it results in new ideas and new ways of doing things. The only bit of the creative process we actually know about is the moment of insight, yet creative ideas and projects may incubate beyond our awareness for months. Not surprising, then, that creativity has long eluded scientific study.</p>
+<p>In the early 1970s, it was still seen as a type of intelligence. But when more subtle tests of IQ and creative skills were developed in the 1970s, particularly by the father of creativity testing, Paul Torrance, it became clear that the link was not so simple. Creative people are intelligent, in terms of IQ tests at least, but only averagely or just above. While it depends on the discipline, in general, having beyond a certain level IQ does not help boost creativity.</p>
+<p>Because of the difficulty of studying the actual process, most early attempts to study creativity concentrated on personality. According to creativity specialist Mark Runco of California State University, the creative personality tends to place a high value on aesthetic qualities and have broad interests, providing lots of resources to draw on and knowledge to recombine into novel solutions. 'Creatives' have an attraction to complexity and an ability to handle conflict. They are also highly self-motivated, perhaps even a little obsessive, when it comes to realising their ambitions.</p>
+<p>But there may be a price to pay for having a creative personality. For centuries, a link has been made between creativity and mental illness. Psychiatrist and author Kay Redfield Jamison of Johns Hopkins University, who herself has bipolar disorder, found that established artists are significantly more likely to have mood disorders. But she also suggests that a switch of mood state might be the key to triggering a creative event, rather than the negative mood itself.</p>
+<p>Jordan Peterson, a psychologist at the University of Toronto, has carried out work that suggests that the brains of creative people are more open to incoming stimuli than less creative types. Our senses are continuously feeding a mass of data into our brains, which have to block most of it to save us from being snowed under. Peterson calls this process latent inhibition and argues that people who have less of it, and who have a reasonably high IQ, can juggle more of the data, and so may be open to more ideas.</p>
+<p>But what of the creative act itself? One of the first studies of the creative brain at work was by Colin Martindale, a psychologist from the University of Maine. Back in 1978, he used a network of scalp electrodes to record the pattern of brain waves as people made up stories. Creativity, he showed, has two stages: inspiration and elaboration, each characterized by very different states of mind. While people were dreaming up their stories, he found their brains were surprisingly quiet. The dominant activity was alpha waves, which is the same sort of brain activity as in some stages of dreaming or rest. This could explain why sleep and relaxation can help people be creative.</p>
+<p>However, when these quiet-minded people were asked to work on their stories, the alpha wave activity dropped off and the brain became busier, revealing increased cortical arousal, and more organised thinking. Strikingly, it was the people who showed the biggest difference in brain activity between the two stages who produced the most creative storylines. Nothing in their background brain activity marked them as creative or uncreative. 'It's as if the less creative person can't shift a gear,' says Guy Claxton, a psychologist at the University of Bristol. 'Creativity requires different kinds of thinking. Very creative people move between these states intuitively.'</p>
+<p>Researchers are now trying to identify some of the specific anatomy of creativity. Brain studies of people with particular types of creativity show, perhaps not surprisingly, that active areas are determined by the specialist knowledge being used. Imagery, spatial awareness, language and so on—whatever the skill, it is localised to some extent to a particular brain part or parts. But it's not just these speciality areas that are active. Using information creatively needs coordination. 'Creative synthesis requires a new pattern, to put the brain in a state where many areas are simultaneously active,' says Claxton. When we concentrate in a less creative way, such as when reading the gas bill, there are fewer active centres and less synthesis.</p>
+<p>But to be truly creative needs more than just the right personality and the right brain areas and networks. It's about using them effectively. Skills, situations and our social setting can shape our creativity just as dramatically as the brain resources we are born with. The most creative people also use the different rhythms of the day, the weekends and the holidays to help alter focus and brain state. They may spend two hours at their desk, then go for a walk, because they know that pattern works for them.</p>
+<p>Another often forgotten aspect of creativity is social. Vera John-Steiner of the University of New Mexico says that to be really creative you need strong social networks and trusting relationships, not just active neural networks. One vital characteristic of a 'creative', she says, is that they have at least one other person in their life who doesn't think they are completely mad!</p>
+</div>
+    </section>
+    <div class="handle" id="dragHandle" aria-label="Resize panels"></div>
+    <section class="right" id="qPane">
+      <div class="question-section active" data-passage="1">
+<h3>Questions 1–5</h3>
+<p class="instr">Do the following statements agree with the information given in Reading Passage 1?<br/><br/>
+In boxes 1–5 on your answer sheet, write:<br/><br/>
+<b>TRUE</b> if the statement agrees with the information<br/>
+<b>FALSE</b> if the statement contradicts the information<br/>
+<b>NOT GIVEN</b> if there is no information on this</p>
+<div class="qblock" id="qb-1">
+<div class="mcq-head"><div class="qnum">1</div><div class="person">Kalamkas moved to Astana mainly because she believed its schools were academically superior.</div></div>
+<div class="tf-options idea-box"><div class="idea-line mcq-option" onclick="pickMCQ('q1','TRUE',this)"><b>T</b><span>TRUE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q1','FALSE',this)"><b>F</b><span>FALSE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q1','NOT GIVEN',this)"><b>NG</b><span>NOT GIVEN</span></div></div>
+</div>
+<div class="qblock" id="qb-2">
+<div class="mcq-head"><div class="qnum">2</div><div class="person">Before speaking to Sanzhar, Kalamkas had been unable to find his social-media account.</div></div>
+<div class="tf-options idea-box"><div class="idea-line mcq-option" onclick="pickMCQ('q2','TRUE',this)"><b>T</b><span>TRUE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q2','FALSE',this)"><b>F</b><span>FALSE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q2','NOT GIVEN',this)"><b>NG</b><span>NOT GIVEN</span></div></div>
+</div>
+<div class="qblock" id="qb-3">
+<div class="mcq-head"><div class="qnum">3</div><div class="person">Kalamkas and Sanzhar were both expected to leave school at the end of that academic year.</div></div>
+<div class="tf-options idea-box"><div class="idea-line mcq-option" onclick="pickMCQ('q3','TRUE',this)"><b>T</b><span>TRUE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q3','FALSE',this)"><b>F</b><span>FALSE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q3','NOT GIVEN',this)"><b>NG</b><span>NOT GIVEN</span></div></div>
+</div>
+<div class="qblock" id="qb-4">
+<div class="mcq-head"><div class="qnum">4</div><div class="person">Sanzhar apologised to Kalamkas during the school day after she blocked him.</div></div>
+<div class="tf-options idea-box"><div class="idea-line mcq-option" onclick="pickMCQ('q4','TRUE',this)"><b>T</b><span>TRUE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q4','FALSE',this)"><b>F</b><span>FALSE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q4','NOT GIVEN',this)"><b>NG</b><span>NOT GIVEN</span></div></div>
+</div>
+<div class="qblock" id="qb-5">
+<div class="mcq-head"><div class="qnum">5</div><div class="person">Kalamkas sent Sanzhar newly taken photographs of her cat every day.</div></div>
+<div class="tf-options idea-box"><div class="idea-line mcq-option" onclick="pickMCQ('q5','TRUE',this)"><b>T</b><span>TRUE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q5','FALSE',this)"><b>F</b><span>FALSE</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q5','NOT GIVEN',this)"><b>NG</b><span>NOT GIVEN</span></div></div>
+</div>
+<h3 style="margin-top:22px;">Questions 6–9</h3>
+<p class="instr">Complete the sentences below.<br/><br/>
+Choose <b>ONE WORD ONLY</b> from the passage for each answer.</p>
+<div class="completion-card qblock" id="qb-6">
+<div class="qnum">6</div>
+<div class="completion-text">Sanzhar had played <input aria-label="Question 6 answer" autocomplete="off" class="word-input" oninput="pickWord('q6',this.value)" type="text"/> for nine years.</div>
+</div>
+<div class="completion-card qblock" id="qb-7">
+<div class="qnum">7</div>
+<div class="completion-text">The pair first concentrated on <input aria-label="Question 7 answer" autocomplete="off" class="word-input" oninput="pickWord('q7',this.value)" type="text"/> when they created their own English-study plan.</div>
+</div>
+<div class="completion-card qblock" id="qb-8">
+<div class="qnum">8</div>
+<div class="completion-text">Sanzhar regularly sent pictures of a cat called <input aria-label="Question 8 answer" autocomplete="off" class="word-input" oninput="pickWord('q8',this.value)" type="text"/> .</div>
+</div>
+<div class="completion-card qblock" id="qb-9">
+<div class="qnum">9</div>
+<div class="completion-text">A packet of Mentos eventually became both a gift and a private <input aria-label="Question 9 answer" autocomplete="off" class="word-input" oninput="pickWord('q9',this.value)" type="text"/> .</div>
+</div>
+<h3 style="margin-top:22px;">Questions 10–13</h3>
+<p class="instr">Choose the correct letter, <b>A, B, C or D</b>.</p>
+<div class="qblock" id="qb-10">
+<div class="mcq-head"><div class="qnum">10</div><div class="person">Why did Kalamkas initially doubt that the boy was called Sanzhar?</div></div>
+<div class="idea-box"><div class="idea-line mcq-option" onclick="pickMCQ('q10','A',this)"><b>A</b><span>She had misunderstood her friends.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q10','B',this)"><b>B</b><span>The name had negative associations for her.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q10','C',this)"><b>C</b><span>He had introduced himself using another name.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q10','D',this)"><b>D</b><span>Another student in 11G had the same name.</span></div></div>
+</div>
+<div class="qblock" id="qb-11">
+<div class="mcq-head"><div class="qnum">11</div><div class="person">What caused the first serious misunderstanding?</div></div>
+<div class="idea-box"><div class="idea-line mcq-option" onclick="pickMCQ('q11','A',this)"><b>A</b><span>Kalamkas expected more frequent contact at school.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q11','B',this)"><b>B</b><span>Sanzhar cancelled their first walk.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q11','C',this)"><b>C</b><span>Their English courses took place at different times.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q11','D',this)"><b>D</b><span>Sanzhar refused to share his phone number.</span></div></div>
+</div>
+<div class="qblock" id="qb-12">
+<div class="mcq-head"><div class="qnum">12</div><div class="person">What does the writer suggest about their independent English plan?</div></div>
+<div class="idea-box"><div class="idea-line mcq-option" onclick="pickMCQ('q12','A',this)"><b>A</b><span>It removed the need for either student to work alone.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q12','B',this)"><b>B</b><span>It was successful because their abilities were identical.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q12','C',this)"><b>C</b><span>It gave their meetings an additional purpose.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q12','D',this)"><b>D</b><span>It was designed mainly to save money.</span></div></div>
+</div>
+<div class="qblock" id="qb-13">
+<div class="mcq-head"><div class="qnum">13</div><div class="person">What was different about their understanding of the relationship by winter?</div></div>
+<div class="idea-box"><div class="idea-line mcq-option" onclick="pickMCQ('q13','A',this)"><b>A</b><span>Only Sanzhar believed classmates knew about them.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q13','B',this)"><b>B</b><span>Kalamkas wanted a direct statement of commitment.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q13','C',this)"><b>C</b><span>Sanzhar wanted to wait until after IELTS.</span></div><div class="idea-line mcq-option" onclick="pickMCQ('q13','D',this)"><b>D</b><span>Kalamkas preferred to keep the relationship informal.</span></div></div>
+</div>
+</div>
+      <div class="question-section" data-passage="2">
+<!-- Q1-7: Matching Headings -->
+<h3>Questions 14–19</h3>
+<p class="instr">The reading passage has eight paragraphs, <b>A–H</b>.<br/>Choose the correct heading for paragraphs <b>B and D–H</b> from the list below.<br/>Write the correct number, <b>i–xi</b>, in boxes 14–19 on your answer sheet.</p>
+<div class="headings-list">
+<b>List of Headings</b>
+<span><b>i</b> Data consistency needed for language</span><br/>
+<span><b>ii</b> Consensuses on an initial recommendation for saving dying out languages</span><br/>
+<span><b>iii</b> Positive gains for protection</span><br/>
+<span><b>iv</b> Minimum requirement for saving a language</span><br/>
+<span><b>v</b> Potential threat to minority language</span><br/>
+<span><b>vi</b> A period when there was absent of real effort made</span><br/>
+<span><b>vii</b> Native language programs launched</span><br/>
+<span><b>viii</b> Lack of confidence in young speakers as a negative factor</span><br/>
+<span><b>ix</b> Practise in several developing countries</span><br/>
+<span><b>x</b> Value of minority language to linguists</span><br/>
+<span><b>xi</b> Government participation in the language field</span>
+</div>
+
+<div class="qblock" id="qb-14">
+<div class="qrow">
+<span class="qnum">14</span>
+<span class="qtext">Paragraph B 
+        <select class="q-select" onchange="pickSelect('q14',this.value)" style="width:65px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option><option value="vii">vii</option><option value="viii">viii</option><option value="ix">ix</option><option value="x">x</option><option value="xi">xi</option>
+</select></span>
+</div>
+</div>
+<div style="font-size:13px; color:#888; margin-bottom:12px; padding-left:4px;"><i>Examples: Paragraph A — v   |   Paragraph C — vi</i></div>
+<div class="qblock" id="qb-15">
+<div class="qrow">
+<span class="qnum">15</span>
+<span class="qtext">Paragraph D 
+        <select class="q-select" onchange="pickSelect('q15',this.value)" style="width:65px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option><option value="vii">vii</option><option value="viii">viii</option><option value="ix">ix</option><option value="x">x</option><option value="xi">xi</option>
+</select></span>
+</div>
+</div>
+<div class="qblock" id="qb-16">
+<div class="qrow">
+<span class="qnum">16</span>
+<span class="qtext">Paragraph E 
+        <select class="q-select" onchange="pickSelect('q16',this.value)" style="width:65px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option><option value="vii">vii</option><option value="viii">viii</option><option value="ix">ix</option><option value="x">x</option><option value="xi">xi</option>
+</select></span>
+</div>
+</div>
+<div class="qblock" id="qb-17">
+<div class="qrow">
+<span class="qnum">17</span>
+<span class="qtext">Paragraph F 
+        <select class="q-select" onchange="pickSelect('q17',this.value)" style="width:65px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option><option value="vii">vii</option><option value="viii">viii</option><option value="ix">ix</option><option value="x">x</option><option value="xi">xi</option>
+</select></span>
+</div>
+</div>
+<div class="qblock" id="qb-18">
+<div class="qrow">
+<span class="qnum">18</span>
+<span class="qtext">Paragraph G 
+        <select class="q-select" onchange="pickSelect('q18',this.value)" style="width:65px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option><option value="vii">vii</option><option value="viii">viii</option><option value="ix">ix</option><option value="x">x</option><option value="xi">xi</option>
+</select></span>
+</div>
+</div>
+<div class="qblock" id="qb-19">
+<div class="qrow">
+<span class="qnum">19</span>
+<span class="qtext">Paragraph H 
+        <select class="q-select" onchange="pickSelect('q19',this.value)" style="width:65px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option><option value="vii">vii</option><option value="viii">viii</option><option value="ix">ix</option><option value="x">x</option><option value="xi">xi</option>
+</select></span>
+</div>
+</div>
+<!-- Q8-12: Matching People -->
+<h3 style="margin-top:8px;">Questions 20–24</h3>
+<p class="instr">Use the information in the passage to match the people (listed <b>A–F</b>) with opinions or deeds below.<br/>Write the appropriate letters <b>A–F</b> in boxes 20–24 on your answer sheet.</p>
+<div style="font-size:13px; line-height:1.6; margin-bottom:18px; padding:10px 14px; background:#f9f9f9; border:1px solid #e0e0e0; border-radius:3px;">
+<b>List of People</b><br/>
+<b>A</b> Nicholas Ostler<br/>
+<b>B</b> Michael Krauss<br/>
+<b>C</b> Joseph E. Grimes<br/>
+<b>D</b> Sarah G. Thomason<br/>
+<b>E</b> Keneth L. Hale<br/>
+<b>F</b> Douglas H. Whalen
+    </div>
+<div class="qblock" id="qb-20">
+<div class="qrow">
+<span class="qnum">20</span>
+<span class="qtext">Reported language conservation practice in Hawaii 
+        <select class="q-select" onchange="pickSelect('q20',this.value)" style="width:55px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+</select></span>
+</div>
+</div>
+<div class="qblock" id="qb-21">
+<div class="qrow">
+<span class="qnum">21</span>
+<span class="qtext">Predicted that many languages would disappear soon 
+        <select class="q-select" onchange="pickSelect('q21',this.value)" style="width:55px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+</select></span>
+</div>
+</div>
+<div class="qblock" id="qb-22">
+<div class="qrow">
+<span class="qnum">22</span>
+<span class="qtext">The experienced process that languages die out personally 
+        <select class="q-select" onchange="pickSelect('q22',this.value)" style="width:55px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+</select></span>
+</div>
+</div>
+<div class="qblock" id="qb-23">
+<div class="qrow">
+<span class="qnum">23</span>
+<span class="qtext">Raised language fund in England 
+        <select class="q-select" onchange="pickSelect('q23',this.value)" style="width:55px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+</select></span>
+</div>
+</div>
+<div class="qblock" id="qb-24">
+<div class="qrow">
+<span class="qnum">24</span>
+<span class="qtext">Not enough effort on saving until recent work 
+        <select class="q-select" onchange="pickSelect('q24',this.value)" style="width:55px; margin-left:8px; flex-shrink:0;">
+<option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+</select></span>
+</div>
+</div>
+<!-- Q13-14: Multiple Choice -->
+<h3 style="margin-top:8px;">Questions 25–26</h3>
+<p class="instr">Choose the correct letter, <b>A, B, C</b> or <b>D</b>.<br/>Write your answers in boxes 25–26 on your answer sheet.</p>
+<div class="qblock" id="qb-25">
+<div class="qtext" style="margin-bottom:8px; font-weight:600;">25. What is the real result of a master-apprentice program sponsored by The Ford Foundation?</div>
+<div class="opts">
+<label class="opt"><input name="q25" onchange="pickRadio('q25','A',this.parentElement)" type="radio" value="A"/> <b>A</b>  Teach children how to speak</label>
+<label class="opt"><input name="q25" onchange="pickRadio('q25','B',this.parentElement)" type="radio" value="B"/> <b>B</b>  Revive some endangered languages in California</label>
+<label class="opt"><input name="q25" onchange="pickRadio('q25','C',this.parentElement)" type="radio" value="C"/> <b>C</b>  Postpone the dying date for some endangered languages</label>
+<label class="opt"><input name="q25" onchange="pickRadio('q25','D',this.parentElement)" type="radio" value="D"/> <b>D</b>  Increase communication between students</label>
+</div>
+</div>
+<div class="qblock" id="qb-26">
+<div class="qtext" style="margin-bottom:8px; font-weight:600;">26. What should the majority language speakers do according to the last paragraph?</div>
+<div class="opts">
+<label class="opt"><input name="q26" onchange="pickRadio('q26','A',this.parentElement)" type="radio" value="A"/> <b>A</b>  They should teach their children endangered language in free lessons</label>
+<label class="opt"><input name="q26" onchange="pickRadio('q26','B',this.parentElement)" type="radio" value="B"/> <b>B</b>  They should learn at least four languages</label>
+<label class="opt"><input name="q26" onchange="pickRadio('q26','C',this.parentElement)" type="radio" value="C"/> <b>C</b>  They should show their loyalty to a dying language</label>
+<label class="opt"><input name="q26" onchange="pickRadio('q26','D',this.parentElement)" type="radio" value="D"/> <b>D</b>  They should be more tolerant of minority language speakers</label>
+</div>
+</div>
+</div>
+      <div class="question-section" data-passage="3">
+<!-- Q27-32: Matching -->
+<h3>Questions 27–32</h3>
+<p class="instr">Look at the following statements (Questions 27–32) and the list of people below.<br/>
+    Match each statement with the correct person, A–G.<br/>
+    Write the correct letter, A–G, in boxes 27–32 on your answer sheet.<br/>
+<b>NB You may use any letter more than once.</b></p>
+<div style="background:#f5f5f5;padding:10px;border-radius:3px;margin-bottom:16px;font-size:13px;">
+<div style="margin-bottom:4px;"><b>List of People</b></div>
+<div>A Paul Torrance</div>
+<div>B Mark Runco</div>
+<div>C Kay Redfield Jamison</div>
+<div>D Jordan Peterson</div>
+<div>E Colin Martindale</div>
+<div>F Guy Claxton</div>
+<div>G Vera John-Steiner</div>
+</div>
+<div class="qblock" id="qb-27">
+<div class="qrow">
+<span class="qnum">27</span>
+<select class="q-select" onchange="pickSelect('q27',this.value)" style="width:100px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option>
+<option value="A">A</option><option value="B">B</option><option value="C">C</option>
+<option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option>
+</select>
+<span class="qtext">Creative people are receptive to the immense amount of information that the brain has to deal with.</span>
+</div>
+</div>
+<div class="qblock" id="qb-28">
+<div class="qrow">
+<span class="qnum">28</span>
+<select class="q-select" onchange="pickSelect('q28',this.value)" style="width:100px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option>
+<option value="A">A</option><option value="B">B</option><option value="C">C</option>
+<option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option>
+</select>
+<span class="qtext">Creativity requires numerous parts of the brain to be active at the same time.</span>
+</div>
+</div>
+<div class="qblock" id="qb-29">
+<div class="qrow">
+<span class="qnum">29</span>
+<select class="q-select" onchange="pickSelect('q29',this.value)" style="width:100px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option>
+<option value="A">A</option><option value="B">B</option><option value="C">C</option>
+<option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option>
+</select>
+<span class="qtext">Creative people engage in, and are well-informed about, a wide range of subjects.</span>
+</div>
+</div>
+<div class="qblock" id="qb-30">
+<div class="qrow">
+<span class="qnum">30</span>
+<select class="q-select" onchange="pickSelect('q30',this.value)" style="width:100px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option>
+<option value="A">A</option><option value="B">B</option><option value="C">C</option>
+<option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option>
+</select>
+<span class="qtext">Creative people may have unstable personalities.</span>
+</div>
+</div>
+<div class="qblock" id="qb-31">
+<div class="qrow">
+<span class="qnum">31</span>
+<select class="q-select" onchange="pickSelect('q31',this.value)" style="width:100px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option>
+<option value="A">A</option><option value="B">B</option><option value="C">C</option>
+<option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option>
+</select>
+<span class="qtext">Creative people are driven to achieve the goals they set themselves.</span>
+</div>
+</div>
+<div class="qblock" id="qb-32">
+<div class="qrow">
+<span class="qnum">32</span>
+<select class="q-select" onchange="pickSelect('q32',this.value)" style="width:100px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option>
+<option value="A">A</option><option value="B">B</option><option value="C">C</option>
+<option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option>
+</select>
+<span class="qtext">Creative people need support from others.</span>
+</div>
+</div>
+<!-- Q33-36: Summary Completion -->
+<h3 style="margin-top:8px;">Questions 33–36</h3>
+<p class="instr">Complete the summary below.<br/>
+    Choose <b>NO MORE THAN TWO WORDS</b> from the passage for each answer.</p>
+<div style="background:#fafafa;padding:14px;border:1px solid #ddd;border-radius:3px;margin-bottom:16px;font-size:13px;line-height:1.7;">
+      Colin Martindale carried out research into the creative brain at work. For his study, volunteers had a series of 
+      <input class="q-input" oninput="pickText('q33',this.value)" style="width:140px;display:inline-block;margin:0 4px;" type="text"> 
+      placed on their heads which were used to monitor brain activity while they made up stories. Martindale demonstrated that creativity consisted of 
+      <input class="q-input" oninput="pickText('q34',this.value)" style="width:100px;display:inline-block;margin:0 4px;" type="text"/> 
+      and elaboration phases. In the first of these, the brain was mostly inactive except for 
+      <input class="q-input" oninput="pickText('q35',this.value)" style="width:100px;display:inline-block;margin:0 4px;" type="text"/> 
+      and this corresponds to what takes place during dreaming or relaxation. In the second phase, when the volunteers worked on their stories, however, their brains became a lot busier. Interestingly, the most creative stories were produced by those volunteers with the greatest 
+      <input class="q-input" oninput="pickText('q36',this.value)" style="width:100px;display:inline-block;margin:0 4px;" type="text"/> 
+      in brain activity between the two phases.
+    </div>
+<!-- Q37-40: True/False/Not Given -->
+<h3>Questions 37–40</h3>
+<p class="instr">Do the following statements agree with the information given in Reading Passage 3?<br/>
+    In boxes 37–40 on your answer sheet, write<br/>
+<b>TRUE</b> if the statement agrees with the information<br/>
+<b>FALSE</b> if the statement contradicts the information<br/>
+<b>NOT GIVEN</b> if there is no information on this</p>
+<div class="qblock" id="qb-37">
+<div class="qrow">
+<span class="qnum">37</span>
+<select class="q-select" onchange="pickSelect('q37',this.value)" style="width:120px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option>
+</select>
+<span class="qtext">People with very high IQs are more likely to be creative than those with average IQs.</span>
+</div>
+</div>
+<div class="qblock" id="qb-38">
+<div class="qrow">
+<span class="qnum">38</span>
+<select class="q-select" onchange="pickSelect('q38',this.value)" style="width:120px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option>
+</select>
+<span class="qtext">Society tends to value aesthetic skills highly.</span>
+</div>
+</div>
+<div class="qblock" id="qb-39">
+<div class="qrow">
+<span class="qnum">39</span>
+<select class="q-select" onchange="pickSelect('q39',this.value)" style="width:120px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option>
+</select>
+<span class="qtext">There can be disadvantages to having a creative personality.</span>
+</div>
+</div>
+<div class="qblock" id="qb-40">
+<div class="qrow">
+<span class="qnum">40</span>
+<select class="q-select" onchange="pickSelect('q40',this.value)" style="width:120px; margin-right:8px; flex-shrink:0; margin-top:2px;">
+<option value="">—</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option>
+</select>
+<span class="qtext">Language skills are more important than spatial awareness in any form of creativity.</span>
+</div>
+</div>
+</div>
+    </section>
+  </main>
+
+  <footer class="bottom">
+    <div class="passage-tabs">
+      <button class="passage-tab active" data-passage="1">Passage 1</button>
+      <button class="passage-tab" data-passage="2">Passage 2</button>
+      <button class="passage-tab" data-passage="3">Passage 3</button>
+    </div>
+    <div class="qnav" id="qnav"></div>
+    <div class="nav-arrows"><button class="nav-arrow" id="prevBtn">←</button><button class="nav-arrow" id="nextBtn">→</button></div>
+  </footer>
+</div>
+
+<div class="hlbar" id="hlbar" role="toolbar" aria-label="Highlight tools"><button data-hl="hl-yellow">Yellow</button><button data-hl="hl-blue">Blue</button><button data-action="remove">Remove</button></div>
+
+<div class="submit-modal" id="submitModal" role="dialog" aria-modal="true" aria-labelledby="submitTitle">
+  <div class="submit-dialog">
+    <div class="dialog-icon">✓</div>
+    <h2 id="submitTitle">Testni yakunlaysizmi?</h2>
+    <p>Submit qilingandan keyin urinish yakunlanadi va javoblarni o‘zgartirib bo‘lmaydi.</p>
+    <div class="submit-review"><div><b id="reviewAnswered">0</b><span>Answered</span></div><div><b id="reviewEmpty">40</b><span>Unanswered</span></div></div>
+    <div class="dialog-actions"><button class="dialog-cancel" id="cancelSubmit">Davom etish</button><button class="dialog-confirm" id="confirmSubmit">Submit final</button></div>
+  </div>
+</div>
+
+<div class="result-screen" id="resultScreen">
+  <div class="result-card">
+    <div class="result-head"><div><h2>Reading Mock Result</h2><div class="score-sub">Final result for this attempt</div></div><div><div class="score-big" id="scoreBig">0/40</div><div class="score-sub" id="bandTxt">Estimated Band —</div></div></div>
+    <div class="result-stats"><div class="stat"><b id="correctStat">0</b>Correct</div><div class="stat"><b id="wrongStat">0</b>Incorrect</div><div class="stat"><b id="emptyStat">40</b>Unanswered</div></div>
+    <div class="result-grid" id="resultGrid"></div>
+    <div class="delivery-status" id="deliveryStatus" aria-live="polite"></div>
+    <div class="result-actions"><button class="retry" id="retryBtn">Qayta yuborish</button></div>
+  </div>
+</div>
+
+<script>
+const CORRECT = {"q1": "FALSE", "q2": "TRUE", "q3": "FALSE", "q4": "FALSE", "q5": "FALSE", "q6": "football", "q7": "grammar", "q8": "Zara", "q9": "joke", "q10": "B", "q11": "A", "q12": "C", "q13": "B", "q14": "x", "q15": "iii", "q16": "i", "q17": "vii", "q18": "viii", "q19": "ii", "q20": "C", "q21": "B", "q22": "E", "q23": "A", "q24": "D", "q25": "C", "q26": "D", "q27": "D", "q28": "F", "q29": "B", "q30": "C", "q31": "B", "q32": "G", "q33": "scalp electrodes", "q34": "inspiration", "q35": "alpha waves", "q36": "difference", "q37": "FALSE", "q38": "NOT GIVEN", "q39": "TRUE", "q40": "NOT GIVEN"};
+const answers = Object.create(null);
+const ranges = {1:[1,13],2:[14,26],3:[27,40]};
+const scrollState = {1:[0,0],2:[0,0],3:[0,0]};
+let activePassage = 1;
+let currentQ = 1;
+let started = false;
+let secondsLeft = 60*60;
+let timerId = null;
+let savedRange = null;
+let submitted = false;
+let submitting = false;
+let lastPayload = null;
+let startedAt = null;
+let deadlineAt = null;
+const submissionId = self.crypto?.randomUUID?.() || `ark-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const passageOf = q => q<=13 ? 1 : q<=26 ? 2 : 3;
+const norm = v => String(v ?? '').trim().replace(/\s+/g,' ').toLowerCase();
+const answered = q => norm(answers['q'+q]) !== '';
+
+function setAnswer(id,val,source){
+  if(submitted) return;
+  answers[id]=val;
+  const q=Number(id.slice(1));
+  currentQ=q;
+  if(source) source.dataset.qid=id;
+  renderNav();
+}
+function pickMCQ(id,val,el){
+  setAnswer(id,val,el);
+  const box=el.closest('.idea-box,.tf-options') || el.parentElement;
+  if(box) $$('.mcq-option',box).forEach(x=>x.classList.toggle('selected',x===el));
+}
+function pickWord(id,val){setAnswer(id,val,null)}
+function pickText(id,val){setAnswer(id,val,null)}
+function pickSelect(id,val){setAnswer(id,val,null)}
+function pickRadio(id,val,label){
+  setAnswer(id,val,label);
+  const box=label.closest('.opts');
+  if(box) $$('.opt',box).forEach(x=>x.classList.toggle('sel',x===label));
+}
+
+function showPassage(p, keepQ=false){
+  p=Number(p);
+  if(p===activePassage && keepQ) return;
+  scrollState[activePassage]=[$('#passagePane').scrollTop,$('#qPane').scrollTop];
+  activePassage=p;
+  $$('.passage-section').forEach(x=>x.classList.toggle('active',Number(x.dataset.passage)===p));
+  $$('.question-section').forEach(x=>x.classList.toggle('active',Number(x.dataset.passage)===p));
+  $$('.passage-tab').forEach(x=>x.classList.toggle('active',Number(x.dataset.passage)===p));
+  const [a,b]=ranges[p];
+  $('#partTitle').textContent='Reading Passage '+p;
+  $('#partSub').textContent=`Questions ${a}–${b}`;
+  requestAnimationFrame(()=>{
+    $('#passagePane').scrollTop=scrollState[p][0]||0;
+    $('#qPane').scrollTop=scrollState[p][1]||0;
+  });
+  renderNav();
+}
+
+function getAnchor(q){
+  return document.getElementById('qb-'+q) || document.querySelector(`[data-qid="q${q}"]`) ||
+    document.querySelector(`[oninput*="q${q}"],[onchange*="q${q}"],[onclick*="q${q}"]`);
+}
+function jumpToQuestion(q){
+  q=Math.max(1,Math.min(40,Number(q)));
+  currentQ=q;
+  const p=passageOf(q);
+  if(p!==activePassage) showPassage(p,true);
+  renderNav();
+  requestAnimationFrame(()=>{const el=getAnchor(q); if(el) el.scrollIntoView({behavior:'smooth',block:'center'});});
+}
+function renderNav(){
+  const [a,b]=ranges[activePassage];
+  $('#qnav').innerHTML='';
+  for(let q=a;q<=b;q++){
+    const btn=document.createElement('button');
+    btn.className='qdot'+(answered(q)?' answered':'')+(q===currentQ?' current':'');
+    btn.textContent=q;
+    btn.onclick=()=>jumpToQuestion(q);
+    $('#qnav').appendChild(btn);
+  }
+  $('#prevBtn').disabled=currentQ<=1;
+  $('#nextBtn').disabled=currentQ>=40;
+}
+
+$$('.passage-tab').forEach(btn=>btn.addEventListener('click',()=>{
+  const p=Number(btn.dataset.passage); const [a,b]=ranges[p];
+  if(currentQ<a || currentQ>b) currentQ=a;
+  showPassage(p);
+}));
+$('#prevBtn').onclick=()=>jumpToQuestion(currentQ-1);
+$('#nextBtn').onclick=()=>jumpToQuestion(currentQ+1);
+
+/* tag all interactive answers for reliable navigation */
+$$('input,select').forEach(el=>{
+  el.setAttribute('autocomplete','off');
+  if(el.matches('input[type="radio"],input[type="checkbox"]'))el.checked=false;else el.value='';
+  const code=[el.getAttribute('oninput'),el.getAttribute('onchange'),el.getAttribute('onclick')].filter(Boolean).join(' ');
+  const m=code.match(/q(\d+)/); if(m) el.dataset.qid='q'+m[1];
+});
+
+/* resizer */
+(()=>{
+  const h=$('#dragHandle'), left=$('#passagePane'), wrap=$('#splitWrap');
+  let down=false,startX=0,startW=0;
+  h.addEventListener('pointerdown',e=>{down=true;startX=e.clientX;startW=left.getBoundingClientRect().width;h.setPointerCapture(e.pointerId);h.classList.add('active');document.body.style.userSelect='none';});
+  h.addEventListener('pointermove',e=>{if(!down)return;const total=wrap.getBoundingClientRect().width-h.offsetWidth;let w=Math.max(260,Math.min(total-300,startW+e.clientX-startX));left.style.width=w+'px';left.style.minWidth=w+'px';});
+  h.addEventListener('pointerup',e=>{down=false;h.classList.remove('active');document.body.style.userSelect='';try{h.releasePointerCapture(e.pointerId)}catch{}});
+})();
+
+/* Robust two-color highlight. It wraps individual text nodes, so selections across
+   sentences and paragraphs never break the passage/question layout. */
+const hlbar=$('#hlbar');
+function hideHL(){hlbar.classList.remove('show')}
+function nodeElement(node){return node?.nodeType===Node.ELEMENT_NODE?node:node?.parentElement}
+function selectionRoot(range){
+  const start=nodeElement(range.startContainer)?.closest('#passagePane,#qPane');
+  const end=nodeElement(range.endContainer)?.closest('#passagePane,#qPane');
+  return start&&start===end?start:null;
+}
+function rangeTextNodes(range){
+  const root=selectionRoot(range); if(!root)return[];
+  const nodes=[];
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
+    const parent=node.parentElement;
+    if(!node.nodeValue||!node.nodeValue.trim()||!parent)return NodeFilter.FILTER_REJECT;
+    if(parent.closest('script,style,button,input,select,textarea,.hlbar,.qnum,mark.hl'))return NodeFilter.FILTER_REJECT;
+    try{return range.intersectsNode(node)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}catch{return NodeFilter.FILTER_REJECT}
+  }});
+  while(walker.nextNode()){
+    const node=walker.currentNode;
+    const start=node===range.startContainer?range.startOffset:0;
+    const end=node===range.endContainer?range.endOffset:node.nodeValue.length;
+    if(end>start)nodes.push({node,start,end});
+  }
+  return nodes;
+}
+function intersectingMarks(range){
+  const root=selectionRoot(range); if(!root)return[];
+  return $$('mark.hl',root).filter(mark=>{try{return range.intersectsNode(mark)}catch{return false}});
+}
+function unwrapMark(mark){
+  const parent=mark.parentNode;if(!parent)return;
+  while(mark.firstChild)parent.insertBefore(mark.firstChild,mark);
+  parent.removeChild(mark);parent.normalize();
+}
+function applyHighlight(className){
+  if(!savedRange)return;
+  const range=savedRange;
+  intersectingMarks(range).forEach(mark=>{mark.className='hl '+className});
+  const segments=rangeTextNodes(range);
+  for(let index=segments.length-1;index>=0;index--){
+    const {node,start,end}=segments[index];
+    const selected=node.splitText(start);
+    selected.splitText(end-start);
+    const mark=document.createElement('mark');
+    mark.className='hl '+className;
+    selected.replaceWith(mark);mark.appendChild(selected);
+  }
+  window.getSelection()?.removeAllRanges();savedRange=null;hideHL();
+}
+function removeSelectedHighlight(){
+  if(!savedRange)return;
+  intersectingMarks(savedRange).forEach(unwrapMark);
+  window.getSelection()?.removeAllRanges();savedRange=null;hideHL();
+}
+function showHighlightToolbar(event){
+  if(event.target?.closest?.('#hlbar'))return;
+  const sel=window.getSelection();
+  if(!sel||sel.rangeCount===0||sel.isCollapsed){hideHL();return;}
+  const range=sel.getRangeAt(0);
+  if(!selectionRoot(range)){hideHL();return;}
+  const rect=range.getBoundingClientRect();
+  if(!rect.width&&!rect.height){hideHL();return;}
+  savedRange=range.cloneRange();
+  hlbar.style.left=Math.max(8,Math.min(window.innerWidth-218,rect.left+rect.width/2-105))+'px';
+  hlbar.style.top=Math.max(8,rect.top-48)+'px';
+  hlbar.classList.add('show');
+}
+document.addEventListener('pointerup',showHighlightToolbar);
+$$('#hlbar button').forEach(btn=>{
+  btn.addEventListener('pointerdown',event=>event.preventDefault());
+  btn.addEventListener('click',()=>btn.dataset.action==='remove'?removeSelectedHighlight():applyHighlight(btn.dataset.hl));
+});
+document.addEventListener('contextmenu',event=>{
+  const mark=event.target.closest?.('mark.hl');if(!mark)return;
+  event.preventDefault();unwrapMark(mark);hideHL();
+});
+document.addEventListener('scroll',hideHL,true);
+
+function formatTime(sec){const m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function tick(){
+  secondsLeft=Math.max(0,Math.ceil((deadlineAt-Date.now())/1000));$('#timer').textContent=formatTime(secondsLeft);
+  $('#timer').classList.toggle('warn',secondsLeft<=600);
+  if(secondsLeft===0){clearInterval(timerId);finalizeSubmission(true);}
+}
+function startMock(){
+  if(started)return;
+  started=true;startedAt=new Date().toISOString();deadlineAt=Date.now()+secondsLeft*1000;$('#startScreen').classList.add('hidden');
+  try{const fs=document.documentElement.requestFullscreen?.();if(fs&&fs.catch)fs.catch(()=>{})}catch{}
+  timerId=setInterval(tick,1000); renderNav();
+}
+$('#startBtn').onclick=startMock;
+
+function estimatedBand(score){
+  if(score>=39)return 9; if(score>=37)return 8.5; if(score>=35)return 8; if(score>=33)return 7.5;
+  if(score>=30)return 7; if(score>=27)return 6.5; if(score>=23)return 6; if(score>=19)return 5.5;
+  if(score>=15)return 5; if(score>=13)return 4.5; if(score>=10)return 4; if(score>=6)return 3.5;
+  if(score>=4)return 3; if(score===3)return 2.5; if(score===2)return 2; if(score===1)return 1; return 0;
+}
+function isCorrect(q){return norm(answers['q'+q])===norm(CORRECT['q'+q])}
+function buildResult(){
+  let score=0,empty=0,wrong=0;
+  const answerDetails={};
+  for(let q=1;q<=40;q++){
+    const id='q'+q;
+    const userAnswer=String(answers[id]??'').trim();
+    const has=norm(userAnswer)!=='';
+    const ok=has&&isCorrect(q);
+    if(ok)score++;else if(!has)empty++;else wrong++;
+    answerDetails[id]={answer:userAnswer,correctAnswer:CORRECT[id],correct:ok,status:ok?'correct':has?'incorrect':'unanswered'};
+  }
+  const band=estimatedBand(score);
+  const elapsed=startedAt?Math.max(0,Math.min(3600,Math.round((Date.now()-Date.parse(startedAt))/1000))):Math.max(0,3600-secondsLeft);
+  return {
+    submissionId,
+    rawScore:score,
+    score,
+    maxScore:40,
+    total:40,
+    band,
+    correct:score,
+    wrong,
+    unanswered:empty,
+    durationSeconds:elapsed,
+    startedAt,
+    submittedAt:new Date().toISOString(),
+    details:{submissionId,answers:answerDetails,durationSeconds:elapsed,startedAt,activePassage}
+  };
+}
+function renderResult(payload){
+  const grid=$('#resultGrid');grid.innerHTML='';
+  for(let q=1;q<=40;q++){
+    const detail=payload.details.answers['q'+q];
+    const d=document.createElement('div');d.className='resq '+(detail.correct?'ok':detail.status==='unanswered'?'empty':'bad');d.textContent=q;grid.appendChild(d);
+  }
+  $('#scoreBig').textContent=payload.rawScore+'/40';$('#bandTxt').textContent='Estimated Band '+payload.band;
+  $('#correctStat').textContent=payload.correct;$('#wrongStat').textContent=payload.wrong;$('#emptyStat').textContent=payload.unanswered;
+  $('#deliveryStatus').className='delivery-status';
+  $('#deliveryStatus').textContent='';
+  $('#retryBtn').classList.remove('show');
+  $('#resultScreen').classList.add('show');
+}
+function sendResultToPlatform(payload){
+  lastPayload=payload;window.__ARK_RESULT__=payload;
+  if(window.ARKMock?.complete){window.ARKMock.complete(payload);return true;}
+  if(window.parent&&window.parent!==window){window.parent.postMessage({type:'ARK_TEST_RESULT',payload},'*');return true;}
+  return false;
+}
+function openSubmitReview(){
+  if(!started||submitted)return;
+  const answeredCount=Array.from({length:40},(_,index)=>answered(index+1)).filter(Boolean).length;
+  $('#reviewAnswered').textContent=answeredCount;$('#reviewEmpty').textContent=40-answeredCount;
+  $('#submitModal').classList.add('show');
+}
+function finalizeSubmission(fromTimer=false){
+  if(submitted||submitting)return;
+  submitting=true;submitted=true;$('#submitModal').classList.remove('show');
+  if(timerId) clearInterval(timerId);
+  const payload=buildResult();
+  if(fromTimer)payload.details.submissionReason='time-expired';
+  renderResult(payload);
+  const connected=sendResultToPlatform(payload);
+  if(!connected){
+    submitting=false;
+    $('#deliveryStatus').className='delivery-status error';
+    $('#deliveryStatus').textContent='Standalone preview: natija hisoblandi. Adminga yuborish uchun testni ARK platformasi ichidan oching.';
+  }
+}
+$('#submitBtn').onclick=openSubmitReview;
+$('#cancelSubmit').onclick=()=>$('#submitModal').classList.remove('show');
+$('#confirmSubmit').onclick=()=>finalizeSubmission(false);
+$('#submitModal').addEventListener('click',event=>{if(event.target===$('#submitModal'))$('#submitModal').classList.remove('show')});
+$('#retryBtn').onclick=()=>{
+  if(!lastPayload||submitting)return;
+  submitting=true;$('#retryBtn').classList.remove('show');
+  $('#deliveryStatus').className='delivery-status';$('#deliveryStatus').textContent='';
+  sendResultToPlatform(lastPayload);
+};
+window.addEventListener('message',event=>{
+  if(event.source!==window.parent)return;
+  if(event.data?.type==='ARK_RESULT_SAVED'){
+    submitting=false;
+    $('#deliveryStatus').className='delivery-status';
+    $('#deliveryStatus').textContent='';
+    $('#retryBtn').classList.remove('show');
+  }
+  if(event.data?.type==='ARK_RESULT_ERROR'){
+    submitting=false;
+    $('#deliveryStatus').className='delivery-status error';
+    $('#deliveryStatus').textContent=event.data.error||'Natijani yuborishda xatolik. Internetni tekshirib, qayta yuboring.';
+    $('#retryBtn').classList.add('show');
+  }
+});
+
+renderNav();
+</script>
+</body>
+</html>

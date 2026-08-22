@@ -1,47 +1,13 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-
-type SectionResult = {
-  section: string;
-  test: { id: string; title: string; skill: string; file_name: string } | null;
-  result: {
-    raw_score: number | null;
-    max_score: number | null;
-    band: number | null;
-    details?: { correct?: number | null; wrong?: number | null; unanswered?: number | null; [key: string]: unknown };
-  } | null;
-};
-
-type ResultData = {
-  attempt: { id: string; status: string; startedAt: string; completedAt: string | null; overallScore: number | null; overallBand: number | null };
-  mock: { id: string; title: string; track: string; status: string };
-  sections: SectionResult[];
-};
+import { ArrowLeftIcon, ArrowRightIcon, ClockIcon } from '@/components/UiIcons';
+import type { MockAttemptData } from '@/lib/mockAttempts';
 
 const labels: Record<string, string> = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
 
-export function MockResultClient({ id }: { id: string }) {
-  const [data, setData] = useState<ResultData | null | undefined>(undefined);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    fetch(`/api/mock/attempts/${id}`)
-      .then(async (response) => {
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error || 'Result topilmadi.');
-        setData(body);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Result topilmadi.');
-        setData(null);
-      });
-  }, [id]);
-
-  if (data === undefined) return <div className="mockLoading">Final result yuklanmoqda…</div>;
-  if (!data) return <div className="mockAccessGate"><div className="mockGateIcon">!</div><h1>Result topilmadi</h1><p>{error}</p><Link className="authPrimary" href="/mock">Mock bo‘limiga qaytish</Link></div>;
-  if (data.attempt.status !== 'completed') return <div className="mockAccessGate"><div className="mockGateIcon">…</div><h1>Mock hali yakunlanmagan</h1><p>Barcha sectionlarni tugatib, “Mockni yakunlash” tugmasini bosing.</p><Link className="authPrimary" href={`/mock/${id}`}>Mock sessionga qaytish</Link></div>;
+export function MockResultClient({ id, data }: { id: string; data: MockAttemptData }) {
+  if (data.attempt.status !== 'completed') {
+    return <div className="mockAccessGate"><div className="mockGateIcon"><ClockIcon /></div><h1>Mock hali yakunlanmagan</h1><p>Barcha sectionlarni tugatib, “Mockni yakunlash” tugmasini bosing.</p><Link className="authPrimary" href={`/mock/${id}`}><ArrowLeftIcon /> Mock sessionga qaytish</Link></div>;
+  }
 
   const primaryValue = data.attempt.overallBand != null ? data.attempt.overallBand : data.attempt.overallScore != null ? `${data.attempt.overallScore}%` : '—';
   const primaryLabel = data.attempt.overallBand != null ? 'Overall band' : 'Overall score';
@@ -52,13 +18,9 @@ export function MockResultClient({ id }: { id: string }) {
         <div className="resultHeroCopy">
           <span className="authEyebrow">FINAL MOCK RESULT</span>
           <h1>{data.mock.title}</h1>
-          <p>{data.mock.track.toUpperCase()} · Completed {data.attempt.completedAt ? new Date(data.attempt.completedAt).toLocaleString() : ''}</p>
+          <p>{data.mock.track.toUpperCase()} · Completed {data.attempt.completedAt ? new Date(data.attempt.completedAt).toLocaleString('uz-UZ') : ''}</p>
         </div>
-        <div className="resultScoreCard">
-          <span>{primaryLabel}</span>
-          <strong>{primaryValue}</strong>
-          <small>Completed successfully</small>
-        </div>
+        <div className="resultScoreCard"><span>{primaryLabel}</span><strong>{primaryValue}</strong><small>Completed successfully</small></div>
       </section>
 
       <section className="resultGrid">
@@ -85,8 +47,8 @@ export function MockResultClient({ id }: { id: string }) {
       </section>
 
       <section className="resultFooterCard">
-        <div><span className="authEyebrow">NEXT STEP</span><h2>Natija saqlandi.</h2><p>Bot ulanganidan keyin aynan shu final natija studentga va active adminlarga avtomatik yuboriladi.</p></div>
-        <div className="resultActions"><Link className="authPrimary" href="/dashboard">Dashboard <span>→</span></Link><Link className="authSecondary" href="/mock">Mock bo‘limi</Link></div>
+        <div><span className="authEyebrow">NEXT STEP</span><h2>Mock yakunlandi</h2><p>Sectionlar kesimidagi tahlilni ko‘rib chiqing yoki boshqaruv sahifasiga qayting.</p></div>
+        <div className="resultActions"><Link className="authPrimary" href="/dashboard">Boshqaruv <span><ArrowRightIcon /></span></Link><Link className="authSecondary" href="/mock"><ArrowLeftIcon /> Mock bo‘limi</Link></div>
       </section>
     </>
   );

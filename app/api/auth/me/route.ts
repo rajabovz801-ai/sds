@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
 
     if (error) throw error;
-    if (!student) return NextResponse.json({ student: null });
+    if (!student) return NextResponse.json({ student: null }, { status: 403 });
 
     return NextResponse.json({
       student: {
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         firstName: student.first_name,
         lastName: student.last_name,
       },
-    });
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     return NextResponse.json({ student: null, error: error instanceof Error ? error.message : 'Session error' }, { status: 500 });
   }

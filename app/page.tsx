@@ -2,7 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
-import { getServerSession } from '@/lib/auth/server-session';
+import { getActiveServerSession } from '@/lib/auth/server-session';
+import { getAdminServerSession } from '@/lib/auth/admin-server-session';
 
 function ArrowRight() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" /></svg>;
@@ -33,7 +34,8 @@ function ShieldCheck() {
 }
 
 export default async function HomePage() {
-  if (await getServerSession()) redirect('/mock');
+  if (await getAdminServerSession()) redirect('/admin');
+  if (await getActiveServerSession()) redirect('/mock');
 
   return (
     <div className="peakHeroPage">

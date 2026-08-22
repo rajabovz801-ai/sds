@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './platform.css';
-import './polish.css';
 import './landing-home-v4.css';
-import './mock-flow.css';
-import './skill-flow.css';
 import './auth.css';
 import './mock-results.css';
+import './workspace-v2.css';
 
 export const metadata: Metadata = {
   title: 'ARK EDUCATION — IELTS Exam & Practice Platform',

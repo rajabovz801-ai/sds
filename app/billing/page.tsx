@@ -1,1 +1,8 @@
-import { PlatformNav } from '@/components/PlatformNav';import { SoonPage } from '@/components/SoonPage';import { requireServerSession } from '@/lib/auth/server-session';export default async function Page(){await requireServerSession('/billing');return <div className="platformRoot"><PlatformNav/><main className="platformMain"><SoonPage title="Billing" description="Subscription, payment history va plan boshqaruvi keyingi bosqichda shu yerga qo‘shiladi." features={['Plans','Payments','Invoices','Access']}/></main></div>}
+import { PlatformNav } from '@/components/PlatformNav';
+import { SoonPage } from '@/components/SoonPage';
+import { requireStudent } from '@/lib/auth/server-session';
+
+export default async function BillingPage() {
+  const student = await requireStudent('/billing');
+  return <div className="platformRoot"><PlatformNav student={student} /><main className="platformMain"><SoonPage title="Billing" description="Subscription, payment history va plan boshqaruvi shu ish maydonida ishlaydi." features={['Plans', 'Payments', 'Invoices', 'Access']} /></main></div>;
+}

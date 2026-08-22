@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hashAccessCode, normalizeAccessCode } from '@/lib/auth/codes';
-import { readSession } from '@/lib/auth/session';
+import { readActiveStudentSession } from '@/lib/auth/active-student';
 import { getServiceSupabase } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = readSession(request);
-    if (!session) return NextResponse.json({ error: 'Avval platformaga kiring.' }, { status: 401 });
+    const session = await readActiveStudentSession(request);
+    if (!session) return NextResponse.json({ error: 'Student sessiyasi faol emas.' }, { status: 403 });
 
     const body = await request.json();
     const code = normalizeAccessCode(String(body?.code || ''));
@@ -58,7 +58,10 @@ export async function POST(request: NextRequest) {
       .select('id')
       .single();
 
-    if (attemptError) throw attemptError;
+    if (attemptError) {
+      await supabase.from('mock_access_codes').update({ used_at: null }).eq('id', access.id).eq('used_at', now);
+      throw attemptError;
+    }
     return NextResponse.json({ attemptId: attempt.id, mock: { id: mock.id, title: mock.title, track: mock.track } });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Mock access server error' }, { status: 500 });

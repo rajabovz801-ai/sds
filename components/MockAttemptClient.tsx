@@ -1,31 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-
-type ResultDetails = {
-  correct?: number | null;
-  wrong?: number | null;
-  unanswered?: number | null;
-  [key: string]: unknown;
-};
-
-type Section = {
-  section: string;
-  test: { id: string; title: string; skill: string; file_name: string } | null;
-  result: { raw_score: number | null; max_score: number | null; band: number | null; details?: ResultDetails } | null;
-};
-
-type AttemptData = {
-  attempt: { id: string; status: string; startedAt: string; completedAt: string | null; overallScore: number | null; overallBand: number | null };
-  mock: { id: string; title: string; track: string; status: string };
-  sections: Section[];
-};
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeftIcon, ArrowRightIcon, FileTextIcon } from '@/components/UiIcons';
+import type { MockAttemptData } from '@/lib/mockAttempts';
 
 const labels: Record<string, string> = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
 
-export function MockAttemptClient({ id }: { id: string }) {
-  const [data, setData] = useState<AttemptData | null | undefined>(undefined);
+export function MockAttemptClient({ id, initialData }: { id: string; initialData: MockAttemptData }) {
+  const router = useRouter();
+  const [data, setData] = useState<MockAttemptData | null>(initialData);
   const [error, setError] = useState('');
   const [finishing, setFinishing] = useState(false);
   const [finishError, setFinishError] = useState('');
@@ -44,8 +29,6 @@ export function MockAttemptClient({ id }: { id: string }) {
       });
   };
 
-  useEffect(() => { void load(); }, [id]);
-
   const completed = useMemo(() => data?.sections.filter((item) => item.result).length || 0, [data]);
   const allDone = Boolean(data?.sections.length && completed === data.sections.length);
 
@@ -57,7 +40,8 @@ export function MockAttemptClient({ id }: { id: string }) {
       const response = await fetch(`/api/mock/attempts/${id}/finish`, { method: 'POST' });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Mock yakunlanmadi.');
-      window.location.href = `/result/${id}`;
+      router.replace(`/result/${id}`);
+      router.refresh();
     } catch (err) {
       setFinishError(err instanceof Error ? err.message : 'Mock yakunlanmadi.');
       await load();
@@ -66,8 +50,7 @@ export function MockAttemptClient({ id }: { id: string }) {
     }
   };
 
-  if (data === undefined) return <div className="mockLoading">Mock session yuklanmoqda…</div>;
-  if (!data) return <div className="mockAccessGate"><div className="mockGateIcon">!</div><h1>Mock session topilmadi</h1><p>{error}</p><Link className="authPrimary" href="/mock">Mock bo‘limiga qaytish</Link></div>;
+  if (!data) return <div className="mockAccessGate"><div className="mockGateIcon"><FileTextIcon /></div><h1>Mock session topilmadi</h1><p>{error}</p><Link className="authPrimary" href="/mock"><ArrowLeftIcon /> Mock bo‘limiga qaytish</Link></div>;
 
   return (
     <>
@@ -77,7 +60,7 @@ export function MockAttemptClient({ id }: { id: string }) {
           <h1>{data.mock.title}</h1>
           <p>{data.mock.track.toUpperCase()} · {completed}/{data.sections.length} section completed</p>
         </div>
-        <div className="mockSessionStatus"><span className={data.attempt.status === 'completed' ? 'done' : ''} /><div><b>{data.attempt.status.replace('_', ' ')}</b><small>Started {new Date(data.attempt.startedAt).toLocaleString()}</small></div></div>
+        <div className="mockSessionStatus"><span className={data.attempt.status === 'completed' ? 'done' : ''} /><div><b>{data.attempt.status.replace('_', ' ')}</b><small>Started {new Date(data.attempt.startedAt).toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' })}</small></div></div>
       </section>
 
       <section className="mockSessionGrid">
@@ -126,7 +109,7 @@ export function MockAttemptClient({ id }: { id: string }) {
           <div className="mockProgressTrack"><span style={{ width: `${data.sections.length ? (completed / data.sections.length) * 100 : 0}%` }} /></div>
 
           {data.attempt.status === 'completed' ? (
-            <Link className="authPrimary mockFinishButton" href={`/result/${id}`}>Final resultni ko‘rish <span>→</span></Link>
+            <Link className="authPrimary mockFinishButton" href={`/result/${id}`}>Final resultni ko‘rish <span><ArrowRightIcon /></span></Link>
           ) : (
             <button className="authPrimary mockFinishButton" type="button" disabled={!allDone || finishing} onClick={finishMock}>
               {finishing ? 'Yakunlanmoqda…' : 'Mockni yakunlash'}
@@ -135,7 +118,7 @@ export function MockAttemptClient({ id }: { id: string }) {
 
           {!allDone && data.attempt.status !== 'completed' && <p className="mockSummaryNote">Final submit barcha biriktirilgan section natijalari saqlangandan keyin ochiladi.</p>}
           {finishError && <p className="mockFinishError">{finishError}</p>}
-          <Link className="authSecondary mockBackLink" href="/mock">← Mock access</Link>
+          <Link className="authSecondary mockBackLink" href="/mock"><ArrowLeftIcon /> Yo‘nalishlarga qaytish</Link>
         </aside>
       </section>
     </>

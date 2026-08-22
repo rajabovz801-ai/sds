@@ -1,38 +1,32 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ArrowUpRightIcon,
+  KeyRoundIcon,
+  ShieldCheckIcon,
+} from '@/components/UiIcons';
 
-type Student = { id: string; firstName: string; lastName: string; username?: string | null };
-
-function ArrowRight() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" /></svg>;
-}
-
-function ArrowUpRight() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9" /></svg>;
-}
-
-function CheckIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12 4 4 8-8" /></svg>;
-}
+type LoginMode = 'student' | 'admin';
 
 export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
   const router = useRouter();
-  const [student, setStudent] = useState<Student | null | undefined>(undefined);
+  const [mode, setMode] = useState<LoginMode>('student');
   const [code, setCode] = useState('');
+  const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const pinRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then((r) => r.json())
-      .then((data) => setStudent(data.student || null))
-      .catch(() => setStudent(null));
-  }, []);
+    if (mode === 'admin') pinRef.current?.focus();
+  }, [mode]);
 
-  async function submit(event: FormEvent) {
+  async function submitStudent(event: FormEvent) {
     event.preventDefault();
     setBusy(true);
     setError('');
@@ -44,8 +38,11 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Kirish amalga oshmadi.');
-      setStudent(data.student);
-      setCode('');
+      if (data.adminChallenge) {
+        setMode('admin');
+        setCode('');
+        return;
+      }
       router.replace(nextPath || data.next || '/mock');
       router.refresh();
     } catch (err) {
@@ -55,59 +52,94 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
     }
   }
 
-  async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    setStudent(null);
+  async function submitAdmin(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    setError('');
+    try {
+      const response = await fetch('/api/auth/admin-login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Admin kirishi amalga oshmadi.');
+      router.replace(data.next || '/admin');
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Admin kirishi amalga oshmadi.');
+    } finally {
+      setBusy(false);
+    }
   }
 
-  if (student === undefined) {
-    return <div className="authStatus">Session tekshirilmoqda…</div>;
-  }
-
-  if (student) {
+  if (mode === 'admin') {
     return (
-      <div className="authSuccess">
-        <span className="authSuccessIcon"><CheckIcon /></span>
-        <span className="authEyebrow">SESSION ACTIVE</span>
-        <h1>{student.firstName} {student.lastName}</h1>
-        <p>Platformaga muvaffaqiyatli kirilgansiz. IELTS yoki CEFR mock yo‘nalishini tanlashingiz mumkin.</p>
-        <div className="authActions">
-          <Link className="authPrimary" href="/mock">Mock platforma <span><ArrowRight /></span></Link>
+      <form className="authForm authAdminForm" onSubmit={submitAdmin}>
+        <button
+          className="authModeBack"
+          type="button"
+          onClick={() => { setMode('student'); setPin(''); setError(''); }}
+        >
+          <ArrowLeftIcon /> Student kirishiga qaytish
+        </button>
+        <span className="authFormIcon"><ShieldCheckIcon /></span>
+        <span className="authEyebrow">RESTRICTED WORKSPACE</span>
+        <h1>Admin tasdiqlash</h1>
+        <p>Himoyalangan boshqaruv paneliga kirish uchun serverda belgilangan PIN’ni kiriting.</p>
+
+        <div className="authCodeField authPinField">
+          <label htmlFor="admin-pin">Admin PIN</label>
+          <div className="authInputShell"><KeyRoundIcon /><input
+            ref={pinRef}
+            id="admin-pin"
+            type="password"
+            value={pin}
+            onChange={(event) => setPin(event.target.value.slice(0, 128))}
+            autoComplete="current-password"
+            placeholder="••••••••"
+          /></div>
+          <span>PIN brauzer xotirasida saqlanmaydi</span>
         </div>
-        <button className="authLogout" type="button" onClick={logout}>Sessiondan chiqish</button>
-      </div>
+
+        {error && <div className="authError" role="alert">{error}</div>}
+        <button className="authPrimary authSubmit" type="submit" disabled={busy || pin.length < 4}>
+          {busy ? 'Tasdiqlanmoqda…' : 'Admin panelni ochish'} <span><ArrowRightIcon /></span>
+        </button>
+      </form>
     );
   }
 
   return (
-    <form className="authForm" onSubmit={submit}>
-      <span className="authEyebrow">SECURE ACCESS</span>
-      <h1>Platformaga kirish</h1>
-      <p>Telegram bot bergan bir martalik kirish kodini kiriting. Kod ishlatilgach qayta ishlamaydi.</p>
+    <form className="authForm" onSubmit={submitStudent}>
+      <span className="authEyebrow">SECURE STUDENT ACCESS</span>
+      <h1>Qaytganingizdan xursandmiz.</h1>
+      <p>Telegram bot bergan bir martalik kodingizni kiriting. Sessiya keyingi tashriflarda avtomatik taniladi.</p>
 
       <div className="authCodeField">
-        <label htmlFor="login-code">Kirish kodi</label>
-        <input
+        <label htmlFor="login-code">Bir martalik kirish kodi</label>
+        <div className="authInputShell"><KeyRoundIcon /><input
           id="login-code"
           value={code}
           onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 8))}
           inputMode="numeric"
           autoComplete="one-time-code"
+          autoFocus
           placeholder="000000"
           aria-describedby="login-help"
-        />
-        <span id="login-help">4–8 xonali bir martalik kod</span>
+        /></div>
+        <span id="login-help">4–8 xonali, faqat bir marta ishlaydigan kod</span>
       </div>
 
-      {error && <div className="authError">{error}</div>}
+      {error && <div className="authError" role="alert">{error}</div>}
 
       <button className="authPrimary authSubmit" type="submit" disabled={busy || code.length < 4}>
-        {busy ? 'Tekshirilmoqda…' : 'Kirish'} <span><ArrowRight /></span>
+        {busy ? 'Tekshirilmoqda…' : 'Platformaga kirish'} <span><ArrowRightIcon /></span>
       </button>
 
-      <div className="authDivider"><span>yoki</span></div>
+      <div className="authDivider"><span>kod hali yo‘qmi?</span></div>
       <Link className="authTelegram" href="https://t.me/arkedu_bot?start=login" target="_blank" rel="noopener noreferrer">
-        Telegram botdan kod olish <span><ArrowUpRight /></span>
+        Telegram botdan kod olish <span><ArrowUpRightIcon /></span>
       </Link>
     </form>
   );

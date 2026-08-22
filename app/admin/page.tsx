@@ -1,4 +1,8 @@
+import { AdminAttemptResetPanel } from '@/components/AdminAttemptResetPanel';
 import { AdminClient } from '@/components/AdminClient';
-import { PlatformNav } from '@/components/PlatformNav';
+import { requireAdminServerSession } from '@/lib/auth/admin-server-session';
 
-export default function AdminPage(){return <div className="platformRoot"><PlatformNav/><main className="platformMain"><AdminClient/></main></div>}
+export default async function AdminPage() {
+  await requireAdminServerSession();
+  return <div className="adminRoot"><AdminClient /><AdminAttemptResetPanel /></div>;
+}

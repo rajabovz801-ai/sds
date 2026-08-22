@@ -1,0 +1,14 @@
+# Dependencies and Next.js build output
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Local environment and deployment state
+.env*
+!.env.example
+.vercel/
+
+# OS/editor noise
+.DS_Store
+*.log

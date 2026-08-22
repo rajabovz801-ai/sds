@@ -1,14 +1,18 @@
 import { SkillLibraryClient } from '@/components/SkillLibraryClient';
-import { requireServerSession } from '@/lib/auth/server-session';
+import { PlatformNav } from '@/components/PlatformNav';
+import { requireStudent } from '@/lib/auth/server-session';
+import { listPublishedTestsBy } from '@/lib/cloudTests';
 
 export default async function IeltsWritingPage() {
-  await requireServerSession('/ielts/writing');
+  const [student, tests] = await Promise.all([
+    requireStudent('/ielts/writing'),
+    listPublishedTestsBy('ielts', 'writing'),
+  ]);
   return (
-    <SkillLibraryClient
-      track="ielts"
-      skill="writing"
-      title="IELTS Writing"
-      description="IELTS Writing uchun yangi mocklar va video materiallar shu bo‘limga qo‘shiladi."
-    />
+    <div className="platformRoot"><PlatformNav student={student} /><main className="platformMain"><SkillLibraryClient
+      track="ielts" skill="writing" title="IELTS Writing"
+      description="Task 1 va Task 2 uchun professional topshiriqlar hamda boshqariladigan practice oqimi."
+      tests={tests}
+    /></main></div>
   );
 }
