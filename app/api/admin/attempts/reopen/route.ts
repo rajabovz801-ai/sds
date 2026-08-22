@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
     if (studentError) throw studentError;
     if (testError) throw testError;
 
-    const studentById = new Map((students || []).map((student: Row) => [String(student.id), student]));
-    const testById = new Map((tests || []).map((test: Row) => [String(test.id), test]));
+    const studentById = new Map<string, Row>((students || []).map((student: Row) => [String(student.id), student] as [string, Row]));
+    const testById = new Map<string, Row>((tests || []).map((test: Row) => [String(test.id), test] as [string, Row]));
 
     const attempts = (sessions || []).map((session: Row) => {
       const student = studentById.get(String(session.student_id)) || {};
@@ -108,8 +108,13 @@ export async function POST(request: NextRequest) {
           .eq('id', session.mock_attempt_id)
           .eq('student_id', session.student_id),
       ]);
-      if (resultDeleteError) throw resultDeleteError;
-      if (attemptUpdateError) throw attemptUpdateError;
+      if (resultDeleteError || attemptUpdateError) {
+        await supabase
+          .from('test_sessions')
+          .update({ superseded: false, updated_at: new Date().toISOString() })
+          .eq('id', session.id);
+        throw resultDeleteError || attemptUpdateError;
+      }
     }
 
     return NextResponse.json({
