@@ -6,7 +6,7 @@ export default function IeltsReadingPage() {
       track="ielts"
       skill="reading"
       title="IELTS Reading"
-      description="Published IELTS Reading mock testlari shu bo‘limda ko‘rinadi. Testni tanlang va to‘g‘ridan-to‘g‘ri imtihon sahifasiga kiring."
+      description="IELTS Academic Reading uchun yangi mocklar va video materiallar shu bo‘limga qo‘shiladi."
     />
   );
 }
