@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Student = { id: string; firstName: string; lastName: string; username?: string | null };
 
 export function LoginClient() {
+  const router = useRouter();
   const [student, setStudent] = useState<Student | null | undefined>(undefined);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -32,6 +34,8 @@ export function LoginClient() {
       if (!response.ok) throw new Error(data.error || 'Kirish amalga oshmadi.');
       setStudent(data.student);
       setCode('');
+      router.push(data.next || '/mock');
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Kirish amalga oshmadi.');
     } finally {
@@ -54,10 +58,10 @@ export function LoginClient() {
         <span className="authSuccessIcon">✓</span>
         <span className="authEyebrow">SESSION ACTIVE</span>
         <h1>{student.firstName} {student.lastName}</h1>
-        <p>Platformaga muvaffaqiyatli kirilgansiz. Dashboard yoki Mock bo‘limiga davom etishingiz mumkin.</p>
+        <p>Platformaga muvaffaqiyatli kirilgansiz. IELTS yoki CEFR mock yo‘nalishini tanlashingiz mumkin.</p>
         <div className="authActions">
-          <Link className="authPrimary" href="/dashboard">Dashboard <span>→</span></Link>
-          <Link className="authSecondary" href="/mock">Mock ID kiritish</Link>
+          <Link className="authPrimary" href="/mock">Mock platforma <span>→</span></Link>
+          <Link className="authSecondary" href="/dashboard">Dashboard</Link>
         </div>
         <button className="authLogout" type="button" onClick={logout}>Sessiondan chiqish</button>
       </div>
