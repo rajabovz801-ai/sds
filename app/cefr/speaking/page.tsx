@@ -6,7 +6,7 @@ export default function CefrSpeakingPage() {
       track="cefr"
       skill="speaking"
       title="CEFR Speaking"
-      description="Published CEFR Speaking mock va practice materiallari shu bo‘limda ko‘rinadi."
+      description="CEFR Speaking uchun yangi practice, mock va video materiallar shu bo‘limga qo‘shiladi."
     />
   );
 }
