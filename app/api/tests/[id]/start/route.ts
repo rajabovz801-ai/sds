@@ -22,7 +22,7 @@ type SessionRow = {
 function migrationError(error: unknown) {
   const value = error as { code?: string; message?: string } | null;
   if (value?.code === '42P01' || value?.code === '42703') {
-    return 'Exam control bazasi hali o‘rnatilmagan. Supabase migrationni ishga tushiring.';
+    return 'Exam control bazasi hali o‘rnatilmagan. Supabase migrationlarni ishga tushiring.';
   }
   return value?.message || 'Test session yaratilmadi.';
 }
@@ -93,7 +93,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .from('test_sessions')
       .select('id,status,started_at,expires_at,locked_until')
       .eq('student_id', student.studentId)
-      .eq('test_id', testId);
+      .eq('test_id', testId)
+      .eq('superseded', false);
 
     const { data: existing, error: existingError } = await existingQuery.maybeSingle();
     if (existingError) throw existingError;
@@ -128,6 +129,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         status: 'in_progress',
         started_at: startedAt.toISOString(),
         expires_at: expiresAt.toISOString(),
+        superseded: false,
       })
       .select('id,status,started_at,expires_at,locked_until')
       .single();
