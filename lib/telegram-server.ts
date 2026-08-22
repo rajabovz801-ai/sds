@@ -235,6 +235,27 @@ function gatewayConfig() {
   }
 }
 
+function endpointForSection(baseEndpoint: string, section: string) {
+  const skill = cleanText(section, 30).toLowerCase();
+  if (!['reading', 'listening', 'writing'].includes(skill)) return baseEndpoint;
+
+  try {
+    const url = new URL(baseEndpoint);
+    const segments = url.pathname.split('/');
+    const currentFile = segments[segments.length - 1] || '';
+
+    if (/^(reading|listening|writing)\.php$/i.test(currentFile)) {
+      segments[segments.length - 1] = `${skill}.php`;
+      url.pathname = segments.join('/');
+      return url.toString();
+    }
+
+    return baseEndpoint;
+  } catch {
+    return baseEndpoint;
+  }
+}
+
 function responseError(body: GatewayResponse | null) {
   if (!body) return '';
   const status = cleanText(body.status, 30).toLowerCase();
@@ -366,14 +387,16 @@ export async function sendAdminTestResult(result: AdminTestResult): Promise<Tele
   }
 
   const payload = buildGatewayPayload(result, config.submitKey);
+  const endpoint = endpointForSection(config.endpoint, payload.section);
 
   try {
-    const response = await fetch(config.endpoint, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         accept: 'application/json',
         'content-type': 'application/json; charset=utf-8',
         'x-ark-source': 'ark-platform',
+        'x-ark-section': payload.section,
         'x-ark-submit-key': config.submitKey,
         'x-ark-submission-id': payload.submission_id,
       },
