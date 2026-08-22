@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
-import { getPublicSupabase, getServiceSupabase, HTML_TESTS_BUCKET } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getServiceSupabase, HTML_TESTS_BUCKET } from '@/lib/supabase/server';
+import { readSession } from '@/lib/auth/session';
+import { readAdminSession } from '@/lib/auth/admin-session';
 
 function injectBridge(html: string, context: { mode: string; attemptId: string; section: string; testId: string }) {
   const script = `
@@ -53,11 +55,14 @@ function injectBridge(html: string, context: { mode: string; attemptId: string; 
   return `${html}${script}`;
 }
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (!readSession(request) && !readAdminSession(request)) {
+      return new NextResponse('Avval platformaga kiring.', { status: 401 });
+    }
     const { id } = await params;
-    const publicDb = getPublicSupabase();
-    const { data: test, error } = await publicDb
+    const service = getServiceSupabase();
+    const { data: test, error } = await service
       .from('tests')
       .select('id,status,file_path,file_name')
       .eq('id', id)
@@ -66,7 +71,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     if (error || !test) return new NextResponse('Test not found', { status: 404 });
 
-    const service = getServiceSupabase();
     const { data: file, error: downloadError } = await service.storage.from(HTML_TESTS_BUCKET).download(test.file_path);
     if (downloadError || !file) throw downloadError || new Error('HTML file not found');
 
@@ -81,8 +85,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       status: 200,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `inline; filename="${String(test.file_name || 'test.html').replace(/"/g, '')}"`,
-        'Cache-Control': 'private, no-store, max-age=0',
+        'Content-Disposition': `inline; filename="${String(test.file_name || 'test.html').replace(/[\r\n"]/g, '')}"`,
+        'Cache-Control': 'private, max-age=300, stale-while-revalidate=600',
         'X-Content-Type-Options': 'nosniff',
       },
     });

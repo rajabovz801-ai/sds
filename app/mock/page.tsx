@@ -1,7 +1,8 @@
 import { MockTrackChoiceClient } from '@/components/MockTrackChoiceClient';
-import { requireServerSession } from '@/lib/auth/server-session';
+import { PlatformNav } from '@/components/PlatformNav';
+import { requireStudent } from '@/lib/auth/server-session';
 
 export default async function MockPage() {
-  await requireServerSession('/mock');
-  return <MockTrackChoiceClient />;
+  const student = await requireStudent('/mock');
+  return <div className="platformRoot"><PlatformNav student={student} /><main className="platformMain"><MockTrackChoiceClient student={student} /></main></div>;
 }

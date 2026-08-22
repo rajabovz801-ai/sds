@@ -1,1 +1,8 @@
-import { PlatformNav } from '@/components/PlatformNav';import { SoonPage } from '@/components/SoonPage';import { requireServerSession } from '@/lib/auth/server-session';export default async function Page(){await requireServerSession('/study-tools');return <div className="platformRoot"><PlatformNav/><main className="platformMain"><SoonPage title="Study tools" description="Articles, shadowing, typing, writing samples, speaking samples va podcastlar shu bo‘limga qo‘shiladi." features={['Articles','Shadowing','Typing','Samples','Podcasts']}/></main></div>}
+import { PlatformNav } from '@/components/PlatformNav';
+import { SoonPage } from '@/components/SoonPage';
+import { requireStudent } from '@/lib/auth/server-session';
+
+export default async function StudyToolsPage() {
+  const student = await requireStudent('/study-tools');
+  return <div className="platformRoot"><PlatformNav student={student} /><main className="platformMain"><SoonPage title="Study tools" description="Articles, shadowing, typing, writing samples va podcastlar shu bo‘limda ishlaydi." features={['Articles', 'Shadowing', 'Typing', 'Samples', 'Podcasts']} /></main></div>;
+}

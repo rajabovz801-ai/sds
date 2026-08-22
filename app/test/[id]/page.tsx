@@ -1,5 +1,7 @@
 import { TestViewerClient } from '@/components/TestViewerClient';
 import { requireServerSession } from '@/lib/auth/server-session';
+import { getPublishedTest } from '@/lib/cloudTests';
+import { notFound } from 'next/navigation';
 
 type Search = Record<string, string | string[] | undefined>;
 
@@ -23,10 +25,18 @@ export default async function TestPage({
   if (attempt) nextQuery.set('attempt', attempt);
   if (mode) nextQuery.set('mode', mode);
   if (section) nextQuery.set('section', section);
-  await requireServerSession(`/test/${id}${nextQuery.size ? `?${nextQuery.toString()}` : ''}`);
+  const [, test] = await Promise.all([
+    requireServerSession(`/test/${id}${nextQuery.size ? `?${nextQuery.toString()}` : ''}`),
+    getPublishedTest(id),
+  ]);
+  if (!test) notFound();
   return (
     <TestViewerClient
       id={id}
+      initialData={{
+        test: { id: test.id, title: test.title, track: test.track, skill: test.skill, fileName: test.fileName },
+        contentUrl: `/api/tests/${test.id}/content`,
+      }}
       attemptId={attempt}
       mode={mode}
       section={section}

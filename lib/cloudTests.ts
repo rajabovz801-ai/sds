@@ -32,3 +32,28 @@ export async function listPublishedTests(): Promise<CloudTest[]> {
   if(error) throw error;
   return ((data||[]) as TestRow[]).map(mapTest);
 }
+
+export async function listPublishedTestsBy(track: TestTrack, skill: TestSkill): Promise<CloudTest[]> {
+  const supabase = getPublicSupabase();
+  const { data, error } = await supabase
+    .from('tests')
+    .select('*')
+    .eq('status', 'published')
+    .eq('track', track)
+    .eq('skill', skill)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return ((data || []) as TestRow[]).map(mapTest);
+}
+
+export async function getPublishedTest(id: string): Promise<CloudTest | null> {
+  const supabase = getPublicSupabase();
+  const { data, error } = await supabase
+    .from('tests')
+    .select('*')
+    .eq('id', id)
+    .eq('status', 'published')
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapTest(data as TestRow) : null;
+}

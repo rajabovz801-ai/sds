@@ -1,24 +1,191 @@
 'use client';
 
-import Link from 'next/link';
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArkLogoIcon } from '@/components/ArkLogoIcon';
+import {
+  ArrowUpRightIcon,
+  EditIcon,
+  FileTextIcon,
+  LayoutGridIcon,
+  LibraryIcon,
+  LogOutIcon,
+  SearchIcon,
+  ShieldCheckIcon,
+  TrashIcon,
+  UploadCloudIcon,
+} from '@/components/UiIcons';
 
-type Track='ielts'|'cefr'; type Skill='reading'|'listening'|'writing'|'speaking'|'full-mock'; type Status='published'|'draft';
-type TestRow={id:string;title:string;description:string;track:Track;skill:Skill;status:Status;file_name:string;file_path:string;updated_at:string};
-type FormState={title:string;description:string;track:Track;skill:Skill;status:Status};
-const blank:FormState={title:'',description:'',track:'ielts',skill:'reading',status:'published'};
+type Track = 'ielts' | 'cefr';
+type Skill = 'reading' | 'listening' | 'writing' | 'speaking' | 'full-mock';
+type Status = 'published' | 'draft';
+type TestRow = {
+  id: string; title: string; description: string; track: Track; skill: Skill; status: Status;
+  file_name: string; file_path: string; updated_at: string;
+};
+type FormState = { title: string; description: string; track: Track; skill: Skill; status: Status };
 
-export function AdminClient(){
-  const [adminKey,setAdminKey]=useState(''); const [tests,setTests]=useState<TestRow[]>([]); const [form,setForm]=useState<FormState>(blank); const [file,setFile]=useState<File|null>(null); const [editId,setEditId]=useState<string|null>(null); const [error,setError]=useState(''); const [busy,setBusy]=useState(false);
-  useEffect(()=>setAdminKey(sessionStorage.getItem('ark_admin_key')||''),[]);
-  const headers=()=>({'x-admin-key':adminKey});
-  const load=async()=>{if(!adminKey)return;const r=await fetch('/api/admin/tests',{headers:headers()});const d=await r.json();if(!r.ok){setError(d.error||'Admin access failed');setTests([]);return;}setTests(d.tests||[]);setError('')};
-  useEffect(()=>{if(adminKey){sessionStorage.setItem('ark_admin_key',adminKey);void load()}},[adminKey]);
-  const stats=useMemo(()=>({all:tests.length,pub:tests.filter(t=>t.status==='published').length,draft:tests.filter(t=>t.status==='draft').length}),[tests]);
-  const reset=()=>{setForm(blank);setFile(null);setEditId(null);setError('')};
-  const submit=async(e:FormEvent)=>{e.preventDefault();if(!adminKey){setError('Admin access key kiriting.');return;}setBusy(true);setError('');try{let r:Response;if(editId){r=await fetch(`/api/admin/tests/${editId}`,{method:'PATCH',headers:{...headers(),'content-type':'application/json'},body:JSON.stringify(form)});}else{if(!file)throw new Error('HTML faylni tanlang.');const fd=new FormData();Object.entries(form).forEach(([k,v])=>fd.append(k,v));fd.append('file',file);r=await fetch('/api/admin/tests',{method:'POST',headers:headers(),body:fd});}const d=await r.json();if(!r.ok)throw new Error(d.error||'Saqlanmadi');reset();await load();}catch(err){setError(err instanceof Error?err.message:'Xatolik')}finally{setBusy(false)}};
-  const edit=(t:TestRow)=>{setEditId(t.id);setForm({title:t.title,description:t.description||'',track:t.track,skill:t.skill,status:t.status});setFile(null);window.scrollTo({top:0,behavior:'smooth'})};
-  const remove=async(id:string)=>{if(!confirm('Bu test o‘chirilsinmi?'))return;const r=await fetch(`/api/admin/tests/${id}`,{method:'DELETE',headers:headers()});const d=await r.json();if(!r.ok){setError(d.error||'O‘chirilmadi');return;}await load()};
-  const onFile=(e:ChangeEvent<HTMLInputElement>)=>setFile(e.target.files?.[0]||null);
-  return <><section className="pageHeading"><div className="pageHeadingCopy"><h1>Admin panel</h1><p>HTML testlarni Supabase cloud’ga yuklang va boshqaring.</p></div><div className="headingActions"><Link href="/dashboard" className="pButton pButtonGhost">Dashboard</Link></div></section><section className="adminLayout"><div className="adminFormCard"><div className="adminSectionHeader"><h2>{editId?'Testni tahrirlash':'Yangi test qo‘shish'}</h2><p>Cloud storage + database.</p></div><form className="adminForm" onSubmit={submit}><div className="field"><label>Admin access key</label><input type="password" value={adminKey} onChange={e=>setAdminKey(e.target.value)} placeholder="ADMIN_ACCESS_KEY"/></div><div className="field"><label>Test nomi</label><input value={form.title} onChange={e=>setForm(v=>({...v,title:e.target.value}))} placeholder="IELTS Reading Test 1"/></div><div className="twoFields"><div className="field"><label>Imtihon</label><select value={form.track} onChange={e=>setForm(v=>({...v,track:e.target.value as Track}))}><option value="ielts">IELTS</option><option value="cefr">CEFR</option></select></div><div className="field"><label>Skill</label><select value={form.skill} onChange={e=>setForm(v=>({...v,skill:e.target.value as Skill}))}><option value="reading">Reading</option><option value="listening">Listening</option><option value="writing">Writing</option><option value="speaking">Speaking</option><option value="full-mock">Full mock</option></select></div></div><div className="field"><label>Status</label><select value={form.status} onChange={e=>setForm(v=>({...v,status:e.target.value as Status}))}><option value="published">Published</option><option value="draft">Draft</option></select></div><div className="field"><label>Izoh</label><textarea value={form.description} onChange={e=>setForm(v=>({...v,description:e.target.value}))}/></div>{!editId&&<label className="dropZone"><input type="file" accept=".html,.htm,text/html" onChange={onFile}/><div><b>HTML testni tanlang</b><span className={file?'fileReady':''}>{file?`✓ ${file.name}`:'Faqat .html / .htm'}</span></div></label>}{error&&<p className="formError">{error}</p>}<div className="formActions"><button className="pButton pButtonPrimary" disabled={busy}>{busy?'Saqlanmoqda…':editId?'Save changes':'Upload test'}</button>{editId&&<button type="button" className="pButton pButtonGhost" onClick={reset}>Cancel</button>}</div></form></div><div className="adminLibrary"><div className="adminSectionHeader"><h2>Test library</h2><p>Supabase’dagi barcha testlar.</p></div><div className="adminStats"><div className="miniStat"><b>{stats.all}</b><span>Total</span></div><div className="miniStat"><b>{stats.pub}</b><span>Published</span></div><div className="miniStat"><b>{stats.draft}</b><span>Draft</span></div></div>{tests.length===0?<div className="emptyState"><div className="emptyIcon">HTML</div><h3>Cloud library bo‘sh</h3><p>Admin key to‘g‘ri bo‘lsa, birinchi HTML testni yuklang.</p></div>:<div className="adminTableWrap"><table className="adminTable"><thead><tr><th>Test</th><th>Exam</th><th>Skill</th><th>Status</th><th>Actions</th></tr></thead><tbody>{tests.map(t=><tr key={t.id}><td><div className="adminTitle">{t.title}</div><div style={{fontSize:9,color:'#979ca6',marginTop:3}}>{t.file_name}</div></td><td>{t.track.toUpperCase()}</td><td>{t.skill}</td><td><span className={`statusPill ${t.status==='published'?'statusPublished':'statusDraft'}`}>{t.status}</span></td><td><div className="tableActions"><Link className="pButton pButtonGhost pButtonSmall" href={`/test/${t.id}`}>Open</Link><button className="pButton pButtonGhost pButtonSmall" onClick={()=>edit(t)}>Edit</button><button className="pButton pButtonDanger pButtonSmall" onClick={()=>remove(t.id)}>Delete</button></div></td></tr>)}</tbody></table></div>}</div></section></>;
+const blank: FormState = { title: '', description: '', track: 'ielts', skill: 'reading', status: 'published' };
+
+export function AdminClient() {
+  const router = useRouter();
+  const [tests, setTests] = useState<TestRow[]>([]);
+  const [form, setForm] = useState<FormState>(blank);
+  const [file, setFile] = useState<File | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/tests', { cache: 'no-store' });
+      if (response.status === 401) {
+        router.replace('/login');
+        return;
+      }
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Testlar yuklanmadi.');
+      setTests(data.tests || []);
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Admin ma’lumotlari yuklanmadi.');
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const stats = useMemo(() => ({
+    all: tests.length,
+    published: tests.filter((test) => test.status === 'published').length,
+    draft: tests.filter((test) => test.status === 'draft').length,
+  }), [tests]);
+
+  const filteredTests = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return tests;
+    return tests.filter((test) => `${test.title} ${test.track} ${test.skill} ${test.status}`.toLowerCase().includes(normalized));
+  }, [query, tests]);
+
+  function reset() {
+    setForm(blank);
+    setFile(null);
+    setEditId(null);
+    setError('');
+  }
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    if (!form.title.trim()) { setError('Test nomini kiriting.'); return; }
+    if (!editId && !file) { setError('HTML faylni tanlang.'); return; }
+    setBusy(true);
+    setError('');
+    setNotice('');
+
+    try {
+      let response: Response;
+      if (editId) {
+        response = await fetch(`/api/admin/tests/${editId}`, {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(form),
+        });
+      } else {
+        const formData = new FormData();
+        Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+        formData.append('file', file as File);
+        response = await fetch('/api/admin/tests', { method: 'POST', body: formData });
+      }
+
+      if (response.status === 401) { router.replace('/login'); return; }
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Saqlanmadi.');
+      setNotice(editId ? 'Test ma’lumotlari yangilandi.' : 'Yangi test muvaffaqiyatli yuklandi.');
+      reset();
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Saqlashda xatolik yuz berdi.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function edit(test: TestRow) {
+    setEditId(test.id);
+    setForm({ title: test.title, description: test.description || '', track: test.track, skill: test.skill, status: test.status });
+    setFile(null);
+    setNotice('');
+    setError('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function remove(id: string) {
+    if (!window.confirm('Bu test va uning HTML fayli butunlay o‘chirilsinmi?')) return;
+    setError('');
+    const response = await fetch(`/api/admin/tests/${id}`, { method: 'DELETE' });
+    if (response.status === 401) { router.replace('/login'); return; }
+    const data = await response.json();
+    if (!response.ok) { setError(data.error || 'Test o‘chirilmadi.'); return; }
+    setNotice('Test o‘chirildi.');
+    await load();
+  }
+
+  async function logout() {
+    await fetch('/api/auth/admin-logout', { method: 'POST' });
+    router.replace('/login');
+    router.refresh();
+  }
+
+  function onFile(event: ChangeEvent<HTMLInputElement>) {
+    setFile(event.target.files?.[0] || null);
+    setError('');
+  }
+
+  return (
+    <div className="adminWorkspace">
+      <header className="adminTopbar">
+        <div className="adminBrand"><span><ArkLogoIcon /></span><div><strong>ARK Control</strong><small>CONTENT OPERATIONS</small></div></div>
+        <div className="adminTopActions"><span className="adminSecureChip"><ShieldCheckIcon /> Secure admin session</span><button type="button" onClick={logout}><LogOutIcon /> Chiqish</button></div>
+      </header>
+
+      <main className="adminMain">
+        <section className="adminHero">
+          <div><span><LayoutGridIcon /> ADMIN WORKSPACE</span><h1>Content boshqaruvi</h1><p>HTML mock testlarni yuklang, tartiblang va o‘quvchilar uchun nashr qiling.</p></div>
+          <div className="adminMetrics">
+            <div><small>JAMI</small><strong>{stats.all}</strong><span>test</span></div>
+            <div><small>LIVE</small><strong>{stats.published}</strong><span>published</span></div>
+            <div><small>DRAFT</small><strong>{stats.draft}</strong><span>kutilmoqda</span></div>
+          </div>
+        </section>
+
+        {(error || notice) && <div className={error ? 'adminAlert adminAlertError' : 'adminAlert adminAlertSuccess'}>{error || notice}</div>}
+
+        <section className="adminLayout">
+          <div className="adminFormCard">
+            <div className="adminSectionHeader"><span>{editId ? <EditIcon /> : <UploadCloudIcon />}</span><div><h2>{editId ? 'Testni tahrirlash' : 'Yangi test yuklash'}</h2><p>{editId ? 'Metadata va statusni yangilang.' : 'HTML fayl va uning ma’lumotlarini kiriting.'}</p></div></div>
+            <form className="adminForm" onSubmit={submit}>
+              <div className="field"><label htmlFor="admin-title">Test nomi</label><input id="admin-title" value={form.title} onChange={(event) => setForm((value) => ({ ...value, title: event.target.value }))} placeholder="IELTS Academic Reading · Test 01" maxLength={120} /></div>
+              <div className="twoFields">
+                <div className="field"><label htmlFor="admin-track">Imtihon</label><select id="admin-track" value={form.track} onChange={(event) => setForm((value) => ({ ...value, track: event.target.value as Track }))}><option value="ielts">IELTS</option><option value="cefr">CEFR</option></select></div>
+                <div className="field"><label htmlFor="admin-skill">Skill</label><select id="admin-skill" value={form.skill} onChange={(event) => setForm((value) => ({ ...value, skill: event.target.value as Skill }))}><option value="reading">Reading</option><option value="listening">Listening</option><option value="writing">Writing</option><option value="speaking">Speaking</option><option value="full-mock">Full mock</option></select></div>
+              </div>
+              <div className="field"><label htmlFor="admin-status">Holati</label><select id="admin-status" value={form.status} onChange={(event) => setForm((value) => ({ ...value, status: event.target.value as Status }))}><option value="published">Published — o‘quvchilarga ochiq</option><option value="draft">Draft — faqat admin uchun</option></select></div>
+              <div className="field"><label htmlFor="admin-description">Qisqa izoh</label><textarea id="admin-description" value={form.description} onChange={(event) => setForm((value) => ({ ...value, description: event.target.value }))} placeholder="Test haqida qisqa tavsif…" maxLength={500} /></div>
+              {!editId && <label className="dropZone"><input type="file" accept=".html,.htm,text/html" onChange={onFile} /><span><UploadCloudIcon /></span><div><b>{file ? file.name : 'HTML faylni tanlang'}</b><small>{file ? `${(file.size / 1024).toFixed(0)} KB · Yuklashga tayyor` : '.html yoki .htm · maksimal 10 MB'}</small></div></label>}
+              <div className="formActions"><button className="pButton pButtonPrimary" disabled={busy}>{busy ? 'Saqlanmoqda…' : editId ? 'O‘zgarishlarni saqlash' : 'Testni yuklash'}</button>{editId && <button type="button" className="pButton pButtonGhost" onClick={reset}>Bekor qilish</button>}</div>
+            </form>
+          </div>
+
+          <div className="adminLibrary">
+            <div className="adminLibraryHeader"><div className="adminSectionHeader"><span><LibraryIcon /></span><div><h2>Test kutubxonasi</h2><p>Barcha yuklangan materiallar.</p></div></div><label className="adminSearch"><SearchIcon /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Test qidirish…" /></label></div>
+            {loading ? <div className="adminLoading"><span /><p>Testlar yuklanmoqda…</p></div> : filteredTests.length === 0 ? <div className="emptyState"><span className="emptyIcon"><FileTextIcon /></span><h3>{query ? 'Mos test topilmadi' : 'Kutubxona hozircha bo‘sh'}</h3><p>{query ? 'Qidiruv so‘zini o‘zgartiring.' : 'Birinchi HTML testingizni chap tomondagi forma orqali yuklang.'}</p></div> : <div className="adminTestList">{filteredTests.map((test) => <article className="adminTestRow" key={test.id}><span className="adminTestFile"><FileTextIcon /></span><div className="adminTestCopy"><div><span>{test.track.toUpperCase()} · {test.skill.toUpperCase()}</span><i className={test.status === 'published' ? 'isPublished' : 'isDraft'}>{test.status}</i></div><h3>{test.title}</h3><small>{test.file_name} · {new Intl.DateTimeFormat('uz-UZ', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(test.updated_at))}</small></div><div className="adminRowActions">{test.status === 'published' && <a href={`/api/tests/${test.id}/content`} target="_blank" rel="noopener noreferrer" title="Ko‘rish"><ArrowUpRightIcon /></a>}<button type="button" onClick={() => edit(test)} title="Tahrirlash"><EditIcon /></button><button type="button" className="danger" onClick={() => remove(test.id)} title="O‘chirish"><TrashIcon /></button></div></article>)}</div>}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
 }
