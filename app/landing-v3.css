@@ -1,0 +1,208 @@
+/* ARK landing v3 — high-contrast premium palette, landing only */
+.arkLandingV2{
+  --v3-night:#0b1220;
+  --v3-ink:#111827;
+  --v3-muted:#58657a;
+  --v3-teal:#0f9f83;
+  --v3-teal-dark:#087967;
+  --v3-cobalt:#3157d5;
+  --v3-violet:#6758d9;
+  --v3-coral:#ef6a4d;
+  --v3-cream:#fbf7ef;
+  --v3-ice:#eef5f7;
+  --v3-lilac:#f4f1fb;
+  --v3-line:#cfd8e3;
+  --v3-line-strong:#bcc8d6;
+  --v3-card:#ffffff;
+  --v3-shadow:0 22px 60px rgba(15,23,42,.10);
+  --v3-shadow-soft:0 12px 36px rgba(15,23,42,.07);
+  background:var(--v3-cream);
+  color:var(--v3-ink);
+}
+
+/* Header */
+.arkLandingV2 .ark2Header{background:rgba(251,247,239,.94);border-bottom:1px solid #d8d0c4;box-shadow:0 6px 24px rgba(34,29,23,.04)}
+.arkLandingV2 .ark2HeaderInner{min-height:92px}
+.arkLandingV2 .ark2BrandMark{width:48px;height:48px;border-radius:15px;background:linear-gradient(145deg,var(--v3-night),#183f66);box-shadow:0 12px 28px rgba(15,23,42,.20)}
+.arkLandingV2 .ark2BrandCopy strong{font-size:16px;color:var(--v3-night);letter-spacing:.01em}
+.arkLandingV2 .ark2BrandCopy small{font-size:9px;color:#738096;letter-spacing:.18em}
+.arkLandingV2 .ark2Nav a{font-size:15px;color:#344054;font-weight:760;padding:11px 14px}
+.arkLandingV2 .ark2Nav a:hover{background:#e9f5f1;color:var(--v3-teal-dark)}
+.arkLandingV2 .ark2Login{font-size:15px;color:#253044}
+.arkLandingV2 .ark2ButtonPrimary{background:var(--v3-teal);border-color:var(--v3-teal);box-shadow:0 12px 28px rgba(15,159,131,.22)}
+.arkLandingV2 .ark2ButtonPrimary:hover{background:var(--v3-teal-dark);border-color:var(--v3-teal-dark);box-shadow:0 15px 34px rgba(8,121,103,.27)}
+.arkLandingV2 .ark2ButtonSecondary{border-color:#b8c3d0;background:#fff;color:var(--v3-night);box-shadow:0 6px 18px rgba(15,23,42,.04)}
+
+/* Hero */
+.arkLandingV2 .ark2Hero{padding:112px 0 104px;background:
+  radial-gradient(circle at 80% 26%,rgba(49,87,213,.16),transparent 30%),
+  radial-gradient(circle at 10% 16%,rgba(15,159,131,.13),transparent 23%),
+  linear-gradient(180deg,#fbf7ef 0%,#f7f4ec 100%)}
+.arkLandingV2 .ark2HeroGlow{width:760px;height:760px;background:radial-gradient(circle,rgba(103,88,217,.10),rgba(103,88,217,0) 69%)}
+.arkLandingV2 .ark2HeroGrid{gap:84px}
+.arkLandingV2 .ark2Badge{background:#e4f4ef;border-color:#9fd4c7;color:#0b6c5b;padding:9px 13px;font-size:12px;box-shadow:0 4px 16px rgba(15,159,131,.07)}
+.arkLandingV2 .ark2BadgeDot{background:var(--v3-teal);box-shadow:0 0 0 5px rgba(15,159,131,.13)}
+.arkLandingV2 .ark2Hero h1{color:var(--v3-night);font-weight:800;text-shadow:0 1px 0 rgba(255,255,255,.45)}
+.arkLandingV2 .ark2Hero h1 em{color:var(--v3-coral)}
+.arkLandingV2 .ark2HeroCopy>p{color:#48576b;font-size:21px;line-height:1.65;font-weight:470}
+.arkLandingV2 .ark2HeroMicro{color:#475569;font-size:13px;font-weight:720}
+.arkLandingV2 .ark2TrustMini{border-top-color:#cdd7df;background:rgba(255,255,255,.50);padding:20px 20px 0 0}
+.arkLandingV2 .ark2TrustMini strong{font-size:14px;color:var(--v3-night)}
+.arkLandingV2 .ark2TrustMini small{font-size:12px;color:#66758a}
+
+/* Hero visual sits on a dark premium stage so every detail reads */
+.arkLandingV2 .ark2HeroStage{min-height:660px;padding:48px 34px;border-radius:38px;background:
+  radial-gradient(circle at 76% 20%,rgba(103,88,217,.30),transparent 26%),
+  radial-gradient(circle at 22% 82%,rgba(15,159,131,.25),transparent 30%),
+  linear-gradient(145deg,#101a2f 0%,#0b1220 58%,#15263a 100%);
+  box-shadow:0 36px 86px rgba(11,18,32,.22);border:1px solid rgba(255,255,255,.08)}
+.arkLandingV2 .ark2Laptop{filter:drop-shadow(0 38px 46px rgba(0,0,0,.34))}
+.arkLandingV2 .ark2LaptopScreen{border-color:#243247;background:#111827;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+.arkLandingV2 .ark2ExamTopbar{background:#fffdfa;border-bottom-color:#d9dee8}
+.arkLandingV2 .ark2MiniMark{background:var(--v3-teal)}
+.arkLandingV2 .ark2ExamSubbar{background:#edf4f6;color:#657286;border-bottom-color:#cfd8e3}
+.arkLandingV2 .ark2ExamBody{background:#fff}
+.arkLandingV2 .ark2Passage{background:#fffdf8;border-right-color:#d8dee7}
+.arkLandingV2 .ark2Questions{background:#f7fafb}
+.arkLandingV2 .ark2Passage small,.arkLandingV2 .ark2QuestionMeta span{color:var(--v3-teal-dark)}
+.arkLandingV2 .ark2Passage h3,.arkLandingV2 .ark2Questions h3{color:#111827}
+.arkLandingV2 .ark2Passage p{color:#475569}
+.arkLandingV2 .ark2Passage mark{background:#bfe8dc;color:#0a5145}
+.arkLandingV2 .ark2Option{border-color:#cfd8e3;box-shadow:0 2px 8px rgba(15,23,42,.025)}
+.arkLandingV2 .ark2Option.active{background:#e6f6f1;border-color:#57b8a4;box-shadow:0 0 0 2px rgba(15,159,131,.08)}
+.arkLandingV2 .ark2Option.active>span{background:var(--v3-teal);border-color:var(--v3-teal)}
+.arkLandingV2 .ark2Option>b{color:var(--v3-teal-dark)}
+.arkLandingV2 .ark2ExamNavigator>span.done{background:#d8f0e8;color:var(--v3-teal-dark)}
+.arkLandingV2 .ark2LaptopBase{background:linear-gradient(180deg,#d6dde7,#9aa9bb)}
+
+/* 3D placeholder family — much more visible, same blue/white family */
+.arkLandingV2 .ark2Asset{background:linear-gradient(145deg,#ffffff 0%,#e9f1ff 62%,#d9e8ff 100%);border:1px solid #90add2;box-shadow:inset -14px -14px 28px rgba(75,117,174,.18),inset 12px 12px 20px rgba(255,255,255,.98),0 18px 38px rgba(7,17,34,.25)}
+.arkLandingV2 .ark2FloatAsset{filter:drop-shadow(0 18px 28px rgba(0,0,0,.22))}
+.arkLandingV2 .ark2Asset-headphones:before{border-color:#496fcc}
+.arkLandingV2 .ark2Asset-headphones:after{background:linear-gradient(180deg,#fff,#75a4e8);box-shadow:46px 0 0 #75a4e8}
+.arkLandingV2 .ark2Asset-microphone:before{background:linear-gradient(180deg,#fff,#6f9cdf);border-color:#98b6de}
+.arkLandingV2 .ark2Asset-microphone:after{border-color:#496fcc}
+.arkLandingV2 .ark2Asset-score-card:before,.arkLandingV2 .ark2Asset-document:before{background:#4f75d1}
+.arkLandingV2 .ark2AssetNote{background:rgba(15,23,42,.86);border-color:rgba(255,255,255,.15);box-shadow:0 16px 36px rgba(0,0,0,.24)}
+.arkLandingV2 .ark2AssetNote span{color:#d9f5ee}.arkLandingV2 .ark2AssetNote small{color:#b6c5d7}
+
+/* Stats */
+.arkLandingV2 .ark2Stats{background:var(--v3-night);border-color:#0b1220;color:#fff}
+.arkLandingV2 .ark2StatsInner>div{min-height:138px;border-right-color:rgba(255,255,255,.12)}
+.arkLandingV2 .ark2Stats strong{color:#fff;font-size:34px}
+.arkLandingV2 .ark2Stats span{color:#bec9d8;font-size:13px}
+
+/* Global sections — alternating surfaces so sections are obvious */
+.arkLandingV2 .ark2Section{padding-top:112px;padding-bottom:112px}
+.arkLandingV2 .ark2Features{background:#fff}
+.arkLandingV2 .ark2PlatformPreview{background:var(--v3-ice);border-top:1px solid #d7e1e6;border-bottom:1px solid #d7e1e6}
+.arkLandingV2 .ark2How{background:var(--v3-cream)}
+.arkLandingV2 .ark2Results{background:#f7f8fb}
+.arkLandingV2 .ark2Why{background:var(--v3-lilac);border-top:1px solid #ddd8ec;border-bottom:1px solid #ddd8ec}
+.arkLandingV2 .ark2Testimonials{background:#fff}
+.arkLandingV2 .ark2SectionHead h2,.arkLandingV2 .ark2CenteredHead h2,.arkLandingV2 .ark2HowCopy h2{color:var(--v3-night);font-weight:780}
+.arkLandingV2 .ark2SectionHead>p,.arkLandingV2 .ark2CenteredHead>p,.arkLandingV2 .ark2HowCopy>p{color:#536176;font-size:17px;line-height:1.7}
+.arkLandingV2 .ark2Eyebrow{color:var(--v3-teal-dark);font-size:11px}
+
+/* Skill cards */
+.arkLandingV2 .ark2SkillCard{border-color:var(--v3-line-strong);box-shadow:var(--v3-shadow-soft);background:#fff}
+.arkLandingV2 .ark2SkillCard:hover{box-shadow:var(--v3-shadow);transform:translateY(-4px)}
+.arkLandingV2 .ark2SkillReading{background:linear-gradient(145deg,#ffffff 0%,#f1fbf8 100%);border-color:#a9d5c9}
+.arkLandingV2 .ark2SkillListening{background:linear-gradient(145deg,#ffffff 0%,#eef3ff 100%);border-color:#b6c6ee}
+.arkLandingV2 .ark2SkillWriting{background:linear-gradient(145deg,#ffffff 0%,#fff3ef 100%);border-color:#e8c0b6}
+.arkLandingV2 .ark2SkillSpeaking{background:linear-gradient(145deg,#ffffff 0%,#f5f0ff 100%);border-color:#cabdea}
+.arkLandingV2 .ark2SkillNumber{background:var(--v3-night)!important;color:#fff!important;border-color:var(--v3-night)!important}
+.arkLandingV2 .ark2SkillIntro small{color:var(--v3-teal-dark)}
+.arkLandingV2 .ark2SkillIntro h3{color:#111827;font-weight:780}
+.arkLandingV2 .ark2SkillIntro p{color:#536176}
+.arkLandingV2 .ark2SkillCard>a{color:var(--v3-teal-dark);font-weight:800}
+.arkLandingV2 .ark2ReadingPreview,.arkLandingV2 .ark2WritingPreview,.arkLandingV2 .ark2AudioUi,.arkLandingV2 .ark2SpeakingVisual{border-color:#c5d0dc;box-shadow:0 10px 28px rgba(15,23,42,.07)}
+.arkLandingV2 .ark2PreviewBar,.arkLandingV2 .ark2WritingTop{background:#101827!important;color:#fff!important;border-color:#101827!important}
+.arkLandingV2 .ark2ReadingSplit mark{background:#bfe8dc;color:#07594a}
+.arkLandingV2 .ark2ReadingSplit .selected{background:#e4f5f0!important;border-color:#74bea9!important;color:#0b5f51!important}
+.arkLandingV2 .ark2AudioProgress span{background:var(--v3-cobalt)}
+
+/* Main product preview */
+.arkLandingV2 .ark2BrowserMock{border-color:#aebdcb;box-shadow:0 34px 84px rgba(15,23,42,.17);background:#fff}
+.arkLandingV2 .ark2BrowserChrome{background:#111827!important;color:#dbe4ef!important;border-bottom-color:#25334a!important}
+.arkLandingV2 .ark2BrowserContent>aside{background:#172136!important;color:#c8d2e0!important;border-right-color:#2c3b53!important}
+.arkLandingV2 .ark2BrowserContent>aside .active{background:#1e876f!important;color:#fff!important}
+.arkLandingV2 .ark2BrowserContent>article{background:#fffdf8!important}
+.arkLandingV2 .ark2BrowserContent>section{background:#f4f7f9!important}
+.arkLandingV2 .ark2BrowserContent mark{background:#bfe8dc;color:#07594a}
+.arkLandingV2 .ark2BrowserContent label{border-color:#cbd5df!important;background:#fff!important}
+.arkLandingV2 .ark2BrowserContent label.chosen{border-color:#63bba8!important;background:#e6f6f1!important;color:#0b5f51!important}
+.arkLandingV2 .ark2QuestionRail .current{background:var(--v3-teal)!important;color:#fff!important}
+.arkLandingV2 .ark2Annotation{background:#101827!important;color:#fff!important;border-color:#24344f!important;box-shadow:0 12px 28px rgba(15,23,42,.18)!important}
+
+/* How it works */
+.arkLandingV2 .ark2Steps article{border-color:#c8d2dd;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.05)}
+.arkLandingV2 .ark2Steps article>span{color:var(--v3-coral);font-weight:900}
+.arkLandingV2 .ark2Steps h3{color:var(--v3-night)}
+.arkLandingV2 .ark2Steps p{color:#58657a}
+
+/* Full mock — distinct rich dark section */
+.arkLandingV2 .ark2MockSection{background:
+  radial-gradient(circle at 72% 18%,rgba(103,88,217,.25),transparent 26%),
+  radial-gradient(circle at 12% 80%,rgba(15,159,131,.22),transparent 30%),
+  linear-gradient(145deg,#0b1220,#101b32 58%,#17243b)}
+.arkLandingV2 .ark2MockCopy h2{color:#fff}
+.arkLandingV2 .ark2MockCopy>p{color:#c8d2e0;font-size:18px}
+.arkLandingV2 .ark2MockChecks span{border-color:rgba(255,255,255,.16)!important;background:rgba(255,255,255,.07)!important;color:#eef4fb!important}
+.arkLandingV2 .ark2MockWindow{border-color:#43516a!important;box-shadow:0 30px 74px rgba(0,0,0,.35)!important}
+.arkLandingV2 .ark2MockWindowTop{background:#f6f8fb!important;border-bottom-color:#d5dde8!important}
+.arkLandingV2 .ark2MockWindowBody{background:#fff!important}
+.arkLandingV2 .ark2MockAsset{filter:drop-shadow(0 20px 30px rgba(0,0,0,.30))}
+
+/* Analytics & result */
+.arkLandingV2 .ark2AnalyticsCard,.arkLandingV2 .ark2DetailedResult{border-color:#bdc8d5!important;box-shadow:var(--v3-shadow-soft)!important;background:#fff!important}
+.arkLandingV2 .ark2AnalyticsStats>div{background:#f0f5f7!important;border-color:#d4dee5!important}
+.arkLandingV2 .ark2AnalyticsStats strong{color:var(--v3-night)!important}
+.arkLandingV2 .ark2AnalyticsChart .line{stroke:var(--v3-teal)!important}
+.arkLandingV2 .ark2AnalyticsChart circle{fill:var(--v3-teal)!important}
+.arkLandingV2 .ark2ResultHead>span{background:#e4f4ef!important;color:#087967!important;border-color:#a8d7ca!important}
+.arkLandingV2 .ark2ResultScore>div:first-child{background:#eaf7f3!important;border-color:#b9ddd3!important}
+.arkLandingV2 .ark2ResultScore>div:last-child{background:#edf2ff!important;border-color:#c5d0f2!important}
+.arkLandingV2 .ark2ResultRows>div{border-color:#d4dce6!important}
+.arkLandingV2 .ark2DetailedResult>a{color:var(--v3-teal-dark)!important;font-weight:850!important}
+
+/* Why ARK & testimonials */
+.arkLandingV2 .ark2WhyGrid article{background:#fff!important;border:1px solid #cfc8e0!important;box-shadow:0 10px 28px rgba(43,35,76,.07)!important}
+.arkLandingV2 .ark2WhyGrid article>span{color:var(--v3-violet)!important;font-weight:900!important}
+.arkLandingV2 .ark2WhyGrid h3{color:var(--v3-night)!important}
+.arkLandingV2 .ark2WhyGrid p{color:#5d6678!important}
+.arkLandingV2 .ark2TestimonialGrid article{border:1px solid #c8d2dc!important;background:#fff!important;box-shadow:0 10px 30px rgba(15,23,42,.07)!important}
+.arkLandingV2 .ark2QuoteMark{color:var(--v3-coral)!important}
+.arkLandingV2 .ark2TestimonialGrid article>p{color:#354155!important;font-size:16px!important;line-height:1.7!important}
+
+/* Final CTA */
+.arkLandingV2 .ark2FinalCta{background:#fff;padding-top:116px;padding-bottom:116px}
+.arkLandingV2 .ark2FinalCard{background:
+  radial-gradient(circle at 84% 10%,rgba(239,106,77,.22),transparent 22%),
+  radial-gradient(circle at 18% 90%,rgba(15,159,131,.26),transparent 28%),
+  linear-gradient(135deg,#0b1220,#14213a)!important;
+  border:1px solid #26344b!important;box-shadow:0 34px 82px rgba(11,18,32,.24)!important}
+.arkLandingV2 .ark2FinalCard h2{color:#fff!important}
+.arkLandingV2 .ark2FinalCard p{color:#c7d2df!important;font-size:18px!important}
+.arkLandingV2 .ark2FinalVisual .ark2Asset{box-shadow:inset -14px -14px 28px rgba(75,117,174,.18),inset 12px 12px 20px rgba(255,255,255,.98),0 22px 40px rgba(0,0,0,.30)}
+
+/* Footer */
+.arkLandingV2 .ark2Footer{background:#090f1b!important;color:#d6dee8!important;border-top-color:#1e2b40!important}
+.arkLandingV2 .ark2Footer a{color:#c4cedb!important}.arkLandingV2 .ark2Footer a:hover{color:#fff!important}
+
+/* Stronger typography / visibility */
+.arkLandingV2 .ark2SectionHead h2,.arkLandingV2 .ark2CenteredHead h2,.arkLandingV2 .ark2HowCopy h2,.arkLandingV2 .ark2MockCopy h2,.arkLandingV2 .ark2FinalCard h2{letter-spacing:-.04em}
+.arkLandingV2 .ark2SkillCard p,.arkLandingV2 .ark2WhyGrid p,.arkLandingV2 .ark2Steps p{font-size:15px;line-height:1.65}
+
+@media(max-width:1100px){
+  .arkLandingV2 .ark2HeroStage{min-height:590px;padding:34px 24px}
+  .arkLandingV2 .ark2HeaderInner{min-height:78px}
+}
+@media(max-width:760px){
+  .arkLandingV2 .ark2Hero{padding:72px 0 74px}
+  .arkLandingV2 .ark2HeroCopy>p{font-size:18px}
+  .arkLandingV2 .ark2HeroStage{min-height:470px;padding:24px 14px;border-radius:26px}
+  .arkLandingV2 .ark2Section{padding-top:78px;padding-bottom:78px}
+  .arkLandingV2 .ark2StatsInner>div{min-height:100px}
+  .arkLandingV2 .ark2Stats strong{font-size:27px}
+}
