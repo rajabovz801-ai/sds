@@ -6,170 +6,157 @@ const skills = ['Reading', 'Listening', 'Writing', 'Speaking'];
 
 export default function HomePage() {
   return (
-    <div className="landingRoot">
+    <div className="arkLanding">
       <LandingMotion />
       <Header />
 
       <main>
-        <section className="heroEditorial" id="platform">
-          <div className="shell heroEditorialGrid">
-            <div className="heroEditorialCopy" data-reveal="up">
-              <div className="heroKicker"><span className="liveDot" /> IELTS &amp; CEFR exam platform</div>
-              <h1>Practice that feels like the real exam.</h1>
-              <p className="heroLead">Mock test, tahlil va progressni bitta aniq tizimga yig‘dik. Testni ishlang, natijani ko‘ring va keyingi practice’ni nimaga qaratish kerakligini biling.</p>
-
-              <div className="heroActions">
-                <Link className="primaryCta" href="/dashboard">Dashboardni ochish <span>→</span></Link>
-                <Link className="secondaryCta" href="https://t.me/arkedu_bot" target="_blank" rel="noopener noreferrer">Telegram orqali kirish <span>↗</span></Link>
+        <section className="arkHero" id="platform">
+          <div className="heroGlow heroGlowOne" aria-hidden="true" />
+          <div className="heroGlow heroGlowTwo" aria-hidden="true" />
+          <div className="landingShell arkHeroGrid">
+            <div className="arkHeroCopy" data-reveal="up">
+              <div className="arkHeroBadge"><span /> IELTS &amp; CEFR practice platform</div>
+              <h1>Prepare smarter.<br />Perform with confidence.</h1>
+              <p>ARK test, mock, natija va progressni bitta zamonaviy tizimga birlashtiradi. Real imtihonga yaqin practice qiling, natijani ko‘ring va keyingi qadamni aniq biling.</p>
+              <div className="arkHeroActions">
+                <Link className="arkPrimaryButton" href="/dashboard">Dashboardni ochish <span>→</span></Link>
+                <Link className="arkSecondaryButton" href="/mock">Mock testlar <span>↗</span></Link>
               </div>
-
-              <div className="heroMetaBar">
-                <div><strong>IELTS</strong><span>Full mock workflow</span></div>
-                <div><strong>CEFR</strong><span>A2 dan C1 gacha</span></div>
-                <div><strong>Cloud</strong><span>Tests &amp; results</span></div>
+              <div className="arkHeroTrust">
+                <div><strong>4 skills</strong><span>IELTS workflow</span></div>
+                <div><strong>A2–C1</strong><span>CEFR practice</span></div>
+                <div><strong>Cloud</strong><span>tests &amp; results</span></div>
               </div>
             </div>
 
-            <div className="examPreviewShell revealDelay1" data-reveal="up">
-              <div className="examPreview" id="mock" data-tilt aria-label="ARK mock exam preview">
-                <div className="previewTopbar">
-                  <div className="previewBrandLine"><span className="previewLogo">A</span><b>ARK MOCK</b></div>
-                  <div className="previewContext">IELTS Academic · Reading</div>
-                  <div className="previewTimer"><span>Time left</span><b>18:42</b></div>
-                </div>
-
-                <div className="previewSubbar">
-                  <span className="previewSectionActive">Passage 2</span>
-                  <span>Questions 14–26</span>
-                  <span className="previewSecure">Secure mode</span>
-                </div>
-
-                <div className="previewBody">
-                  <div className="previewPassage">
-                    <span className="previewLabel">READING PASSAGE</span>
-                    <h3>Why practice systems matter</h3>
-                    <p>Students improve faster when practice is followed by clear analysis. A strong system identifies recurring mistakes and turns each result into a focused next step.</p>
-                    <p>The aim is not simply to complete more tests, but to understand <mark>why an answer was right or wrong</mark> and what should be trained next.</p>
+            <div className="arkHeroVisual" data-reveal="up" data-tilt>
+              <div className="heroBrowserBar"><span className="browserDots"><i /><i /><i /></span><span>arkexam.uz/dashboard</span><b>•••</b></div>
+              <div className="heroDashboardMock">
+                <aside className="mockSidebar">
+                  <div className="mockLogo"><span>A</span><b>ARK</b></div>
+                  <div className="mockNav active"><span>⌂</span><b>Dashboard</b></div>
+                  <div className="mockNav"><span>▦</span><b>Practice</b></div>
+                  <div className="mockNav"><span>◎</span><b>Mock tests</b></div>
+                  <div className="mockNav"><span>✦</span><b>Results</b></div>
+                </aside>
+                <div className="mockContent">
+                  <div className="mockTopbar"><strong>Dashboard</strong><div><span>★ 0</span><span>UZ</span><i>A</i></div></div>
+                  <div className="mockWelcome">
+                    <div><small>Good afternoon 👋</small><h3>Welcome back</h3></div>
+                    <p>Consistency is the key to<br /><strong>mastering any skill.</strong></p>
                   </div>
-
-                  <div className="previewQuestion">
-                    <div className="questionHeader"><span>QUESTION 14</span><b>Choose one answer</b></div>
-                    <h3>According to the passage, effective practice should:</h3>
-                    <div className="previewOptions">
-                      <div className="previewOption"><span>A</span><p>focus only on speed</p></div>
-                      <div className="previewOption selected"><span>B</span><p>identify mistakes and guide the next step</p><i>✓</i></div>
-                      <div className="previewOption"><span>C</span><p>avoid reviewing previous answers</p></div>
-                      <div className="previewOption"><span>D</span><p>repeat the same task continuously</p></div>
-                    </div>
+                  <div className="mockMetrics">
+                    <article className="highlight"><span>◎</span><strong>8.0</strong><small>Target Band</small></article>
+                    <article><span>⌁</span><strong>—</strong><small>Avg Score</small></article>
+                    <article><span>▦</span><strong>12</strong><small>Tests</small></article>
+                    <article><span>◷</span><strong>51m</strong><small>Practice</small></article>
                   </div>
-                </div>
-
-                <div className="previewFooter">
-                  <div className="previewProgressText"><b>14</b><span>/ 40 answered</span></div>
-                  <div className="previewProgress"><span /></div>
-                  <button type="button" tabIndex={-1}>Review later</button>
+                  <div className="mockChartCard">
+                    <div className="mockChartHead"><div><strong>Weekly Performance</strong><small>last 7 days</small></div><span>Listening</span></div>
+                    <svg viewBox="0 0 520 140" aria-hidden="true"><g><line x1="0" y1="24" x2="520" y2="24"/><line x1="0" y1="68" x2="520" y2="68"/><line x1="0" y1="112" x2="520" y2="112"/></g><path d="M0 112 C82 110 120 112 180 108 S280 112 342 105 S432 76 520 30"/><circle cx="520" cy="30" r="5"/></svg>
+                    <div className="mockDays"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+                  </div>
                 </div>
               </div>
+              <div className="floatingChip chipOne">✓ Real exam flow</div>
+              <div className="floatingChip chipTwo">↗ Progress tracking</div>
             </div>
           </div>
         </section>
 
-        <section className="proofStrip" aria-label="Platform capabilities">
-          <div className="shell proofStripGrid">
-            <div data-reveal="up"><strong>01</strong><span>Real exam interface</span></div>
-            <div className="revealDelay1" data-reveal="up"><strong>02</strong><span>Cloud test library</span></div>
-            <div className="revealDelay2" data-reveal="up"><strong>03</strong><span>Result tracking</span></div>
-            <div className="revealDelay3" data-reveal="up"><strong>04</strong><span>Admin control</span></div>
+        <section className="arkProofStrip" aria-label="Platform capabilities">
+          <div className="landingShell arkProofGrid">
+            <span>REAL EXAM UI</span><span>IELTS</span><span>CEFR</span><span>CLOUD TESTS</span><span>RESULT TRACKING</span>
           </div>
         </section>
 
-        <section className="trackChoice" id="tracks">
-          <div className="shell">
-            <div className="sectionHeader" data-reveal="up">
-              <div>
-                <span className="sectionEyebrow">EXAM ROUTES</span>
-                <h2>Bitta platforma. Ikki yo‘nalish.</h2>
-              </div>
-              <p>Qaysi imtihonga tayyorlanayotgan bo‘lsangiz, shu yo‘nalish ichida practice, mock va natijalarni boshqaring.</p>
+        <section className="arkFeatureSection" id="features">
+          <div className="landingShell">
+            <div className="arkSectionIntro" data-reveal="up">
+              <div><span className="arkEyebrow">BUILT FOR SERIOUS PRACTICE</span><h2>Everything you need to improve, without the clutter.</h2></div>
+              <p>ARK o‘quvchini ortiqcha elementlar bilan chalg‘itmaydi. Har bir ekran practice, mock va natijani tezroq boshqarish uchun qurilgan.</p>
             </div>
 
-            <div className="trackCards">
-              <article className="trackCard" data-reveal="up">
-                <div className="trackCardTop">
-                  <div><span className="trackIndex">01</span><span className="trackTag">IELTS</span></div>
-                  <span className="trackArrow">↗</span>
-                </div>
-                <h3>IELTS Mock Platform</h3>
-                <p>Academic exam flow uchun Reading, Listening, Writing va Speaking practice’lari.</p>
-                <div className="skillGrid">{skills.map(skill => <span key={skill}>{skill}</span>)}</div>
-                <div className="trackCardFooter">
-                  <Link className="cardPrimary" href="/ielts">Platformani ko‘rish <span>→</span></Link>
-                  <Link className="cardSecondary" href="https://t.me/arkedu_bot?start=ielts" target="_blank" rel="noopener noreferrer">Access olish</Link>
+            <div className="arkFeatureGrid">
+              <article className="featureLarge" data-reveal="up">
+                <span className="featureIcon mint">01</span>
+                <div><h3>Exam-first interface</h3><p>Reading, Listening va boshqa testlar uchun toza, aniq va focusga mo‘ljallangan exam layout.</p></div>
+                <div className="featureMiniUi">
+                  <div className="miniUiTop"><span>READING PASSAGE</span><b>18:42</b></div>
+                  <div className="miniUiBody"><p>Practice becomes more effective when every answer is followed by clear analysis and a focused next step.</p><div><span>A</span><b>Repeat the same task</b></div><div className="selected"><span>B</span><b>Review mistakes and improve</b><em>✓</em></div><div><span>C</span><b>Focus only on speed</b></div></div>
                 </div>
               </article>
 
-              <article className="trackCard revealDelay1" data-reveal="up">
-                <div className="trackCardTop">
-                  <div><span className="trackIndex">02</span><span className="trackTag">CEFR</span></div>
-                  <span className="trackArrow">↗</span>
-                </div>
-                <h3>CEFR Mock Platform</h3>
-                <p>A2 dan C1 gacha skill-based practice va bosqichma-bosqich natija nazorati.</p>
-                <div className="skillGrid">{skills.map(skill => <span key={skill}>{skill}</span>)}</div>
-                <div className="trackCardFooter">
-                  <Link className="cardPrimary" href="/cefr">Platformani ko‘rish <span>→</span></Link>
-                  <Link className="cardSecondary" href="https://t.me/arkedu_bot?start=cefr" target="_blank" rel="noopener noreferrer">Access olish</Link>
-                </div>
+              <article data-reveal="up" className="featureSoft">
+                <span className="featureIcon blue">02</span>
+                <h3>Progress that makes sense</h3>
+                <p>Skill bo‘yicha ko‘rsatkichlar, practice history va keyingi qadam bitta dashboardda.</p>
+                <div className="featureBars"><span><i style={{width:'76%'}} /></span><span><i style={{width:'58%'}} /></span><span><i style={{width:'88%'}} /></span></div>
+              </article>
+
+              <article data-reveal="up" className="featureSoft">
+                <span className="featureIcon violet">03</span>
+                <h3>Cloud test library</h3>
+                <p>Published testlar markaziy kutubxonadan keladi va o‘quvchi uchun bir xil professional formatda ochiladi.</p>
+                <div className="featureFiles"><span>IELTS Reading <b>→</b></span><span>Listening Mock <b>→</b></span><span>CEFR Practice <b>→</b></span></div>
               </article>
             </div>
           </div>
         </section>
 
-        <section className="platformSection" id="features">
-          <div className="shell">
-            <div className="sectionHeader compact" data-reveal="up">
-              <div><span className="sectionEyebrow">BUILT FOR PRACTICE</span><h2>Exam day’ga yaqinroq tajriba.</h2></div>
-              <p>Interface bezak uchun emas. Har bir element test ishlash, tahlil qilish va boshqarishni tezlashtirish uchun qurilgan.</p>
+        <section className="arkTracks" id="tracks">
+          <div className="landingShell">
+            <div className="arkSectionIntro compact" data-reveal="up">
+              <div><span className="arkEyebrow">TWO EXAM ROUTES</span><h2>One platform. Two clear paths.</h2></div>
+              <p>IELTS va CEFR alohida workflow bilan ishlaydi, lekin progress va experience bitta ARK tizimida qoladi.</p>
             </div>
-
-            <div className="featureGrid">
-              <article data-reveal="up"><span className="featureNo">01</span><h3>Exam-first interface</h3><p>Toza savol layouti, test viewer, navigation va focus holatlari o‘quvchini testning o‘zida ushlab turadi.</p></article>
-              <article className="revealDelay1" data-reveal="up"><span className="featureNo">02</span><h3>Cloud content system</h3><p>HTML testlar admin paneldan yuklanadi, Supabase’da saqlanadi va saytning o‘zida ochiladi.</p></article>
-              <article className="revealDelay2" data-reveal="up"><span className="featureNo">03</span><h3>One control surface</h3><p>Admin panel testlar, statuslar va keyingi mock workflow’larini bitta joydan boshqarishga tayyor.</p></article>
-            </div>
-          </div>
-        </section>
-
-        <section className="processSection" id="how">
-          <div className="shell processGrid">
-            <div className="processIntro" data-reveal="up">
-              <span className="sectionEyebrow light">HOW IT WORKS</span>
-              <h2>Oddiy oqim. Kam chalg‘ituvchi element.</h2>
-              <p>Student nima qilishini izlamaydi — tizim uni keyingi qadamga olib boradi.</p>
-            </div>
-
-            <div className="processList">
-              <article data-reveal="up"><span>01</span><div><h3>Access</h3><p>Telegram orqali platformaga kirish yoki mock access olish.</p></div></article>
-              <article className="revealDelay1" data-reveal="up"><span>02</span><div><h3>Practice</h3><p>Real exam formatiga yaqin testni sayt ichida ishlash.</p></div></article>
-              <article className="revealDelay2" data-reveal="up"><span>03</span><div><h3>Result</h3><p>Natija, skill bo‘yicha ko‘rsatkich va keyingi qadamni ko‘rish.</p></div></article>
-              <article className="revealDelay3" data-reveal="up"><span>04</span><div><h3>Improve</h3><p>Keyingi practice’ni aynan kerakli skill va xato turiga qaratish.</p></div></article>
+            <div className="arkTrackGrid">
+              <article data-reveal="up">
+                <div className="trackTop"><span>IELTS</span><b>01</b></div>
+                <h3>IELTS Academic</h3>
+                <p>Real examga yaqin Reading, Listening, Writing va Speaking workflow.</p>
+                <div className="trackSkills">{skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
+                <Link href="/ielts">IELTS platformani ochish <span>→</span></Link>
+              </article>
+              <article data-reveal="up">
+                <div className="trackTop"><span>CEFR</span><b>02</b></div>
+                <h3>CEFR Practice</h3>
+                <p>A2 dan C1 gacha bosqichma-bosqich practice, mock va natija nazorati.</p>
+                <div className="trackSkills">{skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
+                <Link href="/cefr">CEFR platformani ochish <span>→</span></Link>
+              </article>
             </div>
           </div>
         </section>
 
-        <section className="finalCta">
-          <div className="shell finalCtaCard" data-reveal="up">
-            <div><span className="sectionEyebrow">START PRACTICING</span><h2>Keyingi mock’ni tartibli tizimda ishlang.</h2></div>
-            <div className="finalCtaActions">
-              <Link className="primaryCta" href="/dashboard">Dashboard <span>→</span></Link>
-              <Link className="secondaryCta" href="https://t.me/arkedu_bot" target="_blank" rel="noopener noreferrer">Telegram bot <span>↗</span></Link>
+        <section className="arkHow" id="how">
+          <div className="landingShell arkHowGrid">
+            <div className="arkHowIntro" data-reveal="up">
+              <span className="arkEyebrow light">HOW IT WORKS</span>
+              <h2>From access to improvement in four simple steps.</h2>
+              <p>Student testni qayerdan topish yoki keyin nima qilishni o‘ylab qolmaydi. Flow aniq va bir xil.</p>
+              <Link className="arkSecondaryButton dark" href="/dashboard">Platformani ko‘rish <span>→</span></Link>
             </div>
+            <div className="arkSteps">
+              <article data-reveal="up"><span>01</span><div><h3>Access</h3><p>Account yoki Telegram orqali platformaga kiring.</p></div></article>
+              <article data-reveal="up"><span>02</span><div><h3>Practice</h3><p>Real exam formatiga yaqin testni ishlang.</p></div></article>
+              <article data-reveal="up"><span>03</span><div><h3>Review</h3><p>Natija va xatolarni bitta joyda ko‘ring.</p></div></article>
+              <article data-reveal="up"><span>04</span><div><h3>Improve</h3><p>Keyingi practice’ni aynan kerakli skillga qarating.</p></div></article>
+            </div>
+          </div>
+        </section>
+
+        <section className="arkFinalCta">
+          <div className="landingShell arkFinalCard" data-reveal="up">
+            <div><span className="arkEyebrow">START WITH ARK</span><h2>Your next mock deserves a better system.</h2><p>Professional practice, clean dashboard and one clear path forward.</p></div>
+            <div><Link className="arkPrimaryButton" href="/dashboard">Open dashboard <span>→</span></Link><a className="arkSecondaryButton" href="https://t.me/arkedu_bot" target="_blank" rel="noopener noreferrer">Telegram <span>↗</span></a></div>
           </div>
         </section>
       </main>
 
-      <footer className="siteFooter">
-        <div className="shell footerInner"><span>© 2026 ARK MOCK</span><span>IELTS · CEFR · Practice · Mock</span></div>
+      <footer className="arkFooter">
+        <div className="landingShell"><div className="footerBrand"><span className="arkBrandMark"><span>A</span></span><div><strong>ARK</strong><small>IELTS • CEFR • MOCK</small></div></div><p>© 2026 ARK Exam Hub. Built for focused practice.</p></div>
       </footer>
     </div>
   );
