@@ -6,8 +6,8 @@ import './auth.css';
 import './mock-results.css';
 
 export const metadata: Metadata = {
-  title: 'ARK Mock — IELTS & CEFR Exam Platform',
-  description: 'Professional IELTS and CEFR mock exam platform with cloud tests, dashboard, admin control and result tracking.',
+  title: 'ARK Exam Hub — IELTS & CEFR Practice Platform',
+  description: 'Professional IELTS and CEFR practice platform with mock tests, cloud test library, dashboard and result tracking.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
