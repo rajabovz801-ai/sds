@@ -7,9 +7,9 @@ type Track = 'ielts' | 'cefr';
 type Student = { id: string; firstName: string; lastName: string };
 
 type Section = {
-  key: 'reading' | 'speaking';
+  key: 'listening' | 'reading' | 'writing' | 'speaking';
   title: string;
-  accent: 'blue' | 'violet';
+  accent: 'red' | 'blue' | 'violet';
   facts: readonly string[];
   copy: string;
   href: string;
@@ -17,12 +17,28 @@ type Section = {
 
 const ieltsSections: readonly Section[] = [
   {
+    key: 'listening',
+    title: 'Listening',
+    accent: 'red',
+    facts: ['IELTS format', 'Audio based', 'Mock practice'],
+    copy: 'IELTS Listening uchun alohida mock va video materiallar bo‘limi.',
+    href: '/ielts/listening',
+  },
+  {
     key: 'reading',
     title: 'Reading',
     accent: 'blue',
-    facts: ['40 ta savol', '60 daqiqa', '3 ta passage'],
-    copy: 'IELTS Academic Reading mock testlari. Reading tugmasi sizni to‘g‘ridan-to‘g‘ri Reading testlar bo‘limiga olib kiradi.',
+    facts: ['IELTS format', 'Academic reading', 'Mock practice'],
+    copy: 'IELTS Academic Reading uchun alohida mock va video materiallar bo‘limi.',
     href: '/ielts/reading',
+  },
+  {
+    key: 'writing',
+    title: 'Writing',
+    accent: 'red',
+    facts: ['Task 1', 'Task 2', 'Video lessons'],
+    copy: 'IELTS Writing uchun alohida mock va video materiallar bo‘limi.',
+    href: '/ielts/writing',
   },
 ];
 
@@ -64,10 +80,10 @@ export function ExamSectionsClient({ track }: { track: Track }) {
 
   const sections = track === 'ielts' ? ieltsSections : cefrSections;
   const label = track.toUpperCase();
-  const heroTitle = track === 'ielts' ? 'IELTS Reading' : 'CEFR Speaking';
+  const heroTitle = track === 'ielts' ? 'IELTS Mock Sections' : 'CEFR Speaking';
   const heroCopy = track === 'ielts'
-    ? 'Hozir IELTS uchun faqat Reading mock bo‘limi faol.'
-    : 'Hozir CEFR uchun faqat Speaking bo‘limi faol.';
+    ? 'Listening, Reading va Writing bo‘limlaridan keraklisini tanlang.'
+    : 'CEFR uchun hozir faqat Speaking bo‘limi faol.';
 
   return (
     <div className="examSectionPage">
@@ -82,8 +98,8 @@ export function ExamSectionsClient({ track }: { track: Track }) {
         </div>
       </header>
 
-      <main className="examSectionMain">
-        <section className="examSectionHero">
+      <main className="examSectionMain compactSectionsMain">
+        <section className="examSectionHero compactSectionsHero">
           <div>
             <span className="mockFlowEyebrow">ARK {label} MOCK EXAMINATION</span>
             <h1>{heroTitle}</h1>
@@ -93,9 +109,9 @@ export function ExamSectionsClient({ track }: { track: Track }) {
           <div className="examHeroWatermark">{label}</div>
         </section>
 
-        <section className="examSectionGrid single">
+        <section className={`examSectionGrid compactSectionsGrid ${track === 'cefr' ? 'single' : ''}`}>
           {sections.map((section) => (
-            <article className={`examSectionCard ${section.accent}`} key={section.key}>
+            <article className={`examSectionCard compactSectionCard ${section.accent}`} key={section.key}>
               <div className="examSectionCardTop">
                 <span className="examSectionIcon">{section.title.charAt(0)}</span>
                 <b>READY</b>
