@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPublicSupabase } from '@/lib/supabase/server';
-import { readSession } from '@/lib/auth/session';
+import { readActiveStudentSession } from '@/lib/auth/active-student';
 import { readAdminSession } from '@/lib/auth/admin-session';
 
 export async function GET(request:NextRequest,{params}:{params:Promise<{id:string}>}){
   try{
-    if (!readSession(request) && !readAdminSession(request)) {
+    if (!readAdminSession(request) && !await readActiveStudentSession(request)) {
       return NextResponse.json({error:'Avval platformaga kiring.'},{status:401});
     }
     const {id}=await params;
     const publicDb=getPublicSupabase();
     const {data:test,error}=await publicDb
       .from('tests')
-      .select('id,title,track,skill,status,file_name')
+      .select('id,title,track,skill,status,file_name,duration_minutes')
       .eq('id',id)
       .eq('status','published')
       .single();
@@ -26,6 +26,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{id:strin
         track:test.track,
         skill:test.skill,
         fileName:test.file_name,
+        durationMinutes:Number(test.duration_minutes)||60,
       },
       contentUrl:`/api/tests/${test.id}/content`,
     }, {headers:{'Cache-Control':'private, max-age=60'}});

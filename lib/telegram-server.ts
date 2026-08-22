@@ -127,6 +127,18 @@ function responseError(body: GatewayResponse | null) {
   return cleanText(body.error || body.message || body.detail, 300) || 'SysDC qabul qiluvchisi natijani rad etdi.';
 }
 
+function responseConfirmed(body: GatewayResponse | null) {
+  if (!body) return false;
+  const truthy = (value: unknown) => value === true || value === 1 || cleanText(value, 10).toLowerCase() === 'true';
+  const status = cleanText(body.status, 30).toLowerCase();
+  const sentCount = numberOrNull(body.sent_count ?? body.sent ?? body.delivered);
+  return truthy(body.ok)
+    || truthy(body.success)
+    || (sentCount !== null && sentCount > 0)
+    || Boolean(cleanText(body.message_id ?? body.telegram_message_id, 120))
+    || ['ok', 'success', 'sent', 'delivered'].includes(status);
+}
+
 function responseReference(body: GatewayResponse | null, fallback: string) {
   if (!body) return fallback;
   return cleanText(body.reference || body.submission_id || body.submissionId || body.id, 120) || fallback;
@@ -224,21 +236,21 @@ export async function sendAdminTestResult(result: AdminTestResult): Promise<Tele
       }
     }
 
-    if (response.ok && !body) {
+    const explicitError = responseError(body);
+    if (!response.ok || explicitError) {
+      const message = explicitError || cleanText(body?.error || body?.message, 300) || `SysDC HTTP ${response.status}`;
+      return { configured: true, recipients: 1, sent: 0, failed: 1, status: response.status, error: message };
+    }
+
+    if (!responseConfirmed(body)) {
       return {
         configured: true,
         recipients: 1,
         sent: 0,
         failed: 1,
         status: response.status,
-        error: 'SysDC qabul qiluvchisi tasdiqlovchi JSON javob qaytarmadi.',
+        error: 'SysDC Telegram yuborilganini aniq tasdiqlamadi.',
       };
-    }
-
-    const explicitError = responseError(body);
-    if (!response.ok || explicitError) {
-      const message = explicitError || cleanText(body?.error || body?.message, 300) || `SysDC HTTP ${response.status}`;
-      return { configured: true, recipients: 1, sent: 0, failed: 1, status: response.status, error: message };
     }
 
     return {

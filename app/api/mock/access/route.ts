@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hashAccessCode, normalizeAccessCode } from '@/lib/auth/codes';
-import { readSession } from '@/lib/auth/session';
+import { readActiveStudentSession } from '@/lib/auth/active-student';
 import { getServiceSupabase } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = readSession(request);
-    if (!session) return NextResponse.json({ error: 'Avval platformaga kiring.' }, { status: 401 });
+    const session = await readActiveStudentSession(request);
+    if (!session) return NextResponse.json({ error: 'Student sessiyasi faol emas.' }, { status: 403 });
 
     const body = await request.json();
     const code = normalizeAccessCode(String(body?.code || ''));

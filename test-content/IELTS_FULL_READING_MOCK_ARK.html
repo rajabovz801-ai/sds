@@ -67,11 +67,11 @@ button{border:0}
 .qrow{display:flex;align-items:flex-start;gap:9px;margin-bottom:8px}
 .qnum{min-width:32px;height:32px;border:1px solid #9da6b5;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:12px;font-weight:850;flex-shrink:0;border-radius:7px;color:var(--navy)}
 .qtext{line-height:1.55;padding-top:3px}
-.q-select{border:1px solid #bbb;border-radius:6px;background:#fff;padding:6px 8px;outline:none;font-family:Arial,sans-serif;font-size:13px}
+.q-select{border:1px solid #bbb;border-radius:6px;background:#fff;padding:6px 8px;outline:none;font-family:Arial,sans-serif;font-size:16px}
 .q-select:focus,.q-input:focus,.word-input:focus{border-color:var(--navy-2);box-shadow:0 0 0 3px rgba(25,52,95,.10)}
-.q-input,.word-input{border:1px solid #aaa;border-radius:5px;background:#fff;padding:5px 8px;outline:none;font-family:Arial,sans-serif;font-size:13px}
+.q-input,.word-input{border:1px solid #aaa;border-radius:5px;background:#fff;padding:5px 8px;outline:none;font-family:Arial,sans-serif;font-size:16px}
 .opts{display:flex;flex-direction:column;gap:6px}
-.opt{display:flex;align-items:flex-start;gap:9px;border:1px solid #d1d1d1;border-radius:7px;padding:9px 11px;cursor:pointer;font-family:Arial,sans-serif;font-size:13px;line-height:1.4;background:#fff}
+.opt{display:flex;align-items:flex-start;gap:9px;border:1px solid #d1d1d1;border-radius:7px;padding:9px 11px;cursor:pointer;font-family:Arial,sans-serif;font-size:16px;line-height:1.45;background:#fff}
 .opt:hover{background:#fafafa}
 .opt.sel{border-color:var(--navy-2);background:#edf3fb}
 .opt input{accent-color:var(--navy-2);margin-top:2px}
@@ -79,7 +79,7 @@ button{border:0}
 .mcq-head .qnum{height:auto;min-height:50px;border:0;border-right:1px solid #d0d0d0;background:#f4f6f8}
 .mcq-head .person{padding:10px 12px;display:flex;align-items:center;font-weight:700;line-height:1.45}
 .idea-box{border:1px solid #d5d5d5;background:#fafafa;padding:9px;border-radius:7px;margin-bottom:13px}
-.idea-line{display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:8px;margin:5px 0;padding:8px 9px;font-family:Arial,sans-serif;font-size:13px;line-height:1.4}
+.idea-line{display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:8px;margin:5px 0;padding:8px 9px;font-family:Arial,sans-serif;font-size:16px;line-height:1.45}
 .idea-line.mcq-option{border:1px solid #d3d3d3;border-radius:6px;background:#fff;cursor:pointer}
 .idea-line.mcq-option:hover{border-color:#999}
 .idea-line.mcq-option.selected{border-color:var(--navy-2);background:#edf3fb}
@@ -89,7 +89,7 @@ button{border:0}
 .completion-card{display:grid;grid-template-columns:46px minmax(0,1fr);align-items:stretch;border:1px solid #d0d0d0;border-radius:7px;overflow:hidden;margin-bottom:10px}
 .completion-card .qnum{height:auto;min-height:62px;border:0;border-right:1px solid #d0d0d0;background:#f4f6f8}
 .completion-text{padding:11px 12px;line-height:1.6}
-.headings-list{font-family:Arial,sans-serif;font-size:13px;line-height:1.6;background:#fafafa;border:1px solid #ddd;border-radius:7px;padding:12px 14px;margin-bottom:14px}
+.headings-list{font-family:Arial,sans-serif;font-size:16px;line-height:1.6;background:#fafafa;border:1px solid #ddd;border-radius:7px;padding:12px 14px;margin-bottom:14px}
 
 /* navigation */
 .bottom{flex:0 0 auto;border-top:1px solid var(--line);background:rgba(255,253,249,.98);padding:9px 14px;display:flex;align-items:center;gap:12px;font-family:Inter,"Segoe UI",Arial,sans-serif;box-shadow:0 -8px 28px rgba(16,33,61,.05)}
@@ -146,22 +146,21 @@ mark.hl-blue{background:#bcdcff}
 .resq.ok{background:#edf8ef;border-color:#94c49b;color:#246a31}
 .resq.bad{background:#fff0f0;border-color:#d9a0a0;color:#a01818}
 .resq.empty{background:#f1f1f1;color:#888}
-.delivery-status{display:flex;align-items:center;gap:10px;border:1px solid #dfe4eb;border-radius:12px;background:#f5f8fb;padding:12px 14px;margin:0 0 18px;font:750 12px/1.4 Inter,"Segoe UI",Arial,sans-serif;color:var(--navy)}
+.delivery-status{display:none;align-items:center;gap:10px;border:1px solid #dfe4eb;border-radius:12px;background:#f5f8fb;padding:12px 14px;margin:0 0 18px;font:750 12px/1.4 Inter,"Segoe UI",Arial,sans-serif;color:var(--navy)}
 .delivery-status:before{content:"";width:9px;height:9px;border:2px solid #aab5c4;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;flex:0 0 auto}
-.delivery-status.saved{background:#eef9f4;border-color:#cde9dc;color:#116746}
+.delivery-status.saved{display:none}
 .delivery-status.saved:before{border:0;background:var(--green);animation:none}
-.delivery-status.error{background:#fff2f0;border-color:#f2cbc6;color:#a93c33}
+.delivery-status.error{display:flex;background:#fff2f0;border-color:#f2cbc6;color:#a93c33}
 .delivery-status.error:before{border:0;background:var(--coral);animation:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 .result-actions{display:flex;gap:8px;justify-content:flex-end}
 .result-actions button{border-radius:7px;padding:10px 15px;font-family:Arial,sans-serif;font-size:13px;font-weight:800;cursor:pointer}
-.restart{background:var(--navy);color:#fff}
 .retry{background:var(--coral);color:#fff;display:none}
 .retry.show{display:inline-block}
 .return{background:#eee;color:#222}
 
 @media(max-width:800px){
-  html,body{font-size:15px}
+  html,body{font-size:16px}
   .mock-title{display:none}
   .topbar{padding:0 10px}
   .left{width:50%;min-width:220px;padding:20px 18px 65px}
@@ -182,7 +181,7 @@ mark.hl-blue{background:#bcdcff}
     </div>
     <span class="exam-badge">IELTS ACADEMIC · READING</span>
     <h1>Academic Reading — Full Mock</h1>
-    <p>Haqiqiy imtihon tartibidagi 3 ta passage va 40 ta savol. Vaqt Start bosilgandan keyin boshlanadi, yakuniy natija esa xavfsiz server orqali adminga yuboriladi.</p>
+    <p>Haqiqiy imtihon tartibidagi 3 ta passage va 40 ta savol. Vaqt Start bosilgandan keyin boshlanadi va yakuniy javoblar serverda saqlanadi.</p>
     <div class="start-meta"><div><b>3</b>Passages</div><div><b>40</b>Questions</div><div><b>60</b>Minutes</div></div>
     <button class="start-btn" id="startBtn">Full mockni boshlash →</button>
   </div>
@@ -622,7 +621,7 @@ Choose <b>ONE WORD ONLY</b> from the passage for each answer.</p>
   <div class="submit-dialog">
     <div class="dialog-icon">✓</div>
     <h2 id="submitTitle">Testni yakunlaysizmi?</h2>
-    <p>Submit qilingandan keyin natija hisoblanadi va server orqali ARK Education adminiga yuboriladi.</p>
+    <p>Submit qilingandan keyin urinish yakunlanadi va javoblarni o‘zgartirib bo‘lmaydi.</p>
     <div class="submit-review"><div><b id="reviewAnswered">0</b><span>Answered</span></div><div><b id="reviewEmpty">40</b><span>Unanswered</span></div></div>
     <div class="dialog-actions"><button class="dialog-cancel" id="cancelSubmit">Davom etish</button><button class="dialog-confirm" id="confirmSubmit">Submit final</button></div>
   </div>
@@ -633,8 +632,8 @@ Choose <b>ONE WORD ONLY</b> from the passage for each answer.</p>
     <div class="result-head"><div><h2>Reading Mock Result</h2><div class="score-sub">Final result for this attempt</div></div><div><div class="score-big" id="scoreBig">0/40</div><div class="score-sub" id="bandTxt">Estimated Band —</div></div></div>
     <div class="result-stats"><div class="stat"><b id="correctStat">0</b>Correct</div><div class="stat"><b id="wrongStat">0</b>Incorrect</div><div class="stat"><b id="emptyStat">40</b>Unanswered</div></div>
     <div class="result-grid" id="resultGrid"></div>
-    <div class="delivery-status" id="deliveryStatus">Natija xavfsiz server orqali adminga yuborilmoqda…</div>
-    <div class="result-actions"><button class="retry" id="retryBtn">Qayta yuborish</button><button class="restart" id="restartBtn">Restart Mock</button></div>
+    <div class="delivery-status" id="deliveryStatus" aria-live="polite"></div>
+    <div class="result-actions"><button class="retry" id="retryBtn">Qayta yuborish</button></div>
   </div>
 </div>
 
@@ -892,7 +891,7 @@ function renderResult(payload){
   $('#scoreBig').textContent=payload.rawScore+'/40';$('#bandTxt').textContent='Estimated Band '+payload.band;
   $('#correctStat').textContent=payload.correct;$('#wrongStat').textContent=payload.wrong;$('#emptyStat').textContent=payload.unanswered;
   $('#deliveryStatus').className='delivery-status';
-  $('#deliveryStatus').textContent='Natija xavfsiz server orqali adminga yuborilmoqda…';
+  $('#deliveryStatus').textContent='';
   $('#retryBtn').classList.remove('show');
   $('#resultScreen').classList.add('show');
 }
@@ -929,15 +928,15 @@ $('#submitModal').addEventListener('click',event=>{if(event.target===$('#submitM
 $('#retryBtn').onclick=()=>{
   if(!lastPayload||submitting)return;
   submitting=true;$('#retryBtn').classList.remove('show');
-  $('#deliveryStatus').className='delivery-status';$('#deliveryStatus').textContent='Natija qayta yuborilmoqda…';
+  $('#deliveryStatus').className='delivery-status';$('#deliveryStatus').textContent='';
   sendResultToPlatform(lastPayload);
 };
 window.addEventListener('message',event=>{
   if(event.source!==window.parent)return;
   if(event.data?.type==='ARK_RESULT_SAVED'){
     submitting=false;
-    $('#deliveryStatus').className='delivery-status saved';
-    $('#deliveryStatus').textContent='Natija saqlandi va Telegram orqali adminga yuborildi.';
+    $('#deliveryStatus').className='delivery-status';
+    $('#deliveryStatus').textContent='';
     $('#retryBtn').classList.remove('show');
   }
   if(event.data?.type==='ARK_RESULT_ERROR'){
@@ -947,8 +946,6 @@ window.addEventListener('message',event=>{
     $('#retryBtn').classList.add('show');
   }
 });
-if(new URLSearchParams(location.search).get('mode')==='mock')$('#restartBtn').style.display='none';
-$('#restartBtn').onclick=()=>location.reload();
 
 renderNav();
 </script>

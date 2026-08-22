@@ -1,12 +1,9 @@
 import { timingSafeEqual } from 'node:crypto';
 
 export function getSessionSecret() {
-  const value =
-    process.env.AUTH_SESSION_SECRET?.trim() ||
-    process.env.ADMIN_ACCESS_KEY?.trim() ||
-    process.env.SUPABASE_SECRET_KEY?.trim();
+  const value = process.env.AUTH_SESSION_SECRET?.trim();
 
-  if (!value) throw new Error('Server session secret is not configured');
+  if (!value || value.length < 32) throw new Error('AUTH_SESSION_SECRET kamida 32 belgidan iborat bo‘lishi kerak');
   return value;
 }
 

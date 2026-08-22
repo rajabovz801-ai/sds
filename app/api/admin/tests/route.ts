@@ -39,12 +39,13 @@ export async function POST(request: NextRequest) {
     const track = String(form.get('track') || '');
     const skill = String(form.get('skill') || '');
     const status = String(form.get('status') || 'draft');
+    const durationMinutes = Number(form.get('durationMinutes') || 60);
     const file = form.get('file');
 
     if (!title || title.length > 120 || !(file instanceof File)) {
       return NextResponse.json({ error: 'Test nomi va HTML fayl majburiy.' }, { status: 400 });
     }
-    if (description.length > 500 || !tracks.includes(track as typeof tracks[number]) || !skills.includes(skill as typeof skills[number]) || !statuses.includes(status as typeof statuses[number])) {
+    if (description.length > 500 || !tracks.includes(track as typeof tracks[number]) || !skills.includes(skill as typeof skills[number]) || !statuses.includes(status as typeof statuses[number]) || !Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 240) {
       return NextResponse.json({ error: 'Test ma’lumotlari noto‘g‘ri.' }, { status: 400 });
     }
     if (!/\.html?$/i.test(file.name) || !['text/html', 'application/octet-stream', ''].includes(file.type)) {
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
       track,
       skill,
       status,
+      duration_minutes: durationMinutes,
       file_name: file.name,
       file_path: uploadedPath,
     }).select('*').single();

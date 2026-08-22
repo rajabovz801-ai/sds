@@ -7,18 +7,6 @@ export async function GET(request: NextRequest) {
     const session = readSession(request);
     if (!session) return NextResponse.json({ student: null });
 
-    const sessionAge = session.iat ? Math.floor(Date.now() / 1000) - session.iat : Number.POSITIVE_INFINITY;
-    if (session.firstName && sessionAge < 10 * 60) {
-      return NextResponse.json({
-        student: {
-          id: session.studentId,
-          telegramId: session.telegramId,
-          firstName: session.firstName,
-          lastName: session.lastName || '',
-        },
-      }, { headers: { 'Cache-Control': 'private, max-age=30' } });
-    }
-
     const supabase = getServiceSupabase();
     const { data: student, error } = await supabase
       .from('students')
@@ -28,7 +16,7 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
 
     if (error) throw error;
-    if (!student) return NextResponse.json({ student: null });
+    if (!student) return NextResponse.json({ student: null }, { status: 403 });
 
     return NextResponse.json({
       student: {
@@ -38,7 +26,7 @@ export async function GET(request: NextRequest) {
         firstName: student.first_name,
         lastName: student.last_name,
       },
-    });
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     return NextResponse.json({ student: null, error: error instanceof Error ? error.message : 'Session error' }, { status: 500 });
   }

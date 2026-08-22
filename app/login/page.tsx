@@ -13,7 +13,7 @@ import {
   SparklesIcon,
 } from '@/components/UiIcons';
 import { getAdminServerSession } from '@/lib/auth/admin-server-session';
-import { getServerSession } from '@/lib/auth/server-session';
+import { getActiveServerSession } from '@/lib/auth/server-session';
 
 function safeNext(value: string | string[] | undefined) {
   const path = Array.isArray(value) ? value[0] : value;
@@ -25,7 +25,7 @@ function safeNext(value: string | string[] | undefined) {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
   const nextPath = safeNext((await searchParams).next);
   if (await getAdminServerSession()) redirect('/admin');
-  if (await getServerSession()) redirect(nextPath);
+  if (await getActiveServerSession()) redirect(nextPath);
 
   return (
     <div className="authRoot">

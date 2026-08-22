@@ -47,7 +47,7 @@ export function MockResultClient({ id, data }: { id: string; data: MockAttemptDa
       </section>
 
       <section className="resultFooterCard">
-        <div><span className="authEyebrow">NEXT STEP</span><h2>Natija saqlandi.</h2><p>Yakuniy natija student profilida saqlandi va bildirishnoma navbatiga qo‘shildi.</p></div>
+        <div><span className="authEyebrow">NEXT STEP</span><h2>Mock yakunlandi</h2><p>Sectionlar kesimidagi tahlilni ko‘rib chiqing yoki boshqaruv sahifasiga qayting.</p></div>
         <div className="resultActions"><Link className="authPrimary" href="/dashboard">Boshqaruv <span><ArrowRightIcon /></span></Link><Link className="authSecondary" href="/mock"><ArrowLeftIcon /> Mock bo‘limi</Link></div>
       </section>
     </>

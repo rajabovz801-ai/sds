@@ -107,6 +107,9 @@ export async function POST(request: NextRequest) {
       let student = await findStudent(telegramId);
 
       if (student) {
+        if (student.status === 'blocked') {
+          return NextResponse.json({ error: 'Profil admin tomonidan bloklangan.', registered: true, blocked: true }, { status: 403 });
+        }
         const { data, error } = await supabase
           .from('students')
           .update({
@@ -152,6 +155,9 @@ export async function POST(request: NextRequest) {
 
     if (action === 'code') {
       const student = await findStudent(telegramId);
+      if (student?.status === 'blocked') {
+        return NextResponse.json({ error: 'Profil admin tomonidan bloklangan.', registered: true, blocked: true }, { status: 403 });
+      }
       if (!student || student.status !== 'active') {
         return NextResponse.json({ error: 'Avval ro‘yxatdan o‘ting.', registered: false }, { status: 404 });
       }

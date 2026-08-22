@@ -22,6 +22,6 @@ Because step 3 is server-to-server, the PHP endpoint does not need browser CORS 
 
 ## Receiver contract
 
-The request includes `event_type=result`, `submit_key`, student fields, test fields, score fields, `answers`, `answers_by_question`, and `answers_text`. A successful receiver must return an HTTP 2xx response. JSON such as `{ "success": true }` is recommended. For failures, return a non-2xx response and JSON such as `{ "success": false, "message": "..." }`.
+The request includes `event_type=result`, `submit_key`, student fields, test fields, score fields, `answers`, `answers_by_question`, and `answers_text`. A successful receiver must return HTTP 2xx **and explicit JSON confirmation**, for example `{ "success": true, "sent_count": 2 }`. Return success only after the Telegram API has accepted at least one admin message. For failures, return a non-2xx response and JSON such as `{ "success": false, "message": "..." }`.
 
-The current SysDC receiver already uses `requirePostRequest()`, `getRequestData()`, and `verifySubmitKey()`, so no bot-token move is required. It only needs to accept the result fields above and send them through the existing `telegram.php` helper.
+The current SysDC receiver already uses `requirePostRequest()`, `getRequestData()`, and `verifySubmitKey()`, so no bot-token move is required. It only needs to accept the result fields above, send them through the existing `telegram.php` helper, inspect that helper's Telegram response, and then return the explicit delivery confirmation.

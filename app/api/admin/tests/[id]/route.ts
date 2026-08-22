@@ -38,8 +38,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const track = String(body.track || '');
     const skill = String(body.skill || '');
     const status = String(body.status || '');
+    const durationMinutes = Number(body.durationMinutes || 60);
 
-    if (!title || title.length > 120 || description.length > 500 || !tracks.includes(track) || !skills.includes(skill) || !statuses.includes(status)) {
+    if (!title || title.length > 120 || description.length > 500 || !tracks.includes(track) || !skills.includes(skill) || !statuses.includes(status) || !Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 240) {
       return NextResponse.json({ error: 'Test ma’lumotlari noto‘g‘ri.' }, { status: 400 });
     }
     if (file && (!/\.html?$/i.test(file.name) || !['text/html', 'application/octet-stream', ''].includes(file.type))) {
@@ -60,6 +61,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       track,
       skill,
       status,
+      duration_minutes: durationMinutes,
       updated_at: new Date().toISOString(),
     };
 

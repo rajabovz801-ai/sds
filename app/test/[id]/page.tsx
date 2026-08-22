@@ -1,5 +1,5 @@
 import { TestViewerClient } from '@/components/TestViewerClient';
-import { requireServerSession } from '@/lib/auth/server-session';
+import { requireStudent } from '@/lib/auth/server-session';
 import { getPublishedTest } from '@/lib/cloudTests';
 import { notFound } from 'next/navigation';
 
@@ -26,7 +26,7 @@ export default async function TestPage({
   if (mode) nextQuery.set('mode', mode);
   if (section) nextQuery.set('section', section);
   const [, test] = await Promise.all([
-    requireServerSession(`/test/${id}${nextQuery.size ? `?${nextQuery.toString()}` : ''}`),
+    requireStudent(`/test/${id}${nextQuery.size ? `?${nextQuery.toString()}` : ''}`),
     getPublishedTest(id),
   ]);
   if (!test) notFound();
@@ -34,7 +34,14 @@ export default async function TestPage({
     <TestViewerClient
       id={id}
       initialData={{
-        test: { id: test.id, title: test.title, track: test.track, skill: test.skill, fileName: test.fileName },
+        test: {
+          id: test.id,
+          title: test.title,
+          track: test.track,
+          skill: test.skill,
+          fileName: test.fileName,
+          durationMinutes: test.durationMinutes,
+        },
         contentUrl: `/api/tests/${test.id}/content`,
       }}
       attemptId={attempt}
