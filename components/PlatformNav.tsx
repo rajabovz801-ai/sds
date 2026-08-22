@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 type Student = { firstName: string; lastName: string };
 
 const items = [
-  { href: '/dashboard', label: 'Dashboard', soon: false },
   { href: '/mock', label: 'Mock', soon: false },
   { href: '/practice', label: 'Practice', soon: true },
   { href: '/study-tools', label: 'Study tools', soon: true },
