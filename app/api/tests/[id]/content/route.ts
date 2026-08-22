@@ -7,6 +7,7 @@ type BridgeContext = {
   mode: string;
   attemptId: string;
   section: string;
+  skill: string;
   testId: string;
   sessionId: string;
   expiresAt: string;
@@ -15,6 +16,10 @@ type BridgeContext = {
 
 function injectBridge(html: string, context: BridgeContext) {
   const payload = JSON.stringify(context).replace(/</g, '\\u003c');
+  const showHud = context.skill !== 'listening';
+  const hudMarkup = showHud
+    ? `<div id="ark-secure-hud" aria-live="polite"><small>${context.preview ? 'ADMIN PREVIEW' : 'TIME LEFT'}</small><strong id="ark-secure-time">--:--</strong></div>`
+    : '';
   const script = `
 <style id="ark-secure-style">
 html{font-size:16px!important}
@@ -27,20 +32,21 @@ body{font-size:16px}
 #ark-secure-hud.ark-time-low:before{background:#ff6b58;box-shadow:0 0 0 4px rgba(255,107,88,.15)}
 #deliveryStatus,.delivery-status,#restartBtn,.restart,[data-ark-delivery-success]{display:none!important}
 </style>
-<div id="ark-secure-hud" aria-live="polite"><small>${context.preview ? 'ADMIN PREVIEW' : 'TIME LEFT'}</small><strong id="ark-secure-time">--:--</strong></div>
+${hudMarkup}
 <script>
 (function () {
   var context = ${payload};
   var lastPayload = '';
   var expired = false;
   var platformStarted = false;
+  var resultSaved = false;
   var hud = document.getElementById('ark-secure-hud');
   var timeNode = document.getElementById('ark-secure-time');
   var nativeTimer = document.querySelector('[data-ark-timer],#timer,.timer');
   if (nativeTimer && hud) hud.style.display = 'none';
 
   function sendResult(payload) {
-    if (!payload || typeof payload !== 'object' || context.preview) return;
+    if (!payload || typeof payload !== 'object' || context.preview || resultSaved) return;
     var fingerprint = '';
     try { fingerprint = JSON.stringify(payload); } catch (e) { fingerprint = String(Date.now()); }
     if (fingerprint && fingerprint === lastPayload) return;
@@ -68,7 +74,7 @@ body{font-size:16px}
   }
 
   function submitAtExpiry() {
-    if (expired || context.preview) return;
+    if (expired || context.preview || resultSaved) return;
     expired = true;
     try {
       if (typeof finalizeSubmission === 'function') { finalizeSubmission(true); return; }
@@ -102,6 +108,7 @@ body{font-size:16px}
   }
 
   function renderTime() {
+    if (resultSaved) return;
     var left = remainingSeconds();
     if (timeNode) timeNode.textContent = formatTime(left);
     if (hud) hud.classList.toggle('ark-time-low', left <= 300);
@@ -130,11 +137,21 @@ body{font-size:16px}
   document.addEventListener('ark-result', function (event) { sendResult(event.detail || {}); });
   window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
+    if (event.data && event.data.type === 'ARK_RESULT_SAVED') {
+      resultSaved = true;
+      expired = true;
+      if (hud) hud.style.display = 'none';
+      return;
+    }
     if (event.data && event.data.type === 'ARK_RESULT_ERROR') lastPayload = '';
     if (event.data && event.data.type === 'ARK_PLATFORM_START') startKnownInterface();
   });
 
   var watch = window.setInterval(function () {
+    if (resultSaved) {
+      window.clearInterval(watch);
+      return;
+    }
     if (window.__ARK_RESULT__ && typeof window.__ARK_RESULT__ === 'object') {
       sendResult(window.__ARK_RESULT__);
       window.clearInterval(watch);
@@ -170,9 +187,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const { id } = await params;
     const service = getServiceSupabase();
-    let testQuery = service
+    const testQuery = service
       .from('tests')
-      .select('id,status,file_path,file_name,duration_minutes')
+      .select('id,status,skill,file_path,file_name,duration_minutes')
       .eq('id', id);
     const { data: test, error } = await testQuery.maybeSingle();
     if (error || !test) return new NextResponse('Test yopiq yoki topilmadi.', { status: 404 });
@@ -183,6 +200,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         mode: 'preview',
         attemptId: '',
         section: String(test.status || ''),
+        skill: String(test.skill || ''),
         testId: id,
         sessionId: 'admin-preview',
         expiresAt: new Date(Date.now() + Number(test.duration_minutes || 60) * 60_000).toISOString(),
@@ -194,10 +212,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
       const { data: exam, error: sessionError } = await service
         .from('test_sessions')
-        .select('id,student_id,test_id,mock_attempt_id,mode,section,status,expires_at')
+        .select('id,student_id,test_id,mock_attempt_id,mode,section,status,expires_at,superseded')
         .eq('id', testSessionId)
         .eq('student_id', studentSession!.studentId)
         .eq('test_id', id)
+        .eq('superseded', false)
         .maybeSingle();
       if (sessionError) throw sessionError;
       if (!exam || exam.status !== 'in_progress') return new NextResponse('Bu test urinishidan foydalanib bo‘lingan.', { status: 409 });
@@ -214,6 +233,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         mode: exam.mode,
         attemptId: exam.mock_attempt_id || '',
         section: exam.section || '',
+        skill: String(test.skill || exam.section || ''),
         testId: id,
         sessionId: exam.id,
         expiresAt: exam.expires_at,
