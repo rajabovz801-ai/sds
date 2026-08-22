@@ -6,19 +6,36 @@ import { useEffect, useState } from 'react';
 type Track = 'ielts' | 'cefr';
 type Student = { id: string; firstName: string; lastName: string };
 
-const ieltsSections = [
-  { key: 'listening', title: 'Listening', accent: 'red', facts: ['40 ta savol', '30 daqiqa', '4 ta bo‘lim'], copy: 'Audio materiallar va IELTS formatidagi to‘liq listening testlari.' },
-  { key: 'reading', title: 'Reading', accent: 'blue', facts: ['40 ta savol', '60 daqiqa', '3 ta passage'], copy: 'Akademik matnlar, real test savollari va uchta reading passage.' },
-  { key: 'writing', title: 'Writing', accent: 'red', facts: ['2 ta topshiriq', '60 daqiqa', 'Task 1 va Task 2'], copy: 'Writing Task 1 va Task 2 uchun professional imtihon muhiti.' },
-  { key: 'speaking', title: 'Speaking', accent: 'violet', facts: ['3 ta part', '11–14 daqiqa', 'Part 1, 2 va 3'], copy: 'Speaking Part 1–3 uchun tartibli va exam-style practice muhiti.' },
-] as const;
+type Section = {
+  key: 'reading' | 'speaking';
+  title: string;
+  accent: 'blue' | 'violet';
+  facts: readonly string[];
+  copy: string;
+  href: string;
+};
 
-const cefrSections = [
-  { key: 'listening', title: 'Listening', accent: 'red', facts: ['Level-based', 'Audio tasks', 'A2–C1'], copy: 'CEFR darajalari bo‘yicha listening topshiriqlari va mock materiallar.' },
-  { key: 'reading', title: 'Reading', accent: 'blue', facts: ['Level-based', 'Reading tasks', 'A2–C1'], copy: 'Darajaga mos matnlar va CEFR formatidagi reading savollari.' },
-  { key: 'writing', title: 'Writing', accent: 'red', facts: ['Structured tasks', 'Level-based', 'A2–C1'], copy: 'CEFR yozma topshiriqlari uchun professional practice muhiti.' },
-  { key: 'speaking', title: 'Speaking', accent: 'violet', facts: ['Speaking tasks', 'Level-based', 'A2–C1'], copy: 'CEFR speaking topshiriqlari va tartibli practice flow.' },
-] as const;
+const ieltsSections: readonly Section[] = [
+  {
+    key: 'reading',
+    title: 'Reading',
+    accent: 'blue',
+    facts: ['40 ta savol', '60 daqiqa', '3 ta passage'],
+    copy: 'IELTS Academic Reading mock testlari. Reading tugmasi sizni to‘g‘ridan-to‘g‘ri Reading testlar bo‘limiga olib kiradi.',
+    href: '/ielts/reading',
+  },
+];
+
+const cefrSections: readonly Section[] = [
+  {
+    key: 'speaking',
+    title: 'Speaking',
+    accent: 'violet',
+    facts: ['Speaking tasks', 'Level-based', 'CEFR format'],
+    copy: 'CEFR Speaking uchun alohida professional practice va mock bo‘limi.',
+    href: '/cefr/speaking',
+  },
+];
 
 export function ExamSectionsClient({ track }: { track: Track }) {
   const [student, setStudent] = useState<Student | null | undefined>(undefined);
@@ -47,6 +64,10 @@ export function ExamSectionsClient({ track }: { track: Track }) {
 
   const sections = track === 'ielts' ? ieltsSections : cefrSections;
   const label = track.toUpperCase();
+  const heroTitle = track === 'ielts' ? 'IELTS Reading' : 'CEFR Speaking';
+  const heroCopy = track === 'ielts'
+    ? 'Hozir IELTS uchun faqat Reading mock bo‘limi faol.'
+    : 'Hozir CEFR uchun faqat Speaking bo‘limi faol.';
 
   return (
     <div className="examSectionPage">
@@ -65,13 +86,14 @@ export function ExamSectionsClient({ track }: { track: Track }) {
         <section className="examSectionHero">
           <div>
             <span className="mockFlowEyebrow">ARK {label} MOCK EXAMINATION</span>
-            <h1>Choose your exam section</h1>
+            <h1>{heroTitle}</h1>
+            <p className="examSectionHeroCopy">{heroCopy}</p>
           </div>
           <div className="examStudentCard"><small>ACTIVE STUDENT</small><strong>{student.firstName} {student.lastName}</strong></div>
           <div className="examHeroWatermark">{label}</div>
         </section>
 
-        <section className="examSectionGrid">
+        <section className="examSectionGrid single">
           {sections.map((section) => (
             <article className={`examSectionCard ${section.accent}`} key={section.key}>
               <div className="examSectionCardTop">
@@ -83,7 +105,7 @@ export function ExamSectionsClient({ track }: { track: Track }) {
               <div className="examFacts">
                 {section.facts.map((fact) => <span key={fact}><i />{fact}</span>)}
               </div>
-              <Link href={`/dashboard?track=${track}&skill=${section.key}`} className="examOpenButton">
+              <Link href={section.href} className="examOpenButton">
                 <strong>Open {section.title}</strong><span>→</span>
               </Link>
             </article>
