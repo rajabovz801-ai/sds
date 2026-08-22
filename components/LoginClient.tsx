@@ -61,7 +61,6 @@ export function LoginClient() {
         <p>Platformaga muvaffaqiyatli kirilgansiz. IELTS yoki CEFR mock yo‘nalishini tanlashingiz mumkin.</p>
         <div className="authActions">
           <Link className="authPrimary" href="/mock">Mock platforma <span>→</span></Link>
-          <Link className="authSecondary" href="/dashboard">Dashboard</Link>
         </div>
         <button className="authLogout" type="button" onClick={logout}>Sessiondan chiqish</button>
       </div>
