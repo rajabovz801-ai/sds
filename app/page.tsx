@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LandingAccessCard } from '@/components/LandingAccessCard';
 
 function LockIcon() {
   return (
@@ -81,25 +82,12 @@ export default function HomePage() {
           <div className="arkGateCardHead">
             <div>
               <h2>Welcome back</h2>
-              <p>Imtihon platformasiga kirish yoki yangi hisob yaratish uchun quyidagi tugmadan foydalaning.</p>
+              <p>Avval Telegram orqali ro‘yxatdan o‘ting, keyin bot bergan bir martalik kod bilan platformaga kiring.</p>
             </div>
             <span className="arkGateLock"><LockIcon /></span>
           </div>
 
-          <div className="arkGateRegisterBlock">
-            <label>Ro‘yxatdan o‘tish</label>
-            <Link className="arkGateRegisterField" href="/login">
-              <span>Ro‘yxatdan o‘tish</span>
-              <b>→</b>
-            </Link>
-          </div>
-
-          <Link className="arkGateEnter" href="/mock">ENTER MOCK EXAM</Link>
-
-          <div className="arkGateNote">
-            <span><ShieldIcon /></span>
-            <p>Ro‘yxatdan o‘tgan o‘quvchilar mock platformaga xavfsiz kiradi.</p>
-          </div>
+          <LandingAccessCard />
         </section>
       </main>
 
