@@ -1,0 +1,183 @@
+/* ARK Education — smoky light iOS 26 refinement
+   Contrast + breathing room only. Auth/session logic untouched. */
+.arkIosPage{
+  --ios-ink:#10243f;
+  --ios-muted:#64758b;
+  --ios-line:rgba(83,106,133,.22);
+  --ios-line-strong:rgba(64,88,116,.30);
+  background:
+    radial-gradient(circle at 8% 2%,rgba(96,176,226,.19),transparent 27%),
+    radial-gradient(circle at 92% 5%,rgba(231,106,130,.14),transparent 26%),
+    radial-gradient(circle at 52% 106%,rgba(112,104,206,.08),transparent 34%),
+    linear-gradient(145deg,#e8edf3 0%,#f2f5f8 46%,#eceff4 100%);
+}
+
+.arkIosBackdrop{
+  background:
+    radial-gradient(circle at 50% 36%,rgba(255,255,255,.44),transparent 42%),
+    linear-gradient(180deg,rgba(255,255,255,.28),rgba(220,228,237,.18));
+}
+.arkIosBackdrop::before{
+  background-image:linear-gradient(rgba(38,62,89,.034) 1px,transparent 1px),linear-gradient(90deg,rgba(38,62,89,.034) 1px,transparent 1px);
+  opacity:.28;
+}
+.arkIosOrb{filter:blur(120px);opacity:.62}
+.arkIosOrbBlue{background:rgba(72,159,215,.24)}
+.arkIosOrbRed{background:rgba(224,87,113,.18)}
+.arkIosOrbViolet{background:rgba(113,103,207,.11)}
+.arkIosNoise{opacity:.012}
+
+/* denser, readable liquid glass */
+.arkIosPage .arkIosGlass{
+  background:linear-gradient(135deg,rgba(248,250,253,.90),rgba(235,241,247,.78) 54%,rgba(245,248,251,.86));
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.96),inset 0 -1px 0 rgba(55,78,104,.08),0 18px 46px rgba(49,69,94,.14),0 0 0 1px rgba(67,92,120,.09);
+  backdrop-filter:blur(28px) saturate(138%);
+  -webkit-backdrop-filter:blur(28px) saturate(138%);
+}
+.arkIosPage .arkIosGlassSoft{
+  background:linear-gradient(145deg,rgba(250,252,254,.88),rgba(229,236,243,.76));
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.94),0 8px 22px rgba(50,72,98,.10),0 0 0 1px rgba(68,94,123,.08);
+}
+
+/* header: less dominant */
+.arkIosNavWrap{width:min(1250px,calc(100% - 56px));top:max(16px,env(safe-area-inset-top))}
+.arkIosNav{min-height:64px;padding:7px 9px 7px 10px;border-radius:26px}
+.arkIosBrand{min-width:260px;gap:11px}
+.arkIosLogo{width:44px;height:44px;border-radius:15px;font-size:31px}
+.arkIosBrandCopy strong{font-size:15px!important;color:#12263f!important}
+.arkIosBrandCopy small{color:#65768a!important}
+.arkIosNavStatus{min-height:38px;color:#5b6d82!important;background:rgba(235,241,247,.84)!important;border-color:rgba(75,101,130,.14)!important}
+.arkIosOfficial{min-height:40px;padding:0 15px;color:#9f2636!important;background:rgba(249,240,243,.88)!important;border-color:rgba(199,73,92,.18)!important}
+
+/* more breathing room between the three zones */
+.arkIosHero{
+  width:min(1460px,calc(100% - 72px));
+  padding:104px 0 56px;
+  grid-template-columns:minmax(300px,.82fr) minmax(470px,1.10fr) minmax(330px,.82fr);
+  gap:38px;
+}
+
+/* left: slightly smaller + compact feature cards */
+.arkIosCopy{padding:0 0 14px}
+.arkIosKicker{padding:6px 11px 6px 7px;color:#52677f!important}
+.arkIosKicker>span{width:25px;height:25px}
+.arkIosCopy h1{font-size:clamp(44px,3.55vw,64px);line-height:.93;margin:24px 0 18px;max-width:470px}
+.arkIosCopy h1 span{background:linear-gradient(180deg,#10243f,#244361)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+.arkIosCopy h1 .accent{background:linear-gradient(180deg,#ef5666,#d9293d 78%)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+.arkIosLead{max-width:410px;color:#5f7288!important;font-size:12.5px;line-height:1.65}
+.arkIosBenefits{gap:8px;margin-top:23px;max-width:390px}
+.arkIosBenefit{min-height:48px;padding:6px 10px 6px 7px;border-radius:15px}
+.arkIosBenefit i{width:34px;height:34px;border-radius:11px;padding:8px}
+.arkIosBenefit strong{font-size:10.5px;color:#16304d!important}
+.arkIosBenefit small{font-size:8.5px;color:#6b7c90!important}
+
+/* center: reduce size ~12%, keep contrast */
+.arkIosProduct{max-width:650px;margin-inline:auto}
+.arkIosProductHalo{width:78%;opacity:.58}
+.arkIosStage{
+  min-height:454px;
+  padding:12px;
+  border-radius:29px;
+  background:linear-gradient(145deg,rgba(245,249,252,.92),rgba(218,228,238,.80))!important;
+  border-color:rgba(255,255,255,.88)!important;
+  box-shadow:inset 0 1px 0 #fff,0 28px 62px rgba(51,72,96,.17),0 0 0 1px rgba(65,91,120,.11)!important;
+}
+.arkIosStageTop{min-height:48px}
+.arkIosStageBrand>span{width:32px;height:32px;border-radius:10px;font-size:22px}
+.arkIosStageBrand strong{color:#15304d!important}
+.arkIosStageBrand small{color:#6a7d92!important}
+.arkIosStageTimer{height:32px;color:#2f4a69!important;background:rgba(242,247,251,.92)!important;border-color:rgba(60,91,125,.16)!important}
+.arkIosSkillTabs{height:39px;margin-bottom:8px;background:rgba(207,219,231,.76)!important;border-color:rgba(58,86,116,.12)!important}
+.arkIosSkillTabs span{color:#60738a!important}
+.arkIosSkillTabs .active{background:linear-gradient(145deg,#fff,#edf3f7)!important;color:#16304d!important;box-shadow:0 6px 14px rgba(48,69,92,.10),0 0 0 1px rgba(70,95,123,.09)!important}
+.arkIosExamCanvas{height:314px;border-radius:20px;box-shadow:0 14px 34px rgba(45,66,88,.12),0 0 0 1px rgba(63,89,117,.10)!important}
+.arkIosPassage,.arkIosQuestion{padding:19px 18px}
+.arkIosPassage{background:linear-gradient(180deg,#fff,#f8fafc)!important}
+.arkIosQuestion{background:linear-gradient(180deg,#f3f7fa,#eaf0f5)!important}
+.arkIosStageFooter{min-height:31px;color:#5f7185!important}
+.arkIosFloatScore{left:-22px;bottom:43px;transform:scale(.88);transform-origin:left bottom}
+.arkIosFloatSecure{right:-18px;top:72px;transform:scale(.90);transform-origin:right top}
+
+/* right access: compact, stronger hierarchy and solid CTA */
+.arkIosAccess{
+  min-height:410px!important;
+  padding:28px 28px 25px!important;
+  border-radius:28px!important;
+  background:linear-gradient(145deg,rgba(244,247,250,.94),rgba(225,232,240,.86))!important;
+  border:1px solid rgba(255,255,255,.84)!important;
+  box-shadow:inset 0 1px 0 #fff,0 24px 58px rgba(52,72,96,.16),0 0 0 1px rgba(67,92,120,.10)!important;
+  justify-content:center!important;
+}
+.arkIosAccess::before{opacity:.50!important}
+.arkIosAccess .arkIosAccessEyebrow{color:#2478ac!important}
+.arkIosAccess .arkGateCardHead{gap:15px!important}
+.arkIosAccess .arkGateCardHead h2,
+.arkIosAccess .arkIosAccessHead h2{color:#10243f!important;font-size:31px!important;margin-bottom:10px!important}
+.arkIosAccess .arkGateCardHead p,
+.arkIosAccess .arkIosAccessHead p{color:#5f7187!important;font-size:12px!important;line-height:1.55!important}
+.arkIosAccess .arkIosLock{width:48px!important;height:48px!important;border-radius:15px!important;padding:13px!important}
+
+.arkIosAccess .arkGateAccessReady{
+  margin-top:22px!important;
+  padding:19px!important;
+  border-radius:18px!important;
+  background:linear-gradient(145deg,#f9fbfd,#e9f0f6)!important;
+  border:1px solid rgba(62,92,124,.15)!important;
+  box-shadow:inset 0 1px 0 #fff,0 10px 25px rgba(47,68,91,.09)!important;
+}
+.arkIosAccess .arkGateAccessLabel{color:#25845f!important}
+.arkIosAccess .arkGateAccessReady>strong{color:#132b47!important;font-size:20px!important}
+.arkIosAccess .arkGateAccessReady>p{color:#62758a!important;font-size:11px!important}
+.arkIosAccess .arkGateContinue{
+  height:52px!important;
+  margin-top:7px!important;
+  border-radius:14px!important;
+  background:linear-gradient(145deg,#17324f,#0f2844)!important;
+  color:#fff!important;
+  border:1px solid rgba(9,31,53,.74)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 12px 24px rgba(17,42,69,.18)!important;
+}
+.arkIosAccess .arkGateContinue:hover{transform:translateY(-1px);background:linear-gradient(145deg,#1e4268,#143552)!important;box-shadow:0 16px 28px rgba(17,42,69,.22)!important}
+.arkIosAccess .arkGateContinue b{color:#8fd3ff!important}
+
+.arkIosAccess .arkGateRegisterBlock{margin-top:22px!important}
+.arkIosAccess .arkGateRegisterField{height:56px!important;background:#f8fafc!important;border:1px solid rgba(58,93,128,.20)!important;box-shadow:inset 0 1px 0 #fff,0 7px 16px rgba(48,69,92,.07)!important}
+.arkIosAccess .arkGateCodeBlock{margin-top:14px!important}
+.arkIosAccess .arkGateCodeField{height:56px!important;background:#f8fafc!important;border-color:rgba(58,93,128,.20)!important}
+.arkIosAccess .arkGateCodeField button{width:42px!important;height:42px!important;background:linear-gradient(145deg,#1f8ccb,#146fa8)!important}
+.arkIosAccess .arkGateNote{margin-top:14px!important;color:#718297!important}
+
+.arkIosFooter{bottom:14px!important;color:#6e7d90!important}
+.arkIosFooter b{color:#4f6074!important}
+
+@media(max-width:1350px){
+  .arkIosHero{width:min(1320px,calc(100% - 48px));grid-template-columns:minmax(275px,.78fr) minmax(440px,1.08fr) minmax(310px,.82fr);gap:26px}
+  .arkIosCopy h1{font-size:clamp(42px,3.5vw,58px)}
+  .arkIosProduct{max-width:610px}
+  .arkIosStage{min-height:430px}
+  .arkIosExamCanvas{height:292px}
+  .arkIosAccess{min-height:390px!important;padding:24px!important}
+}
+
+@media(max-width:1180px){
+  .arkIosHero{width:min(980px,calc(100% - 36px));padding-top:100px;grid-template-columns:1fr 1fr;grid-template-areas:"copy access" "product product";gap:28px}
+  .arkIosCopy{grid-area:copy}
+  .arkIosAccess{grid-area:access}
+  .arkIosProduct{grid-area:product;max-width:720px;width:100%}
+}
+
+@media(max-width:760px){
+  .arkIosPage{background:linear-gradient(180deg,#e8edf3,#f3f6f9 62%,#e9edf2)}
+  .arkIosNavWrap{width:calc(100% - 24px)}
+  .arkIosNav{border-radius:20px}
+  .arkIosHero{display:block;width:calc(100% - 28px);padding:96px 0 72px}
+  .arkIosCopy h1{font-size:clamp(43px,12.5vw,58px)}
+  .arkIosBenefits{max-width:none}
+  .arkIosProduct{margin-top:38px;max-width:none}
+  .arkIosStage{min-height:auto}
+  .arkIosExamCanvas{height:auto;min-height:310px}
+  .arkIosAccess{margin-top:38px;min-height:auto!important}
+  .arkIosFloatScore,.arkIosFloatSecure{display:none}
+}
