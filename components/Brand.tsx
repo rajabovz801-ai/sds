@@ -2,11 +2,11 @@ import Link from 'next/link';
 
 export function Brand() {
   return (
-    <Link href="/" className="brand" aria-label="ARK Mock bosh sahifa">
-      <span className="brandMark" aria-hidden="true">A</span>
-      <span className="brandText">
-        <strong>ARK MOCK</strong>
-        <small>EXAM PLATFORM</small>
+    <Link href="/" className="arkBrand" aria-label="ARK bosh sahifa">
+      <span className="arkBrandMark" aria-hidden="true"><span>A</span></span>
+      <span className="arkBrandText">
+        <strong>ARK</strong>
+        <small>EXAM HUB</small>
       </span>
     </Link>
   );
