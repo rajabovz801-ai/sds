@@ -38,153 +38,104 @@ function WaveIcon() {
   );
 }
 
-function SparkIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 2.8c.8 5.2 4 8.3 9.2 9.2-5.2.8-8.4 4-9.2 9.2-.8-5.2-4-8.4-9.2-9.2 5.2-.9 8.4-4 9.2-9.2Z" />
-    </svg>
-  );
-}
-
 export default function HomePage() {
   return (
-    <div className="arkGatePage arkIosPage">
+    <div className="arkHomeV4">
       <LandingMotion />
 
-      <div className="arkIosBackdrop" aria-hidden="true">
-        <span className="arkIosOrb arkIosOrbBlue" />
-        <span className="arkIosOrb arkIosOrbRed" />
-        <span className="arkIosOrb arkIosOrbViolet" />
-        <span className="arkIosNoise" />
+      <div className="arkHomeAmbient" aria-hidden="true">
+        <span className="arkHomeOrb blue" />
+        <span className="arkHomeOrb red" />
+        <span className="arkHomeOrb violet" />
       </div>
 
-      <header className="arkIosNavWrap" data-reveal>
-        <div className="arkIosNav arkIosGlass">
-          <Link href="/" className="arkIosBrand" aria-label="ARK Education bosh sahifa">
-            <span className="arkIosLogo">A</span>
-            <span className="arkIosBrandCopy">
-              <strong>ARK Education</strong>
-              <small>IELTS &amp; English Learning Centre</small>
-            </span>
-          </Link>
-
-          <div className="arkIosNavStatus">
-            <span className="arkIosLiveDot" />
-            <span>Secure student gateway</span>
-          </div>
-
-          <span className="arkIosOfficial">OFFICIAL MOCK PLATFORM</span>
+      <header className="arkHomeNav" data-reveal>
+        <Link href="/" className="arkHomeBrand" aria-label="ARK Education bosh sahifa">
+          <span className="arkHomeLogo">A</span>
+          <span>
+            <strong>ARK Education</strong>
+            <small>IELTS &amp; English Learning Centre</small>
+          </span>
+        </Link>
+        <div className="arkHomeNavMeta">
+          <span className="arkHomeSecureDot" />
+          <span>Secure student gateway</span>
+          <b>OFFICIAL MOCK PLATFORM</b>
         </div>
       </header>
 
-      <main className="arkIosHero">
-        <section className="arkIosCopy" data-reveal>
-          <div className="arkIosKicker arkIosGlassSoft">
-            <span><SparkIcon /></span>
-            ARK EDUCATION MOCK PLATFORM
-          </div>
+      <main className="arkHomeShell" data-reveal>
+        <section className="arkHomeIntro">
+          <div className="arkHomeIntroCopy">
+            <span className="arkHomeEyebrow">ARK EDUCATION MOCK PLATFORM</span>
+            <h1>
+              Real exam. <span>Real progress.</span>
+              <em>Real results.</em>
+            </h1>
+            <p>Professional computer-based mock practice designed to make exam day feel familiar, focused and measurable.</p>
 
-          <h1>
-            <span>Real exam.</span>
-            <span>Real progress.</span>
-            <span className="accent">Real results.</span>
-          </h1>
-
-          <p className="arkIosLead">
-            Professional computer-based mock practice designed to make exam day feel familiar, focused and measurable.
-          </p>
-
-          <div className="arkIosBenefits">
-            <div className="arkIosBenefit arkIosGlassSoft">
-              <i><ShieldIcon /></i>
-              <span><strong>Secure access</strong><small>Telegram verified session</small></span>
-            </div>
-            <div className="arkIosBenefit arkIosGlassSoft">
-              <i><ClockIcon /></i>
-              <span><strong>Real timing</strong><small>Authentic exam flow</small></span>
-            </div>
-            <div className="arkIosBenefit arkIosGlassSoft">
-              <i><WaveIcon /></i>
-              <span><strong>Exam experience</strong><small>Focused test interface</small></span>
+            <div className="arkHomeTrust">
+              <span><i><ShieldIcon /></i><b>Secure access</b></span>
+              <span><i><ClockIcon /></i><b>Real timing</b></span>
+              <span><i><WaveIcon /></i><b>Exam experience</b></span>
             </div>
           </div>
+
+          <aside className="arkHomeAccess">
+            <div className="arkHomeAccessTop">
+              <div>
+                <span>STUDENT ACCESS</span>
+                <h2>Welcome back</h2>
+                <p>Telegram orqali tasdiqlangan kod bilan xavfsiz sessiyaga kiring.</p>
+              </div>
+              <i className="arkHomeLock"><LockIcon /></i>
+            </div>
+            <LandingAccessCard />
+          </aside>
         </section>
 
-        <section className="arkIosProduct" aria-label="ARK IELTS mock examination preview" data-reveal>
-          <div className="arkIosProductHalo" aria-hidden="true" />
-
-          <div className="arkIosStage arkIosGlass" data-tilt>
-            <div className="arkIosStageTop">
-              <div className="arkIosStageBrand">
-                <span>A</span>
-                <div><strong>ARK MOCK</strong><small>IELTS Academic</small></div>
-              </div>
-              <div className="arkIosStageTimer"><ClockIcon /><span>59:42</span></div>
+        <section className="arkHomePreview" data-tilt aria-label="IELTS mock test interface preview">
+          <div className="arkHomePreviewBar">
+            <div className="arkHomePreviewBrand">
+              <span>A</span>
+              <div><strong>ARK MOCK</strong><small>IELTS Academic</small></div>
             </div>
-
-            <div className="arkIosSkillTabs">
+            <div className="arkHomeTabs">
               <span>Listening</span>
               <span className="active">Reading</span>
               <span>Writing</span>
             </div>
-
-            <div className="arkIosExamCanvas">
-              <article className="arkIosPassage">
-                <div className="arkIosMeta"><span>PASSAGE 1</span><b>Academic Reading</b></div>
-                <h2>The future of learning</h2>
-                <p>
-                  Modern assessment environments are increasingly designed to measure not only knowledge, but also a candidate&apos;s ability to work accurately under realistic conditions.
-                </p>
-                <p>
-                  A carefully structured interface can help students become <mark>familiar with the rhythm of a real examination</mark> before test day.
-                </p>
-                <div className="arkIosTextLines" aria-hidden="true"><i /><i /><i /><i /></div>
-              </article>
-
-              <aside className="arkIosQuestion">
-                <div className="arkIosMeta"><span>QUESTION 4</span><b>Multiple choice</b></div>
-                <h3>What is the main purpose of the interface?</h3>
-                <label><i>A</i><span>To shorten the examination</span></label>
-                <label className="selected"><i>B</i><span>To recreate realistic test conditions</span></label>
-                <label><i>C</i><span>To remove time limits</span></label>
-                <div className="arkIosQuestionRail"><span className="done">1</span><span className="done">2</span><span>3</span><span className="current">4</span><span>5</span></div>
-              </aside>
-            </div>
-
-            <div className="arkIosStageFooter">
-              <span><i className="arkIosLiveDot" /> Session protected</span>
-              <strong>ARK EDUCATION</strong>
-              <span>Exam mode <b>ON</b></span>
-            </div>
+            <div className="arkHomeTimer"><ClockIcon /><b>59:42</b></div>
           </div>
 
-          <div className="arkIosFloat arkIosFloatScore arkIosGlass">
-            <small>TARGET BAND</small>
-            <strong>8.0</strong>
-            <span>IELTS Academic</span>
+          <div className="arkHomeExam">
+            <article className="arkHomePassage">
+              <div className="arkHomeMeta"><span>PASSAGE 1</span><b>ACADEMIC READING</b></div>
+              <h3>The future of learning</h3>
+              <p>Modern assessment environments are increasingly designed to measure not only knowledge, but also a candidate&apos;s ability to work accurately under realistic conditions.</p>
+              <p>A carefully structured interface can help students become <mark>familiar with the rhythm of a real examination</mark> before test day.</p>
+              <div className="arkHomeLines"><i /><i /><i /></div>
+            </article>
+
+            <aside className="arkHomeQuestion">
+              <div className="arkHomeMeta"><span>QUESTION 4</span><b>MULTIPLE CHOICE</b></div>
+              <h4>What is the main purpose of the interface?</h4>
+              <label><i>A</i><span>To shorten the examination</span></label>
+              <label className="selected"><i>B</i><span>To recreate realistic test conditions</span></label>
+              <label><i>C</i><span>To remove time limits</span></label>
+              <div className="arkHomeRail"><span className="done">1</span><span className="done">2</span><span>3</span><span className="current">4</span><span>5</span></div>
+            </aside>
           </div>
 
-          <div className="arkIosFloat arkIosFloatSecure arkIosGlass">
-            <i><LockIcon /></i>
-            <span><strong>Secure mode</strong><small>Identity verified</small></span>
+          <div className="arkHomePreviewFoot">
+            <span><i className="arkHomeSecureDot" /> Session protected</span>
+            <strong>ARK EDUCATION</strong>
+            <span>Exam mode <b>ON</b></span>
           </div>
-        </section>
-
-        <section className="arkGateCard arkIosAccess arkIosGlass" data-reveal>
-          <div className="arkGateCardHead arkIosAccessHead">
-            <div>
-              <span className="arkIosAccessEyebrow">STUDENT ACCESS</span>
-              <h2>Welcome back</h2>
-              <p>Telegram orqali tasdiqlangan bir martalik kod bilan xavfsiz sessiyaga kiring.</p>
-            </div>
-            <span className="arkGateLock arkIosLock"><LockIcon /></span>
-          </div>
-
-          <LandingAccessCard />
         </section>
       </main>
 
-      <footer className="arkIosFooter">
+      <footer className="arkHomeFooter">
         <span><b>Powered by Bilimly AI</b></span>
         <i>•</i>
         <span>Academic Platform by Rajabov Zuhriddin</span>
