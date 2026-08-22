@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 export function LandingMotion() {
   useEffect(() => {
     const root = document.documentElement;
+    const landing = document.querySelector<HTMLElement>('.arkIosPage');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
 
@@ -37,8 +38,17 @@ export function LandingMotion() {
 
     const preview = document.querySelector<HTMLElement>('[data-tilt]');
     const onPointerMove = (event: PointerEvent) => {
+      if (landing) {
+        landing.style.setProperty('--mx', (event.clientX / Math.max(window.innerWidth, 1)).toFixed(3));
+        landing.style.setProperty('--my', (event.clientY / Math.max(window.innerHeight, 1)).toFixed(3));
+      }
+
       if (!preview || window.innerWidth < 980) return;
       const rect = preview.getBoundingClientRect();
+      if (
+        event.clientX < rect.left || event.clientX > rect.right ||
+        event.clientY < rect.top || event.clientY > rect.bottom
+      ) return;
       const x = (event.clientX - rect.left) / rect.width - 0.5;
       const y = (event.clientY - rect.top) / rect.height - 0.5;
       preview.style.setProperty('--tilt-x', `${(x * 2.2).toFixed(2)}deg`);
@@ -51,12 +61,12 @@ export function LandingMotion() {
       preview.style.setProperty('--tilt-y', '0deg');
     };
 
-    preview?.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
     preview?.addEventListener('pointerleave', resetTilt);
 
     return () => {
       observer?.disconnect();
-      preview?.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointermove', onPointerMove);
       preview?.removeEventListener('pointerleave', resetTilt);
       root.classList.remove('motion-ready');
     };
