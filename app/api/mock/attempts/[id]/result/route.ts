@@ -61,7 +61,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .maybeSingle();
     if (attemptError) throw attemptError;
     if (!attempt?.mock_id) return NextResponse.json({ error: 'Mock attempt topilmadi.' }, { status: 404 });
-    if (attempt.status === 'completed') return NextResponse.json({ error: 'Bu mock allaqachon yakunlangan.' }, { status: 409 });
+    if (attempt.status === 'completed') return NextResponse.json({ ok: true, duplicate: true, saved: true });
 
     const { data: mock, error: mockError } = await supabase
       .from('mocks')
@@ -117,13 +117,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const [{ data: exam, error: examError }, { data: test, error: testError }, { data: previous, error: previousError }] = await Promise.all([
       supabase
         .from('test_sessions')
-        .select('id,status,started_at,expires_at,client_submission_id,delivery')
+        .select('id,status,started_at,expires_at,client_submission_id,delivery,superseded')
         .eq('id', testSessionId)
         .eq('student_id', student.studentId)
         .eq('test_id', receivedTestId)
         .eq('mock_attempt_id', attempt.id)
         .eq('mode', 'mock')
         .eq('section', section)
+        .eq('superseded', false)
         .maybeSingle(),
       supabase.from('tests').select('id,title,track,skill').eq('id', receivedTestId).maybeSingle(),
       supabase
@@ -154,14 +155,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         ? previous.details as Record<string, unknown>
         : {};
       const previousTelegram = storedDelivery(previousDetails);
-      if (submissionId && previousDetails.submissionId === submissionId && Number(previousTelegram.sent || 0) > 0) {
-        return NextResponse.json({ ok: true, duplicate: true, result: previous });
-      }
-      if (!submissionId || previousDetails.submissionId !== submissionId) {
-        return NextResponse.json({ error: 'Bu section natijasi allaqachon saqlangan.' }, { status: 409 });
+      const sameSubmission = Boolean(submissionId && previousDetails.submissionId === submissionId);
+      if (!sameSubmission || Number(previousTelegram.sent || 0) > 0) {
+        return NextResponse.json({ ok: true, duplicate: true, saved: true, result: previous });
       }
     } else {
-      if (exam.status !== 'in_progress') return NextResponse.json({ error: 'Bu section urinishidan foydalanib bo‘lingan.' }, { status: 409 });
+      if (exam.status !== 'in_progress') return NextResponse.json({ ok: true, duplicate: true, saved: true });
       const { error: resultError } = await supabase
         .from('section_results')
         .insert({ attempt_id: attempt.id, section, raw_score: rawScore, max_score: maxScore, band, details });
@@ -214,20 +213,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           updated_at: new Date().toISOString(),
         })
         .eq('id', exam.id)
-        .eq('student_id', student.studentId),
+        .eq('student_id', student.studentId)
+        .eq('superseded', false),
     ]);
     if (resultStateError) throw resultStateError;
     if (examStateError) throw examStateError;
 
     if (!telegram.configured || telegram.sent === 0) {
       return NextResponse.json({
-        error: telegram.error || 'Natija saqlandi, lekin bot serveri qabul qilganini tasdiqlamadi.',
+        ok: true,
         saved: true,
+        deliveryPending: true,
         result: finalResult,
-      }, { status: 503 });
+      });
     }
 
-    return NextResponse.json({ ok: true, result: finalResult });
+    return NextResponse.json({ ok: true, saved: true, result: finalResult });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Result save server error' }, { status: 500 });
   }
