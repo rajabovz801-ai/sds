@@ -6,6 +6,18 @@ import { useRouter } from 'next/navigation';
 
 type Student = { id: string; firstName: string; lastName: string };
 
+function ArrowUpRight() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9" /></svg>;
+}
+
+function ArrowRight() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" /></svg>;
+}
+
+function CheckCircle() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m8.5 12 2.2 2.2 4.8-4.8" /></svg>;
+}
+
 export function LandingAccessCard() {
   const router = useRouter();
   const [student, setStudent] = useState<Student | null | undefined>(undefined);
@@ -49,7 +61,7 @@ export function LandingAccessCard() {
         <span className="arkGateAccessLabel">SESSION ACTIVE</span>
         <strong>{student.firstName} {student.lastName}</strong>
         <p>Siz platformaga kirgansiz. IELTS yoki CEFR mock yo‘nalishini tanlash uchun davom eting.</p>
-        <Link className="arkGateContinue" href="/mock">Mock platformaga davom etish <b>→</b></Link>
+        <Link className="arkGateContinue" href="/mock">Mock platformaga davom etish <b><ArrowRight /></b></Link>
       </div>
     );
   }
@@ -65,7 +77,7 @@ export function LandingAccessCard() {
           rel="noopener noreferrer"
         >
           <span>Telegram orqali ro‘yxatdan o‘tish</span>
-          <b>↗</b>
+          <b><ArrowUpRight /></b>
         </Link>
       </div>
 
@@ -82,14 +94,14 @@ export function LandingAccessCard() {
             aria-label="Telegram bergan kirish kodi"
           />
           <button type="submit" disabled={busy || code.length < 4} aria-label="Kirish kodini tasdiqlash">
-            {busy ? '…' : '→'}
+            {busy ? '…' : <ArrowRight />}
           </button>
         </div>
         {error && <p className="arkGateCodeError">{error}</p>}
       </form>
 
       <div className="arkGateNote">
-        <span aria-hidden="true">✓</span>
+        <span aria-hidden="true"><CheckCircle /></span>
         <p>Botda ism-familiyangizni yuboring, olingan bir martalik kodni shu yerga kiriting.</p>
       </div>
     </>
