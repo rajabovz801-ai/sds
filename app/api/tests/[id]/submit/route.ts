@@ -67,11 +67,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         .maybeSingle(),
       supabase
         .from('test_sessions')
-        .select('id,status,started_at,expires_at,client_submission_id,delivery')
+        .select('id,status,started_at,expires_at,client_submission_id,delivery,superseded')
         .eq('id', testSessionId)
         .eq('student_id', student.studentId)
         .eq('test_id', id)
         .eq('mode', 'practice')
+        .eq('superseded', false)
         .maybeSingle(),
     ]);
 
@@ -81,11 +82,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!exam) return NextResponse.json({ error: 'Bu test session sizga tegishli emas.' }, { status: 403 });
 
     if (exam.status === 'completed') {
-      if (submissionId && exam.client_submission_id === submissionId && deliverySent(exam.delivery)) {
-        return NextResponse.json({ ok: true, duplicate: true });
-      }
-      if (!submissionId || exam.client_submission_id !== submissionId) {
-        return NextResponse.json({ error: 'Bu test natijasi allaqachon saqlangan.' }, { status: 409 });
+      const sameSubmission = Boolean(submissionId && exam.client_submission_id === submissionId);
+      if (!sameSubmission || deliverySent(exam.delivery)) {
+        return NextResponse.json({ ok: true, duplicate: true, saved: true });
       }
     } else if (exam.status !== 'in_progress') {
       return NextResponse.json({ error: 'Bu test urinishining vaqti tugagan.' }, { status: 409 });
@@ -137,10 +136,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         .eq('id', exam.id)
         .eq('student_id', student.studentId)
         .eq('status', 'in_progress')
+        .eq('superseded', false)
         .select('id')
         .maybeSingle();
       if (completeError) throw completeError;
-      if (!completed) return NextResponse.json({ error: 'Natija boshqa so‘rovda saqlangan.' }, { status: 409 });
+      if (!completed) return NextResponse.json({ ok: true, duplicate: true, saved: true });
     }
 
     const telegram = await sendAdminTestResult({
@@ -167,17 +167,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .from('test_sessions')
       .update({ delivery: { ...telegram, updatedAt: new Date().toISOString() }, updated_at: new Date().toISOString() })
       .eq('id', exam.id)
-      .eq('student_id', student.studentId);
+      .eq('student_id', student.studentId)
+      .eq('superseded', false);
     if (deliveryError) throw deliveryError;
 
     if (!telegram.configured || telegram.sent === 0) {
       return NextResponse.json({
-        error: telegram.error || 'Natija saqlandi, lekin bot serveri qabul qilganini tasdiqlamadi.',
+        ok: true,
         saved: true,
-      }, { status: 503 });
+        deliveryPending: true,
+      });
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, saved: true });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Natija yuborish server xatosi.' }, { status: 500 });
   }
