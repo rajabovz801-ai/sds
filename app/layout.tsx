@@ -5,6 +5,7 @@ import './polish.css';
 import './landing-v2.css';
 import './landing-v3.css';
 import './landing-gate-polish.css';
+import './landing-ios26.css';
 import './mock-flow.css';
 import './skill-flow.css';
 import './auth.css';
