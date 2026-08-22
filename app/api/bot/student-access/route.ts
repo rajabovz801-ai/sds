@@ -4,6 +4,7 @@ import { hashAccessCode } from '@/lib/auth/codes';
 import { getServiceSupabase } from '@/lib/supabase/server';
 
 const CODE_TTL_MINUTES = 15;
+const STUDENT_SELECT = 'id,telegram_id,telegram_username,first_name,last_name,status';
 
 function safeEqual(left: string, right: string) {
   const a = Buffer.from(left, 'utf8');
@@ -31,7 +32,7 @@ async function findStudent(telegramId: string) {
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
     .from('students')
-    .select('id,telegram_id,telegram_username,first_name,last_name,status')
+    .select(STUDENT_SELECT)
     .eq('telegram_id', telegramId)
     .limit(1)
     .maybeSingle();
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
             status: 'active',
           })
           .eq('id', student.id)
-          .select('id,telegram_username,first_name,last_name,status')
+          .select(STUDENT_SELECT)
           .single();
         if (error) throw error;
         student = data;
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
             last_name: lastName,
             status: 'active',
           })
-          .select('id,telegram_username,first_name,last_name,status')
+          .select(STUDENT_SELECT)
           .single();
         if (error) throw error;
         student = data;
