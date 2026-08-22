@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 import './platform.css';
 import './polish.css';
+import './landing-v2.css';
 import './auth.css';
 import './mock-results.css';
 
 export const metadata: Metadata = {
-  title: 'ARK Exam Hub — IELTS & CEFR Practice Platform',
-  description: 'Professional IELTS and CEFR practice platform with mock tests, cloud test library, dashboard and result tracking.',
+  title: 'ARK EDUCATION — IELTS Exam & Practice Platform',
+  description: 'Professional IELTS practice platform with realistic exam interfaces, full mock exams, detailed results and progress tracking.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
