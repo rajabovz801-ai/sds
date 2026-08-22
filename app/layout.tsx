@@ -7,6 +7,7 @@ import './landing-v3.css';
 import './landing-gate-polish.css';
 import './landing-ios26.css';
 import './landing-ios26-light.css';
+import './landing-ios26-smoky.css';
 import './mock-flow.css';
 import './skill-flow.css';
 import './auth.css';
