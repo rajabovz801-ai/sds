@@ -1,13 +1,5 @@
-import { MockAccessClient } from '@/components/MockAccessClient';
-import { PlatformNav } from '@/components/PlatformNav';
+import { MockTrackChoiceClient } from '@/components/MockTrackChoiceClient';
 
 export default function MockPage() {
-  return (
-    <div className="platformRoot">
-      <PlatformNav />
-      <main className="platformMain">
-        <MockAccessClient />
-      </main>
-    </div>
-  );
+  return <MockTrackChoiceClient />;
 }
