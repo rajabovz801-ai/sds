@@ -1,7 +1,8 @@
 import { ExamSectionsClient } from '@/components/ExamSectionsClient';
-import { requireServerSession } from '@/lib/auth/server-session';
+import { PlatformNav } from '@/components/PlatformNav';
+import { requireStudent } from '@/lib/auth/server-session';
 
 export default async function IeltsPage() {
-  await requireServerSession('/ielts');
-  return <ExamSectionsClient track="ielts" />;
+  const student = await requireStudent('/ielts');
+  return <div className="platformRoot"><PlatformNav student={student} /><main className="platformMain"><ExamSectionsClient track="ielts" /></main></div>;
 }

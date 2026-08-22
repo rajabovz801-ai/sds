@@ -1,47 +1,51 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
-
-type Student = { firstName: string; lastName: string };
+import { LogOutIcon } from '@/components/UiIcons';
+import type { StudentSummary } from '@/lib/auth/server-session';
 
 const items = [
-  { href: '/mock', label: 'Mock', soon: false },
+  { href: '/mock', label: 'Boshqaruv' },
+  { href: '/ielts', label: 'IELTS' },
+  { href: '/cefr', label: 'CEFR' },
   { href: '/practice', label: 'Practice', soon: true },
-  { href: '/study-tools', label: 'Study tools', soon: true },
-  { href: '/ai-tutor', label: 'AI Tutor', soon: true },
-  { href: '/live-chat', label: 'Live Chat', soon: true },
-  { href: '/billing', label: 'Billing', soon: true },
+  { href: '/study-tools', label: 'Tools', soon: true },
 ];
 
-export function PlatformNav() {
+export function PlatformNav({ student }: { student: StudentSummary }) {
   const pathname = usePathname();
-  const [student, setStudent] = useState<Student | null>(null);
+  const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  useEffect(() => {
-    fetch('/api/auth/me')
-      .then((response) => response.json())
-      .then((data) => setStudent(data.student || null))
-      .catch(() => setStudent(null));
-  }, [pathname]);
+  async function logout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } finally {
+      router.replace('/');
+      router.refresh();
+    }
+  }
 
-  const isAdmin = pathname.startsWith('/admin');
+  const initials = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`.toUpperCase() || 'AR';
 
   return (
     <div className="platformBarWrap">
       <header className="platformBar">
-        <Link href="/" className="platformBrand" aria-label="ARK Mock bosh sahifa">
+        <Link href="/mock" className="platformBrand" aria-label="ARK Education platformasi">
           <span className="platformBrandMark"><ArkLogoIcon /></span>
-          <span className="platformBrandText"><strong>ARK MOCK</strong><small>IELTS • CEFR</small></span>
+          <span className="platformBrandText"><strong>ARK Education</strong><small>EXAM WORKSPACE</small></span>
         </Link>
 
-        <nav className="platformNav" aria-label="Platforma">
+        <nav className="platformNav" aria-label="Platforma bo‘limlari">
           {items.map((item) => {
-            const active = pathname === item.href || (item.href === '/mock' && pathname.startsWith('/mock/'));
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
-              <Link key={item.href} href={item.href} className={active ? 'active' : ''}>
+              <Link key={item.href} href={item.href} className={active ? 'active' : ''} prefetch>
                 {item.label}
                 {item.soon && <span className="soonDot">SOON</span>}
               </Link>
@@ -50,11 +54,13 @@ export function PlatformNav() {
         </nav>
 
         <div className="platformActions">
-          {isAdmin && <span className="adminModeChip"><b>ADM</b><span>Admin mode</span></span>}
-          <Link className="profileChip" href="/login">
-            <span className="profileAvatar">{student?.firstName?.charAt(0).toUpperCase() || 'U'}</span>
-            <span className="profileLabel">{student ? `${student.firstName} ${student.lastName}` : 'Kirish'}</span>
-          </Link>
+          <div className="profileChip" title={`${student.firstName} ${student.lastName}`}>
+            <span className="profileAvatar">{initials}</span>
+            <span className="profileLabel"><small>Student</small><strong>{student.firstName} {student.lastName}</strong></span>
+          </div>
+          <button className="platformLogout" type="button" onClick={logout} disabled={loggingOut} aria-label="Sessiyadan chiqish" title="Sessiyadan chiqish">
+            <LogOutIcon />
+          </button>
         </div>
       </header>
     </div>

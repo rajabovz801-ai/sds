@@ -1,14 +1,18 @@
 import { SkillLibraryClient } from '@/components/SkillLibraryClient';
-import { requireServerSession } from '@/lib/auth/server-session';
+import { PlatformNav } from '@/components/PlatformNav';
+import { requireStudent } from '@/lib/auth/server-session';
+import { listPublishedTestsBy } from '@/lib/cloudTests';
 
 export default async function IeltsListeningPage() {
-  await requireServerSession('/ielts/listening');
+  const [student, tests] = await Promise.all([
+    requireStudent('/ielts/listening'),
+    listPublishedTestsBy('ielts', 'listening'),
+  ]);
   return (
-    <SkillLibraryClient
-      track="ielts"
-      skill="listening"
-      title="IELTS Listening"
-      description="IELTS Listening uchun yangi mocklar va video materiallar shu bo‘limga qo‘shiladi."
-    />
+    <div className="platformRoot"><PlatformNav student={student} /><main className="platformMain"><SkillLibraryClient
+      track="ielts" skill="listening" title="IELTS Listening"
+      description="Audio asosidagi real mocklar va vaqt nazoratidagi Listening materiallari."
+      tests={tests}
+    /></main></div>
   );
 }

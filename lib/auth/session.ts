@@ -1,33 +1,30 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { NextRequest } from 'next/server';
+import { getSessionSecret } from '@/lib/auth/secrets';
 
 export const SESSION_COOKIE = 'ark_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
-type SessionPayload = {
+export type SessionPayload = {
   studentId: string;
   telegramId: number;
+  firstName?: string;
+  lastName?: string;
+  iat?: number;
   exp: number;
 };
 
-function sessionSecret() {
-  const value =
-    process.env.AUTH_SESSION_SECRET?.trim() ||
-    process.env.ADMIN_ACCESS_KEY?.trim() ||
-    process.env.SUPABASE_SECRET_KEY?.trim();
-
-  if (!value) throw new Error('Server session secret is not configured');
-  return value;
-}
-
 function signature(body: string) {
-  return createHmac('sha256', sessionSecret()).update(body).digest('base64url');
+  return createHmac('sha256', getSessionSecret()).update(body).digest('base64url');
 }
 
-export function createSessionToken(studentId: string, telegramId: number) {
+export function createSessionToken(studentId: string, telegramId: number, firstName?: string, lastName?: string) {
   const payload: SessionPayload = {
     studentId,
     telegramId,
+    firstName: firstName?.trim() || undefined,
+    lastName: lastName?.trim() || undefined,
+    iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS,
   };
   const body = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');

@@ -1,15 +1,19 @@
 import { MockAttemptClient } from '@/components/MockAttemptClient';
 import { PlatformNav } from '@/components/PlatformNav';
-import { requireServerSession } from '@/lib/auth/server-session';
+import { requireStudent } from '@/lib/auth/server-session';
+import { getMockAttempt } from '@/lib/mockAttempts';
+import { notFound } from 'next/navigation';
 
 export default async function MockAttemptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await requireServerSession(`/mock/${id}`);
+  const student = await requireStudent(`/mock/${id}`);
+  const initialData = await getMockAttempt(student.id, id);
+  if (!initialData) notFound();
   return (
     <div className="platformRoot">
-      <PlatformNav />
+      <PlatformNav student={student} />
       <main className="platformMain">
-        <MockAttemptClient id={id} />
+        <MockAttemptClient id={id} initialData={initialData} />
       </main>
     </div>
   );

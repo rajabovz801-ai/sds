@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeftIcon } from '@/components/UiIcons';
 
 type ViewerData = {
   test: { id: string; title: string; track: string; skill: string; fileName: string };
@@ -10,6 +12,7 @@ type ViewerData = {
 
 type Props = {
   id: string;
+  initialData: ViewerData;
   attemptId?: string;
   mode?: string;
   section?: string;
@@ -27,8 +30,8 @@ function normalizeMessage(value: unknown) {
   return data.payload || data.result || data.arkResult || data;
 }
 
-export function TestViewerClient({ id, attemptId, mode, section }: Props) {
-  const [data, setData] = useState<ViewerData | null | undefined>(undefined);
+export function TestViewerClient({ id, initialData: data, attemptId, mode, section }: Props) {
+  const router = useRouter();
   const [bridgeState, setBridgeState] = useState<'idle' | 'ready' | 'saving' | 'saved' | 'error'>('idle');
   const [bridgeError, setBridgeError] = useState('');
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -37,16 +40,6 @@ export function TestViewerClient({ id, attemptId, mode, section }: Props) {
 
   const isMock = mode === 'mock' && Boolean(attemptId && section);
   const backHref = isMock && attemptId ? `/mock/${attemptId}` : '/dashboard';
-
-  useEffect(() => {
-    fetch(`/api/tests/${id}`)
-      .then(async (response) => {
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error || 'Test topilmadi');
-        setData(body);
-      })
-      .catch(() => setData(null));
-  }, [id]);
 
   const iframeSrc = useMemo(() => {
     if (!data) return '';
@@ -59,8 +52,6 @@ export function TestViewerClient({ id, attemptId, mode, section }: Props) {
   }, [data, mode, attemptId, section]);
 
   useEffect(() => {
-    if (!isMock || !attemptId || !section) return;
-
     const saveResult = async (payload: any) => {
       if (savingRef.current) return;
       let fingerprint = '';
@@ -73,25 +64,32 @@ export function TestViewerClient({ id, attemptId, mode, section }: Props) {
       setBridgeError('');
 
       try {
-        const response = await fetch(`/api/mock/attempts/${attemptId}/result`, {
+        const endpoint = isMock && attemptId
+          ? `/api/mock/attempts/${attemptId}/result`
+          : `/api/tests/${id}/submit`;
+        const requestBody = isMock
+          ? { ...payload, result: payload, section, testId: id }
+          : { ...payload, result: payload, testId: id };
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            section,
-            testId: id,
-            ...payload,
-            result: payload,
-          }),
+          body: JSON.stringify(requestBody),
         });
         const body = await response.json();
         if (!response.ok) throw new Error(body.error || 'Natija saqlanmadi.');
         setBridgeState('saved');
-        window.setTimeout(() => {
-          window.location.href = `/mock/${attemptId}?saved=${encodeURIComponent(section)}`;
-        }, 650);
+        iframeRef.current?.contentWindow?.postMessage({ type: 'ARK_RESULT_SAVED', payload: body }, '*');
+        if (isMock && attemptId && section) {
+          window.setTimeout(() => {
+            router.replace(`/mock/${attemptId}?saved=${encodeURIComponent(section)}`);
+            router.refresh();
+          }, 900);
+        }
       } catch (error) {
         setBridgeState('error');
-        setBridgeError(error instanceof Error ? error.message : 'Natija saqlanmadi.');
+        const message = error instanceof Error ? error.message : 'Natija saqlanmadi.';
+        setBridgeError(message);
+        iframeRef.current?.contentWindow?.postMessage({ type: 'ARK_RESULT_ERROR', error: message }, '*');
         lastPayloadRef.current = '';
       } finally {
         savingRef.current = false;
@@ -111,32 +109,31 @@ export function TestViewerClient({ id, attemptId, mode, section }: Props) {
 
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [attemptId, id, isMock, section]);
-
-  if (data === undefined) return <div className="viewerLoading">Test yuklanmoqda…</div>;
-  if (data === null) return <div className="viewerLoading"><div style={{ textAlign: 'center' }}><b>Test topilmadi</b><div style={{ marginTop: 10 }}><Link href={backHref} className="pButton pButtonGhost">Orqaga</Link></div></div></div>;
+  }, [attemptId, id, isMock, router, section]);
 
   const bridgeLabel = bridgeState === 'saving'
-    ? 'Natija saqlanmoqda…'
+    ? 'Natija yuborilmoqda…'
     : bridgeState === 'saved'
-      ? 'Natija saqlandi ✓'
+      ? 'Admin natijani oldi ✓'
       : bridgeState === 'error'
-        ? 'Result connection error'
-        : 'Result autosave active';
+        ? 'Yuborishda xatolik'
+        : bridgeState === 'ready'
+          ? 'Admin result channel active'
+          : 'Result channel preparing';
 
   return (
     <div className="viewerRoot">
       <div className="viewerBar">
-        <Link href={backHref} className="viewerBack">← Back</Link>
+        <Link href={backHref} className="viewerBack"><ArrowLeftIcon /> Orqaga</Link>
         <div className="viewerTitle"><b>{data.test.title}</b><span>{data.test.track.toUpperCase()} • {data.test.skill} • {data.test.fileName}</span></div>
-        {isMock ? <div className={`viewerBridgeChip ${bridgeState}`}><span />{bridgeLabel}</div> : <span className="viewerModeChip">Practice mode</span>}
+        <div className={`viewerBridgeChip ${bridgeState}`}><span />{bridgeLabel}</div>
       </div>
       {bridgeError && <div className="viewerBridgeError">{bridgeError}</div>}
       <iframe
         ref={iframeRef}
         className="viewerFrame"
         title={data.test.title}
-        sandbox="allow-forms allow-modals allow-popups allow-scripts allow-same-origin"
+        sandbox="allow-forms allow-modals allow-popups allow-scripts"
         src={iframeSrc}
       />
     </div>
