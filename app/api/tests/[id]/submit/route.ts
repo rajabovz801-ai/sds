@@ -48,18 +48,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const supabase = getServiceSupabase();
-    const [{ data: test, error: testError }, { data: admins, error: adminError }] = await Promise.all([
-      supabase
-        .from('tests')
-        .select('id,title,track,skill,status')
-        .eq('id', id)
-        .eq('status', 'published')
-        .maybeSingle(),
-      supabase.from('admins').select('telegram_id').eq('active', true),
-    ]);
+    const { data: test, error: testError } = await supabase
+      .from('tests')
+      .select('id,title,track,skill,status')
+      .eq('id', id)
+      .eq('status', 'published')
+      .maybeSingle();
 
     if (testError) throw testError;
-    if (adminError) throw adminError;
     if (!test) return NextResponse.json({ error: 'Test topilmadi.' }, { status: 404 });
 
     const telegram = await sendAdminTestResult({
@@ -80,7 +76,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       durationSeconds,
       submittedAt: typeof body?.submittedAt === 'string' ? body.submittedAt : new Date().toISOString(),
       details,
-    }, (admins || []).map((admin) => String(admin.telegram_id || '')).filter(Boolean));
+    });
 
     if (!telegram.configured || telegram.sent === 0) {
       return NextResponse.json({

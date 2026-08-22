@@ -145,12 +145,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     if (resultError) throw resultError;
 
-    const [{ data: test, error: testError }, { data: admins, error: adminsError }] = await Promise.all([
-      supabase.from('tests').select('id,title,track,skill').eq('id', receivedTestId).maybeSingle(),
-      supabase.from('admins').select('telegram_id').eq('active', true),
-    ]);
+    const { data: test, error: testError } = await supabase
+      .from('tests')
+      .select('id,title,track,skill')
+      .eq('id', receivedTestId)
+      .maybeSingle();
     if (testError) throw testError;
-    if (adminsError) throw adminsError;
     if (!test) return NextResponse.json({ error: 'Test ma’lumotlari topilmadi.', saved: true, result }, { status: 500 });
 
     const telegram = await sendAdminTestResult({
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       durationSeconds: integerOrNull(body?.durationSeconds ?? safeDetails.durationSeconds),
       submittedAt: typeof body?.submittedAt === 'string' ? body.submittedAt : new Date().toISOString(),
       details,
-    }, (admins || []).map((admin) => String(admin.telegram_id || '')).filter(Boolean));
+    });
 
     const finalDetails = {
       ...details,
