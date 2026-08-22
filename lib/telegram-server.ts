@@ -15,6 +15,14 @@ type GatewayAnswer = {
   correct: boolean;
 };
 
+type GatewayBreakdown = {
+  name: string;
+  start_question: number;
+  end_question: number;
+  correct: number;
+  total: number;
+};
+
 type GatewayResponse = Record<string, unknown>;
 
 export type AdminTestResult = {
@@ -97,6 +105,115 @@ function formatAnswers(rows: GatewayAnswer[]) {
   }).join('\n');
 }
 
+function formatDuration(totalSeconds: number | null) {
+  if (totalSeconds === null || totalSeconds < 0) return 'Ko‘rsatilmagan';
+  const total = Math.max(0, Math.round(totalSeconds));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+    : `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function breakdownFor(section: string, rows: GatewayAnswer[]): GatewayBreakdown[] {
+  const ranges = section === 'listening'
+    ? [
+        ['Part 1', 1, 10],
+        ['Part 2', 11, 20],
+        ['Part 3', 21, 30],
+        ['Part 4', 31, 40],
+      ] as const
+    : section === 'reading'
+      ? [
+          ['Passage 1', 1, 13],
+          ['Passage 2', 14, 26],
+          ['Passage 3', 27, 40],
+        ] as const
+      : [];
+
+  return ranges.map(([name, start, end]) => ({
+    name,
+    start_question: start,
+    end_question: end,
+    correct: rows.filter((item) => item.question >= start && item.question <= end && item.correct).length,
+    total: end - start + 1,
+  }));
+}
+
+function compactNumber(value: number | null) {
+  if (value === null) return '—';
+  return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(2)));
+}
+
+function warningCount(details: Record<string, unknown> | undefined) {
+  return Math.max(0, Math.round(numberOrNull(
+    details?.warnings ?? details?.warningCount ?? details?.violations ?? details?.violationCount,
+  ) || 0));
+}
+
+function buildTelegramMessage({
+  section,
+  studentName,
+  rawScore,
+  maxScore,
+  band,
+  durationSeconds,
+  warnings,
+  breakdown,
+}: {
+  section: string;
+  studentName: string;
+  rawScore: number | null;
+  maxScore: number | null;
+  band: number | null;
+  durationSeconds: number | null;
+  warnings: number;
+  breakdown: GatewayBreakdown[];
+}) {
+  const skill = section === 'listening' ? 'LISTENING' : section === 'reading' ? 'READING' : section.toUpperCase() || 'TEST';
+  const accuracy = rawScore !== null && maxScore !== null && maxScore > 0
+    ? Number(((rawScore / maxScore) * 100).toFixed(1))
+    : null;
+  const durationText = formatDuration(durationSeconds);
+  const scoreText = `${compactNumber(rawScore)} / ${compactNumber(maxScore)}`;
+
+  let table = '';
+  if (breakdown.length) {
+    const rows = breakdown.map((item) => {
+      const label = item.name.padEnd(9, ' ');
+      const score = `${item.correct} / ${item.total}`.padStart(7, ' ');
+      return `│ ${label} │ ${score} │`;
+    });
+    table = [
+      '```',
+      '┌───────────┬─────────┐',
+      ...rows,
+      '├───────────┼─────────┤',
+      `│ ${'TOTAL'.padEnd(9, ' ')} │ ${scoreText.padStart(7, ' ')} │`,
+      '└───────────┴─────────┘',
+      '```',
+    ].join('\n');
+  }
+
+  return [
+    `🏆 **ARK EDUCATION — ${skill} RESULT**`,
+    '',
+    `👤 **${studentName}**`,
+    '',
+    table,
+    '',
+    `🎯 **IELTS Band:** ${compactNumber(band)}`,
+    `📊 **Accuracy:** ${accuracy === null ? '—' : `${compactNumber(accuracy)}%`}`,
+    `⚠️ **Warnings:** ${warnings}`,
+    `⏱ **Time:** ${durationText}`,
+    '',
+    `✅ **${skill.charAt(0)}${skill.slice(1).toLowerCase()} completed**`,
+    '',
+    `#${skill}`,
+  ].filter((line, index, all) => line !== '' || (index > 0 && all[index - 1] !== '')).join('\n');
+}
+
 function gatewayConfig() {
   const endpoint = process.env.BOT_RESULTS_ENDPOINT?.trim() || '';
   const submitKey = process.env.BOT_RESULTS_SUBMIT_KEY?.trim() || '';
@@ -159,6 +276,20 @@ function buildGatewayPayload(result: AdminTestResult, submitKey: string) {
   const rawScore = numberOrNull(result.rawScore);
   const maxScore = numberOrNull(result.maxScore);
   const durationSeconds = numberOrNull(result.durationSeconds);
+  const section = cleanText(result.section, 30).toLowerCase();
+  const breakdown = breakdownFor(section, rows);
+  const warnings = warningCount(result.details);
+  const durationText = formatDuration(durationSeconds);
+  const telegramMessage = buildTelegramMessage({
+    section,
+    studentName,
+    rawScore,
+    maxScore,
+    band: numberOrNull(result.band),
+    durationSeconds,
+    warnings,
+    breakdown,
+  });
 
   return {
     event_type: 'result',
@@ -172,7 +303,9 @@ function buildGatewayPayload(result: AdminTestResult, submitKey: string) {
     test_title: cleanText(result.testTitle, 180),
     test_name: cleanText(result.testTitle, 180),
     track: cleanText(result.track, 30).toLowerCase(),
-    section: cleanText(result.section, 30).toLowerCase(),
+    section,
+    skill: section,
+    result_type: `${section || 'test'}_result`,
     raw_score: rawScore,
     score: rawScore,
     max_score: maxScore,
@@ -184,20 +317,44 @@ function buildGatewayPayload(result: AdminTestResult, submitKey: string) {
     wrong_count: numberOrNull(result.wrong),
     unanswered: numberOrNull(result.unanswered),
     unanswered_count: numberOrNull(result.unanswered),
+    warnings,
+    warning_count: warnings,
     duration_seconds: durationSeconds,
+    duration: durationSeconds,
+    time_seconds: durationSeconds,
+    elapsed_seconds: durationSeconds,
+    duration_text: durationText,
+    time_text: durationText,
+    breakdown,
+    parts: breakdown,
+    part_scores: Object.fromEntries(breakdown.map((item) => [item.name.toLowerCase().replace(/\s+/g, '_'), {
+      correct: item.correct,
+      total: item.total,
+      start_question: item.start_question,
+      end_question: item.end_question,
+    }])),
+    telegram_message: telegramMessage,
+    result_message: telegramMessage,
+    message: telegramMessage,
+    telegram_parse_mode: 'Markdown',
     submitted_at: submittedAt(result.submittedAt),
     answers: rows,
     answers_by_question: Object.fromEntries(rows.map((item) => [`q${item.question}`, item])),
     answers_text: formatAnswers(rows),
     result: {
+      section,
       rawScore,
       maxScore,
       band: numberOrNull(result.band),
       correct: numberOrNull(result.correct),
       wrong: numberOrNull(result.wrong),
       unanswered: numberOrNull(result.unanswered),
+      warnings,
       durationSeconds,
+      durationText,
+      breakdown,
       answers: rows,
+      message: telegramMessage,
     },
   };
 }
