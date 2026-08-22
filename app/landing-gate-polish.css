@@ -1,0 +1,141 @@
+/* Landing gate refinements — professional hierarchy without changing platform pages */
+.arkGatePage .arkGateMain{
+  grid-template-columns:minmax(310px,.76fr) minmax(530px,1.30fr) minmax(390px,.92fr);
+  gap:30px;
+}
+
+.arkGatePage .arkGateLeft{
+  padding:0 0 14px 8px;
+  max-width:520px;
+}
+
+.arkGatePage .arkGateKicker{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  color:#6c7e91;
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+
+.arkGatePage .arkGateKicker::before{
+  content:"";
+  width:24px;
+  height:2px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#e22330,#f07f88);
+}
+
+.arkGatePage .arkGateLeft h1{
+  margin:24px 0 18px;
+  gap:1px;
+  font-size:clamp(46px,3.8vw,66px);
+  line-height:.96;
+  letter-spacing:-.052em;
+  font-weight:840;
+  max-width:500px;
+}
+
+.arkGatePage .arkGateLeft h1 .red{
+  color:#df202c;
+}
+
+.arkGatePage .arkGateLead{
+  max-width:430px;
+  margin:0 0 27px;
+  color:#708197;
+  font-size:13px;
+  line-height:1.65;
+  font-weight:520;
+}
+
+.arkGatePage .arkGateBenefits{
+  gap:11px;
+}
+
+.arkGatePage .arkGateBenefits>div{
+  gap:12px;
+  color:#4d627a;
+  font-size:12px;
+  font-weight:760;
+}
+
+.arkGatePage .arkGateBenefits i{
+  width:34px;
+  height:34px;
+  border-radius:11px;
+  padding:8px;
+  background:#eef7fc;
+  border-color:#d6e9f5;
+}
+
+.arkGatePage .arkGateCenter>small{
+  font-size:11px;
+  letter-spacing:.12em;
+  color:#405873;
+}
+
+.arkGatePage .arkGateIelts{
+  font-size:clamp(112px,10.2vw,196px);
+}
+
+.arkGatePage .arkGateCenter>strong{
+  font-size:18px;
+  margin-top:9px;
+}
+
+.arkGatePage .arkGateUnderline{
+  width:190px;
+  margin-top:24px;
+  opacity:.82;
+}
+
+.arkGatePage .arkGateCard{
+  min-height:398px;
+  padding:32px 34px 28px;
+}
+
+.arkGatePage .arkGateCardHead h2{
+  font-size:35px;
+}
+
+.arkGatePage .arkGateCardHead p{
+  font-size:13px;
+  line-height:1.6;
+}
+
+.arkGatePage .arkGateRegisterBlock{
+  margin-top:26px;
+}
+
+.arkGatePage .arkGateRegisterField{
+  height:62px;
+}
+
+.arkGatePage .arkGateEnter{
+  height:60px;
+  margin-top:17px;
+}
+
+@media(max-width:1500px){
+  .arkGatePage .arkGateMain{
+    grid-template-columns:minmax(290px,.74fr) minmax(450px,1.25fr) minmax(360px,.94fr);
+    gap:22px;
+  }
+  .arkGatePage .arkGateLeft h1{font-size:clamp(44px,3.7vw,60px)}
+  .arkGatePage .arkGateLead{font-size:12px;margin-bottom:23px}
+  .arkGatePage .arkGateIelts{font-size:clamp(104px,9.6vw,164px)}
+}
+
+@media(max-width:1180px){
+  .arkGatePage .arkGateLeft{max-width:none;padding-left:0}
+  .arkGatePage .arkGateLeft h1{font-size:clamp(46px,6vw,62px)}
+}
+
+@media(max-width:760px){
+  .arkGatePage .arkGateKicker{font-size:9px}
+  .arkGatePage .arkGateLeft h1{font-size:clamp(44px,13vw,60px);margin:22px 0 16px}
+  .arkGatePage .arkGateLead{font-size:13px;margin-bottom:24px}
+}
