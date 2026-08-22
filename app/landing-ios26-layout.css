@@ -1,0 +1,192 @@
+/* ARK Education — two-zone landing composition
+   Removes the crowded three-column desktop layout while keeping auth/session logic intact. */
+
+@media (min-width:1181px){
+  .arkIosHero{
+    width:min(1450px,calc(100% - 78px));
+    height:100svh;
+    padding:104px 0 52px;
+    display:grid;
+    grid-template-columns:minmax(360px,.78fr) minmax(650px,1.22fr);
+    grid-template-rows:auto auto;
+    grid-template-areas:
+      "copy product"
+      "access product";
+    column-gap:64px;
+    row-gap:20px;
+    align-items:center;
+  }
+
+  .arkIosCopy{
+    grid-area:copy;
+    align-self:end;
+    padding:0;
+    max-width:470px;
+  }
+
+  .arkIosCopy h1{
+    max-width:450px;
+    font-size:clamp(46px,3.75vw,66px);
+    margin:22px 0 17px;
+  }
+
+  .arkIosLead{
+    max-width:430px;
+    font-size:12.5px;
+  }
+
+  .arkIosBenefits{
+    max-width:450px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:20px;
+  }
+
+  .arkIosBenefit{
+    width:auto;
+    min-height:42px;
+    padding:5px 10px 5px 6px;
+    border-radius:14px;
+    flex:0 0 auto;
+  }
+
+  .arkIosBenefit i{
+    width:31px;
+    height:31px;
+    padding:7px;
+    border-radius:10px;
+  }
+
+  .arkIosBenefit>span{display:block}
+  .arkIosBenefit strong{font-size:10px}
+  .arkIosBenefit small{display:none}
+
+  .arkIosProduct{
+    grid-area:product;
+    width:100%;
+    max-width:790px;
+    margin:0 auto;
+    align-self:center;
+  }
+
+  .arkIosStage{
+    min-height:500px;
+    padding:13px;
+    border-radius:32px;
+  }
+
+  .arkIosStageTop{min-height:52px}
+  .arkIosSkillTabs{height:42px;margin-bottom:9px}
+  .arkIosExamCanvas{height:342px}
+  .arkIosPassage,.arkIosQuestion{padding:22px 21px}
+  .arkIosStageFooter{min-height:34px}
+
+  .arkIosFloatScore{
+    left:-30px;
+    bottom:47px;
+    transform:scale(.90);
+    transform-origin:left bottom;
+  }
+
+  .arkIosFloatSecure{
+    right:-28px;
+    top:72px;
+    transform:scale(.92);
+    transform-origin:right top;
+  }
+
+  .arkIosAccess{
+    grid-area:access;
+    align-self:start;
+    width:min(100%,470px);
+    min-height:0!important;
+    padding:19px 20px 18px!important;
+    border-radius:22px!important;
+    justify-content:flex-start!important;
+  }
+
+  .arkIosAccess .arkGateCardHead{
+    grid-template-columns:1fr auto;
+    align-items:center;
+    gap:13px!important;
+  }
+
+  .arkIosAccess .arkIosAccessEyebrow{
+    font-size:8px!important;
+    letter-spacing:.12em!important;
+  }
+
+  .arkIosAccess .arkGateCardHead h2,
+  .arkIosAccess .arkIosAccessHead h2{
+    font-size:24px!important;
+    margin:4px 0 6px!important;
+  }
+
+  .arkIosAccess .arkGateCardHead p,
+  .arkIosAccess .arkIosAccessHead p{
+    font-size:10px!important;
+    line-height:1.45!important;
+    max-width:340px;
+  }
+
+  .arkIosAccess .arkIosLock{
+    width:42px!important;
+    height:42px!important;
+    border-radius:13px!important;
+    padding:11px!important;
+  }
+
+  .arkIosAccess .arkGateAccessReady{
+    margin-top:13px!important;
+    padding:14px 15px!important;
+    border-radius:15px!important;
+    gap:6px!important;
+  }
+
+  .arkIosAccess .arkGateAccessLabel{font-size:8px!important}
+  .arkIosAccess .arkGateAccessReady>strong{font-size:17px!important}
+  .arkIosAccess .arkGateAccessReady>p{font-size:9.5px!important;line-height:1.45!important}
+  .arkIosAccess .arkGateContinue{
+    height:45px!important;
+    border-radius:12px!important;
+    padding:0 14px!important;
+    font-size:10.5px!important;
+  }
+
+  .arkIosAccess .arkGateRegisterBlock{margin-top:14px!important;gap:6px!important}
+  .arkIosAccess .arkGateRegisterField{height:48px!important;border-radius:13px!important;font-size:12px!important}
+  .arkIosAccess .arkGateCodeBlock{margin-top:10px!important;gap:6px!important}
+  .arkIosAccess .arkGateCodeField{height:48px!important;border-radius:13px!important}
+  .arkIosAccess .arkGateCodeField button{width:38px!important;height:38px!important;border-radius:10px!important}
+  .arkIosAccess .arkGateNote{margin-top:9px!important}
+  .arkIosAccess .arkGateNote p{font-size:8.5px!important}
+
+  .arkIosFooter{bottom:12px!important}
+}
+
+@media (min-width:1181px) and (max-width:1360px){
+  .arkIosHero{
+    width:min(1280px,calc(100% - 48px));
+    grid-template-columns:minmax(330px,.76fr) minmax(580px,1.24fr);
+    column-gap:42px;
+  }
+  .arkIosProduct{max-width:710px}
+  .arkIosStage{min-height:470px}
+  .arkIosExamCanvas{height:318px}
+  .arkIosCopy h1{font-size:clamp(43px,3.7vw,58px)}
+  .arkIosAccess{width:min(100%,430px)}
+}
+
+@media (max-width:1180px){
+  .arkIosHero{
+    grid-template-areas:
+      "copy access"
+      "product product";
+  }
+}
+
+@media (max-width:760px){
+  .arkIosBenefits{display:grid;grid-template-columns:1fr 1fr}
+  .arkIosBenefit:last-child{grid-column:1/-1}
+}
