@@ -4,6 +4,7 @@ import './platform.css';
 import './polish.css';
 import './landing-v2.css';
 import './landing-v3.css';
+import './landing-gate-polish.css';
 import './auth.css';
 import './mock-results.css';
 
