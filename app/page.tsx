@@ -1,130 +1,114 @@
 import Link from 'next/link';
 
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7.5 10V7.8a4.5 4.5 0 0 1 9 0V10" />
+      <rect x="5" y="10" width="14" height="10" rx="3" />
+      <path d="M12 14v2.5" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3 5.5 5.7v5.4c0 4.2 2.6 7.7 6.5 9.9 3.9-2.2 6.5-5.7 6.5-9.9V5.7L12 3Z" />
+      <path d="m9.5 12 1.7 1.7 3.5-3.7" />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 7.5V12l3 2" />
+    </svg>
+  );
+}
+
+function BarsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 18V10M12 18V6M18 18v-5" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   return (
-    <div className="arkOnePage">
-      <div className="arkOneShell">
-        <header className="arkOneHeader">
-          <Link href="/" className="arkOneBrand" aria-label="ARK EDUCATION home">
-            <span className="arkOneLogo">A</span>
-            <span><strong>ARK EDUCATION</strong><small>MOCK EXAM PLATFORM</small></span>
-          </Link>
+    <div className="arkGatePage">
+      <div className="arkGateGlow arkGateGlowBlue" aria-hidden="true" />
+      <div className="arkGateGlow arkGateGlowRed" aria-hidden="true" />
 
-          <nav className="arkOneNav" aria-label="Landing navigation">
-            <span className="active">Home</span>
-            <Link href="/mock">Mock Exam</Link>
-            <Link href="/login">Login</Link>
-          </nav>
+      <header className="arkGateHeader">
+        <Link href="/" className="arkGateBrand" aria-label="ARK Education bosh sahifa">
+          <span className="arkGateLogo">A</span>
+          <span className="arkGateBrandCopy">
+            <strong>ARK Education</strong>
+            <small>IELTS &amp; English Learning Centre</small>
+          </span>
+        </Link>
+        <span className="arkGateOfficial">OFFICIAL MOCK PLATFORM</span>
+      </header>
 
-          <Link className="arkOneTopCta" href="/mock">Start Mock <span>→</span></Link>
-        </header>
+      <main className="arkGateMain">
+        <section className="arkGateLeft">
+          <div className="arkGateBadge"><span /> IELTS ASSESSMENT CENTRE</div>
+          <h1>
+            <span>Real exam.</span>
+            <span>Real progress.</span>
+            <span className="red">Real results.</span>
+          </h1>
 
-        <main className="arkOneMain">
-          <section className="arkOneIntro">
-            <div className="arkOneEyebrow"><i /> PROFESSIONAL EXAM PRACTICE</div>
-            <h1>Your Mock Platform.</h1>
-            <p>One focused place for realistic exam practice. Choose your path and enter a clean, professional mock environment.</p>
+          <div className="arkGateBenefits">
+            <div><i><ShieldIcon /></i><span>Secure student access</span></div>
+            <div><i><ClockIcon /></i><span>Real IELTS timing</span></div>
+            <div><i><BarsIcon /></i><span>Professional test experience</span></div>
+          </div>
+        </section>
 
-            <div className="arkOneChoiceHead">
-              <span>CHOOSE YOUR PATH</span>
-              <small>IELTS or CEFR</small>
+        <section className="arkGateCenter" aria-label="ARK IELTS mock examination centre">
+          <small>ARK EDUCATION MOCK EXAMINATION CENTRE</small>
+          <div className="arkGateIelts">IELTS<sup>TM</sup></div>
+          <strong>English for International Opportunity</strong>
+          <span className="arkGateUnderline" aria-hidden="true" />
+        </section>
+
+        <section className="arkGateCard">
+          <div className="arkGateCardHead">
+            <div>
+              <h2>Welcome back</h2>
+              <p>Imtihon platformasiga kirish yoki yangi hisob yaratish uchun quyidagi tugmadan foydalaning.</p>
             </div>
+            <span className="arkGateLock"><LockIcon /></span>
+          </div>
 
-            <div className="arkOneChoices">
-              <Link href="/ielts" className="arkOneChoice arkOneChoiceDark">
-                <div className="arkOneChoiceTop"><span>01</span><b>IELTS</b></div>
-                <h2>IELTS Mock</h2>
-                <p>Reading · Listening · Writing · Speaking</p>
-                <div className="arkOneChoiceBottom"><small>Open platform</small><span>↗</span></div>
-              </Link>
+          <div className="arkGateRegisterBlock">
+            <label>Ro‘yxatdan o‘tish</label>
+            <Link className="arkGateRegisterField" href="/login">
+              <span>Ro‘yxatdan o‘tish</span>
+              <b>→</b>
+            </Link>
+          </div>
 
-              <Link href="/cefr" className="arkOneChoice arkOneChoiceLime">
-                <div className="arkOneChoiceTop"><span>02</span><b>CEFR</b></div>
-                <h2>CEFR Mock</h2>
-                <p>Level-based practice · A2 to C1</p>
-                <div className="arkOneChoiceBottom"><small>Open platform</small><span>↗</span></div>
-              </Link>
-            </div>
+          <Link className="arkGateEnter" href="/mock">ENTER MOCK EXAM</Link>
 
-            <div className="arkOneMiniTrust">
-              <span>✓ Real exam flow</span>
-              <span>✓ Focused interface</span>
-              <span>✓ Progress ready</span>
-            </div>
-          </section>
+          <div className="arkGateNote">
+            <span><ShieldIcon /></span>
+            <p>Ro‘yxatdan o‘tgan o‘quvchilar mock platformaga xavfsiz kiradi.</p>
+          </div>
+        </section>
+      </main>
 
-          <section className="arkOneVisual" aria-label="ARK mock platform preview">
-            <div className="arkOneDashboard">
-              <aside className="arkOneDashSide">
-                <div className="arkOneDashBrand"><span>A</span><b>ARK</b></div>
-                <div className="arkOneDashMenu active"><span>▦</span><b>Dashboard</b></div>
-                <div className="arkOneDashMenu"><span>◫</span><b>Mock Tests</b></div>
-                <div className="arkOneDashMenu"><span>◉</span><b>Results</b></div>
-                <div className="arkOneDashMenu"><span>✦</span><b>Progress</b></div>
-                <div className="arkOneDashMenu"><span>⚙</span><b>Settings</b></div>
-
-                <div className="arkOneDashPromo">
-                  <span>ARK+</span>
-                  <strong>Full mock mode</strong>
-                  <small>Train with a complete exam workflow.</small>
-                  <button type="button" tabIndex={-1}>Open mock ↗</button>
-                </div>
-              </aside>
-
-              <div className="arkOneDashContent">
-                <div className="arkOneDashTop">
-                  <div className="arkOneSearch"><span>⌕</span><small>Search tests</small></div>
-                  <div className="arkOneDashProfile"><span>◌</span><b>Student</b><i>A</i></div>
-                </div>
-
-                <div className="arkOneDashHeading">
-                  <div><h3>Your Mock Platform</h3><p>Exam performance overview</p></div>
-                  <button type="button" tabIndex={-1}>View report ↗</button>
-                </div>
-
-                <div className="arkOneMetrics">
-                  <article><span>◎</span><div><strong>7.5</strong><small>Target band</small></div><b>↗</b></article>
-                  <article><span>✓</span><div><strong>12</strong><small>Mocks done</small></div><b>↗</b></article>
-                  <article><span>◷</span><div><strong>68%</strong><small>Progress</small></div><b>↗</b></article>
-                </div>
-
-                <div className="arkOneDashGrid">
-                  <article className="arkOneChartCard">
-                    <div className="arkOneCardHead"><div><strong>Skill Performance</strong><small>Last 7 days</small></div><span>IELTS</span></div>
-                    <div className="arkOneBars">
-                      <i style={{height:'44%'}}/><i style={{height:'70%'}}/><i style={{height:'58%'}}/><i style={{height:'82%'}}/><i style={{height:'66%'}}/><i style={{height:'90%'}}/>
-                    </div>
-                    <div className="arkOneBarLabels"><span>R</span><span>L</span><span>W</span><span>S</span><span>M</span><span>T</span></div>
-                  </article>
-
-                  <article className="arkOneLineCard">
-                    <div className="arkOneCardHead"><div><strong>Weekly Score</strong><small>Mock trend</small></div><span>7.5</span></div>
-                    <svg viewBox="0 0 460 180" aria-hidden="true">
-                      <g><line x1="0" y1="35" x2="460" y2="35"/><line x1="0" y1="90" x2="460" y2="90"/><line x1="0" y1="145" x2="460" y2="145"/></g>
-                      <path d="M0 130 C55 102 80 115 125 88 S205 62 255 84 S340 52 395 58 S440 42 460 50" />
-                      <circle cx="255" cy="84" r="5" />
-                    </svg>
-                  </article>
-
-                  <article className="arkOneRecentCard">
-                    <div className="arkOneCardHead"><div><strong>Recent Tests</strong><small>Latest activity</small></div><span>View all</span></div>
-                    <div className="arkOneRecentRow"><b>01</b><span>IELTS Reading Mock</span><em>32/40</em></div>
-                    <div className="arkOneRecentRow"><b>02</b><span>Listening Practice</span><em>30/40</em></div>
-                    <div className="arkOneRecentRow"><b>03</b><span>CEFR Level Test</span><em>B2</em></div>
-                  </article>
-
-                  <article className="arkOneFocusCard">
-                    <small>NEXT STEP</small>
-                    <strong>Complete one full mock.</strong>
-                    <p>Use a timed exam to establish your current baseline.</p>
-                    <span>Start now →</span>
-                  </article>
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
-      </div>
+      <footer className="arkGateFooter">
+        <span><b>Powered by Bilimly AI</b></span>
+        <i>•</i>
+        <span>Academic Platform by Rajabov Zuhriddin</span>
+        <i>•</i>
+        <span>© 2026 ARK Education</span>
+      </footer>
     </div>
   );
 }
