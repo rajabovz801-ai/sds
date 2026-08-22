@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import type { CloudTest, TestSkill, TestTrack } from '@/lib/cloudTests';
+import { useEffect, useState } from 'react';
+import type { TestSkill, TestTrack } from '@/lib/cloudTests';
 
 type Student = { firstName: string; lastName: string };
 
@@ -18,26 +18,13 @@ export function SkillLibraryClient({
   description: string;
 }) {
   const [student, setStudent] = useState<Student | null | undefined>(undefined);
-  const [tests, setTests] = useState<CloudTest[]>([]);
-  const [loadingTests, setLoadingTests] = useState(true);
 
   useEffect(() => {
     fetch('/api/auth/me')
       .then((r) => r.json())
       .then((data) => setStudent(data.student || null))
       .catch(() => setStudent(null));
-
-    fetch('/api/public-tests')
-      .then((r) => r.json())
-      .then((data) => setTests(data.tests || []))
-      .catch(() => setTests([]))
-      .finally(() => setLoadingTests(false));
   }, []);
-
-  const filtered = useMemo(
-    () => tests.filter((test) => test.status === 'published' && test.track === track && test.skill === skill),
-    [tests, track, skill],
-  );
 
   if (student === undefined) return <div className="mockFlowLoading">Session tekshirilmoqda…</div>;
 
@@ -57,7 +44,7 @@ export function SkillLibraryClient({
   const backHref = track === 'ielts' ? '/ielts' : '/cefr';
 
   return (
-    <div className="examSectionPage skillLibraryPage">
+    <div className="examSectionPage skillWorkspacePage">
       <header className="examSectionHeader">
         <Link href="/" className="mockFlowBrand">
           <span>A</span>
@@ -69,8 +56,8 @@ export function SkillLibraryClient({
         </div>
       </header>
 
-      <main className="skillLibraryMain">
-        <section className="skillLibraryHero">
+      <main className="skillWorkspaceMain">
+        <section className="skillWorkspaceHero">
           <div>
             <span className="mockFlowEyebrow">{track.toUpperCase()} · {skill.toUpperCase()}</span>
             <h1>{title}</h1>
@@ -82,37 +69,10 @@ export function SkillLibraryClient({
           </div>
         </section>
 
-        <section className="skillLibraryList">
-          <div className="skillLibraryHeading">
-            <div>
-              <span>AVAILABLE TESTS</span>
-              <h2>{title}</h2>
-            </div>
-            <b>{filtered.length} ta test</b>
-          </div>
-
-          {loadingTests ? (
-            <div className="skillLibraryEmpty">Testlar yuklanmoqda…</div>
-          ) : filtered.length === 0 ? (
-            <div className="skillLibraryEmpty">
-              <strong>Hozircha test joylanmagan.</strong>
-              <p>Bu bo‘lim tayyor. Testlar qo‘shilganda shu yerda avtomatik chiqadi.</p>
-            </div>
-          ) : (
-            <div className="skillLibraryCards">
-              {filtered.map((test, index) => (
-                <Link href={`/test/${test.id}`} className="skillTestCard" key={test.id}>
-                  <span className="skillTestNumber">{String(index + 1).padStart(2, '0')}</span>
-                  <div>
-                    <small>{track.toUpperCase()} · {skill.toUpperCase()}</small>
-                    <h3>{test.title}</h3>
-                    {test.description && <p>{test.description}</p>}
-                  </div>
-                  <span className="skillTestOpen">OPEN →</span>
-                </Link>
-              ))}
-            </div>
-          )}
+        <section className="skillWorkspaceEmpty">
+          <span className="skillWorkspaceBadge">SECTION READY</span>
+          <h2>{title} materiallari shu yerga qo‘shiladi.</h2>
+          <p>Eski testlar bu bo‘limdan olib tashlandi. Keyingi bosqichda yangi mocklar va video materiallarni shu yerga ulaymiz.</p>
         </section>
       </main>
     </div>
