@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readSession } from '@/lib/auth/session';
 import { getServiceSupabase } from '@/lib/supabase/server';
+import { sendAdminTestResult } from '@/lib/telegram-server';
 
 type SectionName = 'reading' | 'listening' | 'writing' | 'speaking';
 
@@ -84,14 +85,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (maxScore !== null && maxScore <= 0) return NextResponse.json({ error: 'Max score noto‘g‘ri.' }, { status: 400 });
     if (rawScore !== null && maxScore !== null && rawScore > maxScore) return NextResponse.json({ error: 'Score max score’dan katta bo‘lishi mumkin emas.' }, { status: 400 });
     if (band !== null && (band < 0 || band > 9)) return NextResponse.json({ error: 'Band noto‘g‘ri.' }, { status: 400 });
+    if (correct !== null && wrong !== null && unanswered !== null && maxScore !== null && correct + wrong + unanswered !== Math.round(maxScore)) {
+      return NextResponse.json({ error: 'Javoblar soni umumiy savollar soniga mos emas.' }, { status: 400 });
+    }
 
     if (band === null && mock.track === 'ielts' && rawScore !== null && maxScore !== null) {
       band = ieltsBand(section, rawScore, maxScore);
     }
 
-    const safeDetails = body?.details && typeof body.details === 'object' && !Array.isArray(body.details) ? body.details : {};
+    const safeDetails = body?.details && typeof body.details === 'object' && !Array.isArray(body.details)
+      ? body.details as Record<string, unknown>
+      : {};
+    const submissionId = String(safeDetails.submissionId || body?.submissionId || '').trim().slice(0, 100);
     const details = {
       ...safeDetails,
+      ...(submissionId ? { submissionId } : {}),
       correct,
       wrong,
       unanswered,
@@ -101,6 +109,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     if (JSON.stringify(details).length > 200000) {
       return NextResponse.json({ error: 'Result details juda katta.' }, { status: 413 });
+    }
+
+    if (submissionId) {
+      const { data: previous, error: previousError } = await supabase
+        .from('section_results')
+        .select('section,raw_score,max_score,band,details,created_at')
+        .eq('attempt_id', attempt.id)
+        .eq('section', section)
+        .maybeSingle();
+      if (previousError) throw previousError;
+      const previousDetails = previous?.details && typeof previous.details === 'object'
+        ? previous.details as Record<string, unknown>
+        : {};
+      const previousTelegram = previousDetails.telegram && typeof previousDetails.telegram === 'object'
+        ? previousDetails.telegram as Record<string, unknown>
+        : {};
+      if (previousDetails.submissionId === submissionId && Number(previousTelegram.sent || 0) > 0) {
+        return NextResponse.json({ ok: true, duplicate: true, result: previous, telegram: previousTelegram });
+      }
     }
 
     const { data: result, error: resultError } = await supabase
@@ -117,7 +144,57 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .single();
 
     if (resultError) throw resultError;
-    return NextResponse.json({ ok: true, result });
+
+    const [{ data: test, error: testError }, { data: admins, error: adminsError }] = await Promise.all([
+      supabase.from('tests').select('id,title,track,skill').eq('id', receivedTestId).maybeSingle(),
+      supabase.from('admins').select('telegram_id').eq('active', true),
+    ]);
+    if (testError) throw testError;
+    if (adminsError) throw adminsError;
+    if (!test) return NextResponse.json({ error: 'Test ma’lumotlari topilmadi.', saved: true, result }, { status: 500 });
+
+    const telegram = await sendAdminTestResult({
+      student: {
+        firstName: session.firstName,
+        lastName: session.lastName,
+        telegramId: session.telegramId,
+      },
+      testTitle: test.title,
+      track: test.track || mock.track,
+      section,
+      rawScore,
+      maxScore,
+      band,
+      correct,
+      wrong,
+      unanswered,
+      durationSeconds: integerOrNull(body?.durationSeconds ?? safeDetails.durationSeconds),
+      submittedAt: typeof body?.submittedAt === 'string' ? body.submittedAt : new Date().toISOString(),
+      details,
+    }, (admins || []).map((admin) => String(admin.telegram_id || '')).filter(Boolean));
+
+    const finalDetails = {
+      ...details,
+      telegram: { ...telegram, updatedAt: new Date().toISOString() },
+    };
+    const { error: telegramStateError } = await supabase
+      .from('section_results')
+      .update({ details: finalDetails })
+      .eq('attempt_id', attempt.id)
+      .eq('section', section);
+    if (telegramStateError) throw telegramStateError;
+
+    const finalResult = { ...result, details: finalDetails };
+    if (!telegram.configured || telegram.sent === 0) {
+      return NextResponse.json({
+        error: telegram.error || 'Natija saqlandi, lekin Telegram admin’ga yuborilmadi.',
+        saved: true,
+        result: finalResult,
+        telegram,
+      }, { status: 503 });
+    }
+
+    return NextResponse.json({ ok: true, result: finalResult, telegram });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Result save server error' }, { status: 500 });
   }

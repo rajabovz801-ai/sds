@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeftIcon, CheckCircleIcon } from '@/components/UiIcons';
+import { ArrowLeftIcon } from '@/components/UiIcons';
 
 type ViewerData = {
   test: { id: string; title: string; track: string; skill: string; fileName: string };
@@ -52,8 +52,6 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
   }, [data, mode, attemptId, section]);
 
   useEffect(() => {
-    if (!isMock || !attemptId || !section) return;
-
     const saveResult = async (payload: any) => {
       if (savingRef.current) return;
       let fingerprint = '';
@@ -66,26 +64,32 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
       setBridgeError('');
 
       try {
-        const response = await fetch(`/api/mock/attempts/${attemptId}/result`, {
+        const endpoint = isMock && attemptId
+          ? `/api/mock/attempts/${attemptId}/result`
+          : `/api/tests/${id}/submit`;
+        const requestBody = isMock
+          ? { ...payload, result: payload, section, testId: id }
+          : { ...payload, result: payload, testId: id };
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            ...payload,
-            result: payload,
-            section,
-            testId: id,
-          }),
+          body: JSON.stringify(requestBody),
         });
         const body = await response.json();
         if (!response.ok) throw new Error(body.error || 'Natija saqlanmadi.');
         setBridgeState('saved');
-        window.setTimeout(() => {
-          router.replace(`/mock/${attemptId}?saved=${encodeURIComponent(section)}`);
-          router.refresh();
-        }, 650);
+        iframeRef.current?.contentWindow?.postMessage({ type: 'ARK_RESULT_SAVED', payload: body }, '*');
+        if (isMock && attemptId && section) {
+          window.setTimeout(() => {
+            router.replace(`/mock/${attemptId}?saved=${encodeURIComponent(section)}`);
+            router.refresh();
+          }, 900);
+        }
       } catch (error) {
         setBridgeState('error');
-        setBridgeError(error instanceof Error ? error.message : 'Natija saqlanmadi.');
+        const message = error instanceof Error ? error.message : 'Natija saqlanmadi.';
+        setBridgeError(message);
+        iframeRef.current?.contentWindow?.postMessage({ type: 'ARK_RESULT_ERROR', error: message }, '*');
         lastPayloadRef.current = '';
       } finally {
         savingRef.current = false;
@@ -108,19 +112,21 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
   }, [attemptId, id, isMock, router, section]);
 
   const bridgeLabel = bridgeState === 'saving'
-    ? 'Natija saqlanmoqda…'
+    ? 'Natija yuborilmoqda…'
     : bridgeState === 'saved'
-      ? 'Natija saqlandi ✓'
+      ? 'Admin natijani oldi ✓'
       : bridgeState === 'error'
-        ? 'Result connection error'
-        : 'Result autosave active';
+        ? 'Yuborishda xatolik'
+        : bridgeState === 'ready'
+          ? 'Admin result channel active'
+          : 'Result channel preparing';
 
   return (
     <div className="viewerRoot">
       <div className="viewerBar">
         <Link href={backHref} className="viewerBack"><ArrowLeftIcon /> Orqaga</Link>
         <div className="viewerTitle"><b>{data.test.title}</b><span>{data.test.track.toUpperCase()} • {data.test.skill} • {data.test.fileName}</span></div>
-        {isMock ? <div className={`viewerBridgeChip ${bridgeState}`}><span />{bridgeLabel}</div> : <span className="viewerModeChip"><CheckCircleIcon /> Practice mode</span>}
+        <div className={`viewerBridgeChip ${bridgeState}`}><span />{bridgeLabel}</div>
       </div>
       {bridgeError && <div className="viewerBridgeError">{bridgeError}</div>}
       <iframe

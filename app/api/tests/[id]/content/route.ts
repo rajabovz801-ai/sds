@@ -30,6 +30,10 @@ function injectBridge(html: string, context: { mode: string; attemptId: string; 
 
   document.addEventListener('ark:result', function (event) { sendResult(event.detail || {}); });
   document.addEventListener('ark-result', function (event) { sendResult(event.detail || {}); });
+  window.addEventListener('message', function (event) {
+    if (event.source !== window.parent) return;
+    if (event.data && event.data.type === 'ARK_RESULT_ERROR') lastPayload = '';
+  });
 
   var watch = window.setInterval(function () {
     if (window.__ARK_RESULT__ && typeof window.__ARK_RESULT__ === 'object') {

@@ -89,10 +89,12 @@ export function AdminClient() {
     try {
       let response: Response;
       if (editId) {
+        const formData = new FormData();
+        Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+        if (file) formData.append('file', file);
         response = await fetch(`/api/admin/tests/${editId}`, {
           method: 'PATCH',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(form),
+          body: formData,
         });
       } else {
         const formData = new FormData();
@@ -104,7 +106,7 @@ export function AdminClient() {
       if (response.status === 401) { router.replace('/login'); return; }
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Saqlanmadi.');
-      setNotice(editId ? 'Test ma’lumotlari yangilandi.' : 'Yangi test muvaffaqiyatli yuklandi.');
+      setNotice(editId ? (data.fileReplaced ? 'Test va uning HTML fayli yangilandi.' : 'Test ma’lumotlari yangilandi.') : 'Yangi test muvaffaqiyatli yuklandi.');
       reset();
       await load();
     } catch (err) {
@@ -166,7 +168,7 @@ export function AdminClient() {
 
         <section className="adminLayout">
           <div className="adminFormCard">
-            <div className="adminSectionHeader"><span>{editId ? <EditIcon /> : <UploadCloudIcon />}</span><div><h2>{editId ? 'Testni tahrirlash' : 'Yangi test yuklash'}</h2><p>{editId ? 'Metadata va statusni yangilang.' : 'HTML fayl va uning ma’lumotlarini kiriting.'}</p></div></div>
+            <div className="adminSectionHeader"><span>{editId ? <EditIcon /> : <UploadCloudIcon />}</span><div><h2>{editId ? 'Testni tahrirlash' : 'Yangi test yuklash'}</h2><p>{editId ? 'Ma’lumotlarni yangilang yoki bog‘lanishni buzmasdan HTML faylni almashtiring.' : 'HTML fayl va uning ma’lumotlarini kiriting.'}</p></div></div>
             <form className="adminForm" onSubmit={submit}>
               <div className="field"><label htmlFor="admin-title">Test nomi</label><input id="admin-title" value={form.title} onChange={(event) => setForm((value) => ({ ...value, title: event.target.value }))} placeholder="IELTS Academic Reading · Test 01" maxLength={120} /></div>
               <div className="twoFields">
@@ -175,7 +177,7 @@ export function AdminClient() {
               </div>
               <div className="field"><label htmlFor="admin-status">Holati</label><select id="admin-status" value={form.status} onChange={(event) => setForm((value) => ({ ...value, status: event.target.value as Status }))}><option value="published">Published — o‘quvchilarga ochiq</option><option value="draft">Draft — faqat admin uchun</option></select></div>
               <div className="field"><label htmlFor="admin-description">Qisqa izoh</label><textarea id="admin-description" value={form.description} onChange={(event) => setForm((value) => ({ ...value, description: event.target.value }))} placeholder="Test haqida qisqa tavsif…" maxLength={500} /></div>
-              {!editId && <label className="dropZone"><input type="file" accept=".html,.htm,text/html" onChange={onFile} /><span><UploadCloudIcon /></span><div><b>{file ? file.name : 'HTML faylni tanlang'}</b><small>{file ? `${(file.size / 1024).toFixed(0)} KB · Yuklashga tayyor` : '.html yoki .htm · maksimal 10 MB'}</small></div></label>}
+              <label className="dropZone"><input type="file" accept=".html,.htm,text/html" onChange={onFile} /><span><UploadCloudIcon /></span><div><b>{file ? file.name : editId ? 'Yangi HTML tanlash — ixtiyoriy' : 'HTML faylni tanlang'}</b><small>{file ? `${(file.size / 1024).toFixed(0)} KB · Yuklashga tayyor` : editId ? 'Tanlansa, mavjud test ID saqlangan holda fayl almashtiriladi.' : '.html yoki .htm · maksimal 10 MB'}</small></div></label>
               <div className="formActions"><button className="pButton pButtonPrimary" disabled={busy}>{busy ? 'Saqlanmoqda…' : editId ? 'O‘zgarishlarni saqlash' : 'Testni yuklash'}</button>{editId && <button type="button" className="pButton pButtonGhost" onClick={reset}>Bekor qilish</button>}</div>
             </form>
           </div>
