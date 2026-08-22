@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
         lastName: student.last_name,
         username: student.telegram_username,
       },
+      next: '/mock',
     });
     response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
     return response;
