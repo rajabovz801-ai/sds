@@ -45,7 +45,7 @@ export default function HomePage() {
         <section className="peakHeroCopy">
           <div className="peakHeroEyebrow">ARK EDUCATION MOCK PLATFORM</div>
           <h1>Reach your IELTS <em>target.</em></h1>
-          <p className="peakHeroLead">Real IELTS &amp; CEFR mock practice.<br/>Clear progress. Better results.</p>
+          <p className="peakHeroLead">Real IELTS &amp; CEFR mock practice.<br />Clear progress. Better results.</p>
 
           <div className="peakHeroMicro">
             <span>Fast</span><i>•</i><span>Accurate</span><i>•</i><span>Exam-style</span>
@@ -63,11 +63,11 @@ export default function HomePage() {
 
         <section className="peakHeroVisual" aria-label="IELTS and CEFR practice visual">
           <div className="peakHeroGlow" aria-hidden="true" />
-          <div className="peakHeroChevrons" aria-hidden="true"><span/><span/></div>
+          <div className="peakHeroChevrons" aria-hidden="true"><span></span><span></span></div>
           <div className="peakHeroBase" aria-hidden="true" />
 
           <div className="peakHeroBook">
-            <span className="peakHeroBookTop">IELTS<br/>&amp; CEFR</span>
+            <span className="peakHeroBookTop">IELTS<br />&amp; CEFR</span>
             <span className="peakHeroBookMark">A</span>
             <span className="peakHeroBookLine" />
             <small>ARK EDUCATION</small>
