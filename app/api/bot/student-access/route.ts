@@ -5,6 +5,7 @@ import { getServiceSupabase } from '@/lib/supabase/server';
 
 const CODE_TTL_MINUTES = 15;
 const STUDENT_SELECT = 'id,telegram_id,telegram_username,first_name,last_name,status';
+// Vercel runtime reads BOT_REGISTRATION_SECRET for bot-to-site authentication.
 
 function safeEqual(left: string, right: string) {
   const a = Buffer.from(left, 'utf8');
