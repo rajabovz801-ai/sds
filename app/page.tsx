@@ -55,12 +55,13 @@ export default function HomePage() {
 
       <main className="arkGateMain">
         <section className="arkGateLeft">
-          <div className="arkGateBadge"><span /> IELTS ASSESSMENT CENTRE</div>
+          <div className="arkGateKicker">ARK EDUCATION MOCK PLATFORM</div>
           <h1>
             <span>Real exam.</span>
             <span>Real progress.</span>
             <span className="red">Real results.</span>
           </h1>
+          <p className="arkGateLead">Professional computer-based mock practice built to make exam day feel familiar.</p>
 
           <div className="arkGateBenefits">
             <div><i><ShieldIcon /></i><span>Secure student access</span></div>
