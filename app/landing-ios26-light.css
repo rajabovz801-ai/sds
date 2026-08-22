@@ -1,0 +1,241 @@
+/* ARK Education — iOS 26 Light Liquid Glass override */
+.arkIosPage{
+  --ios-ink:#10223d;
+  --ios-muted:#6f8098;
+  --ios-line:rgba(112,139,173,.20);
+  --ios-line-strong:rgba(102,132,169,.30);
+  --ios-glass:rgba(255,255,255,.68);
+  --ios-glass-soft:rgba(255,255,255,.54);
+  --ios-red:#ef4255;
+  --ios-red-deep:#cf2035;
+  --ios-blue:#4da9e9;
+  --ios-blue-deep:#1c7fbe;
+  --ios-violet:#8d7cf1;
+  --ios-night:#10223d;
+  --ios-night-2:#17314f;
+  --ios-shadow:0 28px 75px rgba(44,76,111,.14);
+  color:var(--ios-ink);
+  background:
+    radial-gradient(circle at 10% 4%,rgba(100,192,243,.28),transparent 28%),
+    radial-gradient(circle at 88% 8%,rgba(248,131,151,.22),transparent 28%),
+    radial-gradient(circle at 55% 100%,rgba(153,137,247,.13),transparent 34%),
+    linear-gradient(145deg,#f8fbff 0%,#f3f8fc 47%,#fff8fa 100%);
+}
+
+.arkIosBackdrop{
+  background:
+    radial-gradient(circle at 50% 38%,rgba(255,255,255,.72),transparent 40%),
+    linear-gradient(180deg,rgba(255,255,255,.68),rgba(244,248,252,.38));
+}
+.arkIosBackdrop::before{
+  background-image:linear-gradient(rgba(45,85,125,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(45,85,125,.035) 1px,transparent 1px);
+  opacity:.36;
+}
+.arkIosOrb{filter:blur(105px);opacity:.82}
+.arkIosOrbBlue{background:rgba(90,183,239,.32)}
+.arkIosOrbRed{background:rgba(247,121,143,.23)}
+.arkIosOrbViolet{background:rgba(145,128,242,.16)}
+.arkIosNoise{opacity:.018}
+
+.arkIosGlass{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.82),rgba(255,255,255,.56) 52%,rgba(246,250,255,.70));
+  border:1px solid rgba(255,255,255,.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(120,149,181,.07),
+    0 22px 60px rgba(45,78,114,.13),
+    0 0 0 1px rgba(121,150,181,.08);
+  backdrop-filter:blur(34px) saturate(160%);
+  -webkit-backdrop-filter:blur(34px) saturate(160%);
+}
+.arkIosGlassSoft{
+  background:linear-gradient(145deg,rgba(255,255,255,.74),rgba(244,249,255,.48));
+  border:1px solid rgba(255,255,255,.92);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 10px 28px rgba(54,87,123,.09),0 0 0 1px rgba(103,136,170,.07);
+  backdrop-filter:blur(24px) saturate(150%);
+  -webkit-backdrop-filter:blur(24px) saturate(150%);
+}
+
+.arkIosNav{
+  box-shadow:inset 0 1px 0 #fff,0 20px 55px rgba(55,88,122,.12),0 0 0 1px rgba(123,149,176,.08);
+}
+.arkIosBrandCopy strong{color:#10223d}
+.arkIosBrandCopy small{color:#718197}
+.arkIosNavStatus{
+  background:rgba(244,249,253,.70);
+  border-color:rgba(116,145,178,.17);
+  color:#687a91;
+}
+.arkIosLiveDot{background:#40c98d;box-shadow:0 0 0 5px rgba(64,201,141,.11),0 0 18px rgba(64,201,141,.24)}
+.arkIosOfficial{
+  color:#b12031;
+  background:linear-gradient(145deg,rgba(255,255,255,.84),rgba(255,236,240,.68));
+  border-color:rgba(235,92,112,.22);
+  box-shadow:inset 0 1px 0 #fff,0 8px 20px rgba(210,57,78,.08);
+}
+
+.arkIosKicker{color:#546a83}
+.arkIosKicker>span{
+  background:linear-gradient(145deg,#fff,#e7f5ff);
+  color:#173759;
+  box-shadow:0 8px 20px rgba(76,163,218,.15);
+}
+.arkIosCopy h1{text-shadow:none}
+.arkIosCopy h1 span{
+  background:linear-gradient(180deg,#10233f 0%,#1b3b5e 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.arkIosCopy h1 .accent{
+  background:linear-gradient(180deg,#f05a68,#df263a 76%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 8px 18px rgba(221,38,59,.10));
+}
+.arkIosLead{color:#667991}
+.arkIosBenefit:hover{background:rgba(255,255,255,.82);border-color:rgba(99,145,184,.20)}
+.arkIosBenefit i{
+  color:#247eb8;
+  background:linear-gradient(145deg,rgba(221,244,255,.96),rgba(197,232,252,.72));
+  border-color:rgba(79,162,213,.20);
+}
+.arkIosBenefit strong{color:#18304f}
+.arkIosBenefit small{color:#718398}
+
+.arkIosProductHalo{
+  background:radial-gradient(circle,rgba(102,187,237,.23),rgba(156,138,245,.11) 36%,transparent 69%);
+  filter:blur(24px);
+}
+.arkIosStage{
+  background:linear-gradient(145deg,rgba(255,255,255,.80),rgba(236,245,253,.66));
+  border-color:rgba(255,255,255,.95);
+  box-shadow:inset 0 1px 0 #fff,0 35px 85px rgba(46,79,114,.16),0 0 0 1px rgba(104,136,169,.09);
+}
+.arkIosStage::before{
+  background:conic-gradient(from 145deg,transparent 0 22%,rgba(86,176,232,.18) 29%,transparent 40% 59%,rgba(239,81,104,.14) 67%,transparent 77%);
+  opacity:.56;
+}
+.arkIosStage::after{
+  background:linear-gradient(125deg,rgba(255,255,255,.65),transparent 22%,transparent 72%,rgba(255,255,255,.22));
+  mix-blend-mode:screen;
+}
+.arkIosStageBrand strong{color:#173250}
+.arkIosStageBrand small{color:#71839a}
+.arkIosStageTimer{
+  background:rgba(247,251,254,.82);
+  border-color:rgba(106,142,177,.16);
+  color:#344f6f;
+  box-shadow:inset 0 1px 0 #fff;
+}
+.arkIosStageTimer svg{color:#2988c6}
+.arkIosSkillTabs{
+  background:rgba(223,235,245,.70);
+  border-color:rgba(104,140,176,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.92);
+}
+.arkIosSkillTabs span{color:#6f8196}
+.arkIosSkillTabs .active{
+  background:linear-gradient(145deg,#fff,#f5f9fc);
+  color:#17324f;
+  box-shadow:inset 0 1px 0 #fff,0 7px 18px rgba(45,79,115,.10),0 0 0 1px rgba(108,140,173,.08);
+}
+.arkIosExamCanvas{
+  background:rgba(255,255,255,.98);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.90),0 18px 42px rgba(47,78,112,.13),0 0 0 1px rgba(112,142,174,.08);
+}
+.arkIosPassage{background:linear-gradient(180deg,#fff,#fbfdff)}
+.arkIosQuestion{background:linear-gradient(180deg,#f8fbfe,#f3f8fc)}
+.arkIosStageFooter{color:#62758c}
+.arkIosStageFooter strong{color:#536a84}
+.arkIosStageFooter b{color:#2f9d72}
+
+.arkIosFloat{
+  color:#17314f;
+  background:linear-gradient(145deg,rgba(255,255,255,.87),rgba(245,250,254,.68));
+  border-color:rgba(255,255,255,.96);
+  box-shadow:inset 0 1px 0 #fff,0 18px 38px rgba(46,79,114,.13),0 0 0 1px rgba(102,135,169,.08);
+}
+.arkIosFloat small{color:#7a8ca1}
+.arkIosFloatScore strong{color:#2689c7;text-shadow:none}
+.arkIosFloatScore span{color:#718398}
+.arkIosFloatSecure i{
+  background:linear-gradient(145deg,#fff2f4,#ffdce2);
+  border-color:rgba(230,82,105,.15);
+  color:#d52a40;
+}
+.arkIosFloatSecure strong{color:#17314f}
+.arkIosFloatSecure small{color:#75869a}
+
+.arkIosAccess{
+  background:linear-gradient(145deg,rgba(255,255,255,.80),rgba(250,252,255,.60));
+  border-color:rgba(255,255,255,.95);
+  box-shadow:inset 0 1px 0 #fff,0 30px 70px rgba(50,82,116,.14),0 0 0 1px rgba(103,134,167,.08);
+}
+.arkIosAccess::before{
+  background:radial-gradient(circle at 92% 10%,rgba(239,92,112,.14),transparent 32%),radial-gradient(circle at 10% 100%,rgba(86,171,226,.13),transparent 34%);
+}
+.arkIosAccessEyebrow{color:#287fb8}
+.arkIosAccessHead h2{color:#10223d}
+.arkIosAccessHead p{color:#6c7e94}
+.arkIosLock{
+  background:linear-gradient(145deg,#ff6676,#df263b);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 14px 28px rgba(214,45,65,.18);
+}
+
+.arkIosAccess .arkGateAccessReady{
+  background:linear-gradient(145deg,rgba(255,255,255,.90),rgba(241,248,253,.75));
+  border:1px solid rgba(106,143,177,.16);
+  box-shadow:inset 0 1px 0 #fff,0 12px 30px rgba(47,80,113,.09);
+}
+.arkIosAccess .arkGateAccessLabel{color:#2d9b72}
+.arkIosAccess .arkGateAccessReady>strong{color:#17314f}
+.arkIosAccess .arkGateAccessReady>p{color:#728399}
+.arkIosAccess .arkGateContinue{
+  background:linear-gradient(145deg,#eef8ff,#dbeeff);
+  color:#17314f!important;
+  border:1px solid rgba(72,153,205,.16);
+  box-shadow:inset 0 1px 0 #fff,0 12px 24px rgba(48,127,180,.10);
+}
+.arkIosAccess .arkGateContinue:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 #fff,0 16px 28px rgba(48,127,180,.15)}
+.arkIosAccess .arkGateContinue b{color:#258ac7}
+
+.arkIosAccess .arkGateRegisterBlock label,
+.arkIosAccess .arkGateCodeBlock>label{color:#314a68}
+.arkIosAccess .arkGateRegisterField{
+  background:rgba(255,255,255,.83)!important;
+  color:#17314f!important;
+  border:1px solid rgba(83,155,205,.24)!important;
+  box-shadow:inset 0 1px 0 #fff,0 9px 24px rgba(45,99,140,.08)!important;
+}
+.arkIosAccess .arkGateRegisterField b{background:#edf8ff;color:#2589c5}
+.arkIosAccess .arkGateCodeField{
+  background:rgba(255,255,255,.90);
+  border-color:rgba(99,148,188,.20);
+  box-shadow:inset 0 1px 0 #fff,0 8px 20px rgba(43,87,125,.07);
+}
+.arkIosAccess .arkGateCodeField:focus-within{border-color:#62b4e8;box-shadow:0 0 0 5px rgba(72,168,229,.10),inset 0 1px 0 #fff}
+.arkIosAccess .arkGateCodeField input{color:#17314f}
+.arkIosAccess .arkGateCodeField input::placeholder{color:#98a7b8}
+.arkIosAccess .arkGateCodeField button{
+  background:linear-gradient(145deg,#54b2e9,#2586c5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 8px 18px rgba(43,137,198,.18);
+}
+.arkIosAccess .arkGateNote{color:#8090a3}
+.arkIosAccess .arkGateNote>span{background:#fff;border-color:rgba(227,76,96,.24);color:#d73146!important}
+
+.arkIosFooter{color:#7b8b9d}
+.arkIosFooter b{color:#53657b}
+.arkIosFooter i{color:#a9b5c1}
+
+@media(max-width:1180px){
+  .arkIosPage{height:auto;min-height:100svh;overflow:auto}
+}
+
+@media(max-width:760px){
+  .arkIosPage{
+    background:radial-gradient(circle at 8% 2%,rgba(105,193,243,.24),transparent 26%),radial-gradient(circle at 92% 5%,rgba(247,132,150,.18),transparent 24%),linear-gradient(180deg,#f8fbff,#f4f8fc 65%,#fff9fa);
+  }
+  .arkIosNavStatus{display:none}
+  .arkIosBenefit{background:rgba(255,255,255,.72)}
+  .arkIosStage{box-shadow:0 24px 60px rgba(48,80,112,.14),0 0 0 1px rgba(106,138,170,.08)}
+  .arkIosAccess{background:rgba(255,255,255,.78)}
+}
