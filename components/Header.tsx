@@ -3,21 +3,18 @@ import { Brand } from './Brand';
 
 export function Header() {
   return (
-    <header className="siteHeader">
-      <div className="shell headerInner">
+    <header className="arkHeader">
+      <div className="landingShell arkHeaderInner">
         <Brand />
-        <nav className="topNav" aria-label="Platform navigation">
-          <a href="#platform">Platforma</a>
-          <a href="#mock">Mock</a>
-          <a href="#tracks">Yo‘nalishlar</a>
-          <a href="#features">Imkoniyatlar</a>
-          <a href="#how">Jarayon</a>
+        <nav className="arkTopNav" aria-label="Platform navigation">
+          <a href="#platform">Platform</a>
+          <a href="#features">Features</a>
+          <a href="#tracks">IELTS & CEFR</a>
+          <a href="#how">How it works</a>
         </nav>
-        <div className="headerActions">
-          <Link className="dashboardBtn" href="/dashboard">Dashboard</Link>
-          <Link className="signupBtn" href="https://t.me/arkedu_bot" target="_blank" rel="noopener noreferrer">
-            <span className="ctaLabel">Telegram orqali kirish</span><span>↗</span>
-          </Link>
+        <div className="arkHeaderActions">
+          <Link className="arkLoginButton" href="/login">Kirish</Link>
+          <Link className="arkHeaderCta" href="/dashboard">Dashboard <span>→</span></Link>
         </div>
       </div>
     </header>
