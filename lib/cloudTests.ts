@@ -14,8 +14,8 @@ export type CloudTest = {
   fileName: string;
   filePath: string;
   durationMinutes: number;
-  dailyTaskEnabled: boolean;
-  dailyTaskPoints: number;
+  dailyTaskEnabled?: boolean;
+  dailyTaskPoints?: number;
   createdAt: string;
   updatedAt: string;
 };
