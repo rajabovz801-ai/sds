@@ -8,7 +8,7 @@ import { LogOutIcon } from '@/components/UiIcons';
 import type { StudentSummary } from '@/lib/auth/server-session';
 
 const items = [
-  { href: '/mock', label: 'Boshqaruv' },
+  { href: '/mock', label: 'Dashboard' },
   { href: '/ielts', label: 'IELTS' },
   { href: '/cefr', label: 'CEFR' },
   { href: '/practice', label: 'Practice', soon: true },
