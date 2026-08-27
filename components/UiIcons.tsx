@@ -17,7 +17,7 @@ export function BotIcon(props: IconProps) { return <IconBase {...props}><rect x=
 export function KeyRoundIcon(props: IconProps) { return <IconBase {...props}><circle cx="8" cy="15" r="4" /><path d="m11 12 8-8M16 7l2 2M14 9l2 2" /></IconBase>; }
 export function LogInIcon(props: IconProps) { return <IconBase {...props}><path d="M14 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-3" /><path d="M10 12h11M17 8l4 4-4 4" /></IconBase>; }
 export function LogOutIcon(props: IconProps) { return <IconBase {...props}><path d="M10 8V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-3" /><path d="M14 12H3M7 8l-4 4 4 4" /></IconBase>; }
-export function ShieldCheckIcon(props: IconProps) { return <IconBase {...props}><path d="M12 3 5 6v5c0 4.7 2.8 7 10 4-4.2 2-7 5.3-7 10V6l-7-3Z" /><path d="m9 12 2 2 4-4" /></IconBase>; }
+export function ShieldCheckIcon(props: IconProps) { return <IconBase {...props}><path d="M12 3 5 6v5c0 4.7 2.8 8 7 10 4.2-2 7-5.3 7-10V6l-7-3Z" /><path d="m9 12 2 2 4-4" /></IconBase>; }
 export function CheckCircleIcon(props: IconProps) { return <IconBase {...props}><circle cx="12" cy="12" r="9" /><path d="m8 12 2.5 2.5L16 9" /></IconBase>; }
 export function GlobeIcon(props: IconProps) { return <IconBase {...props}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.3 2.5 3.5 5.5 3.5 9S14.3 18.5 12 21M12 3C9.7 5.5 8.5 8.5 8.5 12S9.7 18.5 12 21" /></IconBase>; }
 export function LayersIcon(props: IconProps) { return <IconBase {...props}><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 16l9 5 9-5" /></IconBase>; }
