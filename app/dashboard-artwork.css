@@ -1,4 +1,4 @@
-/* ARK Dashboard visual system — premium native icon badges. */
+/* ARK Dashboard visual system — coral premium native icon language. */
 
 /* Remaining dashboard PNG artwork never gets a painted tile behind it. */
 .studentDashboardShell img[src^="/achievements/"]{
@@ -12,9 +12,31 @@
   transform:translateZ(0);
 }
 
-/* Sidebar motivation: stronger native icon treatment, still aligned with KPI language. */
+/* Keep going: clean cream/coral card with a real native rocket icon. */
 .studentDashboardShell .studentSideMotivation{
-  padding-right:78px;
+  padding:17px 76px 16px 15px;
+  color:#10233f;
+  background:linear-gradient(145deg,#fffdf9 0%,#fff8f3 100%);
+  border:1px solid rgba(255,104,91,.24);
+  box-shadow:0 16px 34px rgba(73,46,36,.10),inset 0 1px 0 rgba(255,255,255,.94);
+}
+.studentDashboardShell .studentSideMotivation::before{
+  content:"";
+  position:absolute;
+  right:-24px;
+  top:-30px;
+  width:112px;
+  height:112px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,104,91,.12) 0%,rgba(255,104,91,0) 70%);
+  pointer-events:none;
+}
+.studentDashboardShell .studentSideMotivation strong{
+  color:#10233f;
+  font-size:13px;
+}
+.studentDashboardShell .studentSideMotivation p{
+  color:#6e7888;
 }
 .studentDashboardShell .studentSideMotivationIcon{
   position:absolute;
@@ -25,65 +47,66 @@
   border-radius:17px;
   display:grid;
   place-items:center;
-  color:#fff;
-  background:linear-gradient(145deg,#294d94 0%,#6351e6 58%,#7a5df0 100%);
-  border:1px solid rgba(255,255,255,.28);
-  box-shadow:0 14px 28px rgba(15,27,78,.34),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -8px 20px rgba(5,16,55,.14);
+  color:#ff685b;
+  background:linear-gradient(145deg,#fff8f3 0%,#ffe8e2 100%);
+  border:1px solid rgba(255,104,91,.30);
+  box-shadow:0 12px 24px rgba(255,104,91,.16),inset 0 1px 0 rgba(255,255,255,.96),inset 0 -7px 16px rgba(255,104,91,.06);
 }
 .studentDashboardShell .studentSideMotivationIcon::after{
   content:"";
   position:absolute;
   inset:5px;
   border-radius:13px;
-  border:1px solid rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.82);
   pointer-events:none;
 }
 .studentDashboardShell .studentSideMotivationIcon svg{
-  width:26px;
-  height:26px;
+  width:29px;
+  height:29px;
   stroke-width:2.05;
-  filter:drop-shadow(0 2px 4px rgba(4,12,40,.25));
+  filter:drop-shadow(0 2px 3px rgba(255,104,91,.16));
 }
 
-/* Achievement cards — premium badge system, no external image dependency. */
+/* Achievement cards — clean professional progression system. */
 .studentDashboardShell .achievementGrid article{
-  --achievement-accent:#5268d8;
-  --achievement-accent2:#7a8df0;
-  --achievement-soft:#eef1ff;
-  --achievement-line:rgba(82,104,216,.18);
-  --achievement-shadow:rgba(82,104,216,.24);
+  --achievement-accent:#ff685b;
+  --achievement-accent2:#ff8b73;
+  --achievement-soft:#fff1ed;
+  --achievement-line:rgba(255,104,91,.23);
+  --achievement-shadow:rgba(255,104,91,.18);
   position:relative;
   isolation:isolate;
   overflow:hidden;
-  min-height:156px;
+  min-height:148px;
   padding:15px 16px;
   gap:14px;
-  border-color:rgba(16,35,63,.095);
+  border:1px solid rgba(16,35,63,.09);
+  border-radius:16px;
   background:linear-gradient(145deg,#fff 0%,#fffdf9 100%);
+  box-shadow:0 8px 22px rgba(31,45,64,.035);
 }
 .studentDashboardShell .achievementGrid article::before{
   content:"";
   position:absolute;
   z-index:-1;
-  left:-52px;
+  left:-58px;
   top:50%;
-  width:168px;
-  height:168px;
+  width:164px;
+  height:164px;
   transform:translateY(-50%);
   border-radius:50%;
-  background:radial-gradient(circle,var(--achievement-soft) 0%,rgba(255,255,255,0) 72%);
-  opacity:.9;
+  background:radial-gradient(circle,rgba(255,104,91,.075) 0%,rgba(255,104,91,0) 72%);
   pointer-events:none;
 }
 .studentDashboardShell .achievementGrid article.unlocked{
-  border-color:var(--achievement-line);
-  background:linear-gradient(145deg,#fff 0%,#fbfffd 100%);
-  box-shadow:0 12px 30px rgba(20,39,67,.045);
+  border-color:rgba(255,104,91,.35);
+  background:linear-gradient(145deg,#fff 0%,#fff7f4 100%);
+  box-shadow:0 12px 28px rgba(255,104,91,.075),0 5px 16px rgba(31,45,64,.035);
 }
 .studentDashboardShell .achievementGrid article.locked{
   opacity:1!important;
   filter:none!important;
-  background:linear-gradient(145deg,#fff 0%,#fbfaf7 100%);
+  background:linear-gradient(145deg,#fff 0%,#fbfaf8 100%);
 }
 .studentDashboardShell .achievementGrid article>div{
   position:relative;
@@ -91,187 +114,131 @@
   min-width:0;
 }
 .studentDashboardShell .achievementGrid article.locked>div{
-  opacity:.80;
+  opacity:.76;
 }
 
-/* Badge: layered, high-contrast and more visually premium. */
+/* Badge geometry inspired by premium learning dashboards: light coral tile + crisp line icon. */
 .studentDashboardShell .achievementIconBox{
   position:relative;
   z-index:1;
-  width:68px;
-  height:68px;
-  flex:0 0 68px;
-  border-radius:21px;
+  width:60px;
+  height:60px;
+  flex:0 0 60px;
+  border-radius:17px;
   display:grid;
   place-items:center;
-  color:var(--achievement-accent);
-  background:
-    linear-gradient(145deg,rgba(255,255,255,.98),rgba(255,255,255,.78)),
-    var(--achievement-soft);
-  border:1px solid color-mix(in srgb,var(--achievement-accent) 24%,#ffffff 76%);
-  box-shadow:
-    0 12px 25px rgba(16,35,63,.09),
-    0 3px 8px var(--achievement-shadow),
-    inset 0 1px 0 rgba(255,255,255,.95),
-    inset 0 -8px 18px var(--achievement-soft);
-  transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;
+  color:#ff685b;
+  background:linear-gradient(145deg,#fffaf7 0%,#fff0eb 100%);
+  border:1px solid rgba(255,104,91,.24);
+  box-shadow:0 9px 20px rgba(255,104,91,.10),inset 0 1px 0 rgba(255,255,255,.96);
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
 }
 .studentDashboardShell .achievementIconBox::before{
   content:"";
   position:absolute;
-  inset:6px;
-  border-radius:16px;
-  background:linear-gradient(145deg,var(--achievement-soft),rgba(255,255,255,.55));
-  border:1px solid rgba(255,255,255,.72);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
-  z-index:-1;
-}
-.studentDashboardShell .achievementIconBox::after{
-  content:"";
-  position:absolute;
-  right:7px;
-  top:7px;
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--achievement-accent2);
-  box-shadow:0 0 0 3px rgba(255,255,255,.72),0 3px 7px var(--achievement-shadow);
+  inset:5px;
+  border-radius:13px;
+  border:1px solid rgba(255,255,255,.88);
+  pointer-events:none;
 }
 .studentDashboardShell .achievementIconBox svg{
-  width:32px;
-  height:32px;
-  stroke-width:2.15;
-  filter:drop-shadow(0 2px 3px var(--achievement-shadow));
+  width:29px;
+  height:29px;
+  stroke-width:2.05;
+  filter:drop-shadow(0 2px 2px rgba(255,104,91,.10));
 }
 .studentDashboardShell .achievementGrid article.unlocked .achievementIconBox{
-  color:#fff;
-  background:linear-gradient(145deg,var(--achievement-accent2) 0%,var(--achievement-accent) 52%,#173b72 125%);
-  border-color:rgba(255,255,255,.2);
-  box-shadow:
-    0 15px 30px var(--achievement-shadow),
-    0 5px 12px rgba(16,35,63,.16),
-    inset 0 1px 0 rgba(255,255,255,.32),
-    inset 0 -12px 22px rgba(7,20,58,.16);
-}
-.studentDashboardShell .achievementGrid article.unlocked .achievementIconBox::before{
-  background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.03));
-  border-color:rgba(255,255,255,.12);
+  color:#ff5f53;
+  background:linear-gradient(145deg,#fff7f3 0%,#ffe1da 100%);
+  border-color:rgba(255,95,83,.34);
+  box-shadow:0 11px 24px rgba(255,104,91,.17),inset 0 1px 0 rgba(255,255,255,.98);
 }
 .studentDashboardShell .achievementGrid article.unlocked .achievementIconBox::after{
-  background:#fff;
-  box-shadow:0 0 0 3px rgba(255,255,255,.16),0 3px 7px rgba(4,14,43,.24);
+  content:"✓";
+  position:absolute;
+  right:-5px;
+  top:-5px;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  background:#ff685b;
+  border:2px solid #fff;
+  box-shadow:0 5px 10px rgba(255,104,91,.24);
+  font-size:10px;
+  font-weight:900;
+  line-height:1;
 }
 .studentDashboardShell .achievementGrid article.locked .achievementIconBox{
-  opacity:.9;
-  filter:saturate(.94);
+  color:#b0bac6;
+  background:linear-gradient(145deg,#f9fbfc 0%,#f2f5f6 100%);
+  border-color:rgba(124,140,157,.18);
+  box-shadow:0 8px 18px rgba(31,45,64,.045),inset 0 1px 0 rgba(255,255,255,.95);
 }
 .studentDashboardShell .achievementGrid article:hover .achievementIconBox{
-  transform:translateY(-3px) scale(1.015);
-  box-shadow:
-    0 16px 30px rgba(16,35,63,.11),
-    0 5px 12px var(--achievement-shadow),
-    inset 0 1px 0 rgba(255,255,255,.95);
+  transform:translateY(-2px);
+  border-color:rgba(255,104,91,.36);
+  box-shadow:0 13px 25px rgba(255,104,91,.14),inset 0 1px 0 rgba(255,255,255,.96);
 }
 
 .studentDashboardShell .achievementGrid strong{
   font-size:12.5px!important;
   line-height:1.22;
-  color:#18304f;
+  color:#172b47;
 }
 .studentDashboardShell .achievementGrid p{
-  min-height:28px;
-  margin:6px 0 10px!important;
+  min-height:27px;
+  margin:6px 0 9px!important;
+  color:#8792a1;
   font-size:9.5px!important;
   line-height:1.45;
 }
 .studentDashboardShell .achievementProgress{
   height:5px;
-  background:#edf0f3;
+  border-radius:999px;
+  background:#edf0f2;
+  overflow:hidden;
 }
 .studentDashboardShell .achievementProgress i{
-  background:linear-gradient(90deg,var(--achievement-accent),var(--achievement-accent2))!important;
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#ff685b 0%,#ff8b73 100%)!important;
+  box-shadow:0 0 8px rgba(255,104,91,.18);
 }
 .studentDashboardShell .achievementGrid article.locked .achievementProgress i{
-  opacity:.78;
+  opacity:.56;
 }
 .studentDashboardShell .achievementGrid article>div>span{
   margin-top:6px!important;
   font-size:8.5px!important;
 }
 .studentDashboardShell .achievementGrid article.unlocked>div>span{
-  color:#15915e;
+  color:#ef5a50;
+  font-weight:850;
+}
+.studentDashboardShell .achievementGrid article.locked>div>span{
+  color:#98a2ae;
 }
 
-/* Premium semantic palette — richer contrast, less pastel, more visual identity. */
-.studentDashboardShell .achievement-first-test{
-  --achievement-accent:#0d9b67;
-  --achievement-accent2:#39c792;
-  --achievement-soft:#e6f7f0;
-  --achievement-line:rgba(13,155,103,.22);
-  --achievement-shadow:rgba(13,155,103,.25);
-}
-.studentDashboardShell .achievement-streak{
-  --achievement-accent:#e65f3c;
-  --achievement-accent2:#ff9a5f;
-  --achievement-soft:#fff0e9;
-  --achievement-line:rgba(230,95,60,.22);
-  --achievement-shadow:rgba(230,95,60,.26);
-}
-.studentDashboardShell .achievement-reading-master{
-  --achievement-accent:#245fca;
-  --achievement-accent2:#5a91f2;
-  --achievement-soft:#eaf1ff;
-  --achievement-line:rgba(36,95,202,.21);
-  --achievement-shadow:rgba(36,95,202,.25);
-}
-.studentDashboardShell .achievement-listening-boost{
-  --achievement-accent:#087f88;
-  --achievement-accent2:#28b7b4;
-  --achievement-soft:#e5f6f6;
-  --achievement-line:rgba(8,127,136,.21);
-  --achievement-shadow:rgba(8,127,136,.25);
-}
-.studentDashboardShell .achievement-ten-tests{
-  --achievement-accent:#5742c7;
-  --achievement-accent2:#8a74ee;
-  --achievement-soft:#f0edff;
-  --achievement-line:rgba(87,66,199,.21);
-  --achievement-shadow:rgba(87,66,199,.26);
-}
-.studentDashboardShell .achievement-accuracy-ace{
-  --achievement-accent:#c66424;
-  --achievement-accent2:#ef9a50;
-  --achievement-soft:#fff1e5;
-  --achievement-line:rgba(198,100,36,.22);
-  --achievement-shadow:rgba(198,100,36,.26);
-}
-.studentDashboardShell .achievement-band-seven{
-  --achievement-accent:#a8750f;
-  --achievement-accent2:#ddb54b;
-  --achievement-soft:#fff5d9;
-  --achievement-line:rgba(168,117,15,.23);
-  --achievement-shadow:rgba(168,117,15,.28);
-}
-.studentDashboardShell .achievement-perfect-section{
-  --achievement-accent:#7741b5;
-  --achievement-accent2:#ad70e4;
-  --achievement-soft:#f5ebff;
-  --achievement-line:rgba(119,65,181,.21);
-  --achievement-shadow:rgba(119,65,181,.26);
-}
-.studentDashboardShell .achievement-fast-finisher{
-  --achievement-accent:#1465b8;
-  --achievement-accent2:#2ca8e8;
-  --achievement-soft:#e9f5ff;
-  --achievement-line:rgba(20,101,184,.21);
-  --achievement-shadow:rgba(20,101,184,.26);
-}
+/* Single coral identity across every achievement: consistent, branded and easy to scan. */
+.studentDashboardShell .achievement-first-test,
+.studentDashboardShell .achievement-streak,
+.studentDashboardShell .achievement-reading-master,
+.studentDashboardShell .achievement-listening-boost,
+.studentDashboardShell .achievement-ten-tests,
+.studentDashboardShell .achievement-accuracy-ace,
+.studentDashboardShell .achievement-band-seven,
+.studentDashboardShell .achievement-perfect-section,
+.studentDashboardShell .achievement-fast-finisher,
 .studentDashboardShell .achievement-consistency{
-  --achievement-accent:#247d5e;
-  --achievement-accent2:#4bb88b;
-  --achievement-soft:#e8f7f0;
-  --achievement-line:rgba(36,125,94,.21);
-  --achievement-shadow:rgba(36,125,94,.25);
+  --achievement-accent:#ff685b;
+  --achievement-accent2:#ff8b73;
+  --achievement-soft:#fff1ed;
+  --achievement-line:rgba(255,104,91,.23);
+  --achievement-shadow:rgba(255,104,91,.18);
 }
 
 /* KPI artwork that still intentionally uses transparent illustrations. */
@@ -306,36 +273,36 @@
 }
 
 @media(max-width:1280px){
-  .studentDashboardShell .achievementGrid article{min-height:150px}
+  .studentDashboardShell .achievementGrid article{min-height:144px}
   .studentDashboardShell .achievementIconBox{
-    width:64px;
-    height:64px;
-    flex-basis:64px;
-    border-radius:20px;
+    width:58px;
+    height:58px;
+    flex-basis:58px;
+    border-radius:16px;
   }
-  .studentDashboardShell .achievementIconBox svg{width:30px;height:30px}
+  .studentDashboardShell .achievementIconBox svg{width:28px;height:28px}
 }
 @media(max-width:940px){
-  .studentDashboardShell .achievementGrid article{min-height:146px}
+  .studentDashboardShell .achievementGrid article{min-height:140px}
   .studentDashboardShell .achievementIconBox{
-    width:61px;
-    height:61px;
-    flex-basis:61px;
-    border-radius:19px;
+    width:56px;
+    height:56px;
+    flex-basis:56px;
+    border-radius:16px;
   }
   .studentDashboardShell .studentWelcomeArt{width:210px!important}
 }
 @media(max-width:620px){
   .studentDashboardShell .achievementGrid article{
-    min-height:138px;
+    min-height:132px;
     padding:13px 14px;
   }
   .studentDashboardShell .achievementIconBox{
-    width:57px;
-    height:57px;
-    flex-basis:57px;
-    border-radius:18px;
+    width:53px;
+    height:53px;
+    flex-basis:53px;
+    border-radius:15px;
   }
-  .studentDashboardShell .achievementIconBox svg{width:27px;height:27px}
+  .studentDashboardShell .achievementIconBox svg{width:26px;height:26px}
   .studentDashboardShell .studentSideMotivationIcon{width:46px;height:46px;right:12px;top:14px}
 }
