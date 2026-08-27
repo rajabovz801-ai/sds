@@ -11,6 +11,7 @@ import './dashboard-artwork.css';
 import './dashboard-kpi-icons.css';
 import './dashboard-analytics-polish.css';
 import './dashboard-daily-tasks.css';
+import './daily-tasks-polish.css';
 import './student-workspace-shell.css';
 import './ielts-library-card-fix.css';
 
