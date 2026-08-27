@@ -12,6 +12,8 @@ type Row = {
   status: string;
   daily_task_enabled: boolean;
   daily_task_points: number;
+  daily_task_started_at: string | null;
+  daily_task_expires_at: string | null;
   updated_at: string;
 };
 
@@ -24,6 +26,19 @@ function formatDate(value?: string | null) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value));
+}
+
+function isActive(row: Row) {
+  const expires = row.daily_task_expires_at ? Date.parse(row.daily_task_expires_at) : 0;
+  return Boolean(row.daily_task_enabled && expires > Date.now());
+}
+
+function expiryLabel(row: Row) {
+  if (!row.daily_task_expires_at) return `Yangilangan: ${formatDate(row.updated_at)}`;
+  const expired = Date.parse(row.daily_task_expires_at) <= Date.now();
+  return expired
+    ? `EXPIRED · ${formatDate(row.daily_task_expires_at)}`
+    : `Tugaydi: ${formatDate(row.daily_task_expires_at)} · 24 soatlik oynada`;
 }
 
 export function AdminDailyTasksPanel() {
@@ -54,7 +69,7 @@ export function AdminDailyTasksPanel() {
   async function toggleOpen() {
     const next = !open;
     setOpen(next);
-    if (next && !loaded) await load();
+    if (next) await load();
   }
 
   async function save(row: Row, enabled: boolean, points: number) {
@@ -68,7 +83,9 @@ export function AdminDailyTasksPanel() {
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Saqlanmadi.');
       setRows((current) => current.map((item) => item.id === row.id ? body.test : item));
-      setMessage(`${row.title}: Daily Task sozlamasi saqlandi.`);
+      setMessage(enabled
+        ? `${row.title}: Daily Task 24 soatga yoqildi.`
+        : `${row.title}: Daily Task’dan olindi.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Saqlanmadi.');
     } finally {
@@ -82,7 +99,7 @@ export function AdminDailyTasksPanel() {
     return bTime - aTime;
   }), [rows]);
 
-  const activeCount = useMemo(() => rows.filter((row) => row.daily_task_enabled).length, [rows]);
+  const activeCount = useMemo(() => rows.filter(isActive).length, [rows]);
 
   return (
     <section className={`${styles.wrap} ${open ? styles.open : ''}`} data-admin-daily-tasks="true">
@@ -91,7 +108,7 @@ export function AdminDailyTasksPanel() {
         <span className={styles.headingCopy}>
           <small>GAMIFICATION CONTROL</small>
           <strong>Daily Tasks boshqaruvi</strong>
-          <span>Testlarni sanasi bo‘yicha boshqaring. Eng yangi testlar tepada turadi.</span>
+          <span>Daily Task yoqilgandan boshlab 24 soat faol turadi va keyin avtomatik yo‘qoladi.</span>
         </span>
         <span className={styles.headingMeta}>
           <b>{loaded ? `${activeCount} ACTIVE` : 'DROPDOWN'}</b>
@@ -104,25 +121,28 @@ export function AdminDailyTasksPanel() {
           {message ? <div className={styles.notice}>{message}</div> : null}
           {loading ? <div className={styles.empty}>Yuklanmoqda…</div> : (
             <div className={styles.list}>
-              {sortedRows.map((row) => (
-                <article className={`${styles.row} ${row.daily_task_enabled ? styles.on : ''}`} key={row.id}>
-                  <div className={styles.copy}>
-                    <small>{row.track.toUpperCase()} · {row.skill.toUpperCase()} · {row.status.toUpperCase()}</small>
-                    <strong>{row.title}</strong>
-                    <span>{formatDate(row.updated_at)}</span>
-                  </div>
-                  <label className={styles.points}>
-                    <ZapIcon /><span>PTS</span>
-                    <input type="number" min="0" max="100" defaultValue={row.daily_task_points || 20} disabled={busyId === row.id} onBlur={(event) => {
-                      const value = Math.max(0, Math.min(100, Math.round(Number(event.target.value) || 20)));
-                      if (value !== row.daily_task_points) void save(row, row.daily_task_enabled, value);
-                    }} />
-                  </label>
-                  <button className={row.daily_task_enabled ? styles.disable : styles.enable} disabled={busyId === row.id || row.status !== 'published'} onClick={() => void save(row, !row.daily_task_enabled, row.daily_task_points || 20)} type="button">
-                    {busyId === row.id ? 'Saqlanmoqda…' : row.daily_task_enabled ? 'Daily Task’dan olish' : 'Daily Task qilish'}
-                  </button>
-                </article>
-              ))}
+              {sortedRows.map((row) => {
+                const active = isActive(row);
+                return (
+                  <article className={`${styles.row} ${active ? styles.on : ''}`} key={row.id}>
+                    <div className={styles.copy}>
+                      <small>{row.track.toUpperCase()} · {row.skill.toUpperCase()} · {row.status.toUpperCase()}</small>
+                      <strong>{row.title}</strong>
+                      <span>{expiryLabel(row)}</span>
+                    </div>
+                    <label className={styles.points}>
+                      <ZapIcon /><span>PTS</span>
+                      <input type="number" min="0" max="100" defaultValue={row.daily_task_points || 20} disabled={busyId === row.id} onBlur={(event) => {
+                        const value = Math.max(0, Math.min(100, Math.round(Number(event.target.value) || 20)));
+                        if (value !== row.daily_task_points) void save(row, active, value);
+                      }} />
+                    </label>
+                    <button className={active ? styles.disable : styles.enable} disabled={busyId === row.id || row.status !== 'published'} onClick={() => void save(row, !active, row.daily_task_points || 20)} type="button">
+                      {busyId === row.id ? 'Saqlanmoqda…' : active ? 'Daily Task’dan olish' : '24 soatga Daily Task qilish'}
+                    </button>
+                  </article>
+                );
+              })}
               {!sortedRows.length && !loading ? <div className={styles.empty}>Testlar topilmadi.</div> : null}
             </div>
           )}
