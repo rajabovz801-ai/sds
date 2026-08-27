@@ -118,6 +118,7 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
   const [clock, setClock] = useState(new Date());
   const [live, setLive] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [totalPts, setTotalPts] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -151,6 +152,30 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
     };
   }, [previewMode]);
 
+  useEffect(() => {
+    if (previewMode) return;
+    let cancelled = false;
+    async function refreshPoints() {
+      try {
+        const res = await fetch('/api/gamification', { cache: 'no-store' });
+        if (!res.ok) return;
+        const summary = await res.json() as { totalPts?: number };
+        if (!cancelled && Number.isFinite(summary.totalPts)) setTotalPts(Math.max(0, Number(summary.totalPts)));
+      } catch {
+        // Dashboard remains usable if the small points summary cannot refresh.
+      }
+    }
+    refreshPoints();
+    const interval = window.setInterval(refreshPoints, 12000);
+    const onFocus = () => refreshPoints();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [previewMode]);
+
   async function logout() {
     if (previewMode || loggingOut) return;
     setLoggingOut(true);
@@ -164,7 +189,6 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
   const todayLabel = new Intl.DateTimeFormat('uz-UZ', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(clock);
   const timeLabel = new Intl.DateTimeFormat('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(clock);
   const recent = useMemo(() => data.recentResults, [data.recentResults]);
-  const totalPts = 0;
 
   return (
     <div className="studentDashboardShell">
