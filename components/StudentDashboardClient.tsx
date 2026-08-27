@@ -5,18 +5,26 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
+  AwardIcon,
   BookOpenIcon,
+  CalendarCheckIcon,
+  CheckCircleIcon,
+  ChecklistIcon,
+  ClockIcon,
+  FlameIcon,
+  GlobeIcon,
   HeadphonesIcon,
   LayersIcon,
   LayoutGridIcon,
   LogOutIcon,
+  RocketIcon,
   SparklesIcon,
-  ClockIcon,
-  GlobeIcon,
+  TargetIcon,
+  ZapIcon,
 } from '@/components/UiIcons';
 import type { StudentSummary } from '@/lib/auth/server-session';
 import type { DashboardData, DashboardPoint } from '@/lib/dashboard';
-import { achievementAssets, type AchievementAssetKey } from '@/components/achievementAssets';
+import { achievementAssets } from '@/components/achievementAssets';
 
 function fmtBand(value: number | null) {
   return value === null ? '—' : value.toFixed(1);
@@ -28,6 +36,22 @@ function bandLabel(value: number | null) {
   if (value >= 7) return 'Good User';
   if (value >= 6) return 'Competent';
   return 'Developing';
+}
+
+function AchievementGlyph({ id }: { id: string }) {
+  switch (id) {
+    case 'first-test': return <CheckCircleIcon />;
+    case 'streak': return <FlameIcon />;
+    case 'reading-master': return <BookOpenIcon />;
+    case 'listening-boost': return <HeadphonesIcon />;
+    case 'ten-tests': return <ChecklistIcon />;
+    case 'accuracy-ace': return <TargetIcon />;
+    case 'band-seven': return <AwardIcon />;
+    case 'perfect-section': return <SparklesIcon />;
+    case 'fast-finisher': return <ZapIcon />;
+    case 'consistency': return <CalendarCheckIcon />;
+    default: return <SparklesIcon />;
+  }
 }
 
 function MiniLine({ points, height = 190 }: { points: DashboardPoint[]; height?: number }) {
@@ -158,7 +182,7 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
           <Link href="/practice"><BookOpenIcon /><span>Practice</span><small>SOON</small></Link>
           <Link href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
         </nav>
-        <div className="studentSideMotivation"><img src={achievementAssets['fast-learner']} alt="" /><strong>Keep going!</strong><p>Har bir yakunlangan test maqsadingizga yaqinlashtiradi.</p></div>
+        <div className="studentSideMotivation"><span className="studentSideMotivationIcon" aria-hidden="true"><RocketIcon /></span><strong>Keep going!</strong><p>Har bir yakunlangan test maqsadingizga yaqinlashtiradi.</p></div>
         <div className="studentSideProfile"><span>{initials}</span><div><small>{previewMode ? 'ADMIN PREVIEW' : 'STUDENT'}</small><strong>{student.firstName} {student.lastName}</strong></div><button type="button" onClick={logout} disabled={previewMode || loggingOut} aria-label={previewMode ? 'Admin preview' : 'Chiqish'}><LogOutIcon /></button></div>
       </aside>
 
@@ -197,7 +221,7 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
           </aside>
         </section>
 
-        <section className="studentAchievements studentPanel"><header><div><h2>Achievements</h2><p>Har bir yutuq haqiqiy faoliyatga qarab ochiladi.</p></div><span>{data.unlockedAchievements} / {data.achievements.length} UNLOCKED</span></header><div className="achievementGrid">{data.achievements.map((achievement) => <article key={achievement.id} className={achievement.unlocked ? 'unlocked' : 'locked'}><img src={achievementAssets[achievement.icon as AchievementAssetKey]} alt="" /><div><strong>{achievement.title}</strong><p>{achievement.description}</p><div className="achievementProgress"><i style={{ width: `${achievement.progress}%` }} /></div><span>{achievement.unlocked ? '✓ Unlocked' : `${Math.round(achievement.progress)}%`}</span></div></article>)}</div></section>
+        <section className="studentAchievements studentPanel"><header><div><h2>Achievements</h2><p>Har bir yutuq haqiqiy faoliyatga qarab ochiladi.</p></div><span>{data.unlockedAchievements} / {data.achievements.length} UNLOCKED</span></header><div className="achievementGrid">{data.achievements.map((achievement) => <article key={achievement.id} className={`${achievement.unlocked ? 'unlocked' : 'locked'} achievement-${achievement.id}`}><span className="achievementIconBox" aria-hidden="true"><AchievementGlyph id={achievement.id} /></span><div><strong>{achievement.title}</strong><p>{achievement.description}</p><div className="achievementProgress"><i style={{ width: `${achievement.progress}%` }} /></div><span>{achievement.unlocked ? '✓ Unlocked' : `${Math.round(achievement.progress)}%`}</span></div></article>)}</div></section>
       </main>
     </div>
   );
