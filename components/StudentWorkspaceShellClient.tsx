@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
+  AwardIcon,
   BookOpenIcon,
   GlobeIcon,
   LayersIcon,
@@ -15,7 +16,7 @@ import {
 } from '@/components/UiIcons';
 import type { StudentSummary } from '@/lib/auth/server-session';
 
-type WorkspaceTrack = 'ielts' | 'cefr' | 'practice' | 'tools';
+type WorkspaceTrack = 'ielts' | 'cefr' | 'practice' | 'tools' | 'leaderboard';
 
 type Props = {
   student: StudentSummary;
@@ -53,6 +54,7 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
           <Link className={active === 'cefr' ? 'active' : ''} href="/cefr"><LayersIcon /><span>CEFR</span></Link>
           <Link className={active === 'practice' ? 'active' : ''} href="/practice"><BookOpenIcon /><span>Practice</span><small>SOON</small></Link>
           <Link className={active === 'tools' ? 'active' : ''} href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
+          <Link className={active === 'leaderboard' ? 'active' : ''} href="/leaderboard"><AwardIcon /><span>Leaderboard</span></Link>
         </nav>
 
         <div className="studentSideProfile">
