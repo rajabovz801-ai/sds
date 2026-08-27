@@ -70,23 +70,26 @@ ${hudMarkup}
     return String(node.textContent || '').trim();
   }
 
+  function cleanNumberText(value) {
+    var cleaned = String(value || '').replace(/,/g, '.').replace(/[^0-9.-]/g, '');
+    if (!cleaned || cleaned === '-' || cleaned === '.' || cleaned === '-.') return null;
+    var parsed = Number(cleaned);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
   function numberFromNode(selectors) {
     var node = firstNode(selectors);
-    if (!node) return null;
-    var match = textOf(node).replace(/,/g, '.').match(/-?\d+(?:\.\d+)?/);
-    if (!match) return null;
-    var value = Number(match[0]);
-    return Number.isFinite(value) ? value : null;
+    return node ? cleanNumberText(textOf(node)) : null;
   }
 
   function fractionFromNode(selectors) {
     var node = firstNode(selectors);
     if (!node) return null;
-    var match = textOf(node).replace(/,/g, '.').match(/(-?\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);
-    if (!match) return null;
-    var value = Number(match[1]);
-    var total = Number(match[2]);
-    return Number.isFinite(value) && Number.isFinite(total) && total > 0 ? [value, total] : null;
+    var parts = textOf(node).replace(/,/g, '.').split('/');
+    if (parts.length < 2) return null;
+    var value = cleanNumberText(parts[0]);
+    var total = cleanNumberText(parts[1]);
+    return value !== null && total !== null && total > 0 ? [value, total] : null;
   }
 
   function resultSurfaceVisible() {
