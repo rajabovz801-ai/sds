@@ -46,6 +46,81 @@ function normalizeMessage(value: unknown) {
   return data.payload || data.result || data.arkResult || data;
 }
 
+function finiteNumber(value: unknown) {
+  if (value === null || value === undefined || value === '') return null;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  const match = String(value).replace(/,/g, '.').match(/-?\d+(?:\.\d+)?/);
+  if (!match) return null;
+  const parsed = Number(match[0]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function fraction(value: unknown) {
+  if (value === null || value === undefined) return null;
+  const match = String(value).replace(/,/g, '.').match(/(-?\d+(?:\.\d+)?)\s*(?:\/|\bof\b)\s*(-?\d+(?:\.\d+)?)/i);
+  if (!match) return null;
+  const current = Number(match[1]);
+  const total = Number(match[2]);
+  return Number.isFinite(current) && Number.isFinite(total) && total > 0 ? [current, total] as const : null;
+}
+
+function firstValue(source: any, keys: string[]) {
+  for (const key of keys) {
+    const value = source?.[key];
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return null;
+}
+
+function normalizeResultPayload(input: any) {
+  const source = input && typeof input === 'object' ? input : {};
+  const nested = source.result && typeof source.result === 'object' ? source.result : {};
+  const merged = { ...nested, ...source };
+  const details = merged.details && typeof merged.details === 'object' && !Array.isArray(merged.details)
+    ? merged.details
+    : {};
+
+  const scoreValue = firstValue(merged, ['rawScore', 'score', 'resultScore', 'finalScore', 'correct', 'correctCount']);
+  const scorePair = fraction(scoreValue);
+  let rawScore = scorePair ? scorePair[0] : finiteNumber(scoreValue);
+  let maxScore = scorePair ? scorePair[1] : finiteNumber(firstValue(merged, [
+    'maxScore', 'total', 'totalScore', 'questionTotal', 'totalQuestions', 'questionCount', 'max',
+  ]));
+
+  let correct = finiteNumber(firstValue(merged, ['correct', 'correctCount', 'correct_count']));
+  let wrong = finiteNumber(firstValue(merged, ['wrong', 'wrongCount', 'incorrect', 'incorrectCount', 'wrong_count']));
+  let unanswered = finiteNumber(firstValue(merged, ['unanswered', 'unansweredCount', 'empty', 'emptyCount', 'unanswered_count']));
+  const answeredValue = firstValue(merged, ['answered', 'answeredCount', 'answeredQuestions']);
+  const answeredPair = fraction(answeredValue);
+  let answered = answeredPair ? answeredPair[0] : finiteNumber(answeredValue);
+  if (maxScore === null && answeredPair) maxScore = answeredPair[1];
+
+  if (rawScore === null && correct !== null) rawScore = correct;
+  if (correct === null && rawScore !== null) correct = rawScore;
+  if (answered === null && maxScore !== null && unanswered !== null) answered = Math.max(0, maxScore - unanswered);
+  if (wrong === null && answered !== null && correct !== null) wrong = Math.max(0, answered - correct);
+  if (unanswered === null && maxScore !== null && correct !== null && wrong !== null) {
+    unanswered = Math.max(0, maxScore - correct - wrong);
+  }
+
+  const normalized: Record<string, any> = {
+    ...merged,
+    details,
+  };
+  if (rawScore !== null) normalized.rawScore = rawScore;
+  if (maxScore !== null) normalized.maxScore = maxScore;
+  if (correct !== null) normalized.correct = Math.max(0, Math.round(correct));
+  if (wrong !== null) normalized.wrong = Math.max(0, Math.round(wrong));
+  if (unanswered !== null) normalized.unanswered = Math.max(0, Math.round(unanswered));
+
+  const band = finiteNumber(firstValue(merged, ['band', 'bandScore', 'overallBand']));
+  if (band !== null) normalized.band = band;
+  const durationSeconds = finiteNumber(firstValue(merged, ['durationSeconds', 'elapsedSeconds', 'timeSpentSeconds']));
+  if (durationSeconds !== null) normalized.durationSeconds = Math.max(0, Math.round(durationSeconds));
+
+  return normalized;
+}
+
 export function TestViewerClient({ id, initialData: data, attemptId, mode, section }: Props) {
   const router = useRouter();
   const viewerRef = useRef<HTMLDivElement | null>(null);
@@ -125,8 +200,9 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
 
     const saveResult = async (payload: any) => {
       if (savingRef.current) return;
+      const normalizedPayload = normalizeResultPayload(payload);
       let fingerprint = '';
-      try { fingerprint = JSON.stringify(payload); } catch { fingerprint = String(Date.now()); }
+      try { fingerprint = JSON.stringify(normalizedPayload); } catch { fingerprint = String(Date.now()); }
       if (fingerprint && fingerprint === lastPayloadRef.current) return;
 
       savingRef.current = true;
@@ -138,8 +214,8 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
           ? `/api/mock/attempts/${attemptId}/result`
           : `/api/tests/${id}/submit`;
         const requestBody = isMock
-          ? { ...payload, result: payload, section, testId: id, testSessionId: examSession.sessionId }
-          : { ...payload, result: payload, testId: id, testSessionId: examSession.sessionId };
+          ? { ...normalizedPayload, result: normalizedPayload, section, testId: id, testSessionId: examSession.sessionId }
+          : { ...normalizedPayload, result: normalizedPayload, testId: id, testSessionId: examSession.sessionId };
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
