@@ -1,0 +1,182 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArkLogoIcon } from '@/components/ArkLogoIcon';
+import {
+  BookOpenIcon,
+  HeadphonesIcon,
+  LayersIcon,
+  LayoutGridIcon,
+  LogOutIcon,
+  SparklesIcon,
+  ClockIcon,
+  GlobeIcon,
+} from '@/components/UiIcons';
+import type { StudentSummary } from '@/lib/auth/server-session';
+import type { DashboardData, DashboardPoint } from '@/lib/dashboard';
+import { achievementAssets, type AchievementAssetKey } from '@/components/achievementAssets';
+
+function fmtBand(value: number | null) {
+  return value === null ? '—' : value.toFixed(1);
+}
+
+function bandLabel(value: number | null) {
+  if (value === null) return 'Natija kutilmoqda';
+  if (value >= 8) return 'Excellent';
+  if (value >= 7) return 'Good User';
+  if (value >= 6) return 'Competent';
+  return 'Developing';
+}
+
+function MiniLine({ points, height = 190 }: { points: DashboardPoint[]; height?: number }) {
+  const values = points.map((p) => p.value);
+  const real = values.filter((v): v is number => v !== null);
+  if (!real.length) return <div className="dashNoData">Hali natija yo‘q</div>;
+  const width = 760;
+  const padX = 24;
+  const padY = 22;
+  const min = Math.max(0, Math.min(...real) - 0.5);
+  const max = Math.min(9, Math.max(...real) + 0.5);
+  const span = Math.max(1, max - min);
+  const coords = points.map((p, index) => {
+    const x = padX + (index * (width - padX * 2)) / Math.max(1, points.length - 1);
+    const y = p.value === null ? null : padY + ((max - p.value) / span) * (height - padY * 2);
+    return { x, y, value: p.value, label: p.label };
+  });
+  const segments: string[] = [];
+  let current: string[] = [];
+  for (const point of coords) {
+    if (point.y === null) {
+      if (current.length > 1) segments.push(current.join(' '));
+      current = [];
+    } else {
+      current.push(`${point.x},${point.y}`);
+    }
+  }
+  if (current.length > 1) segments.push(current.join(' '));
+
+  return (
+    <div className="dashChartWrap">
+      <svg className="dashLineChart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-label="Natijalar grafigi">
+        {[0, 1, 2, 3].map((i) => <line key={i} x1="18" x2={width - 18} y1={24 + i * ((height - 48) / 3)} y2={24 + i * ((height - 48) / 3)} className="dashGridLine" />)}
+        {segments.map((segment, i) => <polyline key={i} points={segment} className="dashLine" />)}
+        {coords.map((point, i) => point.y === null ? null : <g key={i}><circle cx={point.x} cy={point.y} r="5" className="dashDot" /><text x={point.x} y={point.y - 12} textAnchor="middle" className="dashDotLabel">{point.value?.toFixed(1)}</text></g>)}
+      </svg>
+      <div className="dashChartLabels">{points.map((p) => <span key={`${p.date}-${p.label}`}>{p.label}</span>)}</div>
+    </div>
+  );
+}
+
+function SmallTrend({ points }: { points: DashboardPoint[] }) {
+  const real = points.filter((p) => p.value !== null);
+  if (!real.length) return <div className="dashNoData dashNoDataSmall">Hali trend yo‘q</div>;
+  return <MiniLine points={points} height={130} />;
+}
+
+export function StudentDashboardClient({ student, initialData }: { student: StudentSummary; initialData: DashboardData }) {
+  const [data, setData] = useState(initialData);
+  const [clock, setClock] = useState(new Date());
+  const [live, setLive] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setClock(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function refresh() {
+      try {
+        const res = await fetch('/api/dashboard', { cache: 'no-store' });
+        if (!res.ok) throw new Error('refresh failed');
+        const next = await res.json() as DashboardData;
+        if (!cancelled) {
+          setData(next);
+          setLive(true);
+        }
+      } catch {
+        if (!cancelled) setLive(false);
+      }
+    }
+    const interval = window.setInterval(refresh, 8000);
+    const onFocus = () => refresh();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, []);
+
+  async function logout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try { await fetch('/api/auth/logout', { method: 'POST' }); }
+    finally { router.replace('/'); router.refresh(); }
+  }
+
+  const initials = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`.toUpperCase() || 'AR';
+  const studyPct = Math.min(100, Math.round((data.weeklyStudyHours / data.weeklyGoalHours) * 100));
+  const nextGap = data.overallBand === null || data.nextTargetBand === null ? null : Math.max(0, data.nextTargetBand - data.overallBand);
+  const todayLabel = new Intl.DateTimeFormat('uz-UZ', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(clock);
+  const timeLabel = new Intl.DateTimeFormat('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(clock);
+  const recent = useMemo(() => data.recentResults, [data.recentResults]);
+
+  return (
+    <div className="studentDashboardShell">
+      <aside className="studentSidebar">
+        <Link href="/mock" className="studentBrand"><span className="studentBrandMark"><ArkLogoIcon /></span><span><strong>ARK Education</strong><small>EXAM WORKSPACE</small></span></Link>
+        <nav className="studentSideNav">
+          <Link className="active" href="/mock"><LayoutGridIcon /><span>Dashboard</span></Link>
+          <Link href="/ielts"><GlobeIcon /><span>IELTS</span></Link>
+          <Link href="/cefr"><LayersIcon /><span>CEFR</span></Link>
+          <Link href="/practice"><BookOpenIcon /><span>Practice</span><small>SOON</small></Link>
+          <Link href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
+        </nav>
+        <div className="studentSideMotivation"><img src={achievementAssets['fast-learner']} alt="" /><strong>Keep going!</strong><p>Har bir yakunlangan test maqsadingizga yaqinlashtiradi.</p></div>
+        <div className="studentSideProfile"><span>{initials}</span><div><small>STUDENT</small><strong>{student.firstName} {student.lastName}</strong></div><button type="button" onClick={logout} disabled={loggingOut} aria-label="Chiqish"><LogOutIcon /></button></div>
+      </aside>
+
+      <main className="studentDashMain">
+        <header className="studentDashTopbar">
+          <div><span className={`livePill ${live ? '' : 'offline'}`}><i />{live ? 'LIVE' : 'OFFLINE'}</span><strong>{todayLabel}</strong><small>{timeLabel}</small></div>
+          <div className="studentTopProfile"><span>{initials}</span><div><small>STUDENT</small><strong>{student.firstName} {student.lastName}</strong></div></div>
+        </header>
+
+        <section className="studentWelcome">
+          <div><span className="studentWelcomeEyebrow"><SparklesIcon /> PERSONAL PERFORMANCE</span><h1>Xush kelibsiz, {student.firstName}! <em>Natijalaringiz o‘sib bormoqda.</em></h1><p>Kunlik natijalar, band trendi va yutuqlaringiz Supabase’dagi haqiqiy test natijalari bilan avtomatik yangilanadi.</p></div>
+          <img src={achievementAssets['study-hero']} alt="Ta’lim yutug‘i" className="studentWelcomeArt" />
+        </section>
+
+        <section className="studentMetricGrid">
+          <article className="studentMetric"><div className="studentMetricIcon overall"><img src={achievementAssets['quote-trophy']} alt="" /></div><div><small>Overall Band</small><strong>{fmtBand(data.overallBand)}</strong><span>{bandLabel(data.overallBand)}</span></div></article>
+          <article className="studentMetric"><div className="studentMetricIcon reading"><BookOpenIcon /></div><div><small>Reading</small><strong>{fmtBand(data.readingBand)}</strong><span>{bandLabel(data.readingBand)}</span></div></article>
+          <article className="studentMetric"><div className="studentMetricIcon listening"><HeadphonesIcon /></div><div><small>Listening</small><strong>{fmtBand(data.listeningBand)}</strong><span>{bandLabel(data.listeningBand)}</span></div></article>
+          <article className="studentMetric"><div className="studentMetricIcon hours"><ClockIcon /></div><div><small>Weekly Study Hours</small><strong>{data.weeklyStudyHours.toFixed(1)} <b>hrs</b></strong><span>Goal: {data.weeklyGoalHours} hrs</span><div className="studentMiniProgress"><i style={{ width: `${studyPct}%` }} /></div></div></article>
+          <article className="studentMetric"><div className="studentMetricIcon tests"><img src={achievementAssets['ten-tests']} alt="" /></div><div><small>Tests Completed</small><strong>{data.testsCompleted}</strong><span>{data.studyStreak} kunlik streak</span></div></article>
+        </section>
+
+        <section className="studentDashboardGrid">
+          <article className="studentPanel studentDailyPanel"><header><div><h2>Daily Results</h2><p>Oxirgi 14 kundagi band natijalari</p></div><span>14 DAYS</span></header><MiniLine points={data.dailyResults} /></article>
+          <div className="studentMidStack">
+            <article className="studentPanel compact"><header><div><h2>Band Trend</h2><p>Oxirgi 8 hafta</p></div><span>LIVE</span></header><SmallTrend points={data.bandTrend} /></article>
+            <article className="studentPanel compact comparison"><header><div><h2>Section Comparison</h2><p>So‘nggi natijalar</p></div></header>
+              <div className="compareRow"><span>Reading</span><div><i style={{ width: `${Math.min(100, ((data.readingAverage || 0) / 9) * 100)}%` }} /></div><b>{fmtBand(data.readingAverage)}</b></div>
+              <div className="compareRow listening"><span>Listening</span><div><i style={{ width: `${Math.min(100, ((data.listeningAverage || 0) / 9) * 100)}%` }} /></div><b>{fmtBand(data.listeningAverage)}</b></div>
+            </article>
+          </div>
+          <aside className="studentRightStack">
+            <article className="studentProgressSummary"><div className="summaryTop"><div><small>YOUR PROGRESS</small><h2>{bandLabel(data.overallBand)}</h2></div><img src={achievementAssets['target']} alt="" /></div><p>Natijalar jonli tarzda kuzatilmoqda. Keyingi maqsadga muntazamlik bilan yetasiz.</p><div className="summaryStats"><div><small>Next Target</small><strong>{fmtBand(data.nextTargetBand)}</strong><span>{nextGap === null ? '—' : `${nextGap.toFixed(1)} band qoldi`}</span></div><div><small>Focus Area</small><strong>{data.focusArea}</strong><span>Eng ko‘p e’tibor kerak</span></div></div><Link href={data.focusArea === 'Listening' ? '/ielts/listening' : '/ielts/reading'}>Practice’ga o‘tish <span>→</span></Link></article>
+            <article className="studentPanel recentPanel"><header><div><h2>Recent Results</h2><p>So‘nggi testlar</p></div></header><div className="recentList">{recent.length ? recent.map((item) => <div className="recentRow" key={item.id}><div><strong>{item.title}</strong><span>{item.skill} · {new Intl.DateTimeFormat('uz-UZ',{day:'2-digit',month:'short'}).format(new Date(item.date))}</span></div><b>{item.band === null ? item.score : item.band.toFixed(1)}</b></div>) : <div className="dashNoData dashNoDataSmall">Hali natija yo‘q</div>}</div></article>
+          </aside>
+        </section>
+
+        <section className="studentAchievements studentPanel"><header><div><h2>Achievements</h2><p>Har bir yutuq haqiqiy faoliyatga qarab ochiladi.</p></div><span>{data.unlockedAchievements} / {data.achievements.length} UNLOCKED</span></header><div className="achievementGrid">{data.achievements.map((achievement) => <article key={achievement.id} className={achievement.unlocked ? 'unlocked' : 'locked'}><img src={achievementAssets[achievement.icon as AchievementAssetKey]} alt="" /><div><strong>{achievement.title}</strong><p>{achievement.description}</p><div className="achievementProgress"><i style={{ width: `${achievement.progress}%` }} /></div><span>{achievement.unlocked ? '✓ Unlocked' : `${Math.round(achievement.progress)}%`}</span></div></article>)}</div></section>
+      </main>
+    </div>
+  );
+}
