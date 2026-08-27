@@ -1,6 +1,6 @@
-/* ARK Dashboard 3D artwork — transparent, crisp and prominent. */
+/* ARK Dashboard visual system — crisp artwork and native icon badges. */
 
-/* Never paint a box behind PNG artwork. */
+/* Remaining dashboard PNG artwork never gets a painted tile behind it. */
 .studentDashboardShell img[src^="/achievements/"]{
   display:block;
   background:transparent!important;
@@ -12,14 +12,43 @@
   transform:translateZ(0);
 }
 
-/* Achievement cards: artwork is a first-class visual element, not a tiny icon. */
+/* Sidebar motivation: native icon, same visual language as Reading / Listening KPIs. */
+.studentDashboardShell .studentSideMotivation{
+  padding-right:76px;
+}
+.studentDashboardShell .studentSideMotivationIcon{
+  position:absolute;
+  right:14px;
+  top:16px;
+  width:50px;
+  height:50px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  background:linear-gradient(145deg,rgba(255,255,255,.20),rgba(255,255,255,.08));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 12px 24px rgba(10,18,61,.22),inset 0 1px 0 rgba(255,255,255,.18);
+  backdrop-filter:blur(8px);
+}
+.studentDashboardShell .studentSideMotivationIcon svg{
+  width:25px;
+  height:25px;
+  stroke-width:1.9;
+}
+
+/* Achievement cards use vector icon badges: no external image dependency. */
 .studentDashboardShell .achievementGrid article{
+  --achievement-accent:#5268d8;
+  --achievement-soft:#eef1ff;
+  --achievement-line:rgba(82,104,216,.18);
+  --achievement-shadow:rgba(82,104,216,.18);
   position:relative;
   isolation:isolate;
   overflow:hidden;
-  min-height:176px;
-  padding:16px 17px;
-  gap:15px;
+  min-height:156px;
+  padding:15px 16px;
+  gap:13px;
   border-color:rgba(16,35,63,.095);
   background:linear-gradient(145deg,#fff 0%,#fffdf9 100%);
 }
@@ -27,66 +56,161 @@
   content:"";
   position:absolute;
   z-index:-1;
-  left:-22px;
+  left:-44px;
   top:50%;
-  width:142px;
-  height:142px;
+  width:150px;
+  height:150px;
   transform:translateY(-50%);
   border-radius:50%;
-  background:radial-gradient(circle,rgba(76,92,221,.13) 0%,rgba(76,92,221,.055) 46%,transparent 72%);
+  background:radial-gradient(circle,var(--achievement-soft) 0%,rgba(255,255,255,0) 72%);
+  opacity:.82;
   pointer-events:none;
 }
 .studentDashboardShell .achievementGrid article.unlocked{
-  border-color:rgba(42,171,112,.19);
+  border-color:var(--achievement-line);
   background:linear-gradient(145deg,#fff 0%,#fbfffd 100%);
   box-shadow:0 12px 30px rgba(20,39,67,.045);
-}
-.studentDashboardShell .achievementGrid article.unlocked::before{
-  background:radial-gradient(circle,rgba(47,183,118,.14) 0%,rgba(57,110,222,.055) 48%,transparent 72%);
-}
-.studentDashboardShell .achievementGrid img{
-  position:relative;
-  z-index:1;
-  width:94px!important;
-  height:94px!important;
-  flex:0 0 94px;
-  object-fit:contain;
-  opacity:1;
-  filter:drop-shadow(0 13px 15px rgba(16,35,63,.20)) saturate(1.08) contrast(1.04);
-}
-.studentDashboardShell .achievementGrid article>div{
-  position:relative;
-  z-index:1;
 }
 .studentDashboardShell .achievementGrid article.locked{
   opacity:1!important;
   filter:none!important;
   background:linear-gradient(145deg,#fff 0%,#faf9f6 100%);
 }
-.studentDashboardShell .achievementGrid article.locked img{
-  opacity:.56;
-  filter:grayscale(.12) saturate(.78) contrast(1.06) drop-shadow(0 11px 13px rgba(16,35,63,.14));
-}
-.studentDashboardShell .achievementGrid article.locked img[src$="/accuracy-ace.png"]{
-  opacity:.78;
-  filter:grayscale(.04) saturate(.96) contrast(1.12) drop-shadow(0 12px 14px rgba(16,35,63,.16));
+.studentDashboardShell .achievementGrid article>div{
+  position:relative;
+  z-index:1;
+  min-width:0;
 }
 .studentDashboardShell .achievementGrid article.locked>div{
-  opacity:.72;
-}
-.studentDashboardShell .achievementGrid strong{
-  font-size:12.5px!important;
-  line-height:1.23;
-}
-.studentDashboardShell .achievementGrid p{
-  font-size:10px!important;
-  line-height:1.45;
-}
-.studentDashboardShell .achievementGrid article>div>span{
-  font-size:9px!important;
+  opacity:.76;
 }
 
-/* KPI artwork: remove the old "sticker inside a colored box" feeling. */
+.studentDashboardShell .achievementIconBox{
+  position:relative;
+  z-index:1;
+  width:66px;
+  height:66px;
+  flex:0 0 66px;
+  border-radius:20px;
+  display:grid;
+  place-items:center;
+  color:var(--achievement-accent);
+  background:var(--achievement-soft);
+  border:1px solid var(--achievement-line);
+  box-shadow:0 10px 22px rgba(16,35,63,.07),inset 0 1px 0 rgba(255,255,255,.78);
+  transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;
+}
+.studentDashboardShell .achievementIconBox svg{
+  width:31px;
+  height:31px;
+  stroke-width:1.8;
+}
+.studentDashboardShell .achievementGrid article.unlocked .achievementIconBox{
+  color:#fff;
+  background:linear-gradient(145deg,var(--achievement-accent),var(--achievement-accent));
+  border-color:transparent;
+  box-shadow:0 12px 24px var(--achievement-shadow),inset 0 1px 0 rgba(255,255,255,.25);
+}
+.studentDashboardShell .achievementGrid article.locked .achievementIconBox{
+  opacity:.72;
+  filter:saturate(.78);
+}
+.studentDashboardShell .achievementGrid article:hover .achievementIconBox{
+  transform:translateY(-2px);
+}
+
+.studentDashboardShell .achievementGrid strong{
+  font-size:12.5px!important;
+  line-height:1.22;
+  color:#18304f;
+}
+.studentDashboardShell .achievementGrid p{
+  min-height:28px;
+  margin:6px 0 10px!important;
+  font-size:9.5px!important;
+  line-height:1.45;
+}
+.studentDashboardShell .achievementProgress{
+  height:5px;
+  background:#edf0f3;
+}
+.studentDashboardShell .achievementProgress i{
+  background:var(--achievement-accent)!important;
+}
+.studentDashboardShell .achievementGrid article.locked .achievementProgress i{
+  opacity:.65;
+}
+.studentDashboardShell .achievementGrid article>div>span{
+  margin-top:6px!important;
+  font-size:8.5px!important;
+}
+.studentDashboardShell .achievementGrid article.unlocked>div>span{
+  color:#15915e;
+}
+
+/* Individual badge identities — consistent geometry, distinct semantic accents. */
+.studentDashboardShell .achievement-first-test{
+  --achievement-accent:#22a873;
+  --achievement-soft:#e7f7f0;
+  --achievement-line:rgba(34,168,115,.20);
+  --achievement-shadow:rgba(34,168,115,.24);
+}
+.studentDashboardShell .achievement-streak{
+  --achievement-accent:#ef7458;
+  --achievement-soft:#fff0eb;
+  --achievement-line:rgba(239,116,88,.19);
+  --achievement-shadow:rgba(239,116,88,.23);
+}
+.studentDashboardShell .achievement-reading-master{
+  --achievement-accent:#3d73d8;
+  --achievement-soft:#eaf1ff;
+  --achievement-line:rgba(61,115,216,.18);
+  --achievement-shadow:rgba(61,115,216,.22);
+}
+.studentDashboardShell .achievement-listening-boost{
+  --achievement-accent:#188d87;
+  --achievement-soft:#e6f6f4;
+  --achievement-line:rgba(24,141,135,.18);
+  --achievement-shadow:rgba(24,141,135,.22);
+}
+.studentDashboardShell .achievement-ten-tests{
+  --achievement-accent:#6955d7;
+  --achievement-soft:#f0edff;
+  --achievement-line:rgba(105,85,215,.18);
+  --achievement-shadow:rgba(105,85,215,.22);
+}
+.studentDashboardShell .achievement-accuracy-ace{
+  --achievement-accent:#dc7a3d;
+  --achievement-soft:#fff2e8;
+  --achievement-line:rgba(220,122,61,.20);
+  --achievement-shadow:rgba(220,122,61,.23);
+}
+.studentDashboardShell .achievement-band-seven{
+  --achievement-accent:#b98b25;
+  --achievement-soft:#fff6dc;
+  --achievement-line:rgba(185,139,37,.21);
+  --achievement-shadow:rgba(185,139,37,.23);
+}
+.studentDashboardShell .achievement-perfect-section{
+  --achievement-accent:#8b55c8;
+  --achievement-soft:#f5ebff;
+  --achievement-line:rgba(139,85,200,.19);
+  --achievement-shadow:rgba(139,85,200,.22);
+}
+.studentDashboardShell .achievement-fast-finisher{
+  --achievement-accent:#2978c9;
+  --achievement-soft:#e9f4ff;
+  --achievement-line:rgba(41,120,201,.19);
+  --achievement-shadow:rgba(41,120,201,.22);
+}
+.studentDashboardShell .achievement-consistency{
+  --achievement-accent:#2f9670;
+  --achievement-soft:#e9f7f1;
+  --achievement-line:rgba(47,150,112,.19);
+  --achievement-shadow:rgba(47,150,112,.22);
+}
+
+/* KPI artwork that still intentionally uses transparent illustrations. */
 .studentDashboardShell .studentMetricIcon img{
   width:61px!important;
   height:61px!important;
@@ -98,7 +222,7 @@
   overflow:visible;
 }
 
-/* Welcome art: sharp transparent render with no white/black tile behind it. */
+/* Welcome art. */
 .studentDashboardShell .studentWelcomeArt{
   width:252px!important;
   max-height:194px!important;
@@ -106,17 +230,6 @@
   opacity:1!important;
   background:transparent!important;
   filter:drop-shadow(0 20px 27px rgba(24,43,73,.18)) saturate(1.07) contrast(1.035)!important;
-}
-
-/* Sidebar motivational art. */
-.studentDashboardShell .studentSideMotivation img{
-  width:86px!important;
-  height:86px!important;
-  right:-4px;
-  top:-4px;
-  object-fit:contain;
-  opacity:1;
-  filter:drop-shadow(0 10px 13px rgba(0,0,0,.20)) saturate(1.08) contrast(1.04);
 }
 
 /* Dark progress card artwork. */
@@ -129,26 +242,36 @@
 }
 
 @media(max-width:1280px){
-  .studentDashboardShell .achievementGrid img{
-    width:88px!important;
-    height:88px!important;
-    flex-basis:88px;
+  .studentDashboardShell .achievementGrid article{min-height:150px}
+  .studentDashboardShell .achievementIconBox{
+    width:62px;
+    height:62px;
+    flex-basis:62px;
+    border-radius:19px;
   }
+  .studentDashboardShell .achievementIconBox svg{width:29px;height:29px}
 }
 @media(max-width:940px){
-  .studentDashboardShell .achievementGrid article{min-height:164px}
-  .studentDashboardShell .achievementGrid img{
-    width:82px!important;
-    height:82px!important;
-    flex-basis:82px;
+  .studentDashboardShell .achievementGrid article{min-height:146px}
+  .studentDashboardShell .achievementIconBox{
+    width:60px;
+    height:60px;
+    flex-basis:60px;
+    border-radius:18px;
   }
   .studentDashboardShell .studentWelcomeArt{width:210px!important}
 }
 @media(max-width:620px){
-  .studentDashboardShell .achievementGrid article{min-height:154px}
-  .studentDashboardShell .achievementGrid img{
-    width:80px!important;
-    height:80px!important;
-    flex-basis:80px;
+  .studentDashboardShell .achievementGrid article{
+    min-height:138px;
+    padding:13px 14px;
   }
+  .studentDashboardShell .achievementIconBox{
+    width:56px;
+    height:56px;
+    flex-basis:56px;
+    border-radius:17px;
+  }
+  .studentDashboardShell .achievementIconBox svg{width:27px;height:27px}
+  .studentDashboardShell .studentSideMotivationIcon{width:46px;height:46px;right:12px;top:14px}
 }
