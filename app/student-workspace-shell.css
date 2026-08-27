@@ -121,6 +121,223 @@
   display:none;
 }
 
+/* Professional IELTS test-library view shown after opening a skill. */
+.studentWorkspaceShell .sidebarLibrary{
+  padding:0 4px 10px;
+}
+.studentWorkspaceShell .libraryBreadcrumb{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  margin:0 4px 13px;
+  color:#627087;
+  font-size:11px;
+  font-weight:650;
+}
+.studentWorkspaceShell .libraryBreadcrumb a{
+  display:inline-flex;
+  align-items:center;
+  color:#66758a;
+  transition:.18s ease;
+}
+.studentWorkspaceShell .libraryBreadcrumb a:hover{color:#102b52}
+.studentWorkspaceShell .libraryBreadcrumb a:first-child svg{
+  width:18px!important;
+  height:18px!important;
+}
+.studentWorkspaceShell .libraryBreadcrumb i{
+  width:1px;
+  height:20px;
+  background:rgba(16,35,63,.11);
+}
+.studentWorkspaceShell .libraryBreadcrumb span{
+  color:#a1a9b2;
+  font-size:18px;
+  line-height:1;
+}
+.studentWorkspaceShell .libraryBreadcrumb strong{
+  color:#627087;
+  font-weight:700;
+}
+
+.studentWorkspaceShell .sidebarLibraryHero{
+  min-height:205px;
+  padding:30px 36px;
+  border-radius:24px;
+  background:linear-gradient(118deg,#fffdf9 0%,#fffaf2 100%);
+  box-shadow:0 16px 42px rgba(68,54,38,.055);
+}
+.studentWorkspaceShell .sidebarLibraryHero:after{
+  width:250px;
+  height:250px;
+  right:-118px;
+  top:-145px;
+  background:rgba(255,107,88,.105);
+}
+.studentWorkspaceShell .sidebarLibraryHero .workspaceHeroCopy{max-width:76%}
+.studentWorkspaceShell .sidebarLibraryHero .workspaceEyebrow{
+  font-size:8px;
+  letter-spacing:.15em;
+}
+.studentWorkspaceShell .sidebarLibraryHero h1{
+  margin:14px 0 11px;
+  font-size:clamp(38px,3.55vw,55px);
+  letter-spacing:-.05em;
+}
+.studentWorkspaceShell .sidebarLibraryHero p{
+  max-width:760px;
+  font-size:12px;
+  line-height:1.55;
+}
+.studentWorkspaceShell .sidebarLibraryHero .libraryHeroIcon{
+  position:relative;
+  z-index:2;
+  width:78px;
+  height:78px;
+  padding:19px;
+  border-radius:24px;
+  color:#fff;
+  background:linear-gradient(145deg,#12345d,#0d6c83);
+  box-shadow:0 17px 34px rgba(16,47,77,.17);
+}
+.studentWorkspaceShell .sidebarLibraryHero .libraryHeroIcon svg{
+  width:100%!important;
+  height:100%!important;
+}
+.studentWorkspaceShell .sidebarLibrary-listening .libraryHeroIcon{background:linear-gradient(145deg,#ff695a,#ec5d52)}
+.studentWorkspaceShell .sidebarLibrary-reading .libraryHeroIcon{background:linear-gradient(145deg,#16335c,#0e7186)}
+.studentWorkspaceShell .sidebarLibrary-writing .libraryHeroIcon{background:linear-gradient(145deg,#705493,#5a3e7d)}
+
+.studentWorkspaceShell .sidebarLibraryHeading{
+  margin:27px 0 16px;
+  padding:0 1px;
+  align-items:flex-end;
+}
+.studentWorkspaceShell .sidebarLibraryHeading>div>span{
+  color:#52647b;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.13em;
+}
+.studentWorkspaceShell .sidebarLibraryHeading h2{
+  margin-top:8px;
+  font-size:25px;
+  letter-spacing:-.035em;
+}
+.studentWorkspaceShell .libraryFilter{
+  min-width:158px;
+  height:44px;
+  padding:0 38px 0 16px;
+  border:1px solid rgba(16,35,63,.11);
+  border-radius:15px;
+  background:#fffdf9;
+  color:#273b56;
+  font:inherit;
+  font-size:11px;
+  outline:none;
+  box-shadow:0 7px 18px rgba(48,42,35,.025);
+}
+
+.studentWorkspaceShell .sidebarTestGrid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.studentWorkspaceShell .sidebarTestCard{
+  min-height:365px;
+  padding:22px;
+  border-radius:23px;
+  background:linear-gradient(180deg,#fffefb 0%,#fffdf9 100%);
+  border-color:rgba(16,35,63,.105);
+  box-shadow:0 13px 34px rgba(65,52,38,.04);
+}
+.studentWorkspaceShell .sidebarTestCard:hover{
+  transform:translateY(-3px);
+  border-color:rgba(19,112,105,.18);
+  box-shadow:0 22px 44px rgba(65,52,38,.075);
+}
+.studentWorkspaceShell .sidebarTestCard .testLibraryTop>span{
+  width:56px;
+  height:56px;
+  padding:15px;
+  border-radius:17px;
+  background:#e9f6f1;
+  color:#0d866d;
+}
+.studentWorkspaceShell .sidebarTestCard .testLibraryTop>span svg{
+  width:100%!important;
+  height:100%!important;
+}
+.studentWorkspaceShell .sidebarTestCard .testLibraryTop small{
+  padding:6px 10px;
+  border-radius:999px;
+  background:#f3f4f5;
+  color:#718096;
+  font-size:7px;
+  letter-spacing:.08em;
+}
+.studentWorkspaceShell .sidebarTestCard .testLibraryCopy{margin-top:21px}
+.studentWorkspaceShell .sidebarTestCard .testLibraryCopy>span{
+  color:#586c85;
+  font-size:8px;
+  letter-spacing:.13em;
+}
+.studentWorkspaceShell .sidebarTestCard .testLibraryCopy h3{
+  min-height:50px;
+  margin:8px 0 9px;
+  font-size:21px;
+  line-height:1.12;
+  letter-spacing:-.035em;
+}
+.studentWorkspaceShell .sidebarTestCard .testLibraryCopy p{
+  min-height:48px;
+  color:#68778b;
+  font-size:10.5px;
+  line-height:1.5;
+}
+.studentWorkspaceShell .sidebarTestMeta{
+  display:grid;
+  gap:8px;
+  margin-top:15px;
+  color:#65768c;
+}
+.studentWorkspaceShell .sidebarTestMeta span{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:9px;
+}
+.studentWorkspaceShell .sidebarTestMeta svg{
+  width:16px!important;
+  height:16px!important;
+  flex:0 0 16px;
+}
+.studentWorkspaceShell .sidebarTestOpen{
+  min-height:51px;
+  margin-top:auto;
+  padding:0 16px 0 17px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:linear-gradient(90deg,#e6f5f0,#eef8f5);
+  color:#08715d;
+  border:1px solid rgba(12,125,103,.08);
+  font-size:10px;
+  font-weight:850;
+  transition:.18s ease;
+}
+.studentWorkspaceShell .sidebarTestOpen svg{
+  width:18px!important;
+  height:18px!important;
+  flex:0 0 18px;
+}
+.studentWorkspaceShell .sidebarTestOpen:hover{
+  background:linear-gradient(90deg,#dff2ec,#e8f5f1);
+  transform:translateY(-1px);
+}
+.studentWorkspaceShell .sidebarLibraryEmpty{margin-top:6px}
+
 /* Keep the current section obvious in the left navigation. */
 .studentWorkspaceShell .studentSideNav a.active{
   background:#102b52;
@@ -140,6 +357,8 @@
   .studentWorkspaceShell .sectionCardGridSingle{grid-template-columns:minmax(300px,440px)}
   .studentWorkspaceShell .sectionCard{min-height:345px}
   .studentWorkspaceShell .soonCard{padding:28px 30px}
+  .studentWorkspaceShell .sidebarLibraryHero{min-height:190px;padding:27px 30px}
+  .studentWorkspaceShell .sidebarTestGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 @media(max-width:940px){
@@ -156,6 +375,10 @@
   .studentWorkspaceShell .sectionCard{min-height:325px}
   .studentWorkspaceShell .soonCard{min-height:220px;padding:25px 22px;border-radius:24px}
   .studentWorkspaceShell .soonCard h1{font-size:clamp(32px,6vw,44px)}
+  .studentWorkspaceShell .sidebarLibraryHero{padding:24px 24px}
+  .studentWorkspaceShell .sidebarLibraryHero .libraryHeroIcon{width:66px;height:66px;padding:16px}
+  .studentWorkspaceShell .sidebarLibraryHero .workspaceHeroCopy{max-width:78%}
+  .studentWorkspaceShell .sidebarLibraryHeading{margin-top:22px}
 }
 
 @media(max-width:620px){
@@ -166,4 +389,14 @@
   .studentWorkspaceShell .sectionCard{padding:20px;min-height:310px;border-radius:22px}
   .studentWorkspaceShell .soonCard{padding:22px 18px;min-height:205px}
   .studentWorkspaceShell .soonCard>p{font-size:11px}
+  .studentWorkspaceShell .libraryBreadcrumb{min-height:36px;margin-bottom:9px;font-size:10px}
+  .studentWorkspaceShell .sidebarLibraryHero{padding:22px 18px;display:block}
+  .studentWorkspaceShell .sidebarLibraryHero .workspaceHeroCopy{max-width:100%}
+  .studentWorkspaceShell .sidebarLibraryHero .libraryHeroIcon{margin-top:18px;width:58px;height:58px;padding:14px;border-radius:18px}
+  .studentWorkspaceShell .sidebarLibraryHeading{align-items:center}
+  .studentWorkspaceShell .sidebarLibraryHeading h2{font-size:22px}
+  .studentWorkspaceShell .libraryFilter{min-width:122px;height:40px}
+  .studentWorkspaceShell .sidebarTestGrid{grid-template-columns:1fr}
+  .studentWorkspaceShell .sidebarTestCard{min-height:340px;padding:19px}
+  .studentWorkspaceShell .sidebarTestCard .testLibraryCopy h3{min-height:0;font-size:20px}
 }
