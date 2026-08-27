@@ -75,7 +75,14 @@ function SmallTrend({ points }: { points: DashboardPoint[] }) {
   return <MiniLine points={points} height={130} />;
 }
 
-export function StudentDashboardClient({ student, initialData }: { student: StudentSummary; initialData: DashboardData }) {
+type StudentDashboardClientProps = {
+  student: StudentSummary;
+  initialData: DashboardData;
+  previewMode?: boolean;
+  onExitPreview?: () => void;
+};
+
+export function StudentDashboardClient({ student, initialData, previewMode = false, onExitPreview }: StudentDashboardClientProps) {
   const [data, setData] = useState(initialData);
   const [clock, setClock] = useState(new Date());
   const [live, setLive] = useState(true);
@@ -88,6 +95,7 @@ export function StudentDashboardClient({ student, initialData }: { student: Stud
   }, []);
 
   useEffect(() => {
+    if (previewMode) return;
     let cancelled = false;
     async function refresh() {
       try {
@@ -110,10 +118,10 @@ export function StudentDashboardClient({ student, initialData }: { student: Stud
       window.clearInterval(interval);
       window.removeEventListener('focus', onFocus);
     };
-  }, []);
+  }, [previewMode]);
 
   async function logout() {
-    if (loggingOut) return;
+    if (previewMode || loggingOut) return;
     setLoggingOut(true);
     try { await fetch('/api/auth/logout', { method: 'POST' }); }
     finally { router.replace('/'); router.refresh(); }
@@ -138,17 +146,18 @@ export function StudentDashboardClient({ student, initialData }: { student: Stud
           <Link href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
         </nav>
         <div className="studentSideMotivation"><img src={achievementAssets['fast-learner']} alt="" /><strong>Keep going!</strong><p>Har bir yakunlangan test maqsadingizga yaqinlashtiradi.</p></div>
-        <div className="studentSideProfile"><span>{initials}</span><div><small>STUDENT</small><strong>{student.firstName} {student.lastName}</strong></div><button type="button" onClick={logout} disabled={loggingOut} aria-label="Chiqish"><LogOutIcon /></button></div>
+        <div className="studentSideProfile"><span>{initials}</span><div><small>{previewMode ? 'ADMIN PREVIEW' : 'STUDENT'}</small><strong>{student.firstName} {student.lastName}</strong></div><button type="button" onClick={logout} disabled={previewMode || loggingOut} aria-label={previewMode ? 'Admin preview' : 'Chiqish'}><LogOutIcon /></button></div>
       </aside>
 
       <main className="studentDashMain">
         <header className="studentDashTopbar">
-          <div><span className={`livePill ${live ? '' : 'offline'}`}><i />{live ? 'LIVE' : 'OFFLINE'}</span><strong>{todayLabel}</strong><small>{timeLabel}</small></div>
-          <div className="studentTopProfile"><span>{initials}</span><div><small>STUDENT</small><strong>{student.firstName} {student.lastName}</strong></div></div>
+          <div><span className={`livePill ${!previewMode && !live ? 'offline' : ''}`}><i />{previewMode ? 'PREVIEW' : live ? 'LIVE' : 'OFFLINE'}</span><strong>{todayLabel}</strong><small>{timeLabel}</small></div>
+          {previewMode && onExitPreview && <button className="adminBackToPanel" type="button" onClick={onExitPreview}><LogOutIcon /><span>Admin panelga qaytish</span></button>}
+          <div className="studentTopProfile"><span>{initials}</span><div><small>{previewMode ? 'ADMIN PREVIEW' : 'STUDENT'}</small><strong>{student.firstName} {student.lastName}</strong></div></div>
         </header>
 
         <section className="studentWelcome">
-          <div><span className="studentWelcomeEyebrow"><SparklesIcon /> PERSONAL PERFORMANCE</span><h1>Xush kelibsiz, {student.firstName}! <em>Natijalaringiz o‘sib bormoqda.</em></h1><p>Kunlik natijalar, band trendi va yutuqlaringiz Supabase’dagi haqiqiy test natijalari bilan avtomatik yangilanadi.</p></div>
+          <div><span className="studentWelcomeEyebrow"><SparklesIcon /> PERSONAL PERFORMANCE</span><h1>Xush kelibsiz, {student.firstName}! <em>Natijalaringiz o‘sib bormoqda.</em></h1><p>{previewMode ? 'Bu admin preview. Student tizimga kirganda aynan shu real-time dashboardni ko‘radi.' : 'Kunlik natijalar, band trendi va yutuqlaringiz Supabase’dagi haqiqiy test natijalari bilan avtomatik yangilanadi.'}</p></div>
           <img src={achievementAssets['study-hero']} alt="Ta’lim yutug‘i" className="studentWelcomeArt" />
         </section>
 
@@ -163,7 +172,7 @@ export function StudentDashboardClient({ student, initialData }: { student: Stud
         <section className="studentDashboardGrid">
           <article className="studentPanel studentDailyPanel"><header><div><h2>Daily Results</h2><p>Oxirgi 14 kundagi band natijalari</p></div><span>14 DAYS</span></header><MiniLine points={data.dailyResults} /></article>
           <div className="studentMidStack">
-            <article className="studentPanel compact"><header><div><h2>Band Trend</h2><p>Oxirgi 8 hafta</p></div><span>LIVE</span></header><SmallTrend points={data.bandTrend} /></article>
+            <article className="studentPanel compact"><header><div><h2>Band Trend</h2><p>Oxirgi 8 hafta</p></div><span>{previewMode ? 'PREVIEW' : 'LIVE'}</span></header><SmallTrend points={data.bandTrend} /></article>
             <article className="studentPanel compact comparison"><header><div><h2>Section Comparison</h2><p>So‘nggi natijalar</p></div></header>
               <div className="compareRow"><span>Reading</span><div><i style={{ width: `${Math.min(100, ((data.readingAverage || 0) / 9) * 100)}%` }} /></div><b>{fmtBand(data.readingAverage)}</b></div>
               <div className="compareRow listening"><span>Listening</span><div><i style={{ width: `${Math.min(100, ((data.listeningAverage || 0) / 9) * 100)}%` }} /></div><b>{fmtBand(data.listeningAverage)}</b></div>
