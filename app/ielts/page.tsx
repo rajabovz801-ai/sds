@@ -1,8 +1,12 @@
 import { ExamSectionsClient } from '@/components/ExamSectionsClient';
-import { PlatformNav } from '@/components/PlatformNav';
+import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
 import { requireStudent } from '@/lib/auth/server-session';
 
 export default async function IeltsPage() {
   const student = await requireStudent('/ielts');
-  return <div className="platformRoot"><PlatformNav student={student} /><main className="platformMain"><ExamSectionsClient track="ielts" /></main></div>;
+  return (
+    <StudentWorkspaceShellClient student={student} active="ielts">
+      <ExamSectionsClient track="ielts" />
+    </StudentWorkspaceShellClient>
+  );
 }
