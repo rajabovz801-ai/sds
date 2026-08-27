@@ -3,12 +3,13 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
   AwardIcon,
   BookOpenIcon,
   CalendarCheckIcon,
+  FlameIcon,
   GlobeIcon,
   LayersIcon,
   LayoutGridIcon,
@@ -28,7 +29,29 @@ type Props = {
 export function StudentWorkspaceShellClient({ student, active, children }: Props) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [studyStreak, setStudyStreak] = useState(0);
   const initials = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`.toUpperCase() || 'AR';
+  const totalPts = 0;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSidebarSummary() {
+      try {
+        const response = await fetch('/api/dashboard', { cache: 'no-store' });
+        if (!response.ok) return;
+        const dashboard = await response.json() as { studyStreak?: number };
+        if (!cancelled && Number.isFinite(dashboard.studyStreak)) {
+          setStudyStreak(Math.max(0, Number(dashboard.studyStreak)));
+        }
+      } catch {
+        // Keep the workspace usable even if the small sidebar summary cannot refresh.
+      }
+    }
+
+    loadSidebarSummary();
+    return () => { cancelled = true; };
+  }, []);
 
   async function logout() {
     if (loggingOut) return;
@@ -58,6 +81,16 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
           <Link className={active === 'daily-tasks' ? 'active' : ''} href="/daily-tasks"><CalendarCheckIcon /><span>Daily Tasks</span></Link>
           <Link className={active === 'leaderboard' ? 'active' : ''} href="/leaderboard"><AwardIcon /><span>Leaderboard</span></Link>
         </nav>
+
+        <Link className="studentSideDailySummary" href="/daily-tasks">
+          <span className="studentSideDailyIcon"><CalendarCheckIcon /></span>
+          <div>
+            <small>DAILY TASKS</small>
+            <strong>{totalPts} PTS</strong>
+            <em><FlameIcon /> {studyStreak} kun streak</em>
+          </div>
+          <b>→</b>
+        </Link>
 
         <div className="studentSideProfile">
           <span>{initials}</span>
