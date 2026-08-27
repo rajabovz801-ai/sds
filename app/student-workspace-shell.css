@@ -1,4 +1,4 @@
-/* Persistent student workspace shell for IELTS and CEFR. */
+/* Persistent student workspace shell for IELTS, CEFR, Practice and Tools. */
 .studentWorkspaceShell{
   --ws-cream:#f5eddf;
   --ws-paper:#fffdf8;
@@ -11,7 +11,7 @@
 
 .studentWorkspaceShell .studentWorkspaceMain{
   min-width:0;
-  padding:30px 34px 72px;
+  padding:26px 30px 64px;
   overflow:hidden;
 }
 
@@ -25,58 +25,145 @@
 .studentWorkspaceShell .workspaceBack{display:none!important}
 .studentWorkspaceShell .workspaceHeroCompact{margin-top:0}
 
-/* Give the opened workspace a balanced amount of room beside the sidebar. */
+/* Fix icon sizing inherited from the dashboard shell. */
+.studentWorkspaceShell .workspaceEyebrow svg{
+  width:14px!important;
+  height:14px!important;
+  flex:0 0 14px;
+}
+.studentWorkspaceShell .sectionCardIcon svg{
+  width:100%!important;
+  height:100%!important;
+}
+.studentWorkspaceShell .soonMark svg{
+  width:24px!important;
+  height:24px!important;
+}
+
+/* Compact premium hero so the skill cards appear earlier in the viewport. */
 .studentWorkspaceShell .workspaceHero{
-  min-height:220px;
-  padding:34px 38px;
+  min-height:190px;
+  padding:27px 32px;
+  border-radius:27px;
 }
 .studentWorkspaceShell .workspaceHeroCompact h1{
-  font-size:clamp(40px,4.1vw,62px);
+  margin-top:12px;
+  margin-bottom:10px;
+  font-size:clamp(36px,3.45vw,52px);
+  line-height:1;
 }
 .studentWorkspaceShell .workspaceHeroCopy>p{
-  font-size:12.5px;
+  max-width:650px;
+  font-size:11.5px;
+  line-height:1.55;
+}
+.studentWorkspaceShell .workspaceTrackBadge{
+  min-width:158px;
+  padding:14px 16px;
+  border-radius:17px;
+}
+.studentWorkspaceShell .workspaceTrackBadge strong{
+  font-size:22px;
+}
+.studentWorkspaceShell .workspaceTrackBadge span{
+  font-size:8px;
 }
 .studentWorkspaceShell .sectionCardGrid{
   gap:16px;
-  margin-top:18px;
+  margin-top:16px;
 }
 .studentWorkspaceShell .sectionCard{
-  min-height:400px;
+  min-height:360px;
+  padding:23px;
+}
+.studentWorkspaceShell .sectionCardCopy{
+  margin-top:23px;
+}
+.studentWorkspaceShell .sectionFacts{
+  margin-top:19px;
 }
 
-/* Keep the current track obvious in the left navigation. */
+/* Practice / Tools use the same right-side workspace rhythm as IELTS / CEFR. */
+.studentWorkspaceShell .soonPage{
+  min-height:0;
+  padding:0;
+  display:block;
+}
+.studentWorkspaceShell .soonCard{
+  width:100%;
+  max-width:none;
+  min-height:255px;
+  margin:0;
+  padding:32px 34px;
+  border-radius:27px;
+  text-align:left;
+  align-items:flex-start;
+  background:linear-gradient(118deg,rgba(255,253,248,.97),rgba(255,248,239,.92));
+  box-shadow:0 18px 45px rgba(67,54,40,.06);
+}
+.studentWorkspaceShell .soonCard h1{
+  margin:12px 0 10px;
+  font-size:clamp(36px,3.45vw,52px);
+  line-height:1;
+  letter-spacing:-.045em;
+}
+.studentWorkspaceShell .soonCard>p{
+  max-width:680px;
+  margin:0;
+  font-size:11.5px;
+  line-height:1.6;
+}
+.studentWorkspaceShell .soonFeatures{
+  justify-content:flex-start;
+  margin-top:20px;
+}
+.studentWorkspaceShell .soonCard .pButtonGhost{
+  display:none;
+}
+
+/* Keep the current section obvious in the left navigation. */
 .studentWorkspaceShell .studentSideNav a.active{
   background:#102b52;
   color:#fff;
   box-shadow:0 12px 25px rgba(16,43,82,.18);
 }
+.studentWorkspaceShell .studentSideNav a.active small{
+  background:rgba(255,255,255,.14);
+  color:#dce4ec;
+}
 
 @media(max-width:1280px){
-  .studentWorkspaceShell .studentWorkspaceMain{padding:24px 24px 60px}
-  .studentWorkspaceShell .workspaceHero{padding:30px 32px}
-  .studentWorkspaceShell .workspaceTrackBadge{min-width:165px}
+  .studentWorkspaceShell .studentWorkspaceMain{padding:22px 22px 56px}
+  .studentWorkspaceShell .workspaceHero{min-height:180px;padding:25px 28px}
+  .studentWorkspaceShell .workspaceTrackBadge{min-width:150px}
   .studentWorkspaceShell .sectionCardGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .studentWorkspaceShell .sectionCardGridSingle{grid-template-columns:minmax(300px,440px)}
+  .studentWorkspaceShell .sectionCard{min-height:345px}
+  .studentWorkspaceShell .soonCard{padding:28px 30px}
 }
 
 @media(max-width:940px){
   .studentWorkspaceShell .studentWorkspaceMain{padding:14px 14px 48px}
   .studentWorkspaceShell .workspaceHero{
     min-height:0;
-    padding:27px 24px;
+    padding:25px 22px;
     border-radius:24px;
   }
-  .studentWorkspaceShell .workspaceHeroCompact h1{font-size:clamp(34px,7vw,48px)}
-  .studentWorkspaceShell .workspaceTrackBadge{min-width:145px;padding:14px 15px}
+  .studentWorkspaceShell .workspaceHeroCompact h1{font-size:clamp(32px,6vw,44px)}
+  .studentWorkspaceShell .workspaceTrackBadge{min-width:140px;padding:13px 14px}
   .studentWorkspaceShell .sectionCardGrid{grid-template-columns:1fr}
   .studentWorkspaceShell .sectionCardGridSingle{grid-template-columns:1fr}
-  .studentWorkspaceShell .sectionCard{min-height:340px}
+  .studentWorkspaceShell .sectionCard{min-height:325px}
+  .studentWorkspaceShell .soonCard{min-height:220px;padding:25px 22px;border-radius:24px}
+  .studentWorkspaceShell .soonCard h1{font-size:clamp(32px,6vw,44px)}
 }
 
 @media(max-width:620px){
   .studentWorkspaceShell .studentWorkspaceMain{padding:10px 10px 40px}
-  .studentWorkspaceShell .workspaceHero{padding:23px 19px;display:block}
-  .studentWorkspaceShell .workspaceTrackBadge{margin-top:20px;width:max-content;min-width:140px}
-  .studentWorkspaceShell .workspaceHeroCopy>p{font-size:11.5px}
-  .studentWorkspaceShell .sectionCard{padding:20px;min-height:320px;border-radius:22px}
+  .studentWorkspaceShell .workspaceHero{padding:21px 18px;display:block}
+  .studentWorkspaceShell .workspaceTrackBadge{margin-top:17px;width:max-content;min-width:136px}
+  .studentWorkspaceShell .workspaceHeroCopy>p{font-size:11px}
+  .studentWorkspaceShell .sectionCard{padding:20px;min-height:310px;border-radius:22px}
+  .studentWorkspaceShell .soonCard{padding:22px 18px;min-height:205px}
+  .studentWorkspaceShell .soonCard>p{font-size:11px}
 }
