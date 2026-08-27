@@ -105,6 +105,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Bu kod allaqachon ishlatilgan.' }, { status: 409 });
     }
 
+    const { error: loginTimeError } = await supabase
+      .from('students')
+      .update({ last_login_at: now, updated_at: now })
+      .eq('id', student.id);
+    if (loginTimeError) throw loginTimeError;
+
     attempts.delete(ip);
     const response = NextResponse.json({
       student: {
