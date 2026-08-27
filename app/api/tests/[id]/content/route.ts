@@ -16,7 +16,6 @@ type BridgeContext = {
 
 function injectBridge(html: string, context: BridgeContext) {
   const payload = JSON.stringify(context).replace(/</g, '\\u003c');
-  const hudMarkup = '';
   const script = `
 <style id="ark-secure-style">
 html{font-size:16px!important}
@@ -25,9 +24,9 @@ body{font-size:16px}
 #ark-secure-hud{display:none!important}
 #deliveryStatus,.delivery-status,#restartBtn,.restart,[data-ark-delivery-success]{display:none!important}
 </style>
-${hudMarkup}
 <script>
 (function () {
+  'use strict';
   var context = ${payload};
   var lastPayload = '';
   var expired = false;
@@ -37,44 +36,23 @@ ${hudMarkup}
   var submitIntentAt = 0;
   var legacySubmissionId = '';
   var mutationTimer = 0;
-  var hud = document.getElementById('ark-secure-hud');
-  var timeNode = document.getElementById('ark-secure-time');
-  var nativeTimer = document.querySelector('[data-ark-timer],#timer,.timer');
-  if (nativeTimer && hud) hud.style.display = 'none';
+  var candidateKey = '';
+  var candidateSeen = 0;
+  var candidateFirstAt = 0;
 
   var resultSelectors = [
-    '#resultOverlay',
-    '#resultsOverlay',
-    '#resultModal',
-    '#resultScreen',
-    '#resultsScreen',
-    '.result-overlay',
-    '.results-overlay',
-    '.result-modal',
-    '.result-screen',
-    '.results-screen',
-    '[data-ark-result-view]'
+    '#resultOverlay','#resultsOverlay','#resultModal','#resultsModal','#resultScreen','#resultsScreen',
+    '#resultPage','#resultsPage','.result-overlay','.results-overlay','.result-modal','.results-modal',
+    '.result-screen','.results-screen','.result-page','.results-page','[data-ark-result-view]',
+    '[data-result-screen]','[data-result-modal]','[role="dialog"][id*="result" i]','[role="dialog"][class*="result" i]'
   ];
   var scoreSelectors = [
-    '#scoreValue',
-    '#resultScore',
-    '#scoreBig',
-    '#scoreText',
-    '.score-value',
-    '.result-score',
-    '.score-big',
-    '[data-ark-score]'
+    '#scoreValue','#resultScore','#scoreBig','#scoreText','#finalScore','#final-score','#result-score','#score',
+    '.score-value','.result-score','.score-big','.final-score','[data-ark-score]','[data-score]'
   ];
   var answeredSelectors = [
-    '#answeredValue',
-    '#resultAnswered',
-    '#answeredTop',
-    '#reviewAnswered',
-    '.answered-value',
-    '.answered-pill',
-    '.answered-top',
-    '.answered-text',
-    '[data-ark-answered]'
+    '#answeredValue','#resultAnswered','#answeredTop','#reviewAnswered','#answeredCount',
+    '.answered-value','.answered-pill','.answered-top','.answered-text','[data-ark-answered]','[data-answered]'
   ];
 
   function sendResult(payload) {
@@ -86,10 +64,25 @@ ${hudMarkup}
     window.parent.postMessage({ type: 'ARK_TEST_RESULT', payload: payload, context: context }, '*');
   }
 
-  function firstNode(selectors) {
+  function firstNode(selectors, root) {
+    var host = root || document;
     for (var i = 0; i < selectors.length; i += 1) {
-      var node = document.querySelector(selectors[i]);
-      if (node) return node;
+      try {
+        var node = host.querySelector(selectors[i]);
+        if (node) return node;
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  function firstVisibleNode(selectors, root) {
+    var host = root || document;
+    for (var i = 0; i < selectors.length; i += 1) {
+      var nodes = [];
+      try { nodes = host.querySelectorAll(selectors[i]); } catch (e) { nodes = []; }
+      for (var n = 0; n < nodes.length; n += 1) {
+        if (isVisible(nodes[n])) return nodes[n];
+      }
     }
     return null;
   }
@@ -117,35 +110,73 @@ ${hudMarkup}
     return Number.isFinite(current) && Number.isFinite(total) && total > 0 ? [current, total] : null;
   }
 
-  function numberFromNode(selectors) {
-    var node = firstNode(selectors);
+  function numberFromNode(selectors, root) {
+    var node = firstNode(selectors, root);
     return node ? cleanNumberText(textOf(node)) : null;
   }
 
-  function fractionFromNode(selectors) {
-    var node = firstNode(selectors);
+  function fractionFromNode(selectors, root) {
+    var node = firstNode(selectors, root);
     return node ? pairFromText(textOf(node)) : null;
   }
 
   function isVisible(node) {
-    if (!node) return false;
+    if (!node || !node.isConnected) return false;
     if (node.classList && node.classList.contains('hidden')) return false;
     if (node.getAttribute && node.getAttribute('aria-hidden') === 'true') return false;
+    if (node.hidden) return false;
     try {
       var style = window.getComputedStyle(node);
       if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;
+      if (node.getClientRects && node.getClientRects().length === 0) return false;
     } catch (e) {}
     return true;
   }
 
-  function resultSurfaceVisible() {
-    for (var i = 0; i < resultSelectors.length; i += 1) {
-      var nodes = document.querySelectorAll(resultSelectors[i]);
-      for (var n = 0; n < nodes.length; n += 1) {
-        if (isVisible(nodes[n])) return true;
+  function visibleResultSurface() {
+    var direct = firstVisibleNode(resultSelectors);
+    if (direct) return direct;
+
+    var scoreNode = firstVisibleNode(scoreSelectors);
+    if (scoreNode) {
+      var ancestor = null;
+      try { ancestor = scoreNode.closest('[role="dialog"],[id*="result" i],[class*="result" i]'); } catch (e) {}
+      if (ancestor && isVisible(ancestor)) return ancestor;
+    }
+
+    var generic = [];
+    try { generic = document.querySelectorAll('[id*="result" i],[class*="result" i]'); } catch (e) { generic = []; }
+    for (var i = 0; i < generic.length; i += 1) {
+      var node = generic[i];
+      if (!isVisible(node)) continue;
+      var text = String(node.textContent || '');
+      if (/(?:score|result|correct|incorrect|unanswered|accuracy)/i.test(text) && /\\d/.test(text)) return node;
+    }
+    return null;
+  }
+
+  function labeledPairFromSurface(surface) {
+    if (!surface) return null;
+    var text = String(surface.textContent || '').replace(/,/g, '.');
+    var match = text.match(/(?:score|result)\\s*[:\\-]?\\s*(-?\\d+(?:\\.\\d+)?)\\s*\\/\\s*(-?\\d+(?:\\.\\d+)?)/i);
+    if (!match) return null;
+    var current = Number(match[1]);
+    var total = Number(match[2]);
+    return Number.isFinite(current) && Number.isFinite(total) && total > 0 ? [current, total] : null;
+  }
+
+  function labeledNumber(surface, labels) {
+    if (!surface) return null;
+    var text = String(surface.textContent || '').replace(/,/g, '.');
+    for (var i = 0; i < labels.length; i += 1) {
+      var re = new RegExp('(?:^|\\\\s)' + labels[i] + '\\s*[:\\-]?\\s*(-?\\d+(?:\\.\\d+)?)', 'i');
+      var match = text.match(re);
+      if (match) {
+        var value = Number(match[1]);
+        if (Number.isFinite(value)) return value;
       }
     }
-    return false;
+    return null;
   }
 
   function cleanCellText(node) {
@@ -154,6 +185,37 @@ ${hudMarkup}
     var labels = clone.querySelectorAll ? clone.querySelectorAll('.label,small') : [];
     for (var i = 0; i < labels.length; i += 1) labels[i].remove();
     return String(clone.textContent || '').replace(/\\s+/g, ' ').trim();
+  }
+
+  function captureFormAnswers() {
+    var output = {};
+    var controls = document.querySelectorAll('input,select,textarea');
+    for (var i = 0; i < controls.length; i += 1) {
+      var control = controls[i];
+      var raw = String(control.name || control.id || '');
+      var match = raw.match(/(?:^|[^a-z])q(?:uestion)?[-_ ]?(\\d+)/i) || raw.match(/(?:^|[^0-9])(\\d+)(?:[^0-9]|$)/);
+      if (!match) continue;
+      var q = Number(match[1]);
+      if (!Number.isFinite(q) || q <= 0 || q > 200) continue;
+      var type = String(control.type || '').toLowerCase();
+      if ((type === 'radio' || type === 'checkbox') && !control.checked) continue;
+      var value = String(control.value || '').trim();
+      if (!value) continue;
+      var key = 'q' + q;
+      if (output[key] && type === 'checkbox') output[key].answer += ', ' + value;
+      else output[key] = { answer: value, status: 'submitted' };
+    }
+
+    var cells = document.querySelectorAll('.clickable-cell.selected,[data-q].selected,[data-question].selected');
+    for (var n = 0; n < cells.length; n += 1) {
+      var cell = cells[n];
+      var qRaw = cell.getAttribute('data-q') || cell.getAttribute('data-question') || '';
+      var qNum = cleanNumberText(qRaw);
+      if (qNum === null || qNum <= 0 || qNum > 200) continue;
+      var answer = cell.getAttribute('data-letter') || cell.getAttribute('data-value') || textOf(cell);
+      if (answer) output['q' + qNum] = { answer: String(answer).trim(), status: 'submitted' };
+    }
+    return output;
   }
 
   function captureReviewAnswers() {
@@ -182,69 +244,70 @@ ${hudMarkup}
     return output;
   }
 
-  function captureLegacyResult(reason, force) {
+  function stableCandidate(key) {
+    var now = Date.now();
+    if (key !== candidateKey) {
+      candidateKey = key;
+      candidateSeen = 1;
+      candidateFirstAt = now;
+      return false;
+    }
+    candidateSeen += 1;
+    return candidateSeen >= 2 && now - candidateFirstAt >= 55;
+  }
+
+  function captureLegacyResult(reason) {
     if (context.preview || resultSaved) return false;
-    var recentSubmit = submitIntentAt > 0 && Date.now() - submitIntentAt < 12000;
-    if (!resultSurfaceVisible() && !force && !recentSubmit) return false;
+    var surface = visibleResultSurface();
+    if (!surface) return false;
 
-    var scorePair = fractionFromNode(scoreSelectors);
-    var answeredPair = fractionFromNode(answeredSelectors);
+    var scorePair = fractionFromNode(scoreSelectors, surface) || labeledPairFromSurface(surface);
+    var answeredPair = fractionFromNode(answeredSelectors, surface) || fractionFromNode(answeredSelectors);
     var rawScore = scorePair ? scorePair[0] : numberFromNode([
-      '#correctStat',
-      '#correctValue',
-      '#correctCount',
-      '#resultCorrect',
-      '.correct-value',
-      '[data-ark-correct]',
-      ...scoreSelectors
-    ]);
+      '#correctStat','#correctValue','#correctCount','#resultCorrect','.correct-value','[data-ark-correct]',
+      '#scoreValue','#resultScore','#scoreBig','#scoreText','#finalScore','#final-score','#result-score','#score',
+      '.score-value','.result-score','.score-big','.final-score','[data-ark-score]','[data-score]'
+    ], surface);
     var maxScore = scorePair ? scorePair[1] : (answeredPair ? answeredPair[1] : numberFromNode([
-      '#totalValue',
-      '#totalScore',
-      '#questionTotal',
-      '#totalQuestions',
-      '.total-value',
-      '[data-ark-max-score]',
-      '[data-max-score]'
-    ]));
+      '#totalValue','#totalScore','#questionTotal','#totalQuestions','.total-value','[data-ark-max-score]','[data-max-score]','[data-total]'
+    ], surface));
 
+    if (rawScore === null) rawScore = labeledNumber(surface, ['correct','score']);
+    if (maxScore === null) {
+      var allPair = labeledPairFromSurface(surface);
+      if (allPair) maxScore = allPair[1];
+    }
     if (rawScore === null || maxScore === null || maxScore <= 0 || rawScore < 0 || rawScore > maxScore) return false;
 
     var unanswered = numberFromNode([
-      '#unansweredValue',
-      '#emptyValue',
-      '#unansweredCount',
-      '#emptyStat',
-      '#reviewEmpty',
-      '.unanswered-value',
-      '[data-ark-unanswered]'
-    ]);
+      '#unansweredValue','#emptyValue','#unansweredCount','#emptyStat','#reviewEmpty','.unanswered-value','[data-ark-unanswered]','[data-unanswered]'
+    ], surface);
     var wrong = numberFromNode([
-      '#wrongValue',
-      '#wrongCount',
-      '#wrongStat',
-      '#incorrectValue',
-      '#incorrectCount',
-      '.wrong-value',
-      '.incorrect-value',
-      '[data-ark-wrong]'
-    ]);
-    var answered = answeredPair ? answeredPair[0] : numberFromNode(answeredSelectors);
+      '#wrongValue','#wrongCount','#wrongStat','#incorrectValue','#incorrectCount','.wrong-value','.incorrect-value','[data-ark-wrong]','[data-wrong]'
+    ], surface);
+    var answered = answeredPair ? answeredPair[0] : numberFromNode(answeredSelectors, surface);
 
+    if (unanswered === null) unanswered = labeledNumber(surface, ['unanswered','empty']);
+    if (wrong === null) wrong = labeledNumber(surface, ['incorrect','wrong']);
     if (answered === null && unanswered !== null) answered = Math.max(0, maxScore - unanswered);
     if (unanswered === null && answered !== null) unanswered = Math.max(0, maxScore - answered);
     if (wrong === null && answered !== null) wrong = Math.max(0, answered - rawScore);
     if (unanswered === null && wrong !== null) unanswered = Math.max(0, maxScore - rawScore - wrong);
     if (wrong === null && unanswered !== null) wrong = Math.max(0, maxScore - rawScore - unanswered);
 
+    var formAnswers = captureFormAnswers();
+    var reviewAnswers = captureReviewAnswers();
+    var answers = Object.assign({}, formAnswers, reviewAnswers);
+    var candidate = [rawScore,maxScore,wrong,unanswered,Object.keys(answers).length].join('|');
+    if (!stableCandidate(candidate)) return false;
+
     if (!legacySubmissionId) {
       legacySubmissionId = 'legacy-' + String(context.sessionId || context.testId || 'test') + '-' + Date.now().toString(36);
     }
-    var answers = captureReviewAnswers();
     var details = {
       submissionReason: reason || 'legacy-result-captured',
       submissionId: legacySubmissionId,
-      bridgeVersion: 'legacy-dom-v3',
+      bridgeVersion: 'legacy-dom-v4',
       capturedAt: new Date().toISOString()
     };
     if (Object.keys(answers).length) details.answers = answers;
@@ -266,23 +329,14 @@ ${hudMarkup}
     return true;
   }
 
-  function scheduleLegacyCapture(reason, force) {
-    [0, 40, 120, 300, 700, 1400, 2600].forEach(function (delay) {
-      window.setTimeout(function () { captureLegacyResult(reason, Boolean(force)); }, delay);
+  function scheduleLegacyCapture(reason) {
+    [0,80,180,350,650,1100,1800,2800,4200].forEach(function (delay) {
+      window.setTimeout(function () { captureLegacyResult(reason); }, delay);
     });
   }
 
   function remainingSeconds() {
     return Math.max(0, Math.ceil((Date.parse(context.expiresAt) - Date.now()) / 1000));
-  }
-
-  function formatTime(total) {
-    var hours = Math.floor(total / 3600);
-    var minutes = Math.floor((total % 3600) / 60);
-    var seconds = total % 60;
-    return hours > 0
-      ? String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0')
-      : String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
   }
 
   function syncKnownTimer() {
@@ -296,7 +350,7 @@ ${hudMarkup}
     expired = true;
     submitIntentAt = Date.now();
     try {
-      if (typeof finalizeSubmission === 'function') { finalizeSubmission(true); scheduleLegacyCapture('time-expired', true); return; }
+      if (typeof finalizeSubmission === 'function') { finalizeSubmission(true); scheduleLegacyCapture('time-expired'); return; }
     } catch (e) {}
     try {
       if (typeof buildResult === 'function') {
@@ -308,7 +362,7 @@ ${hudMarkup}
       }
     } catch (e) {}
     try {
-      if (typeof submitMock === 'function') { submitMock(true); scheduleLegacyCapture('time-expired', true); return; }
+      if (typeof submitMock === 'function') { submitMock(true); scheduleLegacyCapture('time-expired'); return; }
     } catch (e) {}
     var submit = document.querySelector('[data-ark-submit],#submitBtn,.submit-btn,.submitButton');
     if (submit) {
@@ -316,18 +370,9 @@ ${hudMarkup}
       window.setTimeout(function () {
         var confirm = document.querySelector('#confirmSubmit,[data-ark-confirm-submit],.dialog-confirm,[data-ark-submit-confirm]');
         if (confirm) confirm.click();
-        scheduleLegacyCapture('time-expired', true);
-      }, 80);
-      return;
+        scheduleLegacyCapture('time-expired');
+      }, 100);
     }
-  }
-
-  function renderTime() {
-    if (resultSaved) return;
-    var left = remainingSeconds();
-    if (timeNode) timeNode.textContent = formatTime(left);
-    if (hud) hud.classList.toggle('ark-time-low', left <= 300);
-    if (left <= 0) submitAtExpiry();
   }
 
   function startKnownInterface() {
@@ -336,7 +381,6 @@ ${hudMarkup}
     syncKnownTimer();
     var start = document.querySelector('[data-ark-start],#startBtn,.start-button,.startBtn');
     if (start && !start.disabled) start.click();
-    renderTime();
   }
 
   window.ARK_CONTEXT = context;
@@ -352,44 +396,48 @@ ${hudMarkup}
   document.addEventListener('ark-result', function (event) { sendResult(event.detail || {}); });
   document.addEventListener('click', function (event) {
     var target = event.target && event.target.closest ? event.target.closest(
-      '#confirmSubmit,[data-ark-confirm-submit],.dialog-confirm,[data-ark-submit-confirm],#finishBtn,[data-ark-finish]'
+      '#confirmSubmit,[data-ark-confirm-submit],.dialog-confirm,[data-ark-submit-confirm],#finishBtn,[data-ark-finish],#submitFinal,[data-submit-final]'
     ) : null;
     if (!target) return;
     submitIntentAt = Date.now();
-    scheduleLegacyCapture('manual-submit', true);
-  });
+    candidateKey = '';
+    candidateSeen = 0;
+    candidateFirstAt = 0;
+    scheduleLegacyCapture('manual-submit');
+  }, true);
 
   window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     if (event.data && event.data.type === 'ARK_RESULT_SAVED') {
       resultSaved = true;
       expired = true;
-      if (hud) hud.style.display = 'none';
       return;
     }
     if (event.data && event.data.type === 'ARK_RESULT_ERROR') {
       lastPayload = '';
+      candidateKey = '';
+      candidateSeen = 0;
+      candidateFirstAt = 0;
       legacyAttempts += 1;
-      if (legacyAttempts < 4) scheduleLegacyCapture('retry-after-error', true);
+      if (legacyAttempts < 5) scheduleLegacyCapture('retry-after-error');
     }
     if (event.data && event.data.type === 'ARK_PLATFORM_START') startKnownInterface();
   });
 
   if (typeof MutationObserver !== 'undefined' && document.body) {
     var observer = new MutationObserver(function () {
-      if (resultSaved) return;
-      if (!resultSurfaceVisible() && !(submitIntentAt && Date.now() - submitIntentAt < 12000)) return;
+      if (resultSaved || !visibleResultSurface()) return;
       if (mutationTimer) window.clearTimeout(mutationTimer);
       mutationTimer = window.setTimeout(function () {
-        captureLegacyResult('result-dom-changed', false);
-      }, 45);
+        captureLegacyResult('result-dom-changed');
+      }, 70);
     });
     observer.observe(document.body, {
       subtree: true,
       childList: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['class', 'style', 'aria-hidden']
+      attributeFilter: ['class','style','aria-hidden','hidden']
     });
   }
 
@@ -409,11 +457,17 @@ ${hudMarkup}
         try { sendResult(JSON.parse(raw)); return; } catch (e) {}
       }
     }
-    captureLegacyResult('result-view-detected', false);
-  }, 500);
+    if (visibleResultSurface()) captureLegacyResult('result-view-detected');
+  }, 350);
 
-  renderTime();
-  window.setInterval(renderTime, 250);
+  var expiryWatch = window.setInterval(function () {
+    if (resultSaved) {
+      window.clearInterval(expiryWatch);
+      return;
+    }
+    if (remainingSeconds() <= 0) submitAtExpiry();
+  }, 1000);
+
   window.parent.postMessage({ type: 'ARK_TEST_READY', context: context }, '*');
 })();
 </script>`;
