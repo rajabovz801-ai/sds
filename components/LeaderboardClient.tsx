@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AwardIcon, CalendarCheckIcon, FlameIcon, SparklesIcon } from '@/components/UiIcons';
 import styles from '@/components/LeaderboardClient.module.css';
 
@@ -66,6 +67,12 @@ function streakFor(studentId: string, attempts: AttemptItem[]) {
 
 export function LeaderboardClient({ currentStudentId, students, attempts }: Props) {
   const [period, setPeriod] = useState<Period>('week');
+  const router = useRouter();
+
+  useEffect(() => {
+    const refresh = window.setInterval(() => router.refresh(), 12000);
+    return () => window.clearInterval(refresh);
+  }, [router]);
 
   const rows = useMemo<RankedRow[]>(() => {
     const start = startForPeriod(period);
