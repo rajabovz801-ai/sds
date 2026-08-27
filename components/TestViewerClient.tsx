@@ -255,10 +255,12 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
             <span className="examPreflightIcon"><ShieldCheckIcon /></span>
             <small>ARK SECURE EXAM</small>
             <h1>{data.test.title}</h1>
-            <p>Test faqat bir marta ishlanadi. Boshlagandan keyin vaqt to‘xtamaydi va sahifadan chiqish 10 soniyalik blokni yoqadi.</p>
+            <p>{isMock
+              ? 'Bu Full Mock bo‘limi bir urinish tartibida ishlaydi. Boshlagandan keyin vaqt to‘xtamaydi va sahifadan chiqish 10 soniyalik blokni yoqadi.'
+              : 'Bu practice testni qayta-qayta ishlashingiz mumkin. Har safar yangi urinish va yangi natija saqlanadi; boshlangan testning vaqti esa to‘xtamaydi.'}</p>
             <div className="examPreflightFacts">
               <div><ClockIcon /><span><b>{data.test.durationMinutes} daqiqa</b><small>Server nazoratidagi vaqt</small></span></div>
-              <div><ShieldCheckIcon /><span><b>Bir urinish</b><small>Takroran ochib bo‘lmaydi</small></span></div>
+              <div><ShieldCheckIcon /><span><b>{isMock ? 'Bir urinish' : 'Doim ochiq'}</b><small>{isMock ? 'Mock section takroran ochilmaydi' : 'Qayta ishlash mumkin'}</small></span></div>
             </div>
             {launchError && <div className="examPreflightError">{launchError}</div>}
             {launchState === 'blocked' ? (
