@@ -59,11 +59,24 @@ function MiniLine({ points, height = 190 }: { points: DashboardPoint[]; height?:
 
   return (
     <div className="dashChartWrap">
-      <svg className="dashLineChart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-label="Natijalar grafigi">
-        {[0, 1, 2, 3].map((i) => <line key={i} x1="18" x2={width - 18} y1={24 + i * ((height - 48) / 3)} y2={24 + i * ((height - 48) / 3)} className="dashGridLine" />)}
-        {segments.map((segment, i) => <polyline key={i} points={segment} className="dashLine" />)}
-        {coords.map((point, i) => point.y === null ? null : <g key={i}><circle cx={point.x} cy={point.y} r="5" className="dashDot" /><text x={point.x} y={point.y - 12} textAnchor="middle" className="dashDotLabel">{point.value?.toFixed(1)}</text></g>)}
-      </svg>
+      <div className="dashPlotArea">
+        <svg className="dashLineChart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-label="Natijalar grafigi">
+          {[0, 1, 2, 3].map((i) => <line key={i} x1="18" x2={width - 18} y1={24 + i * ((height - 48) / 3)} y2={24 + i * ((height - 48) / 3)} className="dashGridLine" />)}
+          {segments.map((segment, i) => <polyline key={i} points={segment} className="dashLine" />)}
+        </svg>
+        <div className="dashPointLayer" aria-hidden="true">
+          {coords.map((point, i) => point.y === null ? null : (
+            <span
+              key={i}
+              className="dashPointMarker"
+              style={{ left: `${(point.x / width) * 100}%`, top: `${(point.y / height) * 100}%` }}
+            >
+              <b>{point.value?.toFixed(1)}</b>
+              <i />
+            </span>
+          ))}
+        </div>
+      </div>
       <div className="dashChartLabels">{points.map((p) => <span key={`${p.date}-${p.label}`}>{p.label}</span>)}</div>
     </div>
   );
