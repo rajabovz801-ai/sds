@@ -15,21 +15,23 @@
 .studentDashboardShell .studentSideNav a svg{width:20px;height:20px}
 .studentDashboardShell .studentSideNav a small{font-size:8px;padding:4px 6px}
 .studentDashboardShell .studentSideMotivation strong{font-size:15px}
-.studentDashboardShell .studentSideMotivation p{font-size:10px;line-height:1.55;max-width:145px}
+.studentDashboardShell .studentSideMotivation p{font-size:10px;line-height:1.55;max-width:132px}
 .studentDashboardShell .studentSideProfile small{font-size:8px}
 .studentDashboardShell .studentSideProfile strong{font-size:11px;max-width:118px}
 
-/* Hero copy */
+/* Hero copy: intentionally no decorative PNG on the right. */
+.studentDashboardShell .studentWelcomeArt{display:none!important}
+.studentDashboardShell .studentWelcome>div{max-width:1020px}
 .studentDashboardShell .studentWelcomeEyebrow{font-size:10px;letter-spacing:.12em}
 .studentDashboardShell .studentWelcomeEyebrow svg{width:16px;height:16px}
-.studentDashboardShell .studentWelcome h1{font-size:clamp(38px,3.6vw,58px);line-height:.98}
-.studentDashboardShell .studentWelcome p{font-size:13.5px;line-height:1.6;max-width:720px}
+.studentDashboardShell .studentWelcome h1{font-size:clamp(38px,3.6vw,58px);line-height:.98;max-width:940px}
+.studentDashboardShell .studentWelcome p{font-size:13.5px;line-height:1.6;max-width:820px}
 
 /* KPI cards */
-.studentDashboardShell .studentMetric{min-height:126px;padding:18px;gap:14px}
-.studentDashboardShell .studentMetricIcon{width:60px;height:60px;border-radius:18px}
+.studentDashboardShell .studentMetric{min-height:126px;padding:18px;gap:14px;overflow:hidden}
+.studentDashboardShell .studentMetricIcon{width:60px;height:60px;border-radius:18px;overflow:visible}
 .studentDashboardShell .studentMetricIcon svg{width:28px;height:28px}
-.studentDashboardShell .studentMetricIcon img{width:54px;height:54px}
+.studentDashboardShell .studentMetricIcon img{width:54px;height:54px;display:block}
 .studentDashboardShell .studentMetric small{font-size:11.5px;font-weight:800;line-height:1.25}
 .studentDashboardShell .studentMetric strong{margin-top:5px;font-size:29px;line-height:1}
 .studentDashboardShell .studentMetric strong b{font-size:13px}
@@ -51,7 +53,7 @@
 /* Dark progress summary */
 .studentDashboardShell .summaryTop small{font-size:9px}
 .studentDashboardShell .summaryTop h2{font-size:19px}
-.studentDashboardShell .summaryTop img{width:70px;height:70px}
+.studentDashboardShell .summaryTop img{width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 9px 12px rgba(0,0,0,.16))}
 .studentDashboardShell .studentProgressSummary>p{font-size:10.5px;line-height:1.55}
 .studentDashboardShell .summaryStats small{font-size:8px}
 .studentDashboardShell .summaryStats strong{font-size:23px}
@@ -64,28 +66,62 @@
 .studentDashboardShell .recentRow span{font-size:8.5px;margin-top:3px}
 .studentDashboardShell .recentRow>b{font-size:11px;padding:6px 9px}
 
-/* Achievements — larger artwork and proper readable hierarchy. */
+/* Achievements — readable cards, no image clipping, locked state stays legible. */
 .studentDashboardShell .studentAchievements{margin-top:16px}
 .studentDashboardShell .achievementGrid{gap:12px;padding:0 14px 18px}
-.studentDashboardShell .achievementGrid article{min-height:158px;padding:14px;border-radius:18px;gap:12px}
-.studentDashboardShell .achievementGrid img{width:78px;height:78px;filter:drop-shadow(0 10px 12px rgba(37,43,55,.13))}
+.studentDashboardShell .achievementGrid article{min-height:166px;padding:14px;border-radius:18px;gap:12px;overflow:hidden;isolation:isolate}
+.studentDashboardShell .achievementGrid img{width:84px;height:84px;display:block;object-fit:contain;flex:0 0 auto;filter:drop-shadow(0 10px 14px rgba(37,43,55,.17))}
 .studentDashboardShell .achievementGrid strong{font-size:11.5px;font-weight:850;line-height:1.25}
 .studentDashboardShell .achievementGrid p{min-height:34px;margin:6px 0 9px;font-size:9.5px;line-height:1.45}
 .studentDashboardShell .achievementProgress{height:6px}
 .studentDashboardShell .achievementGrid article>div>span{margin-top:7px;font-size:8.5px}
-.studentDashboardShell .achievementGrid article.locked{opacity:.62}
+.studentDashboardShell .achievementGrid article.locked{opacity:1!important;filter:none!important;background:#fbfbfc}
+.studentDashboardShell .achievementGrid article.locked img{filter:grayscale(.12) saturate(.72) opacity(.63) drop-shadow(0 8px 12px rgba(37,43,55,.12))}
+
+/* Generated 3D artwork sprite. 7 equal cells: Overall, Rocket, Accuracy, Perfect, Fast, Consistency, Ten Tests. */
+.studentDashboardShell .studentMetricIcon.overall img,
+.studentDashboardShell .studentMetricIcon.tests img,
+.studentDashboardShell .studentSideMotivation img,
+.studentDashboardShell .achievementGrid article:nth-child(5) img,
+.studentDashboardShell .achievementGrid article:nth-child(6) img,
+.studentDashboardShell .achievementGrid article:nth-child(8) img,
+.studentDashboardShell .achievementGrid article:nth-child(9) img,
+.studentDashboardShell .achievementGrid article:nth-child(10) img{
+  background-image:url('/achievements/dashboard-3d-sprite.png');
+  background-repeat:no-repeat;
+  background-size:700% 100%;
+  object-position:9999px 9999px;
+  overflow:hidden;
+}
+.studentDashboardShell .studentMetricIcon.overall img{width:66px;height:66px;background-position:0 50%;filter:drop-shadow(0 8px 11px rgba(92,58,18,.18))}
+.studentDashboardShell .studentMetricIcon.overall{background:radial-gradient(circle at 50% 50%,rgba(255,220,122,.22),rgba(243,239,255,.78) 70%)}
+.studentDashboardShell .studentMetricIcon.tests img{width:62px;height:62px;background-position:100% 50%;filter:drop-shadow(0 8px 11px rgba(92,58,18,.16))}
+.studentDashboardShell .studentMetricIcon.tests{background:radial-gradient(circle at 50% 50%,rgba(255,220,122,.25),rgba(255,242,223,.72) 72%)}
+
+/* Sidebar motivation gets the rocket, kept completely inside the card. */
+.studentDashboardShell .studentSideMotivation{min-height:112px;padding-right:78px;overflow:hidden}
+.studentDashboardShell .studentSideMotivation img{right:7px;top:14px;width:70px;height:70px;background-position:16.6667% 50%;filter:drop-shadow(0 8px 12px rgba(5,10,35,.28))}
+
+/* Generated achievement cards. */
+.studentDashboardShell .achievementGrid article:nth-child(5) img{background-position:100% 50%}
+.studentDashboardShell .achievementGrid article:nth-child(6) img{background-position:33.3333% 50%}
+.studentDashboardShell .achievementGrid article:nth-child(8) img{background-position:50% 50%}
+.studentDashboardShell .achievementGrid article:nth-child(9) img{background-position:66.6667% 50%}
+.studentDashboardShell .achievementGrid article:nth-child(10) img{background-position:83.3333% 50%}
 
 @media(max-width:1280px){
   .studentDashboardShell .studentMetric small{font-size:11px}
   .studentDashboardShell .studentMetric strong{font-size:27px}
-  .studentDashboardShell .achievementGrid article{min-height:150px}
+  .studentDashboardShell .achievementGrid article{min-height:158px}
+  .studentDashboardShell .achievementGrid img{width:78px;height:78px}
 }
 
 @media(max-width:940px){
   .studentDashboardShell .studentDashTopbar{height:42px;min-height:42px}
   .studentDashboardShell .studentWelcome h1{font-size:clamp(34px,7vw,48px)}
   .studentDashboardShell .studentWelcome p{font-size:12.5px}
-  .studentDashboardShell .achievementGrid img{width:70px;height:70px}
+  .studentDashboardShell .achievementGrid img{width:72px;height:72px}
+  .studentDashboardShell .studentSideMotivation{display:none}
 }
 
 @media(max-width:620px){
@@ -94,7 +130,8 @@
   .studentDashboardShell .studentMetric span{font-size:10px}
   .studentDashboardShell .studentPanel h2{font-size:16px}
   .studentDashboardShell .studentPanel header p{font-size:10px}
-  .studentDashboardShell .achievementGrid article{min-height:145px}
+  .studentDashboardShell .achievementGrid article{min-height:150px}
   .studentDashboardShell .achievementGrid strong{font-size:12px}
   .studentDashboardShell .achievementGrid p{font-size:10px}
+  .studentDashboardShell .achievementGrid img{width:68px;height:68px}
 }
