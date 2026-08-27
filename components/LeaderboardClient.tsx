@@ -29,9 +29,10 @@ type RankedRow = StudentItem & {
 function TrophyPremiumIcon(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
-      <path d="M8 4h8v3.6c0 3-1.7 5.4-4 5.4s-4-2.4-4-5.4V4Z" />
-      <path d="M8 6H4v1.5C4 10 5.6 11.7 8.2 12M16 6h4v1.5c0 2.5-1.6 4.2-4.2 4.5M12 13v4M8.5 21h7M10 17h4v4h-4Z" />
-      <path d="m12 6.2.7 1.5 1.7.2-1.2 1.2.3 1.7-1.5-.8-1.5.8.3-1.7-1.2-1.2 1.7-.2.7-1.5Z" />
+      <path d="M7.2 3.8h9.6v4.4c0 4-2.1 6.7-4.8 6.7S7.2 12.2 7.2 8.2V3.8Z" />
+      <path d="M7.2 6H3.6v1.8c0 2.8 1.8 4.7 4.8 5.2M16.8 6h3.6v1.8c0 2.8-1.8 4.7-4.8 5.2" />
+      <path d="M12 14.9v3.2M9.2 18.1h5.6M8.2 21h7.6" />
+      <path d="m12 6.4.78 1.55 1.72.25-1.25 1.2.3 1.7L12 10.3l-1.55.8.3-1.7-1.25-1.2 1.72-.25L12 6.4Z" />
     </svg>
   );
 }
@@ -67,16 +68,6 @@ function CalendarPremiumIcon(props: IconProps) {
   );
 }
 
-function MedalPremiumIcon(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
-      <circle cx="12" cy="9" r="5" />
-      <path d="m9 13.3-1 7.2 4-2.2 4 2.2-1-7.2" />
-      <path d="m12 6.3.8 1.6 1.8.3-1.3 1.3.3 1.8-1.6-.9-1.6.9.3-1.8-1.3-1.3 1.8-.3.8-1.6Z" />
-    </svg>
-  );
-}
-
 function UsersIcon(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
@@ -84,6 +75,12 @@ function UsersIcon(props: IconProps) {
       <path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 6.5a2.5 2.5 0 0 1 0 5M17 14c2.4.3 4 1.9 4 4.5" />
     </svg>
   );
+}
+
+function rankToneClass(rank: number) {
+  if (rank === 1) return styles.rankGold;
+  if (rank === 2) return styles.rankSilver;
+  return styles.rankBronze;
 }
 
 function initials(firstName: string, lastName: string) {
@@ -182,7 +179,7 @@ export function LeaderboardClient({ currentStudentId, students, attempts }: Prop
     <div className={styles.leaderboardPage}>
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <span className={styles.heroTrophy}><TrophyPremiumIcon /></span>
+          <span className={styles.heroTrophy}><span className={styles.heroTrophyHalo}><TrophyPremiumIcon /></span></span>
           <div>
             <div className={styles.eyebrow}>LEADERBOARD</div>
             <h1>Leaderboard</h1>
@@ -208,8 +205,10 @@ export function LeaderboardClient({ currentStudentId, students, attempts }: Prop
         <section className={styles.summary}>
           {podiumDisplay.map((row) => (
             <article key={row.id} className={`${styles.podium} ${row.rank === 1 ? styles.podiumFirst : row.rank === 3 ? styles.podiumThird : styles.podiumSecond}`}>
-              <span className={styles.rankBadge}><MedalPremiumIcon /><b>{row.rank}</b></span>
-              {row.rank === 1 ? <span className={styles.crown}><CrownIcon /></span> : null}
+              <span className={`${styles.rankBadge} ${rankToneClass(row.rank)}`}>
+                <i className={styles.rankRibbon} aria-hidden="true" />
+                <b>{row.rank}</b>
+              </span>
               <span className={styles.avatar}>{initials(row.firstName, row.lastName)}</span>
               <div className={styles.podiumBody}>
                 <h3>{row.firstName} {row.lastName}{row.id === currentStudentId ? <span className={styles.you}>YOU</span> : null}</h3>
@@ -223,11 +222,11 @@ export function LeaderboardClient({ currentStudentId, students, attempts }: Prop
 
       <section className={styles.tableCard}>
         <div className={styles.tableHead}>
-          <span><MedalPremiumIcon /> Rank</span><span>Student</span><span>Completed Tests</span><span>Average Score</span><span>Best Score</span><span><FlameIcon /> Streak</span><span>Last Activity</span>
+          <span><TrophyPremiumIcon /> Rank</span><span>Student</span><span>Completed Tests</span><span>Average Score</span><span>Best Score</span><span><FlameIcon /> Streak</span><span>Last Activity</span>
         </div>
         {tableRows.length ? tableRows.map((row) => (
           <div key={row.id} className={`${styles.row} ${row.id === currentStudentId ? styles.rowMe : ''}`}>
-            <span className={styles.rank}>{row.rank <= 3 ? <MedalPremiumIcon /> : `#${row.rank}`}</span>
+            <span className={styles.rank}>{row.rank <= 3 ? <span className={`${styles.tableRankMedal} ${rankToneClass(row.rank)}`}>{row.rank}</span> : `#${row.rank}`}</span>
             <div className={styles.studentCell}><span className={styles.miniAvatar}>{initials(row.firstName, row.lastName)}</span><strong>{row.firstName} {row.lastName}{row.id === currentStudentId ? <span className={styles.you}>YOU</span> : null}</strong></div>
             <span>{row.completedTests}</span>
             <span className={styles.score}>{row.averageScore.toFixed(1)}%</span>
