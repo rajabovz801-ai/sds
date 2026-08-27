@@ -40,6 +40,7 @@ ${hudMarkup}
   var expired = false;
   var platformStarted = false;
   var resultSaved = false;
+  var legacyAttempts = 0;
   var hud = document.getElementById('ark-secure-hud');
   var timeNode = document.getElementById('ark-secure-time');
   var nativeTimer = document.querySelector('[data-ark-timer],#timer,.timer');
@@ -52,6 +53,142 @@ ${hudMarkup}
     if (fingerprint && fingerprint === lastPayload) return;
     lastPayload = fingerprint;
     window.parent.postMessage({ type: 'ARK_TEST_RESULT', payload: payload, context: context }, '*');
+  }
+
+  function firstNode(selectors) {
+    for (var i = 0; i < selectors.length; i += 1) {
+      var node = document.querySelector(selectors[i]);
+      if (node) return node;
+    }
+    return null;
+  }
+
+  function textOf(node) {
+    if (!node) return '';
+    var value = node.value;
+    if (value !== undefined && value !== null && String(value).trim()) return String(value).trim();
+    return String(node.textContent || '').trim();
+  }
+
+  function numberFromNode(selectors) {
+    var node = firstNode(selectors);
+    if (!node) return null;
+    var match = textOf(node).replace(/,/g, '.').match(/-?\d+(?:\.\d+)?/);
+    if (!match) return null;
+    var value = Number(match[0]);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  function fractionFromNode(selectors) {
+    var node = firstNode(selectors);
+    if (!node) return null;
+    var match = textOf(node).replace(/,/g, '.').match(/(-?\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);
+    if (!match) return null;
+    var value = Number(match[1]);
+    var total = Number(match[2]);
+    return Number.isFinite(value) && Number.isFinite(total) && total > 0 ? [value, total] : null;
+  }
+
+  function resultSurfaceVisible() {
+    var node = firstNode([
+      '#resultOverlay',
+      '#resultsOverlay',
+      '#resultModal',
+      '.result-overlay',
+      '.results-overlay',
+      '.result-modal',
+      '[data-ark-result-view]'
+    ]);
+    if (!node) return false;
+    if (node.classList && node.classList.contains('hidden')) return false;
+    if (node.getAttribute && node.getAttribute('aria-hidden') === 'true') return false;
+    try {
+      var style = window.getComputedStyle(node);
+      if (style.display === 'none' || style.visibility === 'hidden') return false;
+    } catch (e) {}
+    return true;
+  }
+
+  function captureLegacyResult(reason) {
+    if (context.preview || resultSaved || !resultSurfaceVisible()) return false;
+
+    var scorePair = fractionFromNode([
+      '#scoreValue',
+      '#resultScore',
+      '.score-value',
+      '.result-score',
+      '[data-ark-score]'
+    ]);
+    var answeredPair = fractionFromNode([
+      '#answeredValue',
+      '#resultAnswered',
+      '.answered-value',
+      '[data-ark-answered]'
+    ]);
+
+    var rawScore = scorePair ? scorePair[0] : numberFromNode([
+      '#scoreValue',
+      '#resultScore',
+      '#correctValue',
+      '#correctCount',
+      '.score-value',
+      '.result-score',
+      '[data-ark-score]'
+    ]);
+    var maxScore = scorePair ? scorePair[1] : (answeredPair ? answeredPair[1] : numberFromNode([
+      '#totalValue',
+      '#totalScore',
+      '#questionTotal',
+      '.total-value',
+      '[data-ark-max-score]',
+      '[data-max-score]'
+    ]));
+
+    if (rawScore === null || maxScore === null || maxScore <= 0 || rawScore < 0 || rawScore > maxScore) return false;
+
+    var unanswered = numberFromNode([
+      '#unansweredValue',
+      '#emptyValue',
+      '#unansweredCount',
+      '.unanswered-value',
+      '[data-ark-unanswered]'
+    ]);
+    var answered = answeredPair ? answeredPair[0] : numberFromNode([
+      '#answeredValue',
+      '#answeredCount',
+      '.answered-value',
+      '[data-ark-answered]'
+    ]);
+    if (answered === null && unanswered !== null) answered = Math.max(0, maxScore - unanswered);
+    if (unanswered === null && answered !== null) unanswered = Math.max(0, maxScore - answered);
+    var wrong = answered !== null ? Math.max(0, answered - rawScore) : null;
+
+    var details = {
+      submissionReason: reason || 'legacy-result-captured',
+      bridgeVersion: 'legacy-dom-v2',
+      capturedAt: new Date().toISOString()
+    };
+
+    var result = {
+      rawScore: rawScore,
+      score: rawScore,
+      maxScore: maxScore,
+      total: maxScore,
+      correct: rawScore,
+      submittedAt: new Date().toISOString(),
+      details: details
+    };
+    if (wrong !== null) result.wrong = wrong;
+    if (unanswered !== null) result.unanswered = unanswered;
+
+    sendResult(result);
+    return true;
+  }
+
+  function scheduleLegacyCapture(reason) {
+    [0, 80, 220, 600].forEach(function (delay) {
+      window.setTimeout(function () { captureLegacyResult(reason); }, delay);
+    });
   }
 
   function remainingSeconds() {
@@ -77,7 +214,7 @@ ${hudMarkup}
     if (expired || context.preview || resultSaved) return;
     expired = true;
     try {
-      if (typeof finalizeSubmission === 'function') { finalizeSubmission(true); return; }
+      if (typeof finalizeSubmission === 'function') { finalizeSubmission(true); scheduleLegacyCapture('time-expired'); return; }
     } catch (e) {}
     try {
       if (typeof buildResult === 'function') {
@@ -89,7 +226,7 @@ ${hudMarkup}
       }
     } catch (e) {}
     try {
-      if (typeof submitMock === 'function') { submitMock(true); return; }
+      if (typeof submitMock === 'function') { submitMock(true); scheduleLegacyCapture('time-expired'); return; }
     } catch (e) {}
     var submit = document.querySelector('[data-ark-submit],#submitBtn,.submit-btn,.submitButton');
     if (submit) {
@@ -97,14 +234,10 @@ ${hudMarkup}
       window.setTimeout(function () {
         var confirm = document.querySelector('#confirmSubmit,[data-ark-confirm-submit],.dialog-confirm');
         if (confirm) confirm.click();
+        scheduleLegacyCapture('time-expired');
       }, 80);
       return;
     }
-    sendResult({
-      timeExpired: true,
-      submittedAt: new Date().toISOString(),
-      details: { submissionReason: 'time-expired', answers: {} }
-    });
   }
 
   function renderTime() {
@@ -135,6 +268,11 @@ ${hudMarkup}
 
   document.addEventListener('ark:result', function (event) { sendResult(event.detail || {}); });
   document.addEventListener('ark-result', function (event) { sendResult(event.detail || {}); });
+  document.addEventListener('click', function (event) {
+    var target = event.target && event.target.closest ? event.target.closest('#confirmSubmit,[data-ark-confirm-submit],.dialog-confirm,[data-ark-submit-confirm]') : null;
+    if (target) scheduleLegacyCapture('manual-submit');
+  });
+
   window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     if (event.data && event.data.type === 'ARK_RESULT_SAVED') {
@@ -143,9 +281,29 @@ ${hudMarkup}
       if (hud) hud.style.display = 'none';
       return;
     }
-    if (event.data && event.data.type === 'ARK_RESULT_ERROR') lastPayload = '';
+    if (event.data && event.data.type === 'ARK_RESULT_ERROR') {
+      lastPayload = '';
+      legacyAttempts += 1;
+      if (legacyAttempts < 3) scheduleLegacyCapture('retry-after-error');
+    }
     if (event.data && event.data.type === 'ARK_PLATFORM_START') startKnownInterface();
   });
+
+  var resultSurface = firstNode([
+    '#resultOverlay',
+    '#resultsOverlay',
+    '#resultModal',
+    '.result-overlay',
+    '.results-overlay',
+    '.result-modal',
+    '[data-ark-result-view]'
+  ]);
+  if (resultSurface && typeof MutationObserver !== 'undefined') {
+    var observer = new MutationObserver(function () {
+      if (resultSurfaceVisible()) scheduleLegacyCapture('result-view-opened');
+    });
+    observer.observe(resultSurface, { attributes: true, attributeFilter: ['class', 'style', 'aria-hidden'] });
+  }
 
   var watch = window.setInterval(function () {
     if (resultSaved) {
@@ -154,16 +312,16 @@ ${hudMarkup}
     }
     if (window.__ARK_RESULT__ && typeof window.__ARK_RESULT__ === 'object') {
       sendResult(window.__ARK_RESULT__);
-      window.clearInterval(watch);
       return;
     }
     var node = document.querySelector('[data-ark-result]');
     if (node) {
       var raw = node.getAttribute('data-ark-result');
       if (raw) {
-        try { sendResult(JSON.parse(raw)); window.clearInterval(watch); } catch (e) {}
+        try { sendResult(JSON.parse(raw)); return; } catch (e) {}
       }
     }
+    captureLegacyResult('result-view-detected');
   }, 600);
 
   renderTime();
