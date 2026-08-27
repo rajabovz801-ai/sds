@@ -26,31 +26,43 @@ type Props = {
   children: ReactNode;
 };
 
+type GamificationPayload = {
+  totalPts?: number;
+  streakDays?: number;
+};
+
 export function StudentWorkspaceShellClient({ student, active, children }: Props) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
   const [studyStreak, setStudyStreak] = useState(0);
+  const [totalPts, setTotalPts] = useState(0);
   const initials = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`.toUpperCase() || 'AR';
-  const totalPts = 0;
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadSidebarSummary() {
       try {
-        const response = await fetch('/api/dashboard', { cache: 'no-store' });
+        const response = await fetch('/api/gamification', { cache: 'no-store' });
         if (!response.ok) return;
-        const dashboard = await response.json() as { studyStreak?: number };
-        if (!cancelled && Number.isFinite(dashboard.studyStreak)) {
-          setStudyStreak(Math.max(0, Number(dashboard.studyStreak)));
-        }
+        const summary = await response.json() as GamificationPayload;
+        if (cancelled) return;
+        if (Number.isFinite(summary.totalPts)) setTotalPts(Math.max(0, Number(summary.totalPts)));
+        if (Number.isFinite(summary.streakDays)) setStudyStreak(Math.max(0, Number(summary.streakDays)));
       } catch {
-        // Keep the workspace usable even if the small sidebar summary cannot refresh.
+        // Keep the workspace usable even if the compact summary cannot refresh.
       }
     }
 
     loadSidebarSummary();
-    return () => { cancelled = true; };
+    const interval = window.setInterval(loadSidebarSummary, 12000);
+    const onFocus = () => loadSidebarSummary();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   async function logout() {
