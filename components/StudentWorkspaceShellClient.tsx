@@ -14,7 +14,6 @@ import {
   SparklesIcon,
 } from '@/components/UiIcons';
 import type { StudentSummary } from '@/lib/auth/server-session';
-import { achievementAssets } from '@/components/achievementAssets';
 
 type WorkspaceTrack = 'ielts' | 'cefr' | 'practice' | 'tools';
 
@@ -55,12 +54,6 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
           <Link className={active === 'practice' ? 'active' : ''} href="/practice"><BookOpenIcon /><span>Practice</span><small>SOON</small></Link>
           <Link className={active === 'tools' ? 'active' : ''} href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
         </nav>
-
-        <div className="studentSideMotivation">
-          <img src={achievementAssets['fast-learner']} alt="" />
-          <strong>Keep going!</strong>
-          <p>Har bir yakunlangan test maqsadingizga yaqinlashtiradi.</p>
-        </div>
 
         <div className="studentSideProfile">
           <span>{initials}</span>
