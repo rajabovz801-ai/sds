@@ -16,13 +16,16 @@ export type CloudTest = {
   durationMinutes: number;
   dailyTaskEnabled?: boolean;
   dailyTaskPoints?: number;
+  dailyTaskStartedAt?: string | null;
+  dailyTaskExpiresAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
 
 type TestRow = {
   id:string; title:string; description:string|null; track:TestTrack; skill:TestSkill; status:TestStatus;
-  file_name:string; file_path:string; duration_minutes?:number|null; daily_task_enabled?:boolean|null; daily_task_points?:number|null; created_at:string; updated_at:string;
+  file_name:string; file_path:string; duration_minutes?:number|null; daily_task_enabled?:boolean|null; daily_task_points?:number|null;
+  daily_task_started_at?:string|null; daily_task_expires_at?:string|null; created_at:string; updated_at:string;
 };
 
 export function mapTest(row: TestRow): CloudTest {
@@ -30,6 +33,7 @@ export function mapTest(row: TestRow): CloudTest {
     id:row.id,title:row.title,description:row.description||'',track:row.track,skill:row.skill,status:row.status,
     fileName:row.file_name,filePath:row.file_path,durationMinutes:Number(row.duration_minutes)||60,
     dailyTaskEnabled:Boolean(row.daily_task_enabled),dailyTaskPoints:Number(row.daily_task_points)||20,
+    dailyTaskStartedAt:row.daily_task_started_at||null,dailyTaskExpiresAt:row.daily_task_expires_at||null,
     createdAt:row.created_at,updatedAt:row.updated_at
   };
 }
@@ -43,12 +47,14 @@ export async function listPublishedTests(): Promise<CloudTest[]> {
 
 export async function listDailyTasks(): Promise<CloudTest[]> {
   const supabase = getPublicSupabase();
+  const now = new Date().toISOString();
   const { data, error } = await supabase
     .from('tests')
     .select('*')
     .eq('status', 'published')
     .eq('daily_task_enabled', true)
-    .order('updated_at', { ascending: false });
+    .gt('daily_task_expires_at', now)
+    .order('daily_task_expires_at', { ascending: true });
   if (error) throw error;
   return ((data || []) as TestRow[]).map(mapTest);
 }
