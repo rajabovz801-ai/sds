@@ -5,6 +5,7 @@ import './landing-home-v4.css';
 import './auth.css';
 import './mock-results.css';
 import './workspace-v2.css';
+import './dashboard-live.css';
 
 export const metadata: Metadata = {
   title: 'ARK EDUCATION — IELTS Exam & Practice Platform',
