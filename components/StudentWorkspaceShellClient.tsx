@@ -16,7 +16,7 @@ import {
 import type { StudentSummary } from '@/lib/auth/server-session';
 import { achievementAssets } from '@/components/achievementAssets';
 
-type WorkspaceTrack = 'ielts' | 'cefr';
+type WorkspaceTrack = 'ielts' | 'cefr' | 'practice' | 'tools';
 
 type Props = {
   student: StudentSummary;
@@ -52,8 +52,8 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
           <Link href="/mock"><LayoutGridIcon /><span>Dashboard</span></Link>
           <Link className={active === 'ielts' ? 'active' : ''} href="/ielts"><GlobeIcon /><span>IELTS</span></Link>
           <Link className={active === 'cefr' ? 'active' : ''} href="/cefr"><LayersIcon /><span>CEFR</span></Link>
-          <Link href="/practice"><BookOpenIcon /><span>Practice</span><small>SOON</small></Link>
-          <Link href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
+          <Link className={active === 'practice' ? 'active' : ''} href="/practice"><BookOpenIcon /><span>Practice</span><small>SOON</small></Link>
+          <Link className={active === 'tools' ? 'active' : ''} href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
         </nav>
 
         <div className="studentSideMotivation">
