@@ -4,9 +4,10 @@ import { AdminDailyTasksPanel } from '@/components/AdminDailyTasksPanel';
 import { AdminMenuPreview } from '@/components/AdminMenuPreview';
 import { AdminProfessionalLayer } from '@/components/AdminProfessionalLayer';
 import { AdminReadableTypography } from '@/components/AdminReadableTypography';
+import { AdminTestManagerDropdown } from '@/components/AdminTestManagerDropdown';
 import { requireAdminServerSession } from '@/lib/auth/admin-server-session';
 
 export default async function AdminPage() {
   await requireAdminServerSession();
-  return <div className="adminRoot"><AdminReadableTypography /><AdminClient /><AdminDailyTasksPanel /><AdminMenuPreview /><AdminProfessionalLayer /><AdminAttemptResetPanel /></div>;
+  return <div className="adminRoot"><AdminReadableTypography /><AdminClient /><AdminDailyTasksPanel /><AdminMenuPreview /><AdminProfessionalLayer /><AdminTestManagerDropdown /><AdminAttemptResetPanel /></div>;
 }
