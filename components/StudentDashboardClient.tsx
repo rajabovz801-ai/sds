@@ -89,13 +89,8 @@ function MiniLine({ points, height = 190 }: { points: DashboardPoint[]; height?:
         </svg>
         <div className="dashPointLayer" aria-hidden="true">
           {coords.map((point, i) => point.y === null ? null : (
-            <span
-              key={i}
-              className="dashPointMarker"
-              style={{ left: `${(point.x / width) * 100}%`, top: `${(point.y / height) * 100}%` }}
-            >
-              <b>{point.value?.toFixed(1)}</b>
-              <i />
+            <span key={i} className="dashPointMarker" style={{ left: `${(point.x / width) * 100}%`, top: `${(point.y / height) * 100}%` }}>
+              <b>{point.value?.toFixed(1)}</b><i />
             </span>
           ))}
         </div>
@@ -169,6 +164,7 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
   const todayLabel = new Intl.DateTimeFormat('uz-UZ', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(clock);
   const timeLabel = new Intl.DateTimeFormat('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(clock);
   const recent = useMemo(() => data.recentResults, [data.recentResults]);
+  const totalPts = 0;
 
   return (
     <div className="studentDashboardShell">
@@ -180,8 +176,14 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
           <Link href="/cefr"><LayersIcon /><span>CEFR</span></Link>
           <Link href="/practice"><BookOpenIcon /><span>Practice</span><small>SOON</small></Link>
           <Link href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
+          <Link href="/daily-tasks"><CalendarCheckIcon /><span>Daily Tasks</span></Link>
           <Link href="/leaderboard"><AwardIcon /><span>Leaderboard</span></Link>
         </nav>
+        <Link className="studentSideDailySummary" href="/daily-tasks">
+          <span className="studentSideDailyIcon"><CalendarCheckIcon /></span>
+          <div><small>DAILY TASKS</small><strong>{totalPts} PTS</strong><em><FlameIcon /> {data.studyStreak} kun streak</em></div>
+          <b>→</b>
+        </Link>
         <div className="studentSideProfile"><span>{initials}</span><div><small>{previewMode ? 'ADMIN PREVIEW' : 'STUDENT'}</small><strong>{student.firstName} {student.lastName}</strong></div><button type="button" onClick={logout} disabled={previewMode || loggingOut} aria-label={previewMode ? 'Admin preview' : 'Chiqish'}><LogOutIcon /></button></div>
       </aside>
 
@@ -209,9 +211,13 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
           <article className="studentPanel studentDailyPanel"><header><div><h2>Daily Results</h2><p>Oxirgi 14 kundagi band natijalari</p></div><span>14 DAYS</span></header><MiniLine points={data.dailyResults} /></article>
           <div className="studentMidStack">
             <article className="studentPanel compact"><header><div><h2>Band Trend</h2><p>Oxirgi 8 hafta</p></div><span>{previewMode ? 'PREVIEW' : 'LIVE'}</span></header><SmallTrend points={data.bandTrend} /></article>
-            <article className="studentPanel compact comparison"><header><div><h2>Section Comparison</h2><p>So‘nggi natijalar</p></div></header>
-              <div className="compareRow"><span>Reading</span><div><i style={{ width: `${Math.min(100, ((data.readingAverage || 0) / 9) * 100)}%` }} /></div><b>{fmtBand(data.readingAverage)}</b></div>
-              <div className="compareRow listening"><span>Listening</span><div><i style={{ width: `${Math.min(100, ((data.listeningAverage || 0) / 9) * 100)}%` }} /></div><b>{fmtBand(data.listeningAverage)}</b></div>
+            <article className="studentPanel compact studentDailyTasksCard">
+              <header><div><h2>Daily Tasks</h2><p>Vazifalarni bajaring va PTS yig‘ing</p></div><span>DAILY</span></header>
+              <div className="studentDailyTaskStats">
+                <div className="pts"><span><ZapIcon /></span><small>YOUR PTS</small><strong>{totalPts}</strong><em>PTS</em></div>
+                <div className="streak"><span><FlameIcon /></span><small>STREAK</small><strong>{data.studyStreak}</strong><em>kun</em></div>
+              </div>
+              <Link className="studentDailyTasksCta" href="/daily-tasks">Daily Tasks’ga o‘tish <span>→</span></Link>
             </article>
           </div>
           <aside className="studentRightStack">
