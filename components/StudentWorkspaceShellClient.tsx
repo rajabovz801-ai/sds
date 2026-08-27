@@ -8,6 +8,7 @@ import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
   AwardIcon,
   BookOpenIcon,
+  CalendarCheckIcon,
   GlobeIcon,
   LayersIcon,
   LayoutGridIcon,
@@ -16,7 +17,7 @@ import {
 } from '@/components/UiIcons';
 import type { StudentSummary } from '@/lib/auth/server-session';
 
-type WorkspaceTrack = 'ielts' | 'cefr' | 'practice' | 'tools' | 'leaderboard';
+type WorkspaceTrack = 'ielts' | 'cefr' | 'practice' | 'tools' | 'daily-tasks' | 'leaderboard';
 
 type Props = {
   student: StudentSummary;
@@ -54,6 +55,7 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
           <Link className={active === 'cefr' ? 'active' : ''} href="/cefr"><LayersIcon /><span>CEFR</span></Link>
           <Link className={active === 'practice' ? 'active' : ''} href="/practice"><BookOpenIcon /><span>Practice</span><small>SOON</small></Link>
           <Link className={active === 'tools' ? 'active' : ''} href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
+          <Link className={active === 'daily-tasks' ? 'active' : ''} href="/daily-tasks"><CalendarCheckIcon /><span>Daily Tasks</span></Link>
           <Link className={active === 'leaderboard' ? 'active' : ''} href="/leaderboard"><AwardIcon /><span>Leaderboard</span></Link>
         </nav>
 
