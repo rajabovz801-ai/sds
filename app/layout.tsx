@@ -11,6 +11,7 @@ import './dashboard-artwork.css';
 import './dashboard-kpi-icons.css';
 import './dashboard-analytics-polish.css';
 import './student-workspace-shell.css';
+import './ielts-library-card-fix.css';
 
 export const metadata: Metadata = {
   title: 'ARK EDUCATION — IELTS Exam & Practice Platform',
