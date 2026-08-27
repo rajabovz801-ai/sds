@@ -38,7 +38,16 @@ export function SearchIcon(props: IconProps) { return <IconBase {...props}><circ
 export function HomeIcon(props: IconProps) { return <IconBase {...props}><path d="m3 11 9-8 9 8" /><path d="M5 10v10h14V10M9 20v-6h6v6" /></IconBase>; }
 export function HelpCircleIcon(props: IconProps) { return <IconBase {...props}><circle cx="12" cy="12" r="9" /><path d="M9.7 9a2.5 2.5 0 1 1 4.1 1.9c-.9.7-1.8 1.2-1.8 2.6M12 17h.01" /></IconBase>; }
 
-export function RocketIcon(props: IconProps) { return <IconBase {...props}><path d="M14.5 4.2c2.4-.9 4.4-.9 5.3-.7.2.9.2 2.9-.7 5.3-1.1 2.8-3.6 5.5-7 7.6l-4.5-4.5c2.1-3.4 4.8-5.9 6.9-7.7Z" /><path d="m9.2 14.8-4.1.7-1.6 4 4-.9.7-3.8M14.7 9.3h.01" /></IconBase>; }
+export function RocketIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M14.8 3.7c2.3-1 4.3-1.1 5.4-1 .1 1.1 0 3.1-1 5.4-1.2 2.8-3.5 5.7-6.8 8.1l-4.6-4.6c2.4-3.3 5.3-5.6 8-6.9Z" />
+      <circle cx="15.5" cy="7.5" r="1.6" />
+      <path d="m9.1 13.7-3.5.5-2.3 2.3 4.3.4M10.3 14.9l-.5 3.5-2.3 2.3-.4-4.3" />
+      <path d="M6.2 17.8 4.4 19.6M7.8 19.4l-1.3 1.3" />
+    </IconBase>
+  );
+}
 export function FlameIcon(props: IconProps) { return <IconBase {...props}><path d="M13.2 3.4c.8 3.1-1.7 4.2-1 6.2.5 1.4 2.2 1.6 2.8 3.1.8-1.3 1.3-2.8.9-4.7 2.7 2.1 4.1 4.6 3.4 7.4-.8 3.3-3.8 5.6-7.4 5.6-4.1 0-7.4-3-7.4-6.9 0-3.4 2-5.8 4.7-8.1-.1 2.5.7 3.6 1.7 4.2.1-2.6 1.1-4.7 2.3-6.8Z" /></IconBase>; }
 export function TargetIcon(props: IconProps) { return <IconBase {...props}><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="4" /><path d="M12 2v3M22 12h-3M12 22v-3M2 12h3" /></IconBase>; }
 export function AwardIcon(props: IconProps) { return <IconBase {...props}><circle cx="12" cy="9" r="5" /><path d="m9 13.2-1 8 4-2.2 4 2.2-1-8" /><path d="m10.3 9 1.1 1.1 2.3-2.3" /></IconBase>; }
