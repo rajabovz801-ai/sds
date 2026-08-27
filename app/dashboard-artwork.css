@@ -64,8 +64,12 @@
   background:linear-gradient(145deg,#fff 0%,#faf9f6 100%);
 }
 .studentDashboardShell .achievementGrid article.locked img{
-  opacity:.50;
-  filter:grayscale(.16) saturate(.72) contrast(1.03) drop-shadow(0 11px 13px rgba(16,35,63,.14));
+  opacity:.56;
+  filter:grayscale(.12) saturate(.78) contrast(1.06) drop-shadow(0 11px 13px rgba(16,35,63,.14));
+}
+.studentDashboardShell .achievementGrid article.locked img[src$="/accuracy-ace.png"]{
+  opacity:.78;
+  filter:grayscale(.04) saturate(.96) contrast(1.12) drop-shadow(0 12px 14px rgba(16,35,63,.16));
 }
 .studentDashboardShell .achievementGrid article.locked>div{
   opacity:.72;
