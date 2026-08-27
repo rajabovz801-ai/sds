@@ -1,0 +1,249 @@
+/* Daily Tasks page only — compact real-data gamification UI. */
+.studentWorkspaceShell .dailyTasksPage{
+  padding:24px 28px 46px;
+}
+.studentWorkspaceShell .dailyTasksHero{
+  padding:24px 28px;
+  border-radius:24px;
+}
+.studentWorkspaceShell .dailyTasksHero h1{
+  margin:8px 0 7px;
+  font-size:clamp(34px,3vw,46px);
+  line-height:1;
+}
+.studentWorkspaceShell .dailyTasksHero p{
+  max-width:820px;
+  font-size:12px;
+  line-height:1.55;
+}
+.studentWorkspaceShell .dailyTasksEyebrow svg{
+  width:16px!important;
+  height:16px!important;
+  flex:0 0 16px;
+}
+
+.studentWorkspaceShell .dailyTasksOverview{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-top:14px;
+}
+.studentWorkspaceShell .dailyTasksStat{
+  min-height:112px;
+  padding:17px 18px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  background:linear-gradient(145deg,#fff 0%,#fffdfa 100%);
+  box-shadow:0 10px 28px rgba(35,44,58,.035);
+}
+.studentWorkspaceShell .dailyTasksStat>.dailyTasksStatIcon{
+  width:48px;
+  height:48px;
+  min-width:48px;
+  margin:0;
+  border-radius:15px;
+  display:grid;
+  place-items:center;
+}
+.studentWorkspaceShell .dailyTasksStat>.dailyTasksStatIcon svg{
+  width:23px!important;
+  height:23px!important;
+}
+.studentWorkspaceShell .dailyTasksStatPts>.dailyTasksStatIcon{
+  color:#d98700;
+  background:#fff0d7;
+}
+.studentWorkspaceShell .dailyTasksStatStreak>.dailyTasksStatIcon{
+  color:#ff6656;
+  background:#fff0ec;
+}
+.studentWorkspaceShell .dailyTasksStatDone>.dailyTasksStatIcon{
+  color:#168a67;
+  background:#e9f7f1;
+}
+.studentWorkspaceShell .dailyTasksStat>div{min-width:0}
+.studentWorkspaceShell .dailyTasksStat small{
+  font-size:8px;
+  line-height:1.2;
+}
+.studentWorkspaceShell .dailyTasksStat strong{
+  margin-top:5px;
+  font-size:27px;
+  line-height:1;
+  white-space:nowrap;
+}
+.studentWorkspaceShell .dailyTasksStat p{
+  margin:7px 0 0;
+  color:#8490a0;
+  font-size:9px;
+  line-height:1.3;
+}
+
+.studentWorkspaceShell .dailyTasksFeed{
+  margin-top:14px;
+  padding:0 0 14px;
+  overflow:hidden;
+  border:1px solid rgba(21,50,83,.09);
+  border-radius:22px;
+  background:#fffdf9;
+  box-shadow:0 14px 34px rgba(35,44,58,.04);
+}
+.studentWorkspaceShell .dailyTasksFeed>header{
+  min-height:78px;
+  padding:17px 20px 14px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  border-bottom:1px solid rgba(16,35,63,.06);
+}
+.studentWorkspaceShell .dailyTasksFeed>header small{
+  display:block;
+  color:#ff685b;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.studentWorkspaceShell .dailyTasksFeed>header h2{
+  margin:5px 0 0;
+  color:#10294d;
+  font-size:21px;
+  letter-spacing:-.025em;
+}
+.studentWorkspaceShell .dailyTasksFeed>header>span{
+  padding:7px 10px;
+  border:1px solid rgba(16,35,63,.08);
+  border-radius:999px;
+  color:#788596;
+  background:#fff;
+  font-size:8px;
+  font-weight:850;
+}
+.studentWorkspaceShell .dailyTasksList{
+  padding:10px 12px 0;
+  display:grid;
+  gap:9px;
+}
+.studentWorkspaceShell .dailyTaskRow{
+  min-height:82px;
+  padding:11px 12px;
+  display:grid;
+  grid-template-columns:46px minmax(0,1fr) 108px 108px;
+  align-items:center;
+  gap:12px;
+  border:1px solid rgba(16,35,63,.075);
+  border-radius:16px;
+  background:#fff;
+  transition:.18s ease;
+}
+.studentWorkspaceShell .dailyTaskRow:hover{
+  transform:translateY(-1px);
+  border-color:rgba(255,107,88,.19);
+  box-shadow:0 10px 22px rgba(44,53,68,.045);
+}
+.studentWorkspaceShell .dailyTaskRow.completed{
+  background:linear-gradient(90deg,#fbfffd 0%,#fff 100%);
+  border-color:rgba(25,150,105,.16);
+}
+.studentWorkspaceShell .dailyTaskRowIcon{
+  width:46px;
+  height:46px;
+  margin:0;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  color:#315d83;
+  background:#edf3f8;
+}
+.studentWorkspaceShell .dailyTaskRow.completed .dailyTaskRowIcon{
+  color:#148562;
+  background:#e9f7f1;
+}
+.studentWorkspaceShell .dailyTaskRowIcon svg{
+  width:21px!important;
+  height:21px!important;
+}
+.studentWorkspaceShell .dailyTaskRowCopy{min-width:0}
+.studentWorkspaceShell .dailyTaskRowCopy small{
+  display:block;
+  color:#8c97a5;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.studentWorkspaceShell .dailyTaskRowCopy strong{
+  display:block;
+  margin-top:4px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#10294d;
+  font-size:12px;
+  line-height:1.25;
+}
+.studentWorkspaceShell .dailyTaskRowCopy span{
+  display:block;
+  margin-top:4px;
+  color:#84909f;
+  font-size:8.5px;
+}
+.studentWorkspaceShell .dailyTaskReward{
+  text-align:right;
+}
+.studentWorkspaceShell .dailyTaskReward small{
+  display:block;
+  color:#98a0aa;
+  font-size:6.5px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.studentWorkspaceShell .dailyTaskReward strong{
+  display:block;
+  margin-top:4px;
+  color:#ff6655;
+  font-size:12px;
+}
+.studentWorkspaceShell .dailyTaskRow.completed .dailyTaskReward strong{color:#169166}
+.studentWorkspaceShell .dailyTaskRow>a{
+  min-height:40px;
+  padding:0 12px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  color:#fff;
+  background:#123866;
+  font-size:8.5px;
+  font-weight:850;
+}
+.studentWorkspaceShell .dailyTaskRow.completed>a{
+  color:#1a6f5a;
+  background:#edf8f4;
+}
+.studentWorkspaceShell .dailyTaskRow>a svg{
+  width:15px!important;
+  height:15px!important;
+  flex:0 0 15px;
+}
+.studentWorkspaceShell .dailyTasksFeed .dailyTasksEmpty{
+  margin:12px;
+}
+
+@media(max-width:1100px){
+  .studentWorkspaceShell .dailyTasksOverview{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .studentWorkspaceShell .dailyTasksStatDone{grid-column:1/-1}
+  .studentWorkspaceShell .dailyTaskRow{grid-template-columns:44px minmax(0,1fr) 96px 96px}
+}
+@media(max-width:760px){
+  .studentWorkspaceShell .dailyTasksPage{padding:16px 14px 34px}
+  .studentWorkspaceShell .dailyTasksHero{padding:21px 20px}
+  .studentWorkspaceShell .dailyTasksOverview{grid-template-columns:1fr}
+  .studentWorkspaceShell .dailyTasksStatDone{grid-column:auto}
+  .studentWorkspaceShell .dailyTaskRow{
+    grid-template-columns:42px minmax(0,1fr) 92px;
+  }
+  .studentWorkspaceShell .dailyTaskReward{display:none}
+  .studentWorkspaceShell .dailyTaskRow>a{grid-column:2/4;width:100%;margin-top:2px}
+}
