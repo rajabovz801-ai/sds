@@ -306,3 +306,6 @@
   .studentDashboardShell .achievementIconBox svg{width:26px;height:26px}
   .studentDashboardShell .studentSideMotivationIcon{width:46px;height:46px;right:12px;top:14px}
 }
+
+/* Keep the student account card anchored at the very bottom of the desktop sidebar. */
+.studentDashboardShell .studentSideProfile{margin-top:auto}
