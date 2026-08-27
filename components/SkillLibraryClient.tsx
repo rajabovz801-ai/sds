@@ -6,7 +6,6 @@ import {
   ClockIcon,
   FileTextIcon,
   HeadphonesIcon,
-  HelpCircleIcon,
   HomeIcon,
   LibraryIcon,
   MicIcon,
@@ -22,12 +21,6 @@ const skillIcons = {
   speaking: MicIcon,
   'full-mock': LibraryIcon,
 };
-
-function materialLabel(skill: TestSkill) {
-  if (skill === 'writing') return 'Topshiriqlar: 2';
-  if (skill === 'reading' || skill === 'listening') return 'Savollar: 40';
-  return 'Professional practice';
-}
 
 export function SkillLibraryClient({
   track,
@@ -85,10 +78,6 @@ export function SkillLibraryClient({
                 <div className="testLibraryCopy">
                   <span>{test.track.toUpperCase()} · {test.skill.toUpperCase()}</span>
                   <h3>{test.title}</h3>
-                </div>
-                <div className="sidebarTestMeta">
-                  <span><ClockIcon /> Vaqt chegarasi: {test.durationMinutes} min</span>
-                  <span><HelpCircleIcon /> {materialLabel(skill)}</span>
                 </div>
                 <Link href={`/test/${test.id}`} className="sidebarTestOpen" prefetch>
                   <strong>Boshlash</strong><ArrowRightIcon />
