@@ -103,17 +103,29 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (existing.status === 'in_progress' && new Date(existing.expires_at).getTime() > Date.now()) {
         return sessionResponse(existing as SessionRow, true, durationSeconds);
       }
+
       if (existing.status === 'in_progress') {
-        await supabase
+        const { error: expireError } = await supabase
           .from('test_sessions')
           .update({ status: 'expired', updated_at: new Date().toISOString() })
           .eq('id', existing.id)
           .eq('status', 'in_progress');
+        if (expireError) throw expireError;
       }
-      return NextResponse.json({
-        error: existing.status === 'completed' ? 'Bu testni allaqachon ishlagansiz.' : 'Bu test uchun ajratilgan vaqt tugagan.',
-        code: 'ATTEMPT_USED',
-      }, { status: 409 });
+
+      if (mode === 'mock') {
+        return NextResponse.json({
+          error: existing.status === 'completed' ? 'Bu mock bo‘limini allaqachon ishlagansiz.' : 'Bu mock bo‘limi uchun ajratilgan vaqt tugagan.',
+          code: 'ATTEMPT_USED',
+        }, { status: 409 });
+      }
+
+      const { error: archiveError } = await supabase
+        .from('test_sessions')
+        .update({ superseded: true, updated_at: new Date().toISOString() })
+        .eq('id', existing.id)
+        .eq('superseded', false);
+      if (archiveError) throw archiveError;
     }
 
     const startedAt = new Date();
@@ -135,8 +147,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .single();
 
     if (createError) {
+      if ((createError as { code?: string }).code === '23505' && mode === 'practice') {
+        const { data: current, error: currentError } = await supabase
+          .from('test_sessions')
+          .select('id,status,started_at,expires_at,locked_until')
+          .eq('student_id', student.studentId)
+          .eq('test_id', testId)
+          .eq('superseded', false)
+          .eq('status', 'in_progress')
+          .maybeSingle();
+        if (currentError) throw currentError;
+        if (current && new Date(current.expires_at).getTime() > Date.now()) {
+          return sessionResponse(current as SessionRow, true, durationSeconds);
+        }
+      }
       if ((createError as { code?: string }).code === '23505') {
-        return NextResponse.json({ error: 'Bu test uchun urinish allaqachon yaratilgan.', code: 'ATTEMPT_USED' }, { status: 409 });
+        return NextResponse.json({ error: 'Bu test uchun faol urinish allaqachon mavjud.', code: 'ATTEMPT_ACTIVE' }, { status: 409 });
       }
       throw createError;
     }
