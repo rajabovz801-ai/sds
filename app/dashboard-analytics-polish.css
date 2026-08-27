@@ -1,0 +1,248 @@
+/* ARK Dashboard analytics section — focused layout polish only. */
+
+/* Keep this section balanced and make every panel use its full height. */
+.studentDashboardShell .studentDashboardGrid{
+  gap:14px;
+  align-items:stretch;
+}
+.studentDashboardShell .studentDashboardGrid>.studentPanel,
+.studentDashboardShell .studentDashboardGrid .studentPanel,
+.studentDashboardShell .studentDashboardGrid .studentProgressSummary{
+  box-shadow:0 14px 34px rgba(44,53,68,.055);
+}
+
+/* Daily Results — eliminate the empty lower half by letting the chart fill the card. */
+.studentDashboardShell .studentDailyPanel{
+  display:flex;
+  flex-direction:column;
+  min-height:470px;
+  background:linear-gradient(180deg,#fffdf9 0%,#fff 100%);
+}
+.studentDashboardShell .studentDailyPanel>header{
+  flex:0 0 auto;
+  padding:18px 20px 12px;
+  border-bottom:1px solid rgba(16,35,63,.045);
+}
+.studentDashboardShell .studentDailyPanel .dashChartWrap{
+  flex:1;
+  min-height:0;
+  padding:10px 20px 18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:stretch;
+}
+.studentDashboardShell .studentDailyPanel .dashLineChart{
+  flex:1;
+  width:100%;
+  height:auto!important;
+  min-height:300px;
+  max-height:none;
+}
+.studentDashboardShell .studentDailyPanel .dashChartLabels{
+  margin-top:10px;
+  padding:0 2px;
+  font-size:9px!important;
+  font-weight:700;
+  color:#7c8796;
+}
+.studentDashboardShell .studentDailyPanel .dashGridLine{
+  stroke:#e7ebf0;
+  stroke-width:1;
+}
+.studentDashboardShell .studentDailyPanel .dashLine{
+  stroke-width:3.4;
+  filter:drop-shadow(0 3px 5px rgba(91,60,241,.14));
+}
+.studentDashboardShell .studentDailyPanel .dashDot{
+  r:5.5;
+  stroke-width:3;
+  filter:drop-shadow(0 3px 4px rgba(91,60,241,.16));
+}
+.studentDashboardShell .studentDailyPanel .dashDotLabel{
+  font-size:13px!important;
+  font-weight:900;
+}
+
+/* Middle stack — Band Trend and Section Comparison should feel intentional, not empty. */
+.studentDashboardShell .studentMidStack,
+.studentDashboardShell .studentRightStack{
+  gap:14px;
+  grid-template-rows:minmax(0,1fr) minmax(0,1fr);
+}
+.studentDashboardShell .studentPanel.compact{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  background:linear-gradient(180deg,#fffdf9 0%,#fff 100%);
+}
+.studentDashboardShell .studentPanel.compact>header{
+  flex:0 0 auto;
+  padding:18px 18px 10px;
+  border-bottom:1px solid rgba(16,35,63,.045);
+}
+.studentDashboardShell .studentPanel.compact .dashChartWrap{
+  flex:1;
+  min-height:0;
+  padding:8px 16px 16px;
+  display:flex;
+  flex-direction:column;
+}
+.studentDashboardShell .studentPanel.compact .dashLineChart{
+  flex:1;
+  width:100%;
+  height:auto!important;
+  min-height:145px;
+  max-height:none;
+}
+.studentDashboardShell .studentPanel.compact .dashChartLabels{
+  margin-top:8px;
+  font-size:8.5px!important;
+  font-weight:700;
+  color:#7d8897;
+}
+.studentDashboardShell .studentPanel.compact .dashLine{
+  stroke-width:3.1;
+  filter:drop-shadow(0 2px 4px rgba(91,60,241,.12));
+}
+.studentDashboardShell .studentPanel.compact .dashDot{
+  r:4.6;
+}
+.studentDashboardShell .studentPanel.compact .dashDotLabel{
+  font-size:11px!important;
+}
+
+/* Section comparison — more legible labels, stronger bars, cleaner spacing. */
+.studentDashboardShell .comparison{
+  padding-bottom:16px;
+}
+.studentDashboardShell .comparison .compareRow{
+  grid-template-columns:82px minmax(0,1fr) 42px;
+  gap:12px;
+  min-height:58px;
+  padding:12px 18px;
+  font-size:11px;
+  font-weight:800;
+}
+.studentDashboardShell .comparison .compareRow+ .compareRow{
+  border-top:1px solid rgba(16,35,63,.045);
+}
+.studentDashboardShell .comparison .compareRow>div{
+  height:10px;
+  background:#edf1f5;
+  box-shadow:inset 0 1px 2px rgba(16,35,63,.035);
+}
+.studentDashboardShell .comparison .compareRow i{
+  min-width:4px;
+  box-shadow:0 2px 7px rgba(63,116,223,.16);
+}
+.studentDashboardShell .comparison .compareRow.listening i{
+  box-shadow:0 2px 7px rgba(34,173,118,.16);
+}
+.studentDashboardShell .comparison .compareRow b{
+  font-size:12px;
+  font-weight:900;
+  color:#10233f;
+}
+
+/* Progress card — same footprint, stronger hierarchy and no awkward dead space. */
+.studentDashboardShell .studentProgressSummary{
+  min-height:0;
+  height:100%;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  background:linear-gradient(150deg,#173a6f 0%,#102e5d 55%,#0f274f 100%);
+}
+.studentDashboardShell .studentProgressSummary>p{
+  margin:12px 0 14px;
+}
+.studentDashboardShell .studentProgressSummary .summaryStats{
+  margin-top:auto;
+}
+.studentDashboardShell .studentProgressSummary>a{
+  margin-top:14px;
+  min-height:44px;
+  box-shadow:0 8px 18px rgba(104,66,232,.22);
+}
+
+/* Recent results — use compact result cards instead of loose rows. */
+.studentDashboardShell .recentPanel{
+  min-height:0;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  background:linear-gradient(180deg,#fffdf9 0%,#fff 100%);
+}
+.studentDashboardShell .recentPanel>header{
+  flex:0 0 auto;
+  padding:18px 18px 10px;
+  border-bottom:1px solid rgba(16,35,63,.045);
+}
+.studentDashboardShell .recentPanel .recentList{
+  flex:1;
+  padding:12px 14px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+.studentDashboardShell .recentPanel .recentRow{
+  min-height:58px;
+  padding:10px 11px;
+  border:1px solid #edf0f3;
+  border-radius:13px;
+  background:#fff;
+  box-shadow:0 6px 14px rgba(30,45,65,.025);
+}
+.studentDashboardShell .recentPanel .recentRow:first-child{
+  border-top:1px solid #edf0f3;
+}
+.studentDashboardShell .recentPanel .recentRow strong{
+  max-width:185px;
+  font-size:10.5px;
+  font-weight:850;
+}
+.studentDashboardShell .recentPanel .recentRow span{
+  margin-top:4px;
+  font-size:8.5px;
+}
+.studentDashboardShell .recentPanel .recentRow>b{
+  min-width:42px;
+  text-align:center;
+  padding:7px 9px;
+  border-radius:10px;
+  font-size:11px;
+  box-shadow:inset 0 0 0 1px rgba(101,69,222,.035);
+}
+
+/* Consistent premium radius/border just for this analytics block. */
+.studentDashboardShell .studentDashboardGrid .studentPanel,
+.studentDashboardShell .studentDashboardGrid .studentProgressSummary{
+  border-radius:22px;
+}
+
+@media(max-width:1280px){
+  .studentDashboardShell .studentDailyPanel{min-height:430px}
+  .studentDashboardShell .studentMidStack{grid-template-rows:minmax(220px,1fr) minmax(220px,1fr)}
+  .studentDashboardShell .studentRightStack{grid-template-rows:auto!important}
+  .studentDashboardShell .studentPanel.compact .dashLineChart{min-height:160px}
+}
+
+@media(max-width:940px){
+  .studentDashboardShell .studentDashboardGrid{gap:12px}
+  .studentDashboardShell .studentDailyPanel{min-height:400px}
+  .studentDashboardShell .studentDailyPanel .dashLineChart{min-height:270px}
+  .studentDashboardShell .studentMidStack,
+  .studentDashboardShell .studentRightStack{gap:12px}
+  .studentDashboardShell .studentMidStack{grid-template-rows:auto}
+  .studentDashboardShell .studentPanel.compact{min-height:250px}
+  .studentDashboardShell .studentPanel.compact .dashLineChart{min-height:155px}
+}
+
+@media(max-width:620px){
+  .studentDashboardShell .studentDailyPanel{min-height:360px}
+  .studentDashboardShell .studentDailyPanel .dashChartWrap{padding:8px 12px 14px}
+  .studentDashboardShell .studentDailyPanel .dashLineChart{min-height:235px}
+  .studentDashboardShell .studentDailyPanel .dashChartLabels{font-size:7.5px!important}
+  .studentDashboardShell .comparison .compareRow{grid-template-columns:72px minmax(0,1fr) 36px;padding:10px 14px}
+  .studentDashboardShell .recentPanel .recentRow strong{max-width:150px}
+}
