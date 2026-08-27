@@ -62,7 +62,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const [{ data: test, error: testError }, { data: exam, error: examError }] = await Promise.all([
       supabase
         .from('tests')
-        .select('id,title,track,skill,status,daily_task_enabled,daily_task_points')
+        .select('id,title,track,skill,status,daily_task_enabled,daily_task_points,daily_task_started_at,daily_task_expires_at')
         .eq('id', id)
         .maybeSingle(),
       supabase
@@ -145,7 +145,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       newlyCompleted = true;
     }
 
-    if (newlyCompleted && test.daily_task_enabled) {
+    const taskStartedAt = test.daily_task_started_at ? new Date(test.daily_task_started_at).getTime() : 0;
+    const taskExpiresAt = test.daily_task_expires_at ? new Date(test.daily_task_expires_at).getTime() : 0;
+    const submittedAtMs = new Date(serverSubmittedAt).getTime();
+    const rewardWindowOpen = Boolean(
+      test.daily_task_enabled
+      && taskStartedAt > 0
+      && taskExpiresAt > submittedAtMs
+      && submittedAtMs >= taskStartedAt,
+    );
+
+    if (newlyCompleted && rewardWindowOpen) {
       const accuracy = Math.max(0, Math.min(100, (rawScore / maxScore) * 100));
       const basePoints = Math.max(0, Math.min(100, Number(test.daily_task_points) || 20));
       const bonus = accuracy >= 99.999 ? 10 : accuracy >= 90 ? 5 : 0;
