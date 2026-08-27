@@ -1,0 +1,50 @@
+/* KPI icon fallback — keeps Overall Band and Tests Completed aligned with Reading, Listening and Study Hours. */
+.studentDashboardShell .studentMetricIcon.overall img,
+.studentDashboardShell .studentMetricIcon.tests img{display:none!important}
+
+.studentDashboardShell .studentMetricIcon.overall,
+.studentDashboardShell .studentMetricIcon.tests{
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+}
+
+.studentDashboardShell .studentMetricIcon.overall{
+  background:#f0eaff!important;
+  color:#6946e7!important;
+}
+
+.studentDashboardShell .studentMetricIcon.tests{
+  background:#fff2df!important;
+  color:#d58a18!important;
+}
+
+.studentDashboardShell .studentMetricIcon.overall::before,
+.studentDashboardShell .studentMetricIcon.tests::before{
+  content:"";
+  width:29px;
+  height:29px;
+  display:block;
+  background:currentColor;
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  mask-position:center;
+  -webkit-mask-size:contain;
+  mask-size:contain;
+}
+
+.studentDashboardShell .studentMetricIcon.overall::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4h10v4a5 5 0 0 1-10 0V4Zm0 2H4v1a5 5 0 0 0 5 5m8-6h3v1a5 5 0 0 1-5 5M12 13v4m-4 3h8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4h10v4a5 5 0 0 1-10 0V4Zm0 2H4v1a5 5 0 0 0 5 5m8-6h3v1a5 5 0 0 1-5 5M12 13v4m-4 3h8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.studentDashboardShell .studentMetricIcon.tests::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='m8 12 2.5 2.5L16 9' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='m8 12 2.5 2.5L16 9' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+@media(max-width:620px){
+  .studentDashboardShell .studentMetricIcon.overall::before,
+  .studentDashboardShell .studentMetricIcon.tests::before{width:27px;height:27px}
+}
