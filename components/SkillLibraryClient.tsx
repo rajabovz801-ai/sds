@@ -85,7 +85,6 @@ export function SkillLibraryClient({
                 <div className="testLibraryCopy">
                   <span>{test.track.toUpperCase()} · {test.skill.toUpperCase()}</span>
                   <h3>{test.title}</h3>
-                  <p>{test.description || 'Haqiqiy egzamen uslubidagi professional mock test.'}</p>
                 </div>
                 <div className="sidebarTestMeta">
                   <span><ClockIcon /> Vaqt chegarasi: {test.durationMinutes} min</span>
