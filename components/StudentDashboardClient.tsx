@@ -118,7 +118,7 @@ type StudentDashboardClientProps = {
   onExitPreview?: () => void;
 };
 
-export function StudentDashboardClient({ student, initialData, previewMode = false, onExitPreview }: StudentDashboardClientProps) {
+export function StudentDashboardClient({ student, initialData: initialData, previewMode = false, onExitPreview }: StudentDashboardClientProps) {
   const [data, setData] = useState(initialData);
   const [clock, setClock] = useState(new Date());
   const [live, setLive] = useState(true);
@@ -180,6 +180,7 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
           <Link href="/cefr"><LayersIcon /><span>CEFR</span></Link>
           <Link href="/practice"><BookOpenIcon /><span>Practice</span><small>SOON</small></Link>
           <Link href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
+          <Link href="/leaderboard"><AwardIcon /><span>Leaderboard</span></Link>
         </nav>
         <div className="studentSideProfile"><span>{initials}</span><div><small>{previewMode ? 'ADMIN PREVIEW' : 'STUDENT'}</small><strong>{student.firstName} {student.lastName}</strong></div><button type="button" onClick={logout} disabled={previewMode || loggingOut} aria-label={previewMode ? 'Admin preview' : 'Chiqish'}><LogOutIcon /></button></div>
       </aside>
