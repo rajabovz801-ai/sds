@@ -192,13 +192,13 @@ export function AdminMenuPreview() {
           </nav>
 
           <div className="platformActions">
+            <button className="adminBackToPanel" type="button" onClick={() => setOpen(false)} aria-label="Admin panelga qaytish" title="Admin panelga qaytish">
+              <LogOutIcon /><span>Admin panelga qaytish</span>
+            </button>
             <div className="profileChip" title="Admin preview">
               <span className="profileAvatar">AR</span>
               <span className="profileLabel"><small>Admin</small><strong>Student menu preview</strong></span>
             </div>
-            <button className="platformLogout" type="button" onClick={() => setOpen(false)} aria-label="Admin panelga qaytish" title="Admin panelga qaytish">
-              <LogOutIcon />
-            </button>
           </div>
         </header>
       </div>
@@ -221,6 +221,9 @@ export function AdminMenuPreview() {
         .adminStudentMenuPortal{position:fixed;z-index:10000;inset:0;overflow:auto}
         .adminMainMenuButton{height:39px;padding:0 12px;border:1px solid rgba(255,255,255,.11);border-radius:12px;background:rgba(255,255,255,.06);color:#dae3ed;display:flex;align-items:center;gap:7px;font:800 8px/1 "Avenir Next","Segoe UI Variable","SF Pro Display","Helvetica Neue",Arial,sans-serif;cursor:pointer}
         .adminMainMenuButton svg{width:15px!important;height:15px!important}.adminMainMenuButton:hover{background:rgba(255,255,255,.11)}
+        .adminBackToPanel{height:44px;padding:0 14px;border:1px solid rgba(16,35,63,.12);border-radius:13px;background:#10233f;color:#fff;display:flex;align-items:center;gap:8px;font:800 9px/1 "Avenir Next","Segoe UI Variable","SF Pro Display","Helvetica Neue",Arial,sans-serif;white-space:nowrap;cursor:pointer;box-shadow:0 10px 22px rgba(16,35,63,.12);transition:.18s ease}
+        .adminBackToPanel svg{width:15px!important;height:15px!important}.adminBackToPanel:hover{background:#193858;transform:translateY(-1px)}
+        @media(max-width:780px){.adminBackToPanel{width:42px;height:42px;padding:11px}.adminBackToPanel span{display:none}}
       `}</style>
     </div>,
     bodyHost,
