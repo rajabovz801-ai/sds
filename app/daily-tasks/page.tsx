@@ -13,7 +13,7 @@ import {
 } from '@/components/UiIcons';
 import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
 import { requireStudent } from '@/lib/auth/server-session';
-import { listPublishedTests, type CloudTest } from '@/lib/cloudTests';
+import { listDailyTasks, type CloudTest } from '@/lib/cloudTests';
 import { getGamificationSummary } from '@/lib/gamification';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +29,7 @@ function taskIcon(test: CloudTest) {
 export default async function DailyTasksPage() {
   const student = await requireStudent('/daily-tasks');
   const [tests, summary] = await Promise.all([
-    listPublishedTests(),
+    listDailyTasks(),
     getGamificationSummary(student.id),
   ]);
   const completedIds = new Set(summary.completedTestIds);
@@ -40,7 +40,7 @@ export default async function DailyTasksPage() {
         <section className="dailyTasksHero">
           <div className="dailyTasksEyebrow"><CalendarCheckIcon /> DAILY TASKS</div>
           <h1>Kunlik vazifalar</h1>
-          <p>IELTS, CEFR, Practice va Study Tools’dagi faol vazifalar shu yerda avtomatik bitta oqimda ko‘rinadi.</p>
+          <p>Admin tanlagan kunlik vazifalar shu yerda chiqadi. Har bir vazifa PTS va streak tizimiga ulanadi.</p>
         </section>
 
         <section className="dailyTasksOverview">
@@ -50,17 +50,17 @@ export default async function DailyTasksPage() {
           </article>
           <article className="dailyTasksStat dailyTasksStatStreak">
             <span className="dailyTasksStatIcon"><FlameIcon /></span>
-            <div><small>STREAK</small><strong>{summary.streakDays} kun</strong><p>Ketma-ket faol kunlar</p></div>
+            <div><small>STREAK</small><strong>{summary.streakDays} kun</strong><p>Ketma-ket daily task kunlari</p></div>
           </article>
           <article className="dailyTasksStat dailyTasksStatDone">
             <span className="dailyTasksStatIcon"><CheckCircleIcon /></span>
-            <div><small>COMPLETED</small><strong>{summary.completedTasks}</strong><p>PTS bergan testlar</p></div>
+            <div><small>COMPLETED</small><strong>{summary.completedTasks}</strong><p>PTS olingan vazifalar</p></div>
           </article>
         </section>
 
         <section className="dailyTasksFeed">
           <header>
-            <div><small>AUTOMATIC FEED</small><h2>Faol vazifalar</h2></div>
+            <div><small>ADMIN SELECTED</small><h2>Faol vazifalar</h2></div>
             <span>{tests.length} ta vazifa</span>
           </header>
 
@@ -78,7 +78,7 @@ export default async function DailyTasksPage() {
                     </div>
                     <div className="dailyTaskReward">
                       <small>{completed ? 'EARNED' : 'REWARD'}</small>
-                      <strong>{completed ? '✓' : '+20–30 PTS'}</strong>
+                      <strong>{completed ? '✓' : `+${test.dailyTaskPoints} PTS`}</strong>
                     </div>
                     <Link href={`/test/${test.id}`} aria-label={`${test.title} testini ochish`}>
                       <span>{completed ? 'Ko‘rish' : 'Boshlash'}</span><ArrowRightIcon />
@@ -89,8 +89,8 @@ export default async function DailyTasksPage() {
             </div>
           ) : (
             <div className="dailyTasksEmpty">
-              <strong>Hozircha faol vazifa yo‘q</strong>
-              <p>Admin testni publish qilishi bilan u shu sahifada avtomatik paydo bo‘ladi.</p>
+              <strong>Hozircha daily task belgilanmagan</strong>
+              <p>Admin paneldan kerakli test Daily Task sifatida yoqilganda shu yerda chiqadi.</p>
             </div>
           )}
         </section>
