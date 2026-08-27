@@ -16,20 +16,13 @@ type BridgeContext = {
 
 function injectBridge(html: string, context: BridgeContext) {
   const payload = JSON.stringify(context).replace(/</g, '\\u003c');
-  const showHud = context.skill !== 'listening';
-  const hudMarkup = showHud
-    ? `<div id="ark-secure-hud" aria-live="polite"><small>${context.preview ? 'ADMIN PREVIEW' : 'TIME LEFT'}</small><strong id="ark-secure-time">--:--</strong></div>`
-    : '';
+  const hudMarkup = '';
   const script = `
 <style id="ark-secure-style">
 html{font-size:16px!important}
 body{font-size:16px}
 .qtext,.opt,.idea-line,.headings-list,.completion-text,.left p,.right p,.right li,input,select,textarea{font-size:16px!important;line-height:1.55}
-#ark-secure-hud{position:fixed;z-index:2147483600;right:14px;top:12px;height:42px;padding:0 13px;border:1px solid rgba(255,255,255,.16);border-radius:13px;background:rgba(13,29,50,.94);box-shadow:0 12px 30px rgba(0,0,0,.18);color:#fff;display:flex;align-items:center;gap:10px;font:800 13px/1 Arial,sans-serif;letter-spacing:.02em;backdrop-filter:blur(14px)}
-#ark-secure-hud:before{content:"";width:8px;height:8px;border-radius:50%;background:#66d5a3;box-shadow:0 0 0 4px rgba(102,213,163,.13)}
-#ark-secure-hud strong{font-variant-numeric:tabular-nums;font-size:15px}
-#ark-secure-hud small{color:#9fb0c3;font-size:9px;letter-spacing:.08em}
-#ark-secure-hud.ark-time-low:before{background:#ff6b58;box-shadow:0 0 0 4px rgba(255,107,88,.15)}
+#ark-secure-hud{display:none!important}
 #deliveryStatus,.delivery-status,#restartBtn,.restart,[data-ark-delivery-success]{display:none!important}
 </style>
 ${hudMarkup}
