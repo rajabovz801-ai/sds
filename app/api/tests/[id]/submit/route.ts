@@ -62,7 +62,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const [{ data: test, error: testError }, { data: exam, error: examError }] = await Promise.all([
       supabase
         .from('tests')
-        .select('id,title,track,skill,status')
+        .select('id,title,track,skill,status,daily_task_enabled,daily_task_points')
         .eq('id', id)
         .maybeSingle(),
       supabase
@@ -116,6 +116,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       savedAt: serverSubmittedAt,
     };
 
+    let newlyCompleted = false;
     if (exam.status === 'in_progress') {
       const { data: completed, error: completeError } = await supabase
         .from('test_sessions')
@@ -141,6 +142,24 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         .maybeSingle();
       if (completeError) throw completeError;
       if (!completed) return NextResponse.json({ ok: true, duplicate: true, saved: true });
+      newlyCompleted = true;
+    }
+
+    if (newlyCompleted && test.daily_task_enabled) {
+      const accuracy = Math.max(0, Math.min(100, (rawScore / maxScore) * 100));
+      const basePoints = Math.max(0, Math.min(100, Number(test.daily_task_points) || 20));
+      const bonus = accuracy >= 99.999 ? 10 : accuracy >= 90 ? 5 : 0;
+      const { error: rewardError } = await supabase
+        .from('daily_task_completions')
+        .upsert({
+          student_id: student.studentId,
+          test_id: id,
+          session_id: exam.id,
+          points_awarded: basePoints + bonus,
+          accuracy: Math.round(accuracy * 100) / 100,
+          completed_at: serverSubmittedAt,
+        }, { onConflict: 'student_id,test_id', ignoreDuplicates: true });
+      if (rewardError) console.error('Daily task reward failed', rewardError);
     }
 
     const telegram = await sendAdminTestResult({
@@ -172,11 +191,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (deliveryError) throw deliveryError;
 
     if (!telegram.configured || telegram.sent === 0) {
-      return NextResponse.json({
-        ok: true,
-        saved: true,
-        deliveryPending: true,
-      });
+      return NextResponse.json({ ok: true, saved: true, deliveryPending: true });
     }
 
     return NextResponse.json({ ok: true, saved: true });
