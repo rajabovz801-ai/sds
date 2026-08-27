@@ -1,4 +1,4 @@
-/* ARK Dashboard visual system — crisp artwork and native icon badges. */
+/* ARK Dashboard visual system — premium native icon badges. */
 
 /* Remaining dashboard PNG artwork never gets a painted tile behind it. */
 .studentDashboardShell img[src^="/achievements/"]{
@@ -12,43 +12,52 @@
   transform:translateZ(0);
 }
 
-/* Sidebar motivation: native icon, same visual language as Reading / Listening KPIs. */
+/* Sidebar motivation: stronger native icon treatment, still aligned with KPI language. */
 .studentDashboardShell .studentSideMotivation{
-  padding-right:76px;
+  padding-right:78px;
 }
 .studentDashboardShell .studentSideMotivationIcon{
   position:absolute;
   right:14px;
-  top:16px;
-  width:50px;
-  height:50px;
-  border-radius:16px;
+  top:15px;
+  width:52px;
+  height:52px;
+  border-radius:17px;
   display:grid;
   place-items:center;
   color:#fff;
-  background:linear-gradient(145deg,rgba(255,255,255,.20),rgba(255,255,255,.08));
-  border:1px solid rgba(255,255,255,.18);
-  box-shadow:0 12px 24px rgba(10,18,61,.22),inset 0 1px 0 rgba(255,255,255,.18);
-  backdrop-filter:blur(8px);
+  background:linear-gradient(145deg,#294d94 0%,#6351e6 58%,#7a5df0 100%);
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 14px 28px rgba(15,27,78,.34),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -8px 20px rgba(5,16,55,.14);
+}
+.studentDashboardShell .studentSideMotivationIcon::after{
+  content:"";
+  position:absolute;
+  inset:5px;
+  border-radius:13px;
+  border:1px solid rgba(255,255,255,.12);
+  pointer-events:none;
 }
 .studentDashboardShell .studentSideMotivationIcon svg{
-  width:25px;
-  height:25px;
-  stroke-width:1.9;
+  width:26px;
+  height:26px;
+  stroke-width:2.05;
+  filter:drop-shadow(0 2px 4px rgba(4,12,40,.25));
 }
 
-/* Achievement cards use vector icon badges: no external image dependency. */
+/* Achievement cards — premium badge system, no external image dependency. */
 .studentDashboardShell .achievementGrid article{
   --achievement-accent:#5268d8;
+  --achievement-accent2:#7a8df0;
   --achievement-soft:#eef1ff;
   --achievement-line:rgba(82,104,216,.18);
-  --achievement-shadow:rgba(82,104,216,.18);
+  --achievement-shadow:rgba(82,104,216,.24);
   position:relative;
   isolation:isolate;
   overflow:hidden;
   min-height:156px;
   padding:15px 16px;
-  gap:13px;
+  gap:14px;
   border-color:rgba(16,35,63,.095);
   background:linear-gradient(145deg,#fff 0%,#fffdf9 100%);
 }
@@ -56,14 +65,14 @@
   content:"";
   position:absolute;
   z-index:-1;
-  left:-44px;
+  left:-52px;
   top:50%;
-  width:150px;
-  height:150px;
+  width:168px;
+  height:168px;
   transform:translateY(-50%);
   border-radius:50%;
   background:radial-gradient(circle,var(--achievement-soft) 0%,rgba(255,255,255,0) 72%);
-  opacity:.82;
+  opacity:.9;
   pointer-events:none;
 }
 .studentDashboardShell .achievementGrid article.unlocked{
@@ -74,7 +83,7 @@
 .studentDashboardShell .achievementGrid article.locked{
   opacity:1!important;
   filter:none!important;
-  background:linear-gradient(145deg,#fff 0%,#faf9f6 100%);
+  background:linear-gradient(145deg,#fff 0%,#fbfaf7 100%);
 }
 .studentDashboardShell .achievementGrid article>div{
   position:relative;
@@ -82,41 +91,86 @@
   min-width:0;
 }
 .studentDashboardShell .achievementGrid article.locked>div{
-  opacity:.76;
+  opacity:.80;
 }
 
+/* Badge: layered, high-contrast and more visually premium. */
 .studentDashboardShell .achievementIconBox{
   position:relative;
   z-index:1;
-  width:66px;
-  height:66px;
-  flex:0 0 66px;
-  border-radius:20px;
+  width:68px;
+  height:68px;
+  flex:0 0 68px;
+  border-radius:21px;
   display:grid;
   place-items:center;
   color:var(--achievement-accent);
-  background:var(--achievement-soft);
-  border:1px solid var(--achievement-line);
-  box-shadow:0 10px 22px rgba(16,35,63,.07),inset 0 1px 0 rgba(255,255,255,.78);
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.98),rgba(255,255,255,.78)),
+    var(--achievement-soft);
+  border:1px solid color-mix(in srgb,var(--achievement-accent) 24%,#ffffff 76%);
+  box-shadow:
+    0 12px 25px rgba(16,35,63,.09),
+    0 3px 8px var(--achievement-shadow),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -8px 18px var(--achievement-soft);
   transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;
 }
+.studentDashboardShell .achievementIconBox::before{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border-radius:16px;
+  background:linear-gradient(145deg,var(--achievement-soft),rgba(255,255,255,.55));
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+  z-index:-1;
+}
+.studentDashboardShell .achievementIconBox::after{
+  content:"";
+  position:absolute;
+  right:7px;
+  top:7px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--achievement-accent2);
+  box-shadow:0 0 0 3px rgba(255,255,255,.72),0 3px 7px var(--achievement-shadow);
+}
 .studentDashboardShell .achievementIconBox svg{
-  width:31px;
-  height:31px;
-  stroke-width:1.8;
+  width:32px;
+  height:32px;
+  stroke-width:2.15;
+  filter:drop-shadow(0 2px 3px var(--achievement-shadow));
 }
 .studentDashboardShell .achievementGrid article.unlocked .achievementIconBox{
   color:#fff;
-  background:linear-gradient(145deg,var(--achievement-accent),var(--achievement-accent));
-  border-color:transparent;
-  box-shadow:0 12px 24px var(--achievement-shadow),inset 0 1px 0 rgba(255,255,255,.25);
+  background:linear-gradient(145deg,var(--achievement-accent2) 0%,var(--achievement-accent) 52%,#173b72 125%);
+  border-color:rgba(255,255,255,.2);
+  box-shadow:
+    0 15px 30px var(--achievement-shadow),
+    0 5px 12px rgba(16,35,63,.16),
+    inset 0 1px 0 rgba(255,255,255,.32),
+    inset 0 -12px 22px rgba(7,20,58,.16);
+}
+.studentDashboardShell .achievementGrid article.unlocked .achievementIconBox::before{
+  background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.03));
+  border-color:rgba(255,255,255,.12);
+}
+.studentDashboardShell .achievementGrid article.unlocked .achievementIconBox::after{
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(255,255,255,.16),0 3px 7px rgba(4,14,43,.24);
 }
 .studentDashboardShell .achievementGrid article.locked .achievementIconBox{
-  opacity:.72;
-  filter:saturate(.78);
+  opacity:.9;
+  filter:saturate(.94);
 }
 .studentDashboardShell .achievementGrid article:hover .achievementIconBox{
-  transform:translateY(-2px);
+  transform:translateY(-3px) scale(1.015);
+  box-shadow:
+    0 16px 30px rgba(16,35,63,.11),
+    0 5px 12px var(--achievement-shadow),
+    inset 0 1px 0 rgba(255,255,255,.95);
 }
 
 .studentDashboardShell .achievementGrid strong{
@@ -135,10 +189,10 @@
   background:#edf0f3;
 }
 .studentDashboardShell .achievementProgress i{
-  background:var(--achievement-accent)!important;
+  background:linear-gradient(90deg,var(--achievement-accent),var(--achievement-accent2))!important;
 }
 .studentDashboardShell .achievementGrid article.locked .achievementProgress i{
-  opacity:.65;
+  opacity:.78;
 }
 .studentDashboardShell .achievementGrid article>div>span{
   margin-top:6px!important;
@@ -148,66 +202,76 @@
   color:#15915e;
 }
 
-/* Individual badge identities — consistent geometry, distinct semantic accents. */
+/* Premium semantic palette — richer contrast, less pastel, more visual identity. */
 .studentDashboardShell .achievement-first-test{
-  --achievement-accent:#22a873;
-  --achievement-soft:#e7f7f0;
-  --achievement-line:rgba(34,168,115,.20);
-  --achievement-shadow:rgba(34,168,115,.24);
+  --achievement-accent:#0d9b67;
+  --achievement-accent2:#39c792;
+  --achievement-soft:#e6f7f0;
+  --achievement-line:rgba(13,155,103,.22);
+  --achievement-shadow:rgba(13,155,103,.25);
 }
 .studentDashboardShell .achievement-streak{
-  --achievement-accent:#ef7458;
-  --achievement-soft:#fff0eb;
-  --achievement-line:rgba(239,116,88,.19);
-  --achievement-shadow:rgba(239,116,88,.23);
+  --achievement-accent:#e65f3c;
+  --achievement-accent2:#ff9a5f;
+  --achievement-soft:#fff0e9;
+  --achievement-line:rgba(230,95,60,.22);
+  --achievement-shadow:rgba(230,95,60,.26);
 }
 .studentDashboardShell .achievement-reading-master{
-  --achievement-accent:#3d73d8;
+  --achievement-accent:#245fca;
+  --achievement-accent2:#5a91f2;
   --achievement-soft:#eaf1ff;
-  --achievement-line:rgba(61,115,216,.18);
-  --achievement-shadow:rgba(61,115,216,.22);
+  --achievement-line:rgba(36,95,202,.21);
+  --achievement-shadow:rgba(36,95,202,.25);
 }
 .studentDashboardShell .achievement-listening-boost{
-  --achievement-accent:#188d87;
-  --achievement-soft:#e6f6f4;
-  --achievement-line:rgba(24,141,135,.18);
-  --achievement-shadow:rgba(24,141,135,.22);
+  --achievement-accent:#087f88;
+  --achievement-accent2:#28b7b4;
+  --achievement-soft:#e5f6f6;
+  --achievement-line:rgba(8,127,136,.21);
+  --achievement-shadow:rgba(8,127,136,.25);
 }
 .studentDashboardShell .achievement-ten-tests{
-  --achievement-accent:#6955d7;
+  --achievement-accent:#5742c7;
+  --achievement-accent2:#8a74ee;
   --achievement-soft:#f0edff;
-  --achievement-line:rgba(105,85,215,.18);
-  --achievement-shadow:rgba(105,85,215,.22);
+  --achievement-line:rgba(87,66,199,.21);
+  --achievement-shadow:rgba(87,66,199,.26);
 }
 .studentDashboardShell .achievement-accuracy-ace{
-  --achievement-accent:#dc7a3d;
-  --achievement-soft:#fff2e8;
-  --achievement-line:rgba(220,122,61,.20);
-  --achievement-shadow:rgba(220,122,61,.23);
+  --achievement-accent:#c66424;
+  --achievement-accent2:#ef9a50;
+  --achievement-soft:#fff1e5;
+  --achievement-line:rgba(198,100,36,.22);
+  --achievement-shadow:rgba(198,100,36,.26);
 }
 .studentDashboardShell .achievement-band-seven{
-  --achievement-accent:#b98b25;
-  --achievement-soft:#fff6dc;
-  --achievement-line:rgba(185,139,37,.21);
-  --achievement-shadow:rgba(185,139,37,.23);
+  --achievement-accent:#a8750f;
+  --achievement-accent2:#ddb54b;
+  --achievement-soft:#fff5d9;
+  --achievement-line:rgba(168,117,15,.23);
+  --achievement-shadow:rgba(168,117,15,.28);
 }
 .studentDashboardShell .achievement-perfect-section{
-  --achievement-accent:#8b55c8;
+  --achievement-accent:#7741b5;
+  --achievement-accent2:#ad70e4;
   --achievement-soft:#f5ebff;
-  --achievement-line:rgba(139,85,200,.19);
-  --achievement-shadow:rgba(139,85,200,.22);
+  --achievement-line:rgba(119,65,181,.21);
+  --achievement-shadow:rgba(119,65,181,.26);
 }
 .studentDashboardShell .achievement-fast-finisher{
-  --achievement-accent:#2978c9;
-  --achievement-soft:#e9f4ff;
-  --achievement-line:rgba(41,120,201,.19);
-  --achievement-shadow:rgba(41,120,201,.22);
+  --achievement-accent:#1465b8;
+  --achievement-accent2:#2ca8e8;
+  --achievement-soft:#e9f5ff;
+  --achievement-line:rgba(20,101,184,.21);
+  --achievement-shadow:rgba(20,101,184,.26);
 }
 .studentDashboardShell .achievement-consistency{
-  --achievement-accent:#2f9670;
-  --achievement-soft:#e9f7f1;
-  --achievement-line:rgba(47,150,112,.19);
-  --achievement-shadow:rgba(47,150,112,.22);
+  --achievement-accent:#247d5e;
+  --achievement-accent2:#4bb88b;
+  --achievement-soft:#e8f7f0;
+  --achievement-line:rgba(36,125,94,.21);
+  --achievement-shadow:rgba(36,125,94,.25);
 }
 
 /* KPI artwork that still intentionally uses transparent illustrations. */
@@ -244,20 +308,20 @@
 @media(max-width:1280px){
   .studentDashboardShell .achievementGrid article{min-height:150px}
   .studentDashboardShell .achievementIconBox{
-    width:62px;
-    height:62px;
-    flex-basis:62px;
-    border-radius:19px;
+    width:64px;
+    height:64px;
+    flex-basis:64px;
+    border-radius:20px;
   }
-  .studentDashboardShell .achievementIconBox svg{width:29px;height:29px}
+  .studentDashboardShell .achievementIconBox svg{width:30px;height:30px}
 }
 @media(max-width:940px){
   .studentDashboardShell .achievementGrid article{min-height:146px}
   .studentDashboardShell .achievementIconBox{
-    width:60px;
-    height:60px;
-    flex-basis:60px;
-    border-radius:18px;
+    width:61px;
+    height:61px;
+    flex-basis:61px;
+    border-radius:19px;
   }
   .studentDashboardShell .studentWelcomeArt{width:210px!important}
 }
@@ -267,10 +331,10 @@
     padding:13px 14px;
   }
   .studentDashboardShell .achievementIconBox{
-    width:56px;
-    height:56px;
-    flex-basis:56px;
-    border-radius:17px;
+    width:57px;
+    height:57px;
+    flex-basis:57px;
+    border-radius:18px;
   }
   .studentDashboardShell .achievementIconBox svg{width:27px;height:27px}
   .studentDashboardShell .studentSideMotivationIcon{width:46px;height:46px;right:12px;top:14px}
