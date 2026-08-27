@@ -4,10 +4,11 @@ import { MouseEvent, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import { ExamSectionsClient } from '@/components/ExamSectionsClient';
-import { MockTrackChoiceClient } from '@/components/MockTrackChoiceClient';
 import { SkillLibraryClient } from '@/components/SkillLibraryClient';
+import { StudentDashboardClient } from '@/components/StudentDashboardClient';
 import { LayoutGridIcon, LogOutIcon } from '@/components/UiIcons';
 import type { CloudTest, TestSkill, TestTrack } from '@/lib/cloudTests';
+import type { DashboardData } from '@/lib/dashboard';
 import type { StudentSummary } from '@/lib/auth/server-session';
 
 type Track = 'ielts' | 'cefr';
@@ -35,6 +36,66 @@ const previewStudent: StudentSummary = {
   id: 'admin-preview',
   firstName: 'Admin',
   lastName: '',
+};
+
+const previewDashboard: DashboardData = {
+  overallBand: 7.0,
+  readingBand: 7.5,
+  listeningBand: 7.0,
+  weeklyStudyHours: 9.5,
+  weeklyGoalHours: 14,
+  testsCompleted: 18,
+  dailyResults: [
+    { label: 'Aug 14', value: 5.5, date: '2026-08-14' },
+    { label: 'Aug 15', value: 6.0, date: '2026-08-15' },
+    { label: 'Aug 16', value: 6.0, date: '2026-08-16' },
+    { label: 'Aug 17', value: 6.5, date: '2026-08-17' },
+    { label: 'Aug 18', value: 6.0, date: '2026-08-18' },
+    { label: 'Aug 19', value: 6.5, date: '2026-08-19' },
+    { label: 'Aug 20', value: 6.5, date: '2026-08-20' },
+    { label: 'Aug 21', value: 7.0, date: '2026-08-21' },
+    { label: 'Aug 22', value: 6.5, date: '2026-08-22' },
+    { label: 'Aug 23', value: 7.0, date: '2026-08-23' },
+    { label: 'Aug 24', value: 7.0, date: '2026-08-24' },
+    { label: 'Aug 25', value: 7.5, date: '2026-08-25' },
+    { label: 'Aug 26', value: 7.0, date: '2026-08-26' },
+    { label: 'Aug 27', value: 7.5, date: '2026-08-27' },
+  ],
+  bandTrend: [
+    { label: 'Wk 1', value: 5.5, date: '2026-07-09' },
+    { label: 'Wk 2', value: 5.5, date: '2026-07-16' },
+    { label: 'Wk 3', value: 6.0, date: '2026-07-23' },
+    { label: 'Wk 4', value: 6.0, date: '2026-07-30' },
+    { label: 'Wk 5', value: 6.5, date: '2026-08-06' },
+    { label: 'Wk 6', value: 6.5, date: '2026-08-13' },
+    { label: 'Wk 7', value: 7.0, date: '2026-08-20' },
+    { label: 'Wk 8', value: 7.0, date: '2026-08-27' },
+  ],
+  recentResults: [
+    { id: 'preview-1', title: 'Reading Mock Test', skill: 'reading', score: '34/40', band: 7.5, date: '2026-08-27T09:20:00+05:00' },
+    { id: 'preview-2', title: 'Listening Mock Test', skill: 'listening', score: '32/40', band: 7.0, date: '2026-08-26T18:10:00+05:00' },
+    { id: 'preview-3', title: 'Reading Practice', skill: 'reading', score: '31/40', band: 7.0, date: '2026-08-25T16:40:00+05:00' },
+    { id: 'preview-4', title: 'Listening Practice', skill: 'listening', score: '30/40', band: 6.5, date: '2026-08-24T14:05:00+05:00' },
+  ],
+  achievements: [
+    { id: 'first-test', title: 'First Test', description: 'Birinchi test yakunlandi', unlocked: true, progress: 100, icon: 'first-test' },
+    { id: 'streak', title: '7-Day Streak', description: '7/7 kun ketma-ket', unlocked: true, progress: 100, icon: 'streak' },
+    { id: 'reading-master', title: 'Reading Master', description: 'Reading 7.5 band', unlocked: true, progress: 100, icon: 'study-hero' },
+    { id: 'listening-boost', title: 'Listening Boost', description: 'Listening 7.0 band', unlocked: true, progress: 100, icon: 'trophy' },
+    { id: 'ten-tests', title: '10 Tests Finished', description: '18/10 test', unlocked: true, progress: 100, icon: 'ten-tests' },
+    { id: 'accuracy-ace', title: 'Accuracy Ace', description: 'Eng yuqori aniqlik 92%', unlocked: true, progress: 92, icon: 'target' },
+    { id: 'band-seven', title: 'Band 7 Reached', description: 'Overall 7.0', unlocked: true, progress: 100, icon: 'band7' },
+    { id: 'perfect-section', title: 'Perfect Section', description: '90%+ aniqlik bilan yakunla', unlocked: false, progress: 92, icon: 'perfect-vocab' },
+    { id: 'fast-finisher', title: 'Fast Finisher', description: 'Vaqt limitining 75%ida yakunla', unlocked: false, progress: 72, icon: 'fast-learner' },
+    { id: 'consistency', title: 'Consistency Pro', description: '6/7 faol kun', unlocked: false, progress: 86, icon: 'quote-trophy' },
+  ],
+  unlockedAchievements: 7,
+  studyStreak: 7,
+  focusArea: 'Listening',
+  nextTargetBand: 7.5,
+  readingAverage: 7.5,
+  listeningAverage: 7.0,
+  lastUpdated: '2026-08-27T10:00:00+05:00',
 };
 
 const skillCopy: Record<Skill, { title: string; description: string }> = {
@@ -176,46 +237,56 @@ export function AdminMenuPreview() {
 
   const portal = open && bodyHost ? createPortal(
     <div className="adminStudentMenuPortal platformRoot" onClickCapture={interceptNavigation}>
-      <div className="platformBarWrap">
-        <header className="platformBar">
-          <a href="/mock" className="platformBrand" aria-label="ARK Education platformasi">
-            <span className="platformBrandMark"><ArkLogoIcon /></span>
-            <span className="platformBrandText"><strong>ARK Education</strong><small>EXAM WORKSPACE</small></span>
-          </a>
+      {screen.type === 'home' ? (
+        <StudentDashboardClient
+          student={previewStudent}
+          initialData={previewDashboard}
+          previewMode
+          onExitPreview={() => setOpen(false)}
+        />
+      ) : (
+        <>
+          <div className="platformBarWrap">
+            <header className="platformBar">
+              <a href="/mock" className="platformBrand" aria-label="ARK Education platformasi">
+                <span className="platformBrandMark"><ArkLogoIcon /></span>
+                <span className="platformBrandText"><strong>ARK Education</strong><small>EXAM WORKSPACE</small></span>
+              </a>
 
-          <nav className="platformNav" aria-label="Platforma bo‘limlari">
-            <a href="/mock" className={activePath === '/mock' ? 'active' : ''}>Boshqaruv</a>
-            <a href="/ielts" className={activePath.startsWith('/ielts') ? 'active' : ''}>IELTS</a>
-            <a href="/cefr" className={activePath.startsWith('/cefr') ? 'active' : ''}>CEFR</a>
-            <a href="/practice">Practice <span className="soonDot">SOON</span></a>
-            <a href="/study-tools">Tools <span className="soonDot">SOON</span></a>
-          </nav>
+              <nav className="platformNav" aria-label="Platforma bo‘limlari">
+                <a href="/mock" className={activePath === '/mock' ? 'active' : ''}>Dashboard</a>
+                <a href="/ielts" className={activePath.startsWith('/ielts') ? 'active' : ''}>IELTS</a>
+                <a href="/cefr" className={activePath.startsWith('/cefr') ? 'active' : ''}>CEFR</a>
+                <a href="/practice">Practice <span className="soonDot">SOON</span></a>
+                <a href="/study-tools">Tools <span className="soonDot">SOON</span></a>
+              </nav>
 
-          <div className="platformActions">
-            <button className="adminBackToPanel" type="button" onClick={() => setOpen(false)} aria-label="Admin panelga qaytish" title="Admin panelga qaytish">
-              <LogOutIcon /><span>Admin panelga qaytish</span>
-            </button>
-            <div className="profileChip" title="Admin preview">
-              <span className="profileAvatar">AR</span>
-              <span className="profileLabel"><small>Admin</small><strong>Student menu preview</strong></span>
-            </div>
+              <div className="platformActions">
+                <button className="adminBackToPanel" type="button" onClick={() => setOpen(false)} aria-label="Admin panelga qaytish" title="Admin panelga qaytish">
+                  <LogOutIcon /><span>Admin panelga qaytish</span>
+                </button>
+                <div className="profileChip" title="Admin preview">
+                  <span className="profileAvatar">AR</span>
+                  <span className="profileLabel"><small>Admin</small><strong>Student menu preview</strong></span>
+                </div>
+              </div>
+            </header>
           </div>
-        </header>
-      </div>
 
-      <main className="platformMain">
-        {screen.type === 'home' && <MockTrackChoiceClient student={previewStudent} />}
-        {screen.type === 'track' && <ExamSectionsClient track={screen.track} />}
-        {screen.type === 'skill' && (
-          <SkillLibraryClient
-            track={screen.track}
-            skill={screen.skill}
-            title={skillCopy[screen.skill].title}
-            description={skillCopy[screen.skill].description}
-            tests={visibleTests}
-          />
-        )}
-      </main>
+          <main className="platformMain">
+            {screen.type === 'track' && <ExamSectionsClient track={screen.track} />}
+            {screen.type === 'skill' && (
+              <SkillLibraryClient
+                track={screen.track}
+                skill={screen.skill}
+                title={skillCopy[screen.skill].title}
+                description={skillCopy[screen.skill].description}
+                tests={visibleTests}
+              />
+            )}
+          </main>
+        </>
+      )}
 
       <style>{`
         .adminStudentMenuPortal{position:fixed;z-index:10000;inset:0;overflow:auto}
