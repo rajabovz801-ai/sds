@@ -354,7 +354,7 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
           className="viewerFrame"
           title={data.test.title}
           sandbox="allow-modals allow-scripts"
-          allow="fullscreen"
+          allow={data.test.skill === 'listening' ? 'autoplay; fullscreen' : 'fullscreen'}
           allowFullScreen
           src={iframeSrc}
         />
