@@ -45,10 +45,10 @@ export default async function PracticePage() {
               <span><i />Quiz format</span>
               <span><i />Short daily drills</span>
             </div>
-            <div className="sectionOpen practiceSectionOpen">
-              <strong>Vocabulary practice</strong>
+            <Link href="/practice/vocabulary" className="sectionOpen practiceSectionOpen">
+              <strong>Vocabulary quizlar</strong>
               <span><ArrowRightIcon /></span>
-            </div>
+            </Link>
           </article>
 
           <article className="sectionCard sectionTone-blue">
