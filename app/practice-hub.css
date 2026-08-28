@@ -1,1 +1,28 @@
-.practiceHubPage{padding:24px 32px 48px}.practiceHubHero{padding:8px 4px 18px;background:transparent;border:0;box-shadow:none}.practiceHubEyebrow{font-size:9px;font-weight:900;letter-spacing:1.8px;color:#9d9189}.practiceHubHero h1{margin:6px 0 8px;font-size:clamp(42px,4vw,56px);line-height:.98;letter-spacing:-2.4px;color:#10213d}.practiceHubHero p{max-width:660px;margin:0;color:#6d645f;font-size:15px;line-height:1.55}.practiceHubSection{margin-top:14px}.practiceHubSectionHead{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:14px}.practiceHubSectionHead small{font-size:8px;font-weight:900;letter-spacing:1.5px;color:#a09289}.practiceHubSectionHead h2{margin:4px 0 0;font-size:23px;line-height:1.1;color:#10213d}.practiceHubSectionHead>span{font-size:11px;font-weight:800;color:#8a7d75}.practiceHubGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:980px}.practiceHubCard{min-height:232px;padding:20px 20px 18px;border:1px solid #e6ddd5;border-radius:21px;background:#fff;display:flex;flex-direction:column;overflow:hidden;position:relative;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.practiceHubCard:before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:#10213d}.practiceHubCardVocabulary{background:linear-gradient(145deg,#fff 0%,#fffaf9 100%)}.practiceHubCardVocabulary:before{background:#ff695d}.practiceHubCardGrammar{background:linear-gradient(145deg,#fff 0%,#f8fcf9 100%)}.practiceHubCardGrammar:before{background:#55b978}.practiceHubCard:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(42,30,22,.08);border-color:#dcd0c7}.practiceHubCardVisual{display:flex;align-items:center;justify-content:space-between;gap:12px}.practiceHubCardIcon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:#f4f1ed;color:#10213d;box-shadow:inset 0 0 0 1px rgba(16,33,61,.03)}.practiceHubCardVocabulary .practiceHubCardIcon{background:#fff0ed;color:#ff695d}.practiceHubCardGrammar .practiceHubCardIcon{background:#edf8f1;color:#2f9d5d}.practiceHubCardIcon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}.practiceHubMiniMark{min-width:36px;height:28px;padding:0 9px;border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:900;letter-spacing:.3px;background:#f7f3ef;color:#9b8e85}.practiceHubCardVocabulary .practiceHubMiniMark{background:#fff3f1;color:#ff695d}.practiceHubCardGrammar .practiceHubMiniMark{background:#eef8f2;color:#2f9d5d}.practiceHubCardCopy{margin-top:18px}.practiceHubCardCopy small{font-size:8px;font-weight:900;letter-spacing:1.55px;color:#9f9086}.practiceHubCardCopy h3{margin:6px 0 8px;font-size:23px;line-height:1.08;letter-spacing:-.5px;color:#10213d}.practiceHubCardCopy p{max-width:430px;margin:0;color:#6d645f;font-size:13.5px;line-height:1.52}.practiceHubCardAction{margin-top:auto;padding-top:16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #eee6df;color:#615750;font-size:12px;font-weight:800}.practiceHubCardAction svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;transition:transform .18s ease}.practiceHubCard:hover .practiceHubCardAction svg{transform:translateX(3px)}@media(max-width:1100px){.practiceHubGrid{max-width:none}}@media(max-width:900px){.practiceHubGrid{grid-template-columns:1fr}.practiceHubPage{padding:22px 20px 42px}.practiceHubCard{min-height:220px}}@media(max-width:560px){.practiceHubPage{padding:16px 14px 34px}.practiceHubHero{padding-top:4px}.practiceHubHero h1{font-size:44px}.practiceHubHero p{font-size:14px}.practiceHubSectionHead{align-items:flex-start}.practiceHubSectionHead h2{font-size:21px}.practiceHubCard{padding:18px;border-radius:18px;min-height:210px}.practiceHubCardCopy h3{font-size:21px}}
+/* Practice uses the same shared workspace language as IELTS and CEFR. */
+.practiceSectionGrid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  max-width:920px;
+}
+
+.practiceSectionGrid .sectionCard{
+  min-height:360px;
+}
+
+.practiceSectionOpen{
+  cursor:default;
+}
+
+.practiceSectionOpen:hover>span{
+  background:#f1ece3;
+  color:#243b57;
+}
+
+@media(max-width:900px){
+  .practiceSectionGrid{
+    grid-template-columns:1fr;
+    max-width:none;
+  }
+  .practiceSectionGrid .sectionCard{
+    min-height:330px;
+  }
+}
