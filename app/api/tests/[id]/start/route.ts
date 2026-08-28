@@ -89,12 +89,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const durationSeconds = Math.max(300, Math.min(14400, Math.round(Number(test.duration_minutes || 60) * 60)));
-    const existingQuery = supabase
+    let existingQuery = supabase
       .from('test_sessions')
       .select('id,status,started_at,expires_at,locked_until')
       .eq('student_id', student.studentId)
       .eq('test_id', testId)
+      .eq('mode', mode)
       .eq('superseded', false);
+
+    if (mode === 'mock') {
+      existingQuery = existingQuery
+        .eq('mock_attempt_id', attemptId)
+        .eq('section', section);
+    }
 
     const { data: existing, error: existingError } = await existingQuery.maybeSingle();
     if (existingError) throw existingError;
@@ -153,6 +160,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           .select('id,status,started_at,expires_at,locked_until')
           .eq('student_id', student.studentId)
           .eq('test_id', testId)
+          .eq('mode', 'practice')
           .eq('superseded', false)
           .eq('status', 'in_progress')
           .maybeSingle();
