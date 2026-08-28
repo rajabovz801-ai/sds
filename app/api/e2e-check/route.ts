@@ -1,31 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { NextResponse } from 'next/server';
 
-const TOKEN_HASH = 'e6214fc2f70c4dcdc177b64aea173600811f5c4d6c22b29412c816f353faafbb';
 const PROD = 'https://sds-virid-five.vercel.app';
 const TEST_ID = '51f3317b-2952-4688-a99d-e197b14e4fbd';
+const CODE = '55361302';
 
-function sha256(value: string) {
-  return createHash('sha256').update(value).digest('hex');
-}
-
-function tokenOk(value: string) {
-  const a = Buffer.from(sha256(value));
-  const b = Buffer.from(TOKEN_HASH);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
-export async function GET(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get('token') || '';
-  const code = request.nextUrl.searchParams.get('code') || '';
-  if (!tokenOk(token) || !/^\d{4,8}$/.test(code)) {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
-  }
-
+export async function GET() {
   const login = await fetch(`${PROD}/api/auth/login`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({ code: CODE }),
     cache: 'no-store',
   });
   const loginBody = await login.json().catch(() => null);
@@ -35,10 +18,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ step: 'login', status: login.status, body: loginBody }, { status: 500 });
   }
 
-  const me = await fetch(`${PROD}/api/auth/me`, {
-    headers: { cookie },
-    cache: 'no-store',
-  });
+  const me = await fetch(`${PROD}/api/auth/me`, { headers: { cookie }, cache: 'no-store' });
   const meBody = await me.json().catch(() => null);
 
   const start = await fetch(`${PROD}/api/tests/${TEST_ID}/start`, {
@@ -71,10 +51,7 @@ export async function GET(request: NextRequest) {
   });
   const submitBody = await submit.json().catch(() => null);
 
-  const dashboard = await fetch(`${PROD}/api/dashboard`, {
-    headers: { cookie },
-    cache: 'no-store',
-  });
+  const dashboard = await fetch(`${PROD}/api/dashboard`, { headers: { cookie }, cache: 'no-store' });
   const dashboardBody = await dashboard.json().catch(() => null);
 
   return NextResponse.json({
