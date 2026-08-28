@@ -32,6 +32,7 @@ export function UploadCloudIcon(props: IconProps) { return <IconBase {...props}>
 export function EditIcon(props: IconProps) { return <IconBase {...props}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" /></IconBase>; }
 export function TrashIcon(props: IconProps) { return <IconBase {...props}><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6" /></IconBase>; }
 export function ClockIcon(props: IconProps) { return <IconBase {...props}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></IconBase>; }
+export function RepeatIcon(props: IconProps) { return <IconBase {...props}><path d="M17 2.5 21 6l-4 3.5" /><path d="M20.5 6H9a6 6 0 0 0-6 6" /><path d="M7 21.5 3 18l4-3.5" /><path d="M3.5 18H15a6 6 0 0 0 6-6" /></IconBase>; }
 export function LibraryIcon(props: IconProps) { return <IconBase {...props}><path d="M4 4h5v16H4zM10 4h5v16h-5zM16 5l4-1 2 15-5 1z" /></IconBase>; }
 export function UserIcon(props: IconProps) { return <IconBase {...props}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></IconBase>; }
 export function SearchIcon(props: IconProps) { return <IconBase {...props}><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></IconBase>; }
