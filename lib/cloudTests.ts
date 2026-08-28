@@ -1,7 +1,7 @@
 import { getPublicSupabase, getServiceSupabase } from '@/lib/supabase/server';
 
 export type TestTrack = 'ielts' | 'cefr';
-export type TestSkill = 'reading' | 'listening' | 'writing' | 'speaking' | 'full-mock';
+export type TestSkill = 'reading' | 'listening' | 'writing' | 'speaking' | 'full-mock' | 'vocabulary';
 export type TestStatus = 'published' | 'draft';
 
 export type CloudTest = {
