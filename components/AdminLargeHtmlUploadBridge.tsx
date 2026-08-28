@@ -38,19 +38,85 @@ export function AdminLargeHtmlUploadBridge() {
 
     const nativeFetch = window.fetch.bind(window);
 
-    const patchHint = () => {
-      document.querySelectorAll<HTMLLabelElement>('.dropZone').forEach((zone) => {
-        const input = zone.querySelector<HTMLInputElement>('input[type="file"]');
-        const hint = zone.querySelector<HTMLElement>('small');
-        if (!input || !hint || input.files?.length) return;
-        if (hint.textContent?.includes('maksimal 10 MB')) {
-          hint.textContent = '.html yoki .htm · maksimal 50 MB';
+    const style = document.createElement('style');
+    style.id = 'ark-html-drag-drop-style';
+    style.textContent = `
+      .dropZone[data-drag-ready="true"]{position:relative;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}
+      .dropZone[data-drag-ready="true"]:after{content:"Yoki HTML faylni shu yerga tashlang";position:absolute;right:18px;bottom:13px;font-size:10px;font-weight:800;color:#62748a;pointer-events:none}
+      .dropZone[data-drag-over="true"]{border-color:#173c6c!important;background:#edf4ff!important;box-shadow:0 0 0 4px rgba(23,60,108,.10)!important;transform:translateY(-1px)}
+      .dropZone[data-drag-over="true"]:after{content:"Faylni tashlang";color:#173c6c}
+      @media(max-width:700px){.dropZone[data-drag-ready="true"]:after{position:static;display:block;margin:8px 0 0 62px}}
+    `;
+    if (!document.getElementById(style.id)) document.head.appendChild(style);
+
+    const setupDropZone = (zone: HTMLLabelElement) => {
+      const input = zone.querySelector<HTMLInputElement>('input[type="file"]');
+      const hint = zone.querySelector<HTMLElement>('small');
+      if (!input) return;
+
+      if (hint && !input.files?.length && hint.textContent?.includes('maksimal 10 MB')) {
+        hint.textContent = '.html yoki .htm · maksimal 50 MB';
+      }
+
+      if (zone.dataset.dragReady === 'true') return;
+      zone.dataset.dragReady = 'true';
+
+      const clearDragState = () => { zone.dataset.dragOver = 'false'; };
+
+      zone.addEventListener('dragenter', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        zone.dataset.dragOver = 'true';
+      });
+
+      zone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+        zone.dataset.dragOver = 'true';
+      });
+
+      zone.addEventListener('dragleave', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const related = event.relatedTarget as Node | null;
+        if (!related || !zone.contains(related)) clearDragState();
+      });
+
+      zone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        clearDragState();
+
+        const dropped = event.dataTransfer?.files?.[0];
+        if (!dropped) return;
+
+        if (!/\.html?$/i.test(dropped.name)) {
+          window.alert('Faqat .html yoki .htm fayl tashlang.');
+          return;
+        }
+        if (dropped.size <= 0 || dropped.size > MAX_DIRECT_HTML_BYTES) {
+          window.alert('HTML fayl hajmi 50 MB dan oshmasligi kerak.');
+          return;
+        }
+
+        try {
+          const transfer = new DataTransfer();
+          transfer.items.add(dropped);
+          input.files = transfer.files;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        } catch {
+          window.alert('Brauzer faylni qabul qilmadi. Chrome yoki Edge’ning yangi versiyasida qayta urinib ko‘ring.');
         }
       });
     };
 
-    patchHint();
-    const observer = new MutationObserver(patchHint);
+    const patchUploadUi = () => {
+      document.querySelectorAll<HTMLLabelElement>('.dropZone').forEach(setupDropZone);
+    };
+
+    patchUploadUi();
+    const observer = new MutationObserver(patchUploadUi);
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -121,7 +187,7 @@ export function AdminLargeHtmlUploadBridge() {
           return jsonResponse(`HTML yuklanmadi: ${uploadError.message}`);
         }
 
-        const finalizeResponse = await nativeFetch('/api/admin/tests/direct-upload', {
+        return nativeFetch('/api/admin/tests/direct-upload', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
@@ -138,8 +204,6 @@ export function AdminLargeHtmlUploadBridge() {
             fileSize: file.size,
           }),
         });
-
-        return finalizeResponse;
       } catch (error) {
         return jsonResponse(error instanceof Error ? error.message : 'HTML yuklashda xatolik yuz berdi.');
       }
@@ -148,6 +212,7 @@ export function AdminLargeHtmlUploadBridge() {
     return () => {
       observer.disconnect();
       window.fetch = nativeFetch;
+      document.getElementById('ark-html-drag-drop-style')?.remove();
       delete globalWindow[marker];
     };
   }, []);
