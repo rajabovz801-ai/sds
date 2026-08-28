@@ -11,7 +11,7 @@ const items = [
   { href: '/mock', label: 'Dashboard' },
   { href: '/ielts', label: 'IELTS' },
   { href: '/cefr', label: 'CEFR' },
-  { href: '/practice', label: 'Practice', soon: true },
+  { href: '/practice', label: 'Practice' },
   { href: '/study-tools', label: 'Tools', soon: true },
 ];
 
