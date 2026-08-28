@@ -158,7 +158,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (newlyCompleted && rewardWindowOpen) {
       const accuracy = Math.max(0, Math.min(100, (rawScore / maxScore) * 100));
       const basePoints = Math.max(0, Math.min(100, Number(test.daily_task_points) || 20));
-      const bonus = accuracy >= 99.999 ? 10 : accuracy >= 90 ? 5 : 0;
+      const bonus = test.skill === 'vocabulary' ? 0 : accuracy >= 99.999 ? 10 : accuracy >= 90 ? 5 : 0;
       const { error: rewardError } = await supabase
         .from('daily_task_completions')
         .upsert({
