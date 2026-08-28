@@ -1,0 +1,97 @@
+.peakHeroPage a:focus-visible{
+  outline:3px solid rgba(79,130,184,.42);
+  outline-offset:4px;
+}
+
+.peakHeroPage .peakHeroPrimary:focus-visible,
+.peakHeroPage .peakHeroSignup:focus-visible{
+  outline-color:rgba(245,109,88,.55);
+}
+
+@media (hover:none){
+  .peakHeroPage .peakHeroSignup:hover,
+  .peakHeroPage .peakHeroPrimary:hover,
+  .peakHeroPage .peakHeroSecondary:hover,
+  .peakHeroPage .peakBentoCard:hover{
+    transform:none;
+  }
+}
+
+@media (max-width:900px){
+  .peakHeroNavShell{padding:10px 14px}
+  .peakHeroNav{grid-template-columns:1fr auto;gap:14px}
+  .peakHeroLinks{display:none}
+  .peakHeroMain{width:min(100% - 36px,760px);grid-template-columns:1fr;gap:12px;padding-top:34px}
+  .peakHeroCopy{max-width:700px;padding-bottom:8px}
+  .peakHeroVisual{width:min(100%,720px);margin:0 auto}
+  .peakVisualGlass{min-height:500px}
+  .peakPlatform{width:calc(100% - 28px);padding:68px 24px 28px;border-radius:36px}
+  .peakBentoGrid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .peakTrackCard{grid-row:auto;min-height:430px}
+}
+
+@media (max-width:640px){
+  .peakHeroNavShell{padding:8px}
+  .peakHeroNav{min-height:62px;padding:7px 8px;border-radius:20px}
+  .peakHeroBrand{gap:8px;min-width:0}
+  .peakHeroBrandMark{width:44px;height:44px;padding:10px;border-radius:14px}
+  .peakHeroBrandCopy strong{font-size:14px}
+  .peakHeroBrandCopy small{display:none}
+  .peakHeroSignIn{display:none}
+  .peakHeroSignup{min-height:44px;padding:0 9px 0 14px;gap:8px;border-radius:15px}
+  .peakHeroSignup>span{width:26px;height:26px}
+
+  .peakHeroMain{width:calc(100% - 24px);min-height:auto;padding:34px 0 46px}
+  .peakHeroCopy{padding:12px 0}
+  .peakHeroEyebrow{margin-bottom:17px;font-size:8px;letter-spacing:.09em}
+  .peakHeroCopy h1{font-size:clamp(45px,14vw,62px);line-height:.96;letter-spacing:-.055em}
+  .peakHeroLead{margin-top:20px;font-size:15px;line-height:1.58}
+  .peakHeroActions{margin-top:24px;gap:9px}
+  .peakHeroPrimary,.peakHeroSecondary{min-height:54px;border-radius:17px}
+  .peakHeroPrimary{padding-left:18px;gap:11px}
+  .peakHeroSecondary{padding:0 16px}
+  .peakHeroProof{grid-template-columns:1fr 1fr;row-gap:18px;margin-top:28px}
+  .peakHeroProof>div{min-width:0;padding:0 14px}
+  .peakHeroProof>div:nth-child(3){grid-column:1/-1;padding-left:0;border-left:0}
+
+  .peakVisualGlass{min-height:390px}
+  .peakHeroArtwork{width:116%}
+  .peakScoreFloat{right:2px;bottom:22px;width:124px;padding:13px;border-radius:20px}
+  .peakScoreFloat strong{font-size:32px}
+  .peakSkillsFloat{left:0;bottom:12px;max-width:72%;padding:0 12px;gap:6px;overflow:hidden}
+
+  .peakPlatform{width:calc(100% - 16px);padding:54px 14px 16px;border-radius:28px}
+  .peakSectionHeading{margin-bottom:30px;padding:0 8px}
+  .peakSectionHeading h2{font-size:clamp(38px,12vw,52px)}
+  .peakSectionHeading p{font-size:14px}
+  .peakBentoGrid{grid-template-columns:1fr;gap:12px}
+  .peakBentoCard{min-height:0;padding:22px;border-radius:24px}
+  .peakCardLabel{top:34px;right:20px;max-width:58%;text-align:right;line-height:1.25}
+  .peakTrackCard{min-height:390px}
+  .peakTrackPills{left:22px;right:22px;bottom:22px}
+  .peakTimerCard{min-height:270px}
+  .peakTimerDial{right:20px;bottom:18px;transform:scale(.9);transform-origin:right bottom}
+
+  .peakFinalCta{margin-left:8px;margin-right:8px}
+}
+
+@media (max-width:430px){
+  .peakHeroSignup{font-size:11px}
+  .peakHeroActions{display:grid;grid-template-columns:1fr}
+  .peakHeroPrimary,.peakHeroSecondary{width:100%;justify-content:space-between}
+  .peakHeroProof{grid-template-columns:1fr}
+  .peakHeroProof>div,.peakHeroProof>div:nth-child(3){grid-column:auto;padding:0;border-left:0}
+  .peakHeroProof>div+div{padding-top:12px;border-top:1px solid rgba(30,45,69,.10)}
+  .peakVisualGlass{min-height:340px}
+  .peakSkillsFloat{display:none}
+  .peakScoreFloat{bottom:8px}
+  .peakCardLabel{position:static;margin:-3px 0 16px;text-align:left;max-width:none}
+  .peakCardIcon{margin-bottom:10px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .peakHeroPage,.peakHeroPage *{scroll-behavior:auto!important}
+  .peakHeroArtwork{animation:none!important}
+  .peakHeroSignup:before,.peakHeroPrimary:before{display:none}
+  .peakHeroSignup,.peakHeroPrimary,.peakHeroSecondary,.peakBentoCard{transition:none!important}
+}

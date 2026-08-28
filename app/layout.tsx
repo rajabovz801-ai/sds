@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import './platform.css';
 import './landing-home-v4.css';
+import './landing-professional-polish.css';
 import './auth.css';
 import './mock-results.css';
 import './workspace-v2.css';

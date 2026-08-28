@@ -46,7 +46,7 @@ export default async function HomePage() {
         <nav className="peakHeroNav">
           <Link href="/" className="peakHeroBrand" aria-label="ARK Education bosh sahifa">
             <span className="peakHeroBrandMark"><ArkLogoIcon /></span>
-            <span className="peakHeroBrandCopy"><strong>ARK Education</strong><small>IELTS &amp; CEFR EXAM PLATFORM</small></span>
+            <span className="peakHeroBrandCopy"><strong>ARK Education</strong><small>IELTS &amp; CEFR IMTIHON PLATFORMASI</small></span>
           </Link>
 
           <div className="peakHeroLinks" aria-label="Asosiy navigatsiya">
@@ -66,7 +66,7 @@ export default async function HomePage() {
       <main>
         <section className="peakHeroMain">
           <div className="peakHeroCopy">
-            <div className="peakHeroEyebrow"><Sparkles /> YANGI AVLOD EXAM PLATFORMASI</div>
+            <div className="peakHeroEyebrow"><Sparkles /> YANGI AVLOD IMTIHON PLATFORMASI</div>
             <h1>Imtihonga emas, <em>natijaga tayyorlaning.</em></h1>
             <p className="peakHeroLead">Haqiqiy imtihon muhiti, aniq vaqt nazorati va IELTS hamda CEFR uchun tushunarli natija tahlili — barchasi bitta platformada.</p>
 
@@ -78,11 +78,11 @@ export default async function HomePage() {
             <div className="peakHeroProof" aria-label="Platforma afzalliklari">
               <div><strong>40</strong><span>savolli real format</span></div>
               <div><strong>IELTS + CEFR</strong><span>bitta profil ichida</span></div>
-              <div><strong>24/7</strong><span>istalgan payt practice</span></div>
+              <div><strong>24/7</strong><span>istalgan payt mashq</span></div>
             </div>
           </div>
 
-          <div className="peakHeroVisual" aria-label="ARK Education exam platformasi">
+          <div className="peakHeroVisual" aria-label="ARK Education imtihon platformasi">
             <div className="peakVisualGlass">
               <div className="peakArtworkStage">
                 <Image
@@ -95,7 +95,7 @@ export default async function HomePage() {
                   priority
                 />
               </div>
-              <div className="peakScoreFloat"><small>TARGET BAND</small><strong>8.0</strong><span>On track</span></div>
+              <div className="peakScoreFloat"><small>MAQSAD BANDI</small><strong>8.0</strong><span>Reja bo‘yicha</span></div>
               <div className="peakSkillsFloat"><span>Reading</span><i /><span>Listening</span><i /><span>Writing</span><i /><span>Speaking</span></div>
             </div>
           </div>
@@ -103,37 +103,37 @@ export default async function HomePage() {
 
         <section className="peakPlatform" id="platform">
           <div className="peakSectionHeading">
-            <span className="peakSectionKicker">PLATFORM INSIDE</span>
+            <span className="peakSectionKicker">PLATFORMA IMKONIYATLARI</span>
             <h2>Har bir bosqich <em>aniq va nazoratda.</em></h2>
             <p>Keraksiz murakkabliksiz: yo‘nalishni tanlang, real formatda ishlang va natijangizni bir qarashda tushuning.</p>
           </div>
 
           <div className="peakBentoGrid">
             <article className="peakBentoCard peakTrackCard">
-              <div className="peakCardIcon"><BookOpen /></div><span className="peakCardLabel">01 • EXAM TRACKS</span>
-              <h3>IELTS va CEFR bir joyda</h3><p>Har bir yo‘nalish uchun alohida skill kutubxonasi va real imtihon oqimi.</p>
+              <div className="peakCardIcon"><BookOpen /></div><span className="peakCardLabel">01 • IMTIHON YO‘NALISHLARI</span>
+              <h3>IELTS va CEFR bir joyda</h3><p>Har bir yo‘nalish uchun alohida ko‘nikma kutubxonasi va real imtihon oqimi.</p>
               <div className="peakTrackPills"><span>IELTS Academic</span><span>CEFR A2–C1</span></div>
             </article>
 
             <article className="peakBentoCard peakTimerCard">
-              <div className="peakCardIcon"><Timer /></div><span className="peakCardLabel">02 • EXAM MODE</span>
-              <h3>Vaqtni his qiling</h3><div className="peakTimerDial"><strong>38:42</strong><span>TIME REMAINING</span></div>
+              <div className="peakCardIcon"><Timer /></div><span className="peakCardLabel">02 • IMTIHON REJIMI</span>
+              <h3>Vaqtni his qiling</h3><div className="peakTimerDial"><strong>38:42</strong><span>QOLGAN VAQT</span></div>
             </article>
 
             <article className="peakBentoCard peakAnalyticsCard">
-              <div className="peakCardIcon"><Chart /></div><span className="peakCardLabel">03 • ANALYTICS</span>
-              <h3>Natija oddiy ko‘rinishda</h3><p>Skill kesimidagi holat va keyingi qadamlar uchun aniq ko‘rsatkichlar.</p>
+              <div className="peakCardIcon"><Chart /></div><span className="peakCardLabel">03 • TAHLIL</span>
+              <h3>Natija oddiy ko‘rinishda</h3><p>Ko‘nikmalar kesimidagi holat va keyingi qadamlar uchun aniq ko‘rsatkichlar.</p>
               <div className="peakMiniChart" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>
             </article>
 
             <article className="peakBentoCard peakSecureCard">
-              <div className="peakCardIcon"><ShieldCheck /></div><span className="peakCardLabel">04 • SECURE SESSION</span>
-              <h3>Bitta kod. Xavfsiz profil.</h3><p>Telegram orqali bir martalik kod bilan kiring. Aktiv session sizni to‘g‘ridan-to‘g‘ri platformaga olib boradi.</p>
-              <div className="peakSecureStatus"><span /><strong>Session protection active</strong></div>
+              <div className="peakCardIcon"><ShieldCheck /></div><span className="peakCardLabel">04 • XAVFSIZ SESSIYA</span>
+              <h3>Bitta kod. Xavfsiz profil.</h3><p>Telegram orqali bir martalik kod bilan kiring. Faol sessiya sizni to‘g‘ridan-to‘g‘ri platformaga olib boradi.</p>
+              <div className="peakSecureStatus"><span /><strong>Sessiya himoyasi faol</strong></div>
             </article>
 
             <article className="peakBentoCard peakListeningCard">
-              <div className="peakCardIcon"><Headphones /></div><span className="peakCardLabel">05 • FOUR SKILLS</span>
+              <div className="peakCardIcon"><Headphones /></div><span className="peakCardLabel">05 • TO‘RT KO‘NIKMA</span>
               <h3>Bir xil, ravon tajriba</h3>
               <div className="peakSkillRows"><span><b>R</b>Reading<i /></span><span><b>L</b>Listening<i /></span><span><b>W</b>Writing<i /></span><span><b>S</b>Speaking<i /></span></div>
             </article>
@@ -141,7 +141,7 @@ export default async function HomePage() {
         </section>
 
         <section className="peakFinalCta">
-          <div><span>READY WHEN YOU ARE</span><h2>Birinchi mock testingizni boshlang.</h2><p>Kod orqali kiring va kerakli imtihon yo‘nalishini tanlang.</p></div>
+          <div><span>BOSHLASHGA TAYYORMISIZ?</span><h2>Birinchi mock testingizni boshlang.</h2><p>Kod orqali kiring va kerakli imtihon yo‘nalishini tanlang.</p></div>
           <Link href="/login?next=/mock" className="peakHeroPrimary">Platformaga kirish <b><ArrowRight /></b></Link>
         </section>
       </main>
