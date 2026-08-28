@@ -10,6 +10,7 @@ import {
   LibraryIcon,
   MicIcon,
   PenToolIcon,
+  RepeatIcon,
   SparklesIcon,
 } from '@/components/UiIcons';
 import type { CloudTest, TestSkill, TestTrack } from '@/lib/cloudTests';
@@ -79,6 +80,12 @@ export function SkillLibraryClient({
                   <span>{test.track.toUpperCase()} · {test.skill.toUpperCase()}</span>
                   <h3>{test.title}</h3>
                 </div>
+                {typeof test.attemptCount === 'number' && (
+                  <div className="sidebarAttemptMeta" aria-label={`${test.attemptCount} attempts`}>
+                    <RepeatIcon />
+                    <span><strong>{test.attemptCount}</strong> {test.attemptCount === 1 ? 'attempt' : 'attempts'}</span>
+                  </div>
+                )}
                 <Link href={`/test/${test.id}`} className="sidebarTestOpen" prefetch>
                   <strong>Boshlash</strong><ArrowRightIcon />
                 </Link>
