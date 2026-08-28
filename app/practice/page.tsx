@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import {
+  ArrowLeftIcon,
   ArrowRightIcon,
   BookOpenIcon,
   FileTextIcon,
@@ -11,55 +13,64 @@ export default async function PracticePage() {
 
   return (
     <StudentWorkspaceShellClient student={student} active="practice">
-      <div className="practiceHubPage">
-        <section className="practiceHubHero">
-          <div className="practiceHubEyebrow">PRACTICE HUB</div>
-          <h1>Practice</h1>
-          <p>Vocabulary va grammar bo‘yicha qisqa, foydali mashqlarni bir joyda bajaring.</p>
+      <div className="workspacePage sectionWorkspace practiceWorkspace">
+        <Link href="/mock" className="workspaceBack"><ArrowLeftIcon /> Yo‘nalishlar</Link>
+
+        <section className="workspaceHero workspaceHeroCompact">
+          <div className="workspaceHeroCopy">
+            <span className="workspaceEyebrow"><BookOpenIcon /> PRACTICE WORKSPACE</span>
+            <h1>Practice kutubxonasi</h1>
+            <p>Vocabulary va grammar bo‘yicha qisqa, foydali mashqlarni tanlang va muntazam practice qiling.</p>
+          </div>
+          <div className="workspaceTrackBadge">
+            <small>ACTIVE TRACK</small>
+            <strong>PRACTICE</strong>
+            <span>2 ta bo‘lim faol</span>
+          </div>
         </section>
 
-        <section className="practiceHubSection">
-          <header className="practiceHubSectionHead">
-            <div>
-              <small>SKILL PRACTICE</small>
-              <h2>Mashq bo‘limlari</h2>
+        <section className="sectionCardGrid practiceSectionGrid">
+          <article className="sectionCard sectionTone-coral">
+            <div className="sectionCardTop">
+              <span className="sectionCardIcon"><BookOpenIcon /></span>
+              <small>01</small>
             </div>
-            <span>2 ta bo‘lim</span>
-          </header>
+            <div className="sectionCardCopy">
+              <span>READY TO PRACTICE</span>
+              <h2>Vocabulary Quiz</h2>
+              <p>Yangi so‘zlarni quiz orqali mustahkamlang va vocabulary bazangizni bosqichma-bosqich kengaytiring.</p>
+            </div>
+            <div className="sectionFacts">
+              <span><i />Vocabulary practice</span>
+              <span><i />Quiz format</span>
+              <span><i />Short daily drills</span>
+            </div>
+            <div className="sectionOpen practiceSectionOpen">
+              <strong>Vocabulary practice</strong>
+              <span><ArrowRightIcon /></span>
+            </div>
+          </article>
 
-          <div className="practiceHubGrid">
-            <article className="practiceHubCard practiceHubCardVocabulary">
-              <div className="practiceHubCardVisual">
-                <span className="practiceHubCardIcon"><BookOpenIcon /></span>
-                <span className="practiceHubMiniMark">Aa</span>
-              </div>
-              <div className="practiceHubCardCopy">
-                <small>VOCABULARY</small>
-                <h3>Vocabulary Quiz</h3>
-                <p>Yangi so‘zlarni test orqali mustahkamlang va vocabulary bazangizni kengaytiring.</p>
-              </div>
-              <div className="practiceHubCardAction">
-                <span>Practice’ni ochish</span>
-                <ArrowRightIcon />
-              </div>
-            </article>
-
-            <article className="practiceHubCard practiceHubCardGrammar">
-              <div className="practiceHubCardVisual">
-                <span className="practiceHubCardIcon"><FileTextIcon /></span>
-                <span className="practiceHubMiniMark">✓</span>
-              </div>
-              <div className="practiceHubCardCopy">
-                <small>GRAMMAR</small>
-                <h3>Grammar Practice</h3>
-                <p>Grammar qoidalarini amaliy mashqlar orqali mustahkamlang va aniqligingizni oshiring.</p>
-              </div>
-              <div className="practiceHubCardAction">
-                <span>Practice’ni ochish</span>
-                <ArrowRightIcon />
-              </div>
-            </article>
-          </div>
+          <article className="sectionCard sectionTone-blue">
+            <div className="sectionCardTop">
+              <span className="sectionCardIcon"><FileTextIcon /></span>
+              <small>02</small>
+            </div>
+            <div className="sectionCardCopy">
+              <span>READY TO PRACTICE</span>
+              <h2>Grammar Practice</h2>
+              <p>Grammar qoidalarini amaliy mashqlar orqali mustahkamlang va gap tuzish aniqligingizni oshiring.</p>
+            </div>
+            <div className="sectionFacts">
+              <span><i />Grammar drills</span>
+              <span><i />Rule practice</span>
+              <span><i />Accuracy building</span>
+            </div>
+            <div className="sectionOpen practiceSectionOpen">
+              <strong>Grammar practice</strong>
+              <span><ArrowRightIcon /></span>
+            </div>
+          </article>
         </section>
       </div>
     </StudentWorkspaceShellClient>
