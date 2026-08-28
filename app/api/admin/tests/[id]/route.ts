@@ -3,7 +3,7 @@ import { getServiceSupabase, HTML_TESTS_BUCKET } from '@/lib/supabase/server';
 import { checkAdminRequest } from '@/lib/adminAuth';
 
 const tracks = ['ielts', 'cefr'];
-const skills = ['reading', 'listening', 'writing', 'speaking', 'full-mock'];
+const skills = ['reading', 'listening', 'writing', 'speaking', 'full-mock', 'vocabulary'];
 const statuses = ['draft', 'published'];
 const MAX_HTML_BYTES = 10 * 1024 * 1024;
 
