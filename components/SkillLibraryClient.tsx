@@ -21,6 +21,7 @@ const skillIcons = {
   writing: PenToolIcon,
   speaking: MicIcon,
   'full-mock': LibraryIcon,
+  vocabulary: BookOpenIcon,
 };
 
 export function SkillLibraryClient({
