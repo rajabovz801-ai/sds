@@ -1,13 +1,12 @@
 import { SkillLibraryClient } from '@/components/SkillLibraryClient';
 import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
 import { requireStudent } from '@/lib/auth/server-session';
-import { listPublishedTestsBy } from '@/lib/cloudTests';
+import { listPublishedTestsByWithAttempts } from '@/lib/cloudTests';
 
 export default async function IeltsListeningPage() {
-  const [student, tests] = await Promise.all([
-    requireStudent('/ielts/listening'),
-    listPublishedTestsBy('ielts', 'listening'),
-  ]);
+  const student = await requireStudent('/ielts/listening');
+  const tests = await listPublishedTestsByWithAttempts('ielts', 'listening', student.id);
+
   return (
     <StudentWorkspaceShellClient student={student} active="ielts">
       <SkillLibraryClient
