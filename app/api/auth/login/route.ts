@@ -109,7 +109,9 @@ export async function POST(request: NextRequest) {
       .from('students')
       .update({ last_login_at: now, updated_at: now })
       .eq('id', student.id);
-    if (loginTimeError) throw loginTimeError;
+    if (loginTimeError) {
+      console.error('Student last_login_at update failed after successful code consumption', loginTimeError);
+    }
 
     attempts.delete(ip);
     const response = NextResponse.json({
