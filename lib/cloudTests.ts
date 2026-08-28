@@ -1,4 +1,4 @@
-import { getPublicSupabase } from '@/lib/supabase/server';
+import { getPublicSupabase, getServiceSupabase } from '@/lib/supabase/server';
 
 export type TestTrack = 'ielts' | 'cefr';
 export type TestSkill = 'reading' | 'listening' | 'writing' | 'speaking' | 'full-mock';
@@ -14,6 +14,7 @@ export type CloudTest = {
   fileName: string;
   filePath: string;
   durationMinutes: number;
+  attemptCount?: number;
   dailyTaskEnabled?: boolean;
   dailyTaskPoints?: number;
   dailyTaskStartedAt?: string | null;
@@ -70,6 +71,37 @@ export async function listPublishedTestsBy(track: TestTrack, skill: TestSkill): 
     .order('updated_at', { ascending: false });
   if (error) throw error;
   return ((data || []) as TestRow[]).map(mapTest);
+}
+
+export async function listPublishedTestsByWithAttempts(
+  track: TestTrack,
+  skill: TestSkill,
+  studentId: string,
+): Promise<CloudTest[]> {
+  const tests = await listPublishedTestsBy(track, skill);
+  if (!tests.length) return tests;
+
+  const supabase = getServiceSupabase();
+  const testIds = tests.map((test) => test.id);
+  const { data, error } = await supabase
+    .from('test_sessions')
+    .select('test_id')
+    .eq('student_id', studentId)
+    .eq('mode', 'practice')
+    .in('test_id', testIds);
+  if (error) throw error;
+
+  const counts = new Map<string, number>();
+  for (const row of data || []) {
+    const testId = String(row.test_id || '');
+    if (!testId) continue;
+    counts.set(testId, (counts.get(testId) || 0) + 1);
+  }
+
+  return tests.map((test) => ({
+    ...test,
+    attemptCount: counts.get(test.id) || 0,
+  }));
 }
 
 export async function getPublishedTest(id: string): Promise<CloudTest | null> {
