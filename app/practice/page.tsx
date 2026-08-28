@@ -1,6 +1,6 @@
 import {
+  ArrowRightIcon,
   BookOpenIcon,
-  CheckCircleIcon,
   FileTextIcon,
 } from '@/components/UiIcons';
 import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
@@ -15,7 +15,7 @@ export default async function PracticePage() {
         <section className="practiceHubHero">
           <div className="practiceHubEyebrow">PRACTICE HUB</div>
           <h1>Practice</h1>
-          <p>Vocabulary va grammar bo‘yicha qisqa, foydali mashqlarni shu yerda bajaring.</p>
+          <p>Vocabulary va grammar bo‘yicha qisqa, foydali mashqlarni bir joyda bajaring.</p>
         </section>
 
         <section className="practiceHubSection">
@@ -29,34 +29,34 @@ export default async function PracticePage() {
 
           <div className="practiceHubGrid">
             <article className="practiceHubCard practiceHubCardVocabulary">
-              <div className="practiceHubCardTop">
+              <div className="practiceHubCardVisual">
                 <span className="practiceHubCardIcon"><BookOpenIcon /></span>
-                <span className="practiceHubStatus"><CheckCircleIcon /> ACTIVE</span>
+                <span className="practiceHubMiniMark">Aa</span>
               </div>
               <div className="practiceHubCardCopy">
                 <small>VOCABULARY</small>
                 <h3>Vocabulary Quiz</h3>
                 <p>Yangi so‘zlarni test orqali mustahkamlang va vocabulary bazangizni kengaytiring.</p>
               </div>
-              <div className="practiceHubCardFoot">
-                <span>Quiz practice</span>
-                <strong>01</strong>
+              <div className="practiceHubCardAction">
+                <span>Practice’ni ochish</span>
+                <ArrowRightIcon />
               </div>
             </article>
 
             <article className="practiceHubCard practiceHubCardGrammar">
-              <div className="practiceHubCardTop">
+              <div className="practiceHubCardVisual">
                 <span className="practiceHubCardIcon"><FileTextIcon /></span>
-                <span className="practiceHubStatus"><CheckCircleIcon /> ACTIVE</span>
+                <span className="practiceHubMiniMark">✓</span>
               </div>
               <div className="practiceHubCardCopy">
                 <small>GRAMMAR</small>
                 <h3>Grammar Practice</h3>
                 <p>Grammar qoidalarini amaliy mashqlar orqali mustahkamlang va aniqligingizni oshiring.</p>
               </div>
-              <div className="practiceHubCardFoot">
-                <span>Grammar drills</span>
-                <strong>02</strong>
+              <div className="practiceHubCardAction">
+                <span>Practice’ni ochish</span>
+                <ArrowRightIcon />
               </div>
             </article>
           </div>
