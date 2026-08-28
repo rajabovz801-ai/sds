@@ -17,6 +17,12 @@
   color:#243b57;
 }
 
+/* Practice is live now. Suppress any stale SOON marker from older nav renderers. */
+.studentSideNav a[href="/practice"] small,
+.platformNav a[href="/practice"] .soonDot{
+  display:none!important;
+}
+
 @media(max-width:900px){
   .practiceSectionGrid{
     grid-template-columns:1fr;
