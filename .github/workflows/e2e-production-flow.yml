@@ -1,0 +1,54 @@
+name: E2E Production Flow Check
+
+on:
+  push:
+    branches:
+      - test/e2e-production-flow-20260828
+    paths:
+      - '.github/workflows/e2e-production-flow.yml'
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run production E2E API flow
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROD='https://sds-virid-five.vercel.app'
+          TEST_ID='51f3317b-2952-4688-a99d-e197b14e4fbd'
+          CODE='55361302'
+          COOKIE_JAR="$RUNNER_TEMP/cookies.txt"
+
+          echo 'STEP login'
+          LOGIN_STATUS=$(curl -sS -o "$RUNNER_TEMP/login.json" -w '%{http_code}' -c "$COOKIE_JAR" -H 'content-type: application/json' -d "{\"code\":\"$CODE\"}" "$PROD/api/auth/login")
+          cat "$RUNNER_TEMP/login.json"
+          test "$LOGIN_STATUS" = '200'
+
+          echo 'STEP me'
+          ME_STATUS=$(curl -sS -o "$RUNNER_TEMP/me.json" -w '%{http_code}' -b "$COOKIE_JAR" "$PROD/api/auth/me")
+          cat "$RUNNER_TEMP/me.json"
+          test "$ME_STATUS" = '200'
+
+          echo 'STEP start'
+          START_STATUS=$(curl -sS -o "$RUNNER_TEMP/start.json" -w '%{http_code}' -b "$COOKIE_JAR" -H 'content-type: application/json' -d '{"mode":"practice"}' "$PROD/api/tests/$TEST_ID/start")
+          cat "$RUNNER_TEMP/start.json"
+          test "$START_STATUS" = '200'
+          SESSION_ID=$(jq -r '.sessionId // empty' "$RUNNER_TEMP/start.json")
+          test -n "$SESSION_ID"
+
+          echo 'STEP submit'
+          SUBMISSION_ID="e2e-gh-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          SUBMIT_PAYLOAD=$(jq -nc --arg sid "$SESSION_ID" --arg sub "$SUBMISSION_ID" '{testSessionId:$sid,correct:0,wrong:0,unanswered:40,rawScore:0,maxScore:40,band:0,durationSeconds:1,details:{submissionId:$sub,e2e:true,note:"TEMP E2E TEST - IGNORE"}}')
+          SUBMIT_STATUS=$(curl -sS -o "$RUNNER_TEMP/submit.json" -w '%{http_code}' -b "$COOKIE_JAR" -H 'content-type: application/json' -d "$SUBMIT_PAYLOAD" "$PROD/api/tests/$TEST_ID/submit")
+          cat "$RUNNER_TEMP/submit.json"
+          test "$SUBMIT_STATUS" = '200'
+          jq -e '.ok == true and .saved == true' "$RUNNER_TEMP/submit.json" >/dev/null
+
+          echo 'STEP dashboard'
+          DASH_STATUS=$(curl -sS -o "$RUNNER_TEMP/dashboard.json" -w '%{http_code}' -b "$COOKIE_JAR" "$PROD/api/dashboard")
+          test "$DASH_STATUS" = '200'
+          jq -e 'type == "object"' "$RUNNER_TEMP/dashboard.json" >/dev/null
+
+          echo "E2E_OK session=$SESSION_ID submission=$SUBMISSION_ID"
