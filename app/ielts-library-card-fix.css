@@ -37,6 +37,42 @@
   display:none!important;
 }
 
+.studentWorkspaceShell .sidebarLibrary .sidebarAttemptMeta{
+  width:max-content;
+  max-width:100%;
+  min-height:32px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:14px;
+  margin-bottom:14px;
+  padding:7px 11px;
+  border:1px solid rgba(16,33,61,.10);
+  border-radius:10px;
+  background:#f8f7f4;
+  color:#687184;
+  font-size:12px;
+  line-height:1;
+  letter-spacing:.01em;
+}
+
+.studentWorkspaceShell .sidebarLibrary .sidebarAttemptMeta svg{
+  width:15px;
+  height:15px;
+  flex:0 0 auto;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.studentWorkspaceShell .sidebarLibrary .sidebarAttemptMeta strong{
+  color:#10213d;
+  font-size:12px;
+  font-weight:800;
+}
+
 .studentWorkspaceShell .sidebarLibrary .sidebarTestOpen{
   min-height:48px;
   margin-top:auto!important;
@@ -47,21 +83,25 @@
 
 @media(max-width:1280px){
   .studentWorkspaceShell .sidebarLibrary .sidebarTestCard{
-    min-height:275px;
+    min-height:285px;
   }
 }
 
 @media(max-width:620px){
   .studentWorkspaceShell .sidebarLibrary .sidebarTestCard{
-    min-height:245px;
+    min-height:265px;
     padding:18px;
   }
   .studentWorkspaceShell .sidebarLibrary .sidebarTestCard .testLibraryCopy h3{
     min-height:0;
     font-size:19px;
   }
+  .studentWorkspaceShell .sidebarLibrary .sidebarAttemptMeta{
+    margin-top:12px;
+    margin-bottom:12px;
+  }
   .studentWorkspaceShell .sidebarLibrary .sidebarTestOpen{
     min-height:46px;
-    margin-top:22px!important;
+    margin-top:auto!important;
   }
 }
