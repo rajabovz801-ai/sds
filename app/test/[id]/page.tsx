@@ -1,3 +1,4 @@
+import { ListeningIframeCleanup } from '@/components/ListeningIframeCleanup';
 import { TestViewerClient } from '@/components/TestViewerClient';
 import { requireStudent } from '@/lib/auth/server-session';
 import { getPublishedTest } from '@/lib/cloudTests';
@@ -31,22 +32,25 @@ export default async function TestPage({
   ]);
   if (!test) notFound();
   return (
-    <TestViewerClient
-      id={id}
-      initialData={{
-        test: {
-          id: test.id,
-          title: test.title,
-          track: test.track,
-          skill: test.skill,
-          fileName: test.fileName,
-          durationMinutes: test.durationMinutes,
-        },
-        contentUrl: `/api/tests/${test.id}/content`,
-      }}
-      attemptId={attempt}
-      mode={mode}
-      section={section}
-    />
+    <>
+      <ListeningIframeCleanup enabled={test.skill === 'listening'} />
+      <TestViewerClient
+        id={id}
+        initialData={{
+          test: {
+            id: test.id,
+            title: test.title,
+            track: test.track,
+            skill: test.skill,
+            fileName: test.fileName,
+            durationMinutes: test.durationMinutes,
+          },
+          contentUrl: `/api/tests/${test.id}/content`,
+        }}
+        attemptId={attempt}
+        mode={mode}
+        section={section}
+      />
+    </>
   );
 }
