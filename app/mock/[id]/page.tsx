@@ -13,7 +13,7 @@ export default async function MockAttemptPage({ params }: { params: Promise<{ id
     <div className="platformRoot">
       <PlatformNav student={student} />
       <main className="platformMain">
-        <MockAttemptClient id={id} initialData={initialData} />
+        <MockAttemptClient id={id} student={student} initialData={initialData} />
       </main>
     </div>
   );
