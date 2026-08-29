@@ -246,10 +246,15 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
       if (iframeRef.current?.contentWindow && event.source !== iframeRef.current.contentWindow) return;
       const message = event.data as any;
       if (message?.type === 'ARK_TEST_READY') {
-        iframeRef.current?.contentWindow?.postMessage({
-          type: 'ARK_PLATFORM_START',
-          expiresAt: examSession.expiresAt,
-        }, '*');
+        // Listening Test 2 uses an external MP3 and Chrome requires a real
+        // user gesture inside the iframe before audible playback. Leave its
+        // own Start Listening gate intact instead of synthetic auto-clicking.
+        if (data.test.id !== 'c28b8a10-7af0-4ec3-8006-2a9ad46803c1') {
+          iframeRef.current?.contentWindow?.postMessage({
+            type: 'ARK_PLATFORM_START',
+            expiresAt: examSession.expiresAt,
+          }, '*');
+        }
         return;
       }
       const payload = normalizeMessage(event.data);
@@ -258,7 +263,7 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
 
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [attemptId, examSession, id, isMock, router, section]);
+  }, [attemptId, data.test.id, examSession, id, isMock, router, section]);
 
   const recordViolation = useCallback(() => {
     if (!examSession) return;
