@@ -312,7 +312,6 @@ export function CefrSpeakingMockClient({ title }: { title: string }) {
           <div className={styles.check}>✓</div>
           <span className={styles.eyebrow}>CEFR SPEAKING</span>
           <h1>Speaking Completed</h1>
-          <p><b>{candidateName}</b> nomidagi to‘liq audio admin panelga yuborildi.</p>
         </section>
       )}
     </div>
