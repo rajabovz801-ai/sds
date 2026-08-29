@@ -14,15 +14,16 @@ export default async function CefrSpeakingPage() {
     listPublishedTestsByWithAttempts('cefr', 'speaking', student.id),
     getCefrSpeakingMock(),
   ]);
+  const speakingMockEnabled = speakingMock?.status === 'published' && Boolean(speakingMock?.instruction_video_path);
 
   return (
     <StudentWorkspaceShellClient student={student} active="cefr">
-      <CefrSpeakingMockCard enabled={speakingMock?.status === 'published' && Boolean(speakingMock?.instruction_video_path)} />
       <SkillLibraryClient
         track="cefr" skill="speaking" title="CEFR Speaking"
         description="Daraja asosidagi speaking topshiriqlari va professional CEFR practice materiallari."
         tests={tests}
         variant="sidebar"
+        specialCard={speakingMockEnabled ? <CefrSpeakingMockCard enabled /> : undefined}
       />
     </StudentWorkspaceShellClient>
   );
