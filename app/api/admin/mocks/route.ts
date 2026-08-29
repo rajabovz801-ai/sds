@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
       track: 'ielts',
       skill: 'listening',
       status: 'draft',
-      duration_minutes: 60,
+      duration_minutes: 40,
       file_name: body.listeningHtml!.name,
       file_path: body.listeningHtml!.path,
       mock_only: true,

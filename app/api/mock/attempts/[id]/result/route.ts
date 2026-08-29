@@ -94,7 +94,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (correct !== null && wrong !== null && unanswered !== null && maxScore !== null && correct + wrong + unanswered !== Math.round(maxScore)) {
       return NextResponse.json({ error: 'Javoblar soni umumiy savollar soniga mos emas.' }, { status: 400 });
     }
-    if (band === null && mock.track === 'ielts' && rawScore !== null && maxScore !== null) band = ieltsBand(section, rawScore, maxScore);
+    if (mock.track === 'ielts' && rawScore !== null && maxScore !== null) {
+      const serverBand = ieltsBand(section, rawScore, maxScore);
+      if (serverBand !== null) band = serverBand;
+    }
 
     const safeDetails = body?.details && typeof body.details === 'object' && !Array.isArray(body.details)
       ? body.details as Record<string, unknown>
