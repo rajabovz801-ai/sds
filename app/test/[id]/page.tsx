@@ -1,5 +1,6 @@
 import { ListeningFullscreenResumeFix } from '@/components/ListeningFullscreenResumeFix';
 import { ListeningIframeCleanup } from '@/components/ListeningIframeCleanup';
+import { MockExamCompanion } from '@/components/MockExamCompanion';
 import { TestViewerClient } from '@/components/TestViewerClient';
 import { requireStudent } from '@/lib/auth/server-session';
 import { getPublishedTest } from '@/lib/cloudTests';
@@ -37,6 +38,7 @@ export default async function TestPage({
     <>
       <ListeningIframeCleanup enabled={isListening} />
       <ListeningFullscreenResumeFix enabled={isListening} />
+      <MockExamCompanion attemptId={attempt} mode={mode} />
       <TestViewerClient
         id={id}
         initialData={{
