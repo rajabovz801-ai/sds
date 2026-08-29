@@ -1,3 +1,4 @@
+import { PLATFORM_MAINTENANCE_MODE, isStudentAllowedDuringMaintenance } from '@/lib/auth/maintenance';
 import { getServiceSupabase } from '@/lib/supabase/server';
 
 export type ActiveMockData = {
@@ -5,6 +6,7 @@ export type ActiveMockData = {
   title: string;
   candidateId: string | null;
   attempt: { id: string; status: string } | null;
+  setupPending?: boolean;
 };
 
 export async function getActiveMockForStudent(studentId: string): Promise<ActiveMockData | null> {
@@ -21,7 +23,18 @@ export async function getActiveMockForStudent(studentId: string): Promise<Active
   if (error) throw error;
 
   const mock = (mocks || []).find((item) => (!item.starts_at || item.starts_at <= now) && (!item.ends_at || item.ends_at > now));
-  if (!mock) return null;
+  if (!mock) {
+    if (PLATFORM_MAINTENANCE_MODE && isStudentAllowedDuringMaintenance(studentId)) {
+      return {
+        id: 'maintenance-mock-preview',
+        title: 'IELTS FULL MOCK 01',
+        candidateId: null,
+        attempt: null,
+        setupPending: true,
+      };
+    }
+    return null;
+  }
 
   const [accessResult, attemptResult] = await Promise.all([
     supabase.from('mock_access_codes').select('candidate_id').eq('mock_id', mock.id).eq('student_id', studentId).maybeSingle(),
@@ -35,5 +48,6 @@ export async function getActiveMockForStudent(studentId: string): Promise<Active
     title: mock.title,
     candidateId: accessResult.data?.candidate_id || null,
     attempt: attemptResult.data || null,
+    setupPending: false,
   };
 }

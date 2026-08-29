@@ -36,7 +36,7 @@ export function ActiveMockBanner({ mock }: { mock: ActiveMockData | null }) {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (busy || code.length < 6) return;
+    if (!mock || mock.setupPending || busy || code.length < 6) return;
     setBusy(true);
     setError('');
     try {
@@ -63,14 +63,22 @@ export function ActiveMockBanner({ mock }: { mock: ActiveMockData | null }) {
   return createPortal(
     <section className={styles.banner}>
       <div className={styles.copy}>
-        <span className={styles.eyebrow}>IELTS FULL MOCK EXAM · ACTIVE NOW</span>
+        <span className={styles.eyebrow}>{mock.setupPending ? 'IELTS FULL MOCK EXAM · FINAL SETUP' : 'IELTS FULL MOCK EXAM · ACTIVE NOW'}</span>
         <h2>{mock.title}</h2>
-        <p>Bugungi Full Mock real exam flow bo‘yicha ishlaydi: Listening instructions → Listening → Reading instructions → Reading. Section natijalari yakungacha yashiriladi.</p>
+        <p>{mock.setupPending
+          ? 'Full Mock engine tayyor. Hozir Listening, Reading va instruction media fayllari yakuniy server ulanishidan o‘tkazilmoqda. Tayyor bo‘lishi bilan shu bannerning o‘zida Mock Code orqali start ochiladi.'
+          : 'Bugungi Full Mock real exam flow bo‘yicha ishlaydi: Listening instructions → Listening → Reading instructions → Reading. Section natijalari yakungacha yashiriladi.'}</p>
         <div className={styles.facts}><span>LISTENING + READING</span><span>80 QUESTIONS</span><span>ONE ATTEMPT</span><span>FINAL OVERALL BAND</span></div>
       </div>
       <div className={styles.action}>
         <small>{mock.candidateId ? `CANDIDATE · ${mock.candidateId}` : 'SECURE MOCK ACCESS'}</small>
-        {mock.attempt ? (
+        {mock.setupPending ? (
+          <>
+            <strong>Mock setup in progress</strong>
+            <p>Test tugmasi faqat barcha media va HTML fayllari xavfsiz ulanganidan keyin ochiladi.</p>
+            <button className={styles.button} type="button" disabled>Final setup…</button>
+          </>
+        ) : mock.attempt ? (
           <>
             <strong>{mock.attempt.status === 'completed' ? 'Mock Completed' : 'Mock in progress'}</strong>
             <p>{mock.attempt.status === 'completed' ? 'Yakuniy natijangiz tayyor.' : 'Oldingi attempt o‘sha joyidan davom etadi.'}</p>
