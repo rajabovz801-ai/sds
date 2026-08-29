@@ -1,0 +1,83 @@
+/*
+ * ARK UI safety layer.
+ * Layout-only overrides: no test, result, auth, mock or admin logic lives here.
+ */
+
+/* Student dashboard: keep labels and actions stable under zoom / narrower viewports. */
+.studentDashboardShell .studentBrand>span:last-child,
+.studentDashboardShell .studentSideProfile>div,
+.studentDashboardShell .studentTopProfile>div,
+.studentDashboardShell .studentMetric>div:last-child,
+.studentDashboardShell .studentPanel>header>div,
+.studentDashboardShell .recentRow>div,
+.studentDashboardShell .summaryStats>div,
+.studentDashboardShell .studentMidStack,
+.studentDashboardShell .studentRightStack,
+.studentDashboardShell .studentDashboardGrid{min-width:0}
+
+.studentDashboardShell .studentSideNav a span,
+.studentDashboardShell .studentSideProfile strong,
+.studentDashboardShell .studentTopProfile strong{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.studentDashboardShell .studentDashTopbar strong,
+.studentDashboardShell .studentDashTopbar small,
+.studentDashboardShell .studentPanel>header>span,
+.studentDashboardShell .studentMetric strong,
+.studentDashboardShell .studentProgressSummary>a,
+.studentDashboardShell .studentDailyTasksCta,
+.studentDashboardShell .adminBackToPanel{
+  white-space:nowrap;
+}
+
+.studentDashboardShell .studentProgressSummary>a,
+.studentDashboardShell .studentDailyTasksCta,
+.studentDashboardShell .adminBackToPanel{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.studentDashboardShell .studentMetric small,
+.studentDashboardShell .studentMetric span,
+.studentDashboardShell .studentPanel header p,
+.studentDashboardShell .studentProgressSummary p{
+  overflow-wrap:anywhere;
+}
+
+/* Shared student workspace cards / CTA controls. */
+.studentWorkspaceShell .workspaceHeroCopy,
+.studentWorkspaceShell .sectionCard,
+.studentWorkspaceShell .sectionCardCopy,
+.studentWorkspaceShell .sidebarTestCard,
+.studentWorkspaceShell .testLibraryCopy,
+.studentWorkspaceShell .sidebarLibraryHeading>div{min-width:0}
+
+.studentWorkspaceShell .sidebarTestOpen,
+.studentWorkspaceShell .sectionCard a,
+.studentWorkspaceShell .libraryFilter{
+  max-width:100%;
+}
+
+.studentWorkspaceShell .sidebarTestOpen{
+  white-space:nowrap;
+  overflow:hidden;
+}
+
+.studentWorkspaceShell .sidebarTestOpen>span,
+.studentWorkspaceShell .testLibraryCopy h3{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+@media(max-width:620px){
+  .studentDashboardShell .studentDashTopbar>div:first-child{min-width:0;overflow:hidden}
+  .studentDashboardShell .studentDashTopbar strong{overflow:hidden;text-overflow:ellipsis}
+  .studentDashboardShell .studentProgressSummary>a,
+  .studentDashboardShell .studentDailyTasksCta{font-size:10px}
+}
