@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { NextRequest } from 'next/server';
 import { getSessionSecret } from '@/lib/auth/secrets';
+import { isStudentAllowedDuringMaintenance } from '@/lib/auth/maintenance';
 
 export const SESSION_COOKIE = 'ark_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
@@ -43,6 +44,7 @@ export function verifySessionToken(token?: string | null): SessionPayload | null
 
     const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as SessionPayload;
     if (!payload.studentId || !payload.telegramId || payload.exp <= Math.floor(Date.now() / 1000)) return null;
+    if (!isStudentAllowedDuringMaintenance(payload.studentId)) return null;
     return payload;
   } catch {
     return null;
