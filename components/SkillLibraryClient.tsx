@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeftIcon,
@@ -31,6 +32,7 @@ export function SkillLibraryClient({
   description,
   tests,
   variant = 'default',
+  specialCard,
 }: {
   track: TestTrack;
   skill: TestSkill;
@@ -38,9 +40,12 @@ export function SkillLibraryClient({
   description: string;
   tests: CloudTest[];
   variant?: 'default' | 'sidebar';
+  specialCard?: ReactNode;
 }) {
   const backHref = track === 'ielts' ? '/ielts' : '/cefr';
   const SkillIcon = skillIcons[skill];
+  const hasMaterials = tests.length > 0 || Boolean(specialCard);
+  const testNumberOffset = specialCard ? 1 : 0;
 
   if (variant === 'sidebar') {
     return (
@@ -69,13 +74,14 @@ export function SkillLibraryClient({
           </select>
         </div>
 
-        {tests.length ? (
+        {hasMaterials ? (
           <section className="testLibraryGrid sidebarTestGrid">
+            {specialCard}
             {tests.map((test, index) => (
               <article className="testLibraryCard sidebarTestCard" key={test.id}>
                 <div className="testLibraryTop">
                   <span><FileTextIcon /></span>
-                  <small>TEST {String(index + 1).padStart(2, '0')}</small>
+                  <small>TEST {String(index + 1 + testNumberOffset).padStart(2, '0')}</small>
                 </div>
                 <div className="testLibraryCopy">
                   <span>{test.track.toUpperCase()} · {test.skill.toUpperCase()}</span>
@@ -120,14 +126,15 @@ export function SkillLibraryClient({
 
       <div className="libraryHeading">
         <div><span>MAVJUD MATERIALLAR</span><h2>Test kutubxonasi</h2></div>
-        <strong>{tests.length} ta material</strong>
+        <strong>{tests.length + (specialCard ? 1 : 0)} ta material</strong>
       </div>
 
-      {tests.length ? (
+      {hasMaterials ? (
         <section className="testLibraryGrid">
+          {specialCard}
           {tests.map((test, index) => (
             <article className="testLibraryCard" key={test.id}>
-              <div className="testLibraryTop"><span><FileTextIcon /></span><small>TEST {String(index + 1).padStart(2, '0')}</small></div>
+              <div className="testLibraryTop"><span><FileTextIcon /></span><small>TEST {String(index + 1 + testNumberOffset).padStart(2, '0')}</small></div>
               <div className="testLibraryCopy"><span>{test.track.toUpperCase()} · {test.skill.toUpperCase()}</span><h3>{test.title}</h3><p>{test.description || 'Real exam formatidagi professional mock test.'}</p></div>
               <div className="testLibraryMeta"><span><ClockIcon /> Yangilangan {new Intl.DateTimeFormat('uz-UZ', { day: '2-digit', month: 'short' }).format(new Date(test.updatedAt))}</span></div>
               <Link href={`/test/${test.id}`} className="testLibraryOpen" prefetch><strong>Testni boshlash</strong><span><ArrowRightIcon /></span></Link>
