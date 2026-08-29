@@ -36,7 +36,7 @@ export function ActiveMockBanner({ mock }: { mock: ActiveMockData | null }) {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (mock.setupPending || busy || code.length < 6) return;
+    if (!mock || mock.setupPending || busy || code.length < 6) return;
     setBusy(true);
     setError('');
     try {
