@@ -1,7 +1,43 @@
+'use client';
+
 import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
 import styles from './CefrSpeakingMockCard.module.css';
 
-export function CefrSpeakingMockCard({ enabled }: { enabled: boolean }) {
+export function CefrSpeakingMockCard({ enabled: initialEnabled }: { enabled: boolean }) {
+  const [enabled, setEnabled] = useState(initialEnabled);
+
+  const refreshStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/cefr/speaking/mock-1/status?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'x-ark-live-status': '1' },
+      });
+      if (!response.ok) return;
+      const body = await response.json() as { enabled?: boolean };
+      setEnabled(Boolean(body.enabled));
+    } catch {
+      // Keep the last known state if a quick refresh fails.
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshStatus();
+    const timer = window.setInterval(refreshStatus, 5000);
+    const onFocus = () => void refreshStatus();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refreshStatus();
+    };
+
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [refreshStatus]);
+
   if (!enabled) return null;
 
   return (
