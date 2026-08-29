@@ -1,41 +1,62 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeftIcon, ArrowRightIcon, FileTextIcon } from '@/components/UiIcons';
-import type { MockAttemptData } from '@/lib/mockAttempts';
+import { ArrowRightIcon, CheckCircleIcon } from '@/components/UiIcons';
+import type { StudentSummary } from '@/lib/auth/server-session';
+import type { MockAttemptData, MockFlowStage } from '@/lib/mockAttempts';
+import styles from './MockAttemptClient.module.css';
 
-const labels: Record<string, string> = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' };
+type SectionKey = 'listening' | 'reading';
 
-export function MockAttemptClient({ id, initialData }: { id: string; initialData: MockAttemptData }) {
+const stageIndex: Record<MockFlowStage, number> = {
+  listening_video: 0,
+  listening_test: 1,
+  reading_video: 2,
+  reading_test: 3,
+  completed: 4,
+};
+
+const steps = [
+  ['01', 'Listening instructions'],
+  ['02', 'Listening test'],
+  ['03', 'Reading instructions'],
+  ['04', 'Reading test'],
+] as const;
+
+export function MockAttemptClient({
+  id,
+  student,
+  initialData,
+}: {
+  id: string;
+  student: StudentSummary;
+  initialData: MockAttemptData;
+}) {
   const router = useRouter();
-  const [data, setData] = useState<MockAttemptData | null>(initialData);
+  const [data, setData] = useState(initialData);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [finishing, setFinishing] = useState(false);
-  const [finishError, setFinishError] = useState('');
 
-  const load = () => {
-    setError('');
-    return fetch(`/api/mock/attempts/${id}`)
-      .then(async (response) => {
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error || 'Mock attempt topilmadi.');
-        setData(body);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Mock attempt topilmadi.');
-        setData(null);
-      });
-  };
+  const load = useCallback(async () => {
+    const response = await fetch(`/api/mock/attempts/${id}`, { cache: 'no-store' });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error || 'Mock attempt yangilanmadi.');
+    setData(body as MockAttemptData);
+    return body as MockAttemptData;
+  }, [id]);
 
-  const completed = useMemo(() => data?.sections.filter((item) => item.result).length || 0, [data]);
-  const allDone = Boolean(data?.sections.length && completed === data.sections.length);
+  const listening = useMemo(() => data.sections.find((item) => item.section === 'listening') || null, [data.sections]);
+  const reading = useMemo(() => data.sections.find((item) => item.section === 'reading') || null, [data.sections]);
+  const currentIndex = stageIndex[data.progress.stage];
 
-  const finishMock = async () => {
-    if (!allDone || finishing) return;
+  const finishMock = useCallback(async () => {
+    if (finishing) return;
     setFinishing(true);
-    setFinishError('');
+    setError('');
     try {
       const response = await fetch(`/api/mock/attempts/${id}/finish`, { method: 'POST' });
       const body = await response.json();
@@ -43,84 +64,142 @@ export function MockAttemptClient({ id, initialData }: { id: string; initialData
       router.replace(`/result/${id}`);
       router.refresh();
     } catch (err) {
-      setFinishError(err instanceof Error ? err.message : 'Mock yakunlanmadi.');
-      await load();
-    } finally {
+      setError(err instanceof Error ? err.message : 'Mock yakunlanmadi.');
       setFinishing(false);
     }
-  };
+  }, [finishing, id, router]);
 
-  if (!data) return <div className="mockAccessGate"><div className="mockGateIcon"><FileTextIcon /></div><h1>Mock session topilmadi</h1><p>{error}</p><Link className="authPrimary" href="/mock"><ArrowLeftIcon /> Mock bo‘limiga qaytish</Link></div>;
+  useEffect(() => {
+    setVideoEnded(false);
+  }, [data.progress.stage]);
+
+  useEffect(() => {
+    if (data.progress.stage === 'completed' && data.attempt.status === 'in_progress') void finishMock();
+  }, [data.attempt.status, data.progress.stage, finishMock]);
+
+  async function completeVideo(section: SectionKey) {
+    if (busy || !videoEnded) return;
+    setBusy(true);
+    setError('');
+    try {
+      const response = await fetch(`/api/mock/attempts/${id}/progress`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ section }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || 'Instruction holati saqlanmadi.');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Instruction holati saqlanmadi.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const stage = data.progress.stage;
+  const isVideo = stage === 'listening_video' || stage === 'reading_video';
+  const videoSection: SectionKey = stage === 'reading_video' ? 'reading' : 'listening';
+  const testSection: SectionKey = stage === 'reading_test' ? 'reading' : 'listening';
+  const activeTest = testSection === 'listening' ? listening : reading;
 
   return (
-    <>
-      <section className="pageHeading mockHeading">
-        <div className="pageHeadingCopy">
-          <span className="authEyebrow">ACTIVE MOCK SESSION</span>
-          <h1>{data.mock.title}</h1>
-          <p>{data.mock.track.toUpperCase()} · {completed}/{data.sections.length} section completed</p>
+    <div className={styles.root}>
+      <section className={styles.identity}>
+        <div className={styles.identityBrand}>
+          <span className={styles.mark}>A</span>
+          <div><small>ARK EDUCATION · IELTS FULL MOCK</small><strong>{data.mock.title}</strong></div>
         </div>
-        <div className="mockSessionStatus"><span className={data.attempt.status === 'completed' ? 'done' : ''} /><div><b>{data.attempt.status.replace('_', ' ')}</b><small>Started {new Date(data.attempt.startedAt).toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' })}</small></div></div>
+        <div className={styles.candidate}>
+          <small>CANDIDATE ID</small>
+          <strong>{data.candidate.id || 'Candidate'}</strong>
+          <span>{student.firstName} {student.lastName}</span>
+        </div>
       </section>
 
-      <section className="mockSessionGrid">
-        <div className="mockSessionMain">
-          <div className="mockCardHeader">
-            <div><span className="authEyebrow">SECTIONS</span><h2>Mock flow</h2></div>
-            <span className="mockSecureBadge">{completed}/{data.sections.length} DONE</span>
-          </div>
-
-          <div className="mockSectionList">
-            {data.sections.map((item, index) => {
-              const sectionLabel = labels[item.section] || item.section;
-              const correct = item.result?.details?.correct;
-              const wrong = item.result?.details?.wrong;
-              return (
-                <article className={`mockSectionCard ${item.result ? 'isComplete' : ''}`} key={item.section}>
-                  <div className="mockSectionIndex">{String(index + 1).padStart(2, '0')}</div>
-                  <div className="mockSectionInfo">
-                    <span>{sectionLabel.toUpperCase()}</span>
-                    <h3>{item.test?.title || `${sectionLabel} test`}</h3>
-                    <p>{item.result ? `Saved${correct != null ? ` · ${correct} correct` : ''}${wrong != null ? ` · ${wrong} wrong` : ''}` : item.test ? 'Test mock session bilan bog‘langan.' : 'Test hali mock’ga biriktirilmagan.'}</p>
-                  </div>
-                  <div className="mockSectionAction">
-                    {item.result ? (
-                      <div className="mockResultMini"><b>{item.result.band ?? (item.result.raw_score != null ? `${item.result.raw_score}/${item.result.max_score ?? '—'}` : '✓')}</b><span>{item.result.band != null ? 'Band' : 'Score'}</span></div>
-                    ) : item.test ? (
-                      <Link className="pButton pButtonPrimary" href={`/test/${item.test.id}?attempt=${data.attempt.id}&mode=mock&section=${item.section}`}>Start {sectionLabel}</Link>
-                    ) : (
-                      <span className="mockUnavailable">Unavailable</span>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+      <section className={styles.hero}>
+        <span className={styles.eyebrow}>SECURE EXAM SESSION</span>
+        <h1>Listening → Reading</h1>
+        <p>Har bir bosqich ketma-ket ochiladi. Listening natijasi Reading tugamaguncha ko‘rsatilmaydi; yakuniy natija ikkala section tugagandan keyin ochiladi.</p>
+        <div className={styles.steps}>
+          {steps.map(([number, label], index) => (
+            <div key={number} className={`${styles.step} ${currentIndex === index ? styles.active : ''} ${currentIndex > index ? styles.done : ''}`}>
+              <b>{currentIndex > index ? '✓' : number}</b><span>{label}</span>
+            </div>
+          ))}
         </div>
-
-        <aside className="mockSummaryCard">
-          <span className="authEyebrow">MOCK SUMMARY</span>
-          <h2>Session overview</h2>
-          <div className="mockSummaryRows">
-            <div><span>Status</span><b>{data.attempt.status.replace('_', ' ')}</b></div>
-            <div><span>Completed</span><b>{completed}/{data.sections.length}</b></div>
-            <div><span>Overall</span><b>{data.attempt.overallBand ?? (data.attempt.overallScore != null ? `${data.attempt.overallScore}%` : '—')}</b></div>
-          </div>
-          <div className="mockProgressTrack"><span style={{ width: `${data.sections.length ? (completed / data.sections.length) * 100 : 0}%` }} /></div>
-
-          {data.attempt.status === 'completed' ? (
-            <Link className="authPrimary mockFinishButton" href={`/result/${id}`}>Final resultni ko‘rish <span><ArrowRightIcon /></span></Link>
-          ) : (
-            <button className="authPrimary mockFinishButton" type="button" disabled={!allDone || finishing} onClick={finishMock}>
-              {finishing ? 'Yakunlanmoqda…' : 'Mockni yakunlash'}
-            </button>
-          )}
-
-          {!allDone && data.attempt.status !== 'completed' && <p className="mockSummaryNote">Final submit barcha biriktirilgan section natijalari saqlangandan keyin ochiladi.</p>}
-          {finishError && <p className="mockFinishError">{finishError}</p>}
-          <Link className="authSecondary mockBackLink" href="/mock"><ArrowLeftIcon /> Yo‘nalishlarga qaytish</Link>
-        </aside>
       </section>
-    </>
+
+      {stage === 'completed' || data.attempt.status === 'completed' ? (
+        <section className={styles.completeCard}>
+          <div className={styles.completeIcon}><CheckCircleIcon /></div>
+          <h2>{finishing ? 'Final result tayyorlanmoqda…' : 'Mock Completed'}</h2>
+          <p>Listening va Reading javoblaringiz xavfsiz saqlandi. Yakuniy band hisoblanmoqda.</p>
+          {data.attempt.status === 'completed' && <Link className={styles.primary} href={`/result/${id}`}>Final result <ArrowRightIcon /></Link>}
+          {error && <div className={styles.error}>{error}</div>}
+        </section>
+      ) : (
+        <section className={styles.stage}>
+          <div className={styles.mainCard}>
+            <div className={styles.stageHead}>
+              <div>
+                <small>{isVideo ? 'OFFICIAL INSTRUCTIONS' : 'EXAM SECTION'}</small>
+                <h2>{isVideo ? `${videoSection === 'listening' ? 'Listening' : 'Reading'} instructions` : `${testSection === 'listening' ? 'Listening' : 'Reading'} Test`}</h2>
+              </div>
+              <span className={styles.badge}>{isVideo ? 'WATCH FIRST' : 'ONE ATTEMPT'}</span>
+            </div>
+
+            {isVideo ? (
+              <>
+                <div className={styles.videoShell}>
+                  <video
+                    key={`${id}-${videoSection}`}
+                    src={`/api/mock/attempts/${id}/video/${videoSection}`}
+                    controls
+                    controlsList="nodownload noplaybackrate noremoteplayback"
+                    disablePictureInPicture
+                    onEnded={() => setVideoEnded(true)}
+                    onPlay={() => setError('')}
+                  />
+                </div>
+                <p className={styles.hint}>Video oxirigacha ko‘rilgandan keyin keyingi bosqich ochiladi. Video test vaqtidan hisoblanmaydi.</p>
+                <div className={styles.actionRow}>
+                  <button className={styles.primary} type="button" disabled={!videoEnded || busy} onClick={() => void completeVideo(videoSection)}>
+                    {busy ? 'Saqlanmoqda…' : videoEnded ? `Continue to ${videoSection === 'listening' ? 'Listening' : 'Reading'}` : 'Watch the full video'} <ArrowRightIcon />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className={styles.testLaunch}>
+                <div>
+                  <div className={styles.testIcon}>{testSection === 'listening' ? 'L' : 'R'}</div>
+                  <h3>{testSection === 'listening' ? 'Listening' : 'Reading'} is ready</h3>
+                  <p>{testSection === 'listening' ? 'Recording test boshlanganda ishlaydi. Listening tugagach ball ko‘rsatilmaydi va siz Reading instructions bosqichiga qaytasiz.' : '60 daqiqalik Reading testni boshlang. Tugagach Full Mock avtomatik yakunlanadi va umumiy natija ochiladi.'}</p>
+                  {activeTest?.test ? (
+                    <Link className={styles.primary} href={`/test/${activeTest.test.id}?attempt=${id}&mode=mock&section=${testSection}`}>
+                      Start {testSection === 'listening' ? 'Listening' : 'Reading'} <ArrowRightIcon />
+                    </Link>
+                  ) : <div className={styles.error}>Bu section uchun test hali biriktirilmagan.</div>}
+                </div>
+              </div>
+            )}
+
+            {error && <div className={styles.error}>{error}</div>}
+          </div>
+
+          <aside className={styles.sideCard}>
+            <small>SESSION OVERVIEW</small>
+            <h3>Candidate session</h3>
+            <div className={styles.summary}>
+              <div><span>Candidate</span><b>{data.candidate.id || '—'}</b></div>
+              <div><span>Status</span><b>{data.attempt.status.replaceAll('_', ' ')}</b></div>
+              <div><span>Listening</span><b>{listening?.result ? 'Completed ✓' : currentIndex >= 1 ? 'In progress' : 'Waiting'}</b></div>
+              <div><span>Reading</span><b>{reading?.result ? 'Completed ✓' : currentIndex >= 3 ? 'In progress' : 'Locked'}</b></div>
+            </div>
+            <div className={styles.notice}>Section ballari imtihon jarayonida yashiriladi. Final result faqat Reading tugagandan keyin ko‘rsatiladi.</div>
+          </aside>
+        </section>
+      )}
+    </div>
   );
 }
