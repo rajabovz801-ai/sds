@@ -56,12 +56,10 @@
   text-rendering:optimizeLegibility;
 }
 .studentDashboardShell .studentBrand strong,
-.studentDashboardShell .studentSideNav a,
 .studentDashboardShell .studentSideProfile strong,
 .studentDashboardShell .studentDashTopbar strong,
 .studentDashboardShell .studentMetric strong,
 .studentDashboardShell .studentPanel h2,
-.studentDashboardShell .studentProgressSummary h2,
 .studentDashboardShell .studentDailyTasksCta{
   color:#102a43;
   text-shadow:none;
@@ -69,6 +67,11 @@
 .studentDashboardShell .studentSideNav a{font-weight:800}
 .studentDashboardShell .studentSideNav a:not(.active){color:#53657b}
 .studentDashboardShell .studentSideNav a:not(.active):hover{color:#102a43}
+.studentDashboardShell .studentSideNav a.active,
+.studentDashboardShell .studentSideNav a.active span,
+.studentDashboardShell .studentSideNav a.active svg{
+  color:#fff!important;
+}
 .studentDashboardShell .studentBrand small,
 .studentDashboardShell .studentSideProfile small,
 .studentDashboardShell .studentDashTopbar small,
@@ -89,6 +92,10 @@
 .studentDashboardShell .dashChartLabels{font-weight:700}
 .studentDashboardShell .studentDashTopbar small{font-weight:750}
 .studentDashboardShell .studentSideProfile small{font-weight:850}
+.studentDashboardShell .studentProgressSummary .summaryTop h2{
+  color:#fff;
+  text-shadow:none;
+}
 .studentDashboardShell .studentProgressSummary>p{color:#dbe5ef;opacity:1}
 .studentDashboardShell .studentProgressSummary .summaryStats small,
 .studentDashboardShell .studentProgressSummary .summaryStats span{color:#c8d6e5;opacity:1}
