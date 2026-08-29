@@ -5,6 +5,7 @@ import { hashAccessCode } from '@/lib/auth/codes';
 import { getServiceSupabase, HTML_TESTS_BUCKET } from '@/lib/supabase/server';
 
 type AssetRef = { bucket: string; path: string; name: string; size?: number };
+type MockSkill = 'listening' | 'reading';
 
 type CreateBody = {
   title?: string;
@@ -45,6 +46,31 @@ function makeCodes(count: number) {
   const used = new Set<string>();
   while (used.size < count) used.add(String(randomInt(100000, 1000000)));
   return [...used];
+}
+
+function adapterFor(skill: MockSkill) {
+  if (skill === 'reading') {
+    return `\n<!-- ARK_MOCK_01_ADAPTER -->\n<style>html[data-ark-guided-mock="1"] #resultScreen,html[data-ark-guided-mock="1"] #resultsScreen,html[data-ark-guided-mock="1"] .result-screen{display:none!important}</style>\n<script>(function(){if(new URLSearchParams(location.search).get('mode')!=='mock')return;document.documentElement.setAttribute('data-ark-guided-mock','1');})();</script>\n`;
+  }
+
+  return `\n<!-- ARK_MOCK_01_ADAPTER -->\n<style>html[data-ark-guided-mock="1"] #resultOverlay,html[data-ark-guided-mock="1"] #securityLock{display:none!important}html[data-ark-guided-mock="1"] #reviewBtn,html[data-ark-guided-mock="1"] #restartBtn{display:none!important}</style>\n<script>(function(){if(new URLSearchParams(location.search).get('mode')!=='mock')return;document.documentElement.setAttribute('data-ark-guided-mock','1');var sent=false;try{document.exitFullscreen=function(){return Promise.resolve();};}catch(e){}window.addEventListener('message',function(event){if(event.data&&event.data.type==='ARK_PLATFORM_START'){event.stopImmediatePropagation();}},true);function emit(){if(sent||!window.__finalResult)return;var r=window.__finalResult;var submissionId='mock-listening-'+Date.now().toString(36);var payload={submissionId:submissionId,rawScore:Number(r.score)||0,score:Number(r.score)||0,maxScore:40,total:40,correct:Number(r.score)||0,wrong:Number(r.wrong)||0,unanswered:Number(r.empty)||0,details:{submissionId:submissionId,source:'mock-listening-adapter'}};sent=true;window.__ARK_RESULT__=payload;try{window.parent.postMessage({type:'ARK_TEST_RESULT',payload:payload},'*');}catch(e){}}var timer=setInterval(function(){emit();if(sent)clearInterval(timer);},80);document.addEventListener('DOMContentLoaded',function(){var restart=document.getElementById('restartBtn');if(restart)restart.style.display='none';var review=document.getElementById('reviewBtn');if(review)review.style.display='none';var steps=document.querySelectorAll('.premium-steps div p');if(steps&&steps[2])steps[2].textContent='This Full Mock section can only be completed once.';});})();</script>\n`;
+}
+
+async function prepareMockHtml(asset: AssetRef, skill: MockSkill) {
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase.storage.from(asset.bucket).download(asset.path);
+  if (error || !data) throw error || new Error(`${skill} HTML yuklanmadi.`);
+  let html = await data.text();
+  if (html.includes('ARK_MOCK_01_ADAPTER')) return;
+  const adapter = adapterFor(skill);
+  html = /<\/body\s*>/i.test(html) ? html.replace(/<\/body\s*>/i, `${adapter}</body>`) : `${html}${adapter}`;
+  const bytes = new TextEncoder().encode(html);
+  const { error: uploadError } = await supabase.storage.from(asset.bucket).upload(asset.path, bytes, {
+    contentType: 'text/html;charset=utf-8',
+    cacheControl: '3600',
+    upsert: true,
+  });
+  if (uploadError) throw uploadError;
 }
 
 export async function GET(request: NextRequest) {
@@ -124,6 +150,11 @@ export async function POST(request: NextRequest) {
     if (checks.some((exists) => !exists)) {
       return NextResponse.json({ error: 'Yuklangan fayllardan biri Storage’da topilmadi. Qayta yuklang.' }, { status: 409 });
     }
+
+    await Promise.all([
+      prepareMockHtml(body.listeningHtml!, 'listening'),
+      prepareMockHtml(body.readingHtml!, 'reading'),
+    ]);
 
     const supabase = getServiceSupabase();
     const { data: students, error: studentsError } = await supabase
