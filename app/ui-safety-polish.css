@@ -49,6 +49,51 @@
   overflow-wrap:anywhere;
 }
 
+/* Typography clarity: scoped to the student dashboard only. */
+.studentDashboardShell{
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+}
+.studentDashboardShell .studentBrand strong,
+.studentDashboardShell .studentSideNav a,
+.studentDashboardShell .studentSideProfile strong,
+.studentDashboardShell .studentDashTopbar strong,
+.studentDashboardShell .studentMetric strong,
+.studentDashboardShell .studentPanel h2,
+.studentDashboardShell .studentProgressSummary h2,
+.studentDashboardShell .studentDailyTasksCta{
+  color:#102a43;
+  text-shadow:none;
+}
+.studentDashboardShell .studentSideNav a{font-weight:800}
+.studentDashboardShell .studentSideNav a:not(.active){color:#53657b}
+.studentDashboardShell .studentSideNav a:not(.active):hover{color:#102a43}
+.studentDashboardShell .studentBrand small,
+.studentDashboardShell .studentSideProfile small,
+.studentDashboardShell .studentDashTopbar small,
+.studentDashboardShell .studentMetric small,
+.studentDashboardShell .studentMetric span,
+.studentDashboardShell .studentPanel header p,
+.studentDashboardShell .dashChartLabels,
+.studentDashboardShell .recentRow span,
+.studentDashboardShell .summaryStats small,
+.studentDashboardShell .summaryStats span{
+  color:#5f6f82;
+  opacity:1;
+  text-shadow:none;
+}
+.studentDashboardShell .studentMetric small{font-weight:850}
+.studentDashboardShell .studentMetric span{font-weight:600}
+.studentDashboardShell .studentPanel header p{font-weight:560}
+.studentDashboardShell .dashChartLabels{font-weight:700}
+.studentDashboardShell .studentDashTopbar small{font-weight:750}
+.studentDashboardShell .studentSideProfile small{font-weight:850}
+.studentDashboardShell .studentProgressSummary>p{color:#dbe5ef;opacity:1}
+.studentDashboardShell .studentProgressSummary .summaryStats small,
+.studentDashboardShell .studentProgressSummary .summaryStats span{color:#c8d6e5;opacity:1}
+.studentDashboardShell .studentProgressSummary>a{font-weight:850}
+
 /* Shared student workspace cards / CTA controls. */
 .studentWorkspaceShell .workspaceHeroCopy,
 .studentWorkspaceShell .sectionCard,
@@ -74,6 +119,20 @@
   overflow:hidden;
   text-overflow:ellipsis;
 }
+
+.studentWorkspaceShell{
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+}
+.studentWorkspaceShell .workspaceHeroCopy>p,
+.studentWorkspaceShell .testLibraryCopy p,
+.studentWorkspaceShell .sidebarTestMeta,
+.studentWorkspaceShell .libraryBreadcrumb{
+  color:#5f6f82;
+  opacity:1;
+}
+.studentWorkspaceShell .sidebarTestOpen{font-weight:850}
 
 @media(max-width:620px){
   .studentDashboardShell .studentDashTopbar>div:first-child{min-width:0;overflow:hidden}
