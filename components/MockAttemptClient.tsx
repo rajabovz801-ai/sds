@@ -117,10 +117,11 @@ export function MockAttemptClient({
         </div>
       </section>
 
-      <section className={styles.hero}>
-        <span className={styles.eyebrow}>SECURE EXAM SESSION</span>
-        <h1>Listening → Reading</h1>
-        <p>Har bir bosqich ketma-ket ochiladi. Listening natijasi Reading tugamaguncha ko‘rsatilmaydi; yakuniy natija ikkala section tugagandan keyin ochiladi.</p>
+      <section className={styles.flowBar}>
+        <div className={styles.flowTitle}>
+          <span className={styles.eyebrow}>SECURE EXAM SESSION</span>
+          <h1>Listening <span>→</span> Reading</h1>
+        </div>
         <div className={styles.steps}>
           {steps.map(([number, label], index) => (
             <div key={number} className={`${styles.step} ${currentIndex === index ? styles.active : ''} ${currentIndex > index ? styles.done : ''}`}>
@@ -162,10 +163,10 @@ export function MockAttemptClient({
                     onPlay={() => setError('')}
                   />
                 </div>
-                <p className={styles.hint}>Video oxirigacha ko‘rilgandan keyin keyingi bosqich ochiladi. Video test vaqtidan hisoblanmaydi.</p>
-                <div className={styles.actionRow}>
+                <div className={styles.videoFooter}>
+                  <p className={styles.hint}>Video oxirigacha ko‘rilgach keyingi bosqich ochiladi. Video test vaqtidan hisoblanmaydi.</p>
                   <button className={styles.primary} type="button" disabled={!videoEnded || busy} onClick={() => void completeVideo(videoSection)}>
-                    {busy ? 'Saqlanmoqda…' : videoEnded ? `Continue to ${videoSection === 'listening' ? 'Listening' : 'Reading'}` : 'Watch the full video'} <ArrowRightIcon />
+                    {busy ? 'Saqlanmoqda…' : videoEnded ? `Continue to ${videoSection === 'listening' ? 'Listening' : 'Reading'}` : 'Watch full video'} <ArrowRightIcon />
                   </button>
                 </div>
               </>
@@ -174,7 +175,7 @@ export function MockAttemptClient({
                 <div>
                   <div className={styles.testIcon}>{testSection === 'listening' ? 'L' : 'R'}</div>
                   <h3>{testSection === 'listening' ? 'Listening' : 'Reading'} is ready</h3>
-                  <p>{testSection === 'listening' ? 'Recording test boshlanganda ishlaydi. Listening tugagach ball ko‘rsatilmaydi va siz Reading instructions bosqichiga qaytasiz.' : '60 daqiqalik Reading testni boshlang. Tugagach Full Mock avtomatik yakunlanadi va umumiy natija ochiladi.'}</p>
+                  <p>{testSection === 'listening' ? 'Recording test boshlanganda ishlaydi. Listening tugagach ball ko‘rsatilmaydi va Reading instructions ochiladi.' : '60 daqiqalik Reading testni boshlang. Tugagach Full Mock avtomatik yakunlanadi.'}</p>
                   {activeTest?.test ? (
                     <Link className={styles.primary} href={`/test/${activeTest.test.id}?attempt=${id}&mode=mock&section=${testSection}`}>
                       Start {testSection === 'listening' ? 'Listening' : 'Reading'} <ArrowRightIcon />
@@ -186,18 +187,6 @@ export function MockAttemptClient({
 
             {error && <div className={styles.error}>{error}</div>}
           </div>
-
-          <aside className={styles.sideCard}>
-            <small>SESSION OVERVIEW</small>
-            <h3>Candidate session</h3>
-            <div className={styles.summary}>
-              <div><span>Candidate</span><b>{data.candidate.id || '—'}</b></div>
-              <div><span>Status</span><b>{data.attempt.status.replaceAll('_', ' ')}</b></div>
-              <div><span>Listening</span><b>{listening?.result ? 'Completed ✓' : currentIndex >= 1 ? 'In progress' : 'Waiting'}</b></div>
-              <div><span>Reading</span><b>{reading?.result ? 'Completed ✓' : currentIndex >= 3 ? 'In progress' : 'Locked'}</b></div>
-            </div>
-            <div className={styles.notice}>Section ballari imtihon jarayonida yashiriladi. Final result faqat Reading tugagandan keyin ko‘rsatiladi.</div>
-          </aside>
         </section>
       )}
     </div>
