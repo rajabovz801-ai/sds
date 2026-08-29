@@ -37,7 +37,14 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
         body: JSON.stringify({ code }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Kirish amalga oshmadi.');
+      if (!response.ok) {
+        if (data.maintenance) {
+          router.replace('/maintenance');
+          router.refresh();
+          return;
+        }
+        throw new Error(data.error || 'Kirish amalga oshmadi.');
+      }
       if (data.adminChallenge) {
         setMode('admin');
         setCode('');
