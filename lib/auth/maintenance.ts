@@ -1,4 +1,4 @@
-export const PLATFORM_MAINTENANCE_MODE = true;
+export const PLATFORM_MAINTENANCE_MODE = false;
 
 const MAINTENANCE_ALLOWED_STUDENT_IDS = new Set([
   '0ca910d9-0f9d-489f-b95c-5e58dd3609f5',
