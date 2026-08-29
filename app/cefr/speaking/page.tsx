@@ -5,6 +5,9 @@ import { requireStudent } from '@/lib/auth/server-session';
 import { getCefrSpeakingMock } from '@/lib/cefrSpeaking';
 import { listPublishedTestsByWithAttempts } from '@/lib/cloudTests';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function CefrSpeakingPage() {
   const student = await requireStudent('/cefr/speaking');
   const [tests, speakingMock] = await Promise.all([
@@ -14,7 +17,7 @@ export default async function CefrSpeakingPage() {
 
   return (
     <StudentWorkspaceShellClient student={student} active="cefr">
-      <CefrSpeakingMockCard enabled={speakingMock?.status === 'published'} />
+      <CefrSpeakingMockCard enabled={speakingMock?.status === 'published' && Boolean(speakingMock?.instruction_video_path)} />
       <SkillLibraryClient
         track="cefr" skill="speaking" title="CEFR Speaking"
         description="Daraja asosidagi speaking topshiriqlari va professional CEFR practice materiallari."
