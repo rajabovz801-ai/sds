@@ -86,6 +86,37 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (!mock || String(mock[sectionFields[section]] || '') !== testId) {
         return NextResponse.json({ error: 'Test bu mock sectioniga tegishli emas.' }, { status: 403 });
       }
+
+      if (section === 'listening' || section === 'reading') {
+        const [{ data: progress, error: progressError }, { data: savedSections, error: sectionsError }] = await Promise.all([
+          supabase.from('mock_attempt_progress').select('listening_video_seen_at,reading_video_seen_at').eq('attempt_id', attemptId).maybeSingle(),
+          supabase.from('section_results').select('section').eq('attempt_id', attemptId),
+        ]);
+        if (progressError) throw progressError;
+        if (sectionsError) throw sectionsError;
+        const completed = new Set((savedSections || []).map((row) => row.section));
+
+        if (section === 'listening') {
+          if (!progress?.listening_video_seen_at) {
+            return NextResponse.json({ error: 'Avval Listening instruction videoni oxirigacha ko‘ring.' }, { status: 409 });
+          }
+          if (completed.has('listening')) {
+            return NextResponse.json({ error: 'Listening section allaqachon yakunlangan.', code: 'ATTEMPT_USED' }, { status: 409 });
+          }
+        }
+
+        if (section === 'reading') {
+          if (!completed.has('listening')) {
+            return NextResponse.json({ error: 'Avval Listening sectionni yakunlang.' }, { status: 409 });
+          }
+          if (!progress?.reading_video_seen_at) {
+            return NextResponse.json({ error: 'Avval Reading instruction videoni oxirigacha ko‘ring.' }, { status: 409 });
+          }
+          if (completed.has('reading')) {
+            return NextResponse.json({ error: 'Reading section allaqachon yakunlangan.', code: 'ATTEMPT_USED' }, { status: 409 });
+          }
+        }
+      }
     }
 
     const durationSeconds = Math.max(300, Math.min(14400, Math.round(Number(test.duration_minutes || 60) * 60)));

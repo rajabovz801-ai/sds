@@ -6,7 +6,7 @@ const labels: Record<string, string> = { reading: 'Reading', listening: 'Listeni
 
 export function MockResultClient({ id, data }: { id: string; data: MockAttemptData }) {
   if (data.attempt.status !== 'completed') {
-    return <div className="mockAccessGate"><div className="mockGateIcon"><ClockIcon /></div><h1>Mock hali yakunlanmagan</h1><p>Barcha sectionlarni tugatib, “Mockni yakunlash” tugmasini bosing.</p><Link className="authPrimary" href={`/mock/${id}`}><ArrowLeftIcon /> Mock sessionga qaytish</Link></div>;
+    return <div className="mockAccessGate"><div className="mockGateIcon"><ClockIcon /></div><h1>Mock hali yakunlanmagan</h1><p>Full Mock flow’ga qayting va qolgan sectionni tugating.</p><Link className="authPrimary" href={`/mock/${id}`}><ArrowLeftIcon /> Mock sessionga qaytish</Link></div>;
   }
 
   const primaryValue = data.attempt.overallBand != null ? data.attempt.overallBand : data.attempt.overallScore != null ? `${data.attempt.overallScore}%` : '—';
@@ -18,9 +18,9 @@ export function MockResultClient({ id, data }: { id: string; data: MockAttemptDa
         <div className="resultHeroCopy">
           <span className="authEyebrow">FINAL MOCK RESULT</span>
           <h1>{data.mock.title}</h1>
-          <p>{data.mock.track.toUpperCase()} · Completed {data.attempt.completedAt ? new Date(data.attempt.completedAt).toLocaleString('uz-UZ') : ''}</p>
+          <p>{data.candidate.id ? `${data.candidate.id} · ` : ''}{data.mock.track.toUpperCase()} · Completed {data.attempt.completedAt ? new Date(data.attempt.completedAt).toLocaleString('uz-UZ') : ''}</p>
         </div>
-        <div className="resultScoreCard"><span>{primaryLabel}</span><strong>{primaryValue}</strong><small>Completed successfully</small></div>
+        <div className="resultScoreCard"><span>{primaryLabel}</span><strong>{primaryValue}</strong><small>Listening + Reading</small></div>
       </section>
 
       <section className="resultGrid">
@@ -33,9 +33,10 @@ export function MockResultClient({ id, data }: { id: string; data: MockAttemptDa
           return (
             <article className="resultSectionCard" key={item.section}>
               <div className="resultCardTop"><span>{String(index + 1).padStart(2, '0')}</span><b>{label}</b></div>
-              <div className="resultMainValue"><strong>{result?.band ?? score}</strong><span>{result?.band != null ? 'Band' : 'Score'}</span></div>
+              <div className="resultMainValue"><strong>{result?.band ?? '—'}</strong><span>Band</span></div>
               <div className="resultStats">
-                <div><span>Correct</span><b>{details.correct ?? '—'}</b></div>
+                <div><span>Score</span><b>{score}</b></div>
+                <div><span>Correct</span><b>{details.correct ?? result?.raw_score ?? '—'}</b></div>
                 <div><span>Wrong</span><b>{details.wrong ?? '—'}</b></div>
                 <div><span>Unanswered</span><b>{details.unanswered ?? '—'}</b></div>
                 <div><span>Accuracy</span><b>{percentage != null ? `${percentage}%` : '—'}</b></div>
@@ -47,8 +48,8 @@ export function MockResultClient({ id, data }: { id: string; data: MockAttemptDa
       </section>
 
       <section className="resultFooterCard">
-        <div><span className="authEyebrow">NEXT STEP</span><h2>Mock yakunlandi</h2><p>Sectionlar kesimidagi tahlilni ko‘rib chiqing yoki boshqaruv sahifasiga qayting.</p></div>
-        <div className="resultActions"><Link className="authPrimary" href="/dashboard">Boshqaruv <span><ArrowRightIcon /></span></Link><Link className="authSecondary" href="/mock"><ArrowLeftIcon /> Mock bo‘limi</Link></div>
+        <div><span className="authEyebrow">MOCK COMPLETED</span><h2>Yakuniy natija saqlandi</h2><p>Listening va Reading natijalari Candidate ID bilan Full Mock tarixiga yozildi.</p></div>
+        <div className="resultActions"><Link className="authPrimary" href="/mock">Dashboard <span><ArrowRightIcon /></span></Link><Link className="authSecondary" href="/mock"><ArrowLeftIcon /> Mock bo‘limi</Link></div>
       </section>
     </>
   );
