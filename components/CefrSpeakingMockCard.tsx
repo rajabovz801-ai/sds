@@ -2,57 +2,45 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import styles from './CefrSpeakingMockCard.module.css';
+import { ArrowRightIcon, FileTextIcon, RepeatIcon } from '@/components/UiIcons';
 
 export function CefrSpeakingMockCard({ enabled: initialEnabled }: { enabled: boolean }) {
   const [enabled, setEnabled] = useState(initialEnabled);
 
   const refreshStatus = useCallback(async () => {
     try {
-      const response = await fetch(`/api/cefr/speaking/mock-1/status?t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: { 'x-ark-live-status': '1' },
-      });
+      const response = await fetch(`/api/cefr/speaking/mock-1/status?t=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) return;
       const body = await response.json() as { enabled?: boolean };
       setEnabled(Boolean(body.enabled));
-    } catch {
-      // Keep the last known state if a quick refresh fails.
-    }
+    } catch {}
   }, []);
 
   useEffect(() => {
     void refreshStatus();
     const timer = window.setInterval(refreshStatus, 5000);
-    const onFocus = () => void refreshStatus();
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') void refreshStatus();
-    };
-
-    window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', onVisible);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener('focus', onFocus);
-      document.removeEventListener('visibilitychange', onVisible);
-    };
+    return () => window.clearInterval(timer);
   }, [refreshStatus]);
 
   if (!enabled) return null;
 
   return (
-    <section className={styles.card}>
-      <div className={styles.copy}>
-        <span className={styles.eyebrow}>CEFR · SPEAKING MOCK</span>
-        <h2>Speaking Mock Test 1</h2>
-        <p>Part 1 va Part 1.2 · timed speaking · microphone recording · bitta to‘liq audio.</p>
-        <div className={styles.facts}>
-          <span>3 + 3 questions</span>
-          <span>Prep timer</span>
-          <span>Full recording</span>
-        </div>
+    <article className="testLibraryCard sidebarTestCard">
+      <div className="testLibraryTop">
+        <span><FileTextIcon /></span>
+        <small>TEST 01</small>
       </div>
-      <Link className={styles.action} href="/cefr/speaking/mock-1">Start Speaking →</Link>
-    </section>
+      <div className="testLibraryCopy">
+        <span>CEFR · SPEAKING</span>
+        <h3>Speaking Mock Test 1</h3>
+      </div>
+      <div className="sidebarAttemptMeta">
+        <RepeatIcon />
+        <span><strong>1</strong> attempt</span>
+      </div>
+      <Link href="/cefr/speaking/mock-1" className="sidebarTestOpen" prefetch>
+        <strong>Boshlash</strong><ArrowRightIcon />
+      </Link>
+    </article>
   );
 }
