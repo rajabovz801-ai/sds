@@ -63,31 +63,26 @@ export function ActiveMockBanner({ mock }: { mock: ActiveMockData | null }) {
   return createPortal(
     <section className={styles.banner}>
       <div className={styles.copy}>
-        <span className={styles.eyebrow}>{mock.setupPending ? 'IELTS FULL MOCK EXAM · FINAL SETUP' : 'IELTS FULL MOCK EXAM · ACTIVE NOW'}</span>
+        <span className={styles.eyebrow}>IELTS FULL MOCK EXAM</span>
         <h2>{mock.title}</h2>
-        <p>{mock.setupPending
-          ? 'Full Mock engine tayyor. Hozir Listening, Reading va instruction media fayllari yakuniy server ulanishidan o‘tkazilmoqda. Tayyor bo‘lishi bilan shu bannerning o‘zida Mock Code orqali start ochiladi.'
-          : 'Bugungi Full Mock real exam flow bo‘yicha ishlaydi: Listening instructions → Listening → Reading instructions → Reading. Section natijalari yakungacha yashiriladi.'}</p>
         <div className={styles.facts}><span>LISTENING + READING</span><span>80 QUESTIONS</span><span>ONE ATTEMPT</span><span>FINAL OVERALL BAND</span></div>
       </div>
       <div className={styles.action}>
         <small>{mock.candidateId ? `CANDIDATE · ${mock.candidateId}` : 'SECURE MOCK ACCESS'}</small>
         {mock.setupPending ? (
           <>
-            <strong>Mock setup in progress</strong>
-            <p>Test tugmasi faqat barcha media va HTML fayllari xavfsiz ulanganidan keyin ochiladi.</p>
-            <button className={styles.button} type="button" disabled>Final setup…</button>
+            <strong>Mock 01</strong>
+            <p>Secure access is being prepared.</p>
+            <button className={styles.button} type="button" disabled>Preparing…</button>
           </>
         ) : mock.attempt ? (
           <>
             <strong>{mock.attempt.status === 'completed' ? 'Mock Completed' : 'Mock in progress'}</strong>
-            <p>{mock.attempt.status === 'completed' ? 'Yakuniy natijangiz tayyor.' : 'Oldingi attempt o‘sha joyidan davom etadi.'}</p>
             <Link className={styles.button} href={attemptHref}>{mock.attempt.status === 'completed' ? 'View Final Result' : 'Continue Mock'} <ArrowRightIcon /></Link>
           </>
         ) : (
           <form className={styles.codeWrap} onSubmit={submit}>
             <strong>Start Mock Exam</strong>
-            <p>Admin bergan 6 xonali shaxsiy Mock Code’ni kiriting.</p>
             <input className={styles.code} value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" placeholder="000000" aria-label="Mock Code" />
             <button className={styles.button} type="submit" disabled={busy || code.length !== 6}>{busy ? 'Checking…' : 'Confirm & Start'} <ArrowRightIcon /></button>
             {error && <div className={styles.error}>{error}</div>}
