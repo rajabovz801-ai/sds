@@ -41,7 +41,7 @@ export function mapTest(row: TestRow): CloudTest {
 
 export async function listPublishedTests(): Promise<CloudTest[]> {
   const supabase = getPublicSupabase();
-  const {data,error} = await supabase.from('tests').select('*').eq('status','published').order('updated_at',{ascending:false});
+  const {data,error} = await supabase.from('tests').select('*').eq('status','published').eq('mock_only', false).order('updated_at',{ascending:false});
   if(error) throw error;
   return ((data||[]) as TestRow[]).map(mapTest);
 }
@@ -53,6 +53,7 @@ export async function listDailyTasks(): Promise<CloudTest[]> {
     .from('tests')
     .select('*')
     .eq('status', 'published')
+    .eq('mock_only', false)
     .eq('daily_task_enabled', true)
     .gt('daily_task_expires_at', now)
     .order('daily_task_expires_at', { ascending: true });
@@ -66,6 +67,7 @@ export async function listPublishedTestsBy(track: TestTrack, skill: TestSkill): 
     .from('tests')
     .select('*')
     .eq('status', 'published')
+    .eq('mock_only', false)
     .eq('track', track)
     .eq('skill', skill)
     .order('updated_at', { ascending: false });
