@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hashAccessCode, normalizeAccessCode } from '@/lib/auth/codes';
 import { createSessionToken, SESSION_COOKIE, sessionCookieOptions } from '@/lib/auth/session';
+import { isStudentAllowedDuringMaintenance } from '@/lib/auth/maintenance';
 import { getServiceSupabase } from '@/lib/supabase/server';
 import { constantTimeEqual } from '@/lib/auth/secrets';
 import {
@@ -82,6 +83,14 @@ export async function POST(request: NextRequest) {
     if (!student) {
       addFailure(ip, nowMs);
       return NextResponse.json({ error: 'Student profili faol emas.' }, { status: 403 });
+    }
+
+    if (!isStudentAllowedDuringMaintenance(student.id)) {
+      attempts.delete(ip);
+      return NextResponse.json(
+        { error: 'Platformada texnik ishlar olib borilmoqda.', maintenance: true },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
     }
 
     const token = createSessionToken(

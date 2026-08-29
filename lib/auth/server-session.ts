@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { SESSION_COOKIE, verifySessionToken } from '@/lib/auth/session';
+import { PLATFORM_MAINTENANCE_MODE } from '@/lib/auth/maintenance';
 import { getServiceSupabase } from '@/lib/supabase/server';
 
 export type StudentSummary = {
@@ -40,13 +41,19 @@ export async function getActiveServerSession() {
 
 export async function requireServerSession(nextPath: string) {
   const session = await getServerSession();
-  if (!session) redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  if (!session) {
+    if (PLATFORM_MAINTENANCE_MODE) redirect('/maintenance');
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  }
   return session;
 }
 
 export async function requireStudent(nextPath: string): Promise<StudentSummary> {
   const session = await requireServerSession(nextPath);
   const student = await getActiveStudent(session.studentId);
-  if (!student) redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  if (!student) {
+    if (PLATFORM_MAINTENANCE_MODE) redirect('/maintenance');
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  }
   return student;
 }
