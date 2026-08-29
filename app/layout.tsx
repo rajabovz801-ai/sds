@@ -16,6 +16,7 @@ import './daily-tasks-polish.css';
 import './student-workspace-shell.css';
 import './ielts-library-card-fix.css';
 import './practice-hub.css';
+import './ui-safety-polish.css';
 
 export const metadata: Metadata = {
   title: 'ARK EDUCATION — IELTS Exam & Practice Platform',
