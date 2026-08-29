@@ -1,3 +1,4 @@
+import { ListeningFullscreenResumeFix } from '@/components/ListeningFullscreenResumeFix';
 import { ListeningIframeCleanup } from '@/components/ListeningIframeCleanup';
 import { TestViewerClient } from '@/components/TestViewerClient';
 import { requireStudent } from '@/lib/auth/server-session';
@@ -31,9 +32,11 @@ export default async function TestPage({
     getPublishedTest(id),
   ]);
   if (!test) notFound();
+  const isListening = test.skill === 'listening';
   return (
     <>
-      <ListeningIframeCleanup enabled={test.skill === 'listening'} />
+      <ListeningIframeCleanup enabled={isListening} />
+      <ListeningFullscreenResumeFix enabled={isListening} />
       <TestViewerClient
         id={id}
         initialData={{
