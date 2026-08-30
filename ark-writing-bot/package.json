@@ -1,0 +1,17 @@
+{
+  "name": "ark-writing-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@vercel/functions": "^2.2.0",
+    "mammoth": "^1.10.0",
+    "pdfkit": "^0.17.2"
+  }
+}
