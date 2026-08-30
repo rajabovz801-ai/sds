@@ -19,6 +19,7 @@ function getIncoming(update) {
   return {
     message,
     chatId: message.chat?.id,
+    chatType: message.chat?.type || "private",
     businessConnectionId: message.business_connection_id || null,
     studentName: [message.from?.first_name, message.from?.last_name].filter(Boolean).join(" ") || "Student"
   };
@@ -39,6 +40,35 @@ function mimeFromName(name = "") {
   if (lower.endsWith(".png")) return "image/png";
   if (lower.endsWith(".webp")) return "image/webp";
   return "image/jpeg";
+}
+
+function isGroupChat(chatType = "") {
+  return chatType === "group" || chatType === "supergroup";
+}
+
+function isGroupServiceMessage(message) {
+  return Boolean(
+    message?.new_chat_members?.length ||
+    message?.left_chat_member ||
+    message?.new_chat_title ||
+    message?.new_chat_photo ||
+    message?.delete_chat_photo ||
+    message?.group_chat_created ||
+    message?.supergroup_chat_created ||
+    message?.channel_chat_created ||
+    message?.migrate_to_chat_id ||
+    message?.migrate_from_chat_id ||
+    message?.pinned_message
+  );
+}
+
+function shouldRespondInGroup(message) {
+  const text = String(message?.text || message?.caption || "");
+  if (!text) return false;
+  if (/^\/(start|help|status)(?:@ArkTutorBot)?\b/i.test(text)) return true;
+  if (/\b@ArkTutorBot\b/i.test(text)) return true;
+  if (message?.reply_to_message?.from?.is_bot) return true;
+  return false;
 }
 
 async function finishAssessment({ assessment, chatId, businessConnectionId, studentName }) {
@@ -120,14 +150,21 @@ async function processUpdate(update) {
     const incoming = getIncoming(update);
     if (!incoming?.chatId) return;
 
-    const { message } = incoming;
+    const { message, chatType } = incoming;
+
+    // Teddy Tutor must stay silent when it is added/removed or when other group service events happen.
+    if (isGroupChat(chatType) && isGroupServiceMessage(message)) return;
+
+    // In groups, do not react to normal conversation. Only explicit mention/reply/command may trigger a response.
+    if (isGroupChat(chatType) && !shouldRespondInGroup(message)) return;
+
     if (message.text) {
       await handleText(incoming, message.text);
     } else if (message.document) {
       await handleDocument(incoming, message.document, message.caption || "");
     } else if (message.photo?.length) {
       await handlePhoto(incoming, message.photo, message.caption || "");
-    } else {
+    } else if (!isGroupChat(chatType)) {
       await sendMessage(
         incoming.chatId,
         "Matn, Word (.docx), PDF yoki essay rasmini yuboring.",
@@ -138,7 +175,7 @@ async function processUpdate(update) {
     console.error(error);
     try {
       const incoming = getIncoming(update);
-      if (incoming?.chatId) {
+      if (incoming?.chatId && !isGroupChat(incoming.chatType)) {
         await sendMessage(
           incoming.chatId,
           "Tekshirishda texnik muammo chiqdi. Faylni yoki matnni qayta yuborib ko'ring.",
