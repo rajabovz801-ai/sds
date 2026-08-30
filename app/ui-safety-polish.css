@@ -141,9 +141,95 @@
 }
 .studentWorkspaceShell .sidebarTestOpen{font-weight:850}
 
+/* Safe visual polish: preserves the existing composition and brand palette. */
+.peakHeroPage,
+.authRoot,
+.studentDashboardShell,
+.studentWorkspaceShell{
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+}
+
+/* Make primary controls feel consistent without changing their visual identity. */
+.peakHeroPage .peakHeroPrimary,
+.peakHeroPage .peakHeroSecondary,
+.peakHeroPage .peakHeroSignup,
+.peakHeroPage .peakHeroSignIn,
+.authRoot .authPrimary,
+.authRoot .authSecondary,
+.authRoot .authTelegram,
+.studentDashboardShell a,
+.studentDashboardShell button,
+.studentWorkspaceShell a,
+.studentWorkspaceShell button{
+  -webkit-tap-highlight-color:transparent;
+}
+
+.peakHeroPage .peakHeroPrimary,
+.peakHeroPage .peakHeroSecondary,
+.authRoot .authPrimary,
+.authRoot .authSecondary,
+.authRoot .authTelegram{
+  min-height:44px;
+}
+
+/* Keyboard focus is clearer while mouse appearance remains unchanged. */
+.peakHeroPage a:focus-visible,
+.authRoot a:focus-visible,
+.authRoot button:focus-visible,
+.authRoot input:focus-visible,
+.studentDashboardShell a:focus-visible,
+.studentDashboardShell button:focus-visible,
+.studentWorkspaceShell a:focus-visible,
+.studentWorkspaceShell button:focus-visible,
+.studentWorkspaceShell input:focus-visible,
+.studentWorkspaceShell select:focus-visible{
+  outline:3px solid rgba(239,73,70,.22);
+  outline-offset:3px;
+}
+
+/* Refine text hierarchy only in marketing/auth/workspace surfaces. */
+.peakHeroPage .peakHeroLead,
+.peakHeroPage .peakSectionHeading p,
+.peakHeroPage .peakBentoCard p,
+.authRoot .authIntro>p,
+.authRoot .authForm>p,
+.studentWorkspaceShell .workspaceHeroCopy>p,
+.studentWorkspaceShell .testLibraryCopy p{
+  line-height:1.65;
+}
+
+.peakHeroPage .peakBentoCard h3,
+.authRoot .authForm h1,
+.studentDashboardShell .studentPanel h2,
+.studentWorkspaceShell .testLibraryCopy h3{
+  text-wrap:balance;
+}
+
+/* Subtle interaction polish; geometry and colors stay intact. */
+@media (hover:hover){
+  .peakHeroPage .peakHeroPrimary,
+  .peakHeroPage .peakHeroSecondary,
+  .authRoot .authPrimary,
+  .authRoot .authTelegram,
+  .studentWorkspaceShell .sidebarTestOpen,
+  .studentWorkspaceShell .sectionCard a{
+    transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background-color .16s ease;
+  }
+}
+
+/* Keep controls comfortably tappable on compact screens without reshaping layouts. */
 @media(max-width:620px){
   .studentDashboardShell .studentDashTopbar>div:first-child{min-width:0;overflow:hidden}
   .studentDashboardShell .studentDashTopbar strong{overflow:hidden;text-overflow:ellipsis}
   .studentDashboardShell .studentProgressSummary>a,
   .studentDashboardShell .studentDailyTasksCta{font-size:10px}
+
+  .peakHeroPage .peakHeroPrimary,
+  .peakHeroPage .peakHeroSecondary,
+  .authRoot .authPrimary,
+  .authRoot .authTelegram{
+    min-height:46px;
+  }
 }
