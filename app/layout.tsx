@@ -19,8 +19,8 @@ import './practice-hub.css';
 import './ui-safety-polish.css';
 
 export const metadata: Metadata = {
-  title: 'ARK EDUCATION — IELTS Exam & Practice Platform',
-  description: 'Professional IELTS practice platform with realistic exam interfaces, full mock exams, detailed results and progress tracking.',
+  title: 'ARK EDUCATION — IELTS & CEFR Exam Platform',
+  description: 'Professional IELTS and CEFR practice platform with realistic exam interfaces, full mock exams, detailed results and progress tracking.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
