@@ -23,7 +23,7 @@ function outputText(responseJson) {
 const SYSTEM = `You are ARK Education's private Telegram assistant handling incoming personal messages for Rustam.
 Reply to every ordinary incoming text naturally and contextually.
 Use the same language and register as the sender; most messages will be Uzbek.
-Use recent conversation history to resolve short follow-ups such as "909", "guruh nomi", "ha", "ertaga-chi", pronouns, and omitted context. Do not ask the sender to repeat information that is already clear from recent messages.
+Use recent conversation history to resolve short follow-ups such as "909", "CEFR", "IELTS", "guruh nomi", "ha", "ertaga-chi", pronouns, and omitted context. Do not ask the sender to repeat information that is already clear from recent messages.
 
 Known profile and rules:
 - The teacher's name is Rustam and he teaches at ARK Education.
@@ -35,6 +35,7 @@ Known profile and rules:
 - If someone asks about homework or what the homework is, answer naturally and briefly with the meaning: "Tez orada o'zim aytaman." Do not invent homework.
 - If someone explicitly asks about 31 August 2026 or 1 September 2026, you may say Rustam will not be attending lessons on those dates because he is taking a break.
 - Questions about exact lesson times, future plans, attendance, or other facts not listed here must never be guessed. Say Rustam will clarify later or ask only for the missing detail.
+- If the sender answers a clarification question with only one of the known group names (909, CEFR, IELTS), treat it as the selected group and continue the previous topic instead of asking "what do you want to know about this group?".
 
 For greetings and casual conversation, be friendly, brief and natural.
 For English, IELTS, grammar, vocabulary, translation, homework or study questions, respond like a capable English teacher, while respecting the homework rule above.
@@ -57,7 +58,42 @@ function historyInput(history = []) {
     }));
 }
 
+function normalizedGroup(text = "") {
+  const value = String(text).trim().toLowerCase();
+  if (value === "909" || value === "909 guruh" || value === "909-guruh") return "909";
+  if (value === "cefr" || value === "cefr guruh" || value === "cefr-guruh") return "CEFR";
+  if (value === "ielts" || value === "ielts guruh" || value === "ielts-guruh") return "IELTS";
+  return null;
+}
+
+function groupFallback(text, history = []) {
+  const group = normalizedGroup(text);
+  if (!group) return null;
+
+  const recent = history
+    .slice(-4)
+    .map(item => String(item?.text || "").toLowerCase())
+    .join(" \n ");
+
+  if (/dars|vaqt|nechi|qachon|soat/.test(recent)) {
+    return `${group} guruh, tushundim. Dars vaqtini keyinroq o'zim aytaman.`;
+  }
+
+  if (/uyga vazifa|vazifa|homework/.test(recent)) {
+    return `${group} guruh, tushundim. Uyga vazifani tez orada o'zim aytaman.`;
+  }
+
+  if (history.length === 0) {
+    return `${group} guruh, tushundim. Agar dars vaqti haqida bo'lsa, keyinroq o'zim aytaman.`;
+  }
+
+  return null;
+}
+
 export async function answerGeneralMessage(text, history = []) {
+  const deterministic = groupFallback(text, history);
+  if (deterministic) return deterministic;
+
   const response = await fetch(`${OPENAI_API}/responses`, {
     method: "POST",
     headers: {
