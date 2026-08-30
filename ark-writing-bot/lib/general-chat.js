@@ -59,6 +59,17 @@ function historyInput(history = []) {
     }));
 }
 
+function commandReply(text = "") {
+  const value = String(text).trim();
+  if (/^\/start(?:@arktutorbot)?(?:\s|$)/i.test(value)) {
+    return "Salom! 🐻 Men Teddy Tutor. IELTS, ingliz tili, writing va o‘qish bo‘yicha yordam beraman. Savolingizni yozavering.";
+  }
+  if (/^\/help(?:@arktutorbot)?(?:\s|$)/i.test(value)) {
+    return "Yordam kerak bo‘lsa savolingizni yozing. Writing tekshirish, IELTS, grammar, vocabulary va tarjima bo‘yicha yordam bera olaman.";
+  }
+  return null;
+}
+
 function normalizedGroup(text = "") {
   const value = String(text).trim().toLowerCase();
   if (value === "909" || value === "909 guruh" || value === "909-guruh") return "909";
@@ -92,6 +103,9 @@ function groupFallback(text, history = []) {
 }
 
 export async function answerGeneralMessage(text, history = []) {
+  const command = commandReply(text);
+  if (command) return command;
+
   const deterministic = groupFallback(text, history);
   if (deterministic) return deterministic;
 
