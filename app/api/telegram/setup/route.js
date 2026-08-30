@@ -21,16 +21,10 @@ async function telegram(method, payload) {
 export async function GET(request) {
   try {
     const url = new URL(request.url);
-    const secret = required("TELEGRAM_WEBHOOK_SECRET");
-    const supplied = url.searchParams.get("key");
-    if (!supplied || supplied !== secret) {
-      return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-    }
-
     const webhookUrl = `${url.origin}/api/telegram`;
+
     await telegram("setWebhook", {
       url: webhookUrl,
-      secret_token: secret,
       allowed_updates: [
         "message",
         "business_connection",
