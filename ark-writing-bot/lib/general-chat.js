@@ -38,7 +38,10 @@ function historyInput(history = []) {
     .slice(-12)
     .map(item => ({
       role: item.role,
-      content: [{ type: "input_text", text: String(item.text).slice(0, 3000) }]
+      content: [{
+        type: item.role === "assistant" ? "output_text" : "input_text",
+        text: String(item.text).slice(0, 3000)
+      }]
     }));
 }
 
