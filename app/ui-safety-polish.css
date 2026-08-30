@@ -144,6 +144,8 @@
 /* Safe visual polish: preserves the existing composition and brand palette. */
 .peakHeroPage,
 .authRoot,
+.platformRoot,
+.viewerRoot,
 .studentDashboardShell,
 .studentWorkspaceShell{
   -webkit-font-smoothing:antialiased;
@@ -159,6 +161,10 @@
 .authRoot .authPrimary,
 .authRoot .authSecondary,
 .authRoot .authTelegram,
+.platformRoot a,
+.platformRoot button,
+.viewerRoot a,
+.viewerRoot button,
 .studentDashboardShell a,
 .studentDashboardShell button,
 .studentWorkspaceShell a,
@@ -170,15 +176,27 @@
 .peakHeroPage .peakHeroSecondary,
 .authRoot .authPrimary,
 .authRoot .authSecondary,
-.authRoot .authTelegram{
+.authRoot .authTelegram,
+.platformRoot .pButton{
   min-height:44px;
 }
+
+.platformRoot .pButtonSmall{min-height:38px}
+.platformRoot .adminShortcut,
+.platformRoot .profileChip{min-height:42px}
 
 /* Keyboard focus is clearer while mouse appearance remains unchanged. */
 .peakHeroPage a:focus-visible,
 .authRoot a:focus-visible,
 .authRoot button:focus-visible,
 .authRoot input:focus-visible,
+.platformRoot a:focus-visible,
+.platformRoot button:focus-visible,
+.platformRoot input:focus-visible,
+.platformRoot select:focus-visible,
+.platformRoot textarea:focus-visible,
+.viewerRoot a:focus-visible,
+.viewerRoot button:focus-visible,
 .studentDashboardShell a:focus-visible,
 .studentDashboardShell button:focus-visible,
 .studentWorkspaceShell a:focus-visible,
@@ -189,12 +207,16 @@
   outline-offset:3px;
 }
 
-/* Refine text hierarchy only in marketing/auth/workspace surfaces. */
+/* Refine text hierarchy only in marketing/auth/workspace/platform surfaces. */
 .peakHeroPage .peakHeroLead,
 .peakHeroPage .peakSectionHeading p,
 .peakHeroPage .peakBentoCard p,
 .authRoot .authIntro>p,
 .authRoot .authForm>p,
+.platformRoot .pageHeadingCopy p,
+.platformRoot .panelHeader p,
+.platformRoot .emptyState p,
+.platformRoot .soonCard p,
 .studentWorkspaceShell .workspaceHeroCopy>p,
 .studentWorkspaceShell .testLibraryCopy p{
   line-height:1.65;
@@ -202,10 +224,50 @@
 
 .peakHeroPage .peakBentoCard h3,
 .authRoot .authForm h1,
+.platformRoot .pageHeadingCopy h1,
+.platformRoot .panelHeader h2,
+.platformRoot .resultHeroCopy h1,
+.platformRoot .resultFooterCard h2,
 .studentDashboardShell .studentPanel h2,
 .studentWorkspaceShell .testLibraryCopy h3{
   text-wrap:balance;
 }
+
+/* Platform navigation and generic cards: prevent clipping without changing layout. */
+.platformRoot .platformBar,
+.platformRoot .platformNav,
+.platformRoot .platformActions,
+.platformRoot .pageHeadingCopy,
+.platformRoot .panelHeader>div,
+.platformRoot .testInfo,
+.platformRoot .activityText,
+.platformRoot .resultHeroCopy,
+.platformRoot .resultSectionCard,
+.platformRoot .resultFooterCard>div{min-width:0}
+
+.platformRoot .testInfo h3,
+.platformRoot .profileLabel,
+.platformRoot .resultSectionCard>p{
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* Result readability: the original 8–9px metadata was unnecessarily small. */
+.platformRoot .resultScoreCard span,
+.platformRoot .resultScoreCard small,
+.platformRoot .resultCardTop span,
+.platformRoot .resultMainValue span,
+.platformRoot .resultStats span,
+.platformRoot .resultSectionCard>p{font-size:10px}
+
+.platformRoot .resultStats b,
+.platformRoot .resultCardTop b{font-size:12px}
+.platformRoot .resultHeroCopy p{font-size:12px;line-height:1.55}
+.platformRoot .resultFooterCard p{font-size:11px;line-height:1.65}
+
+.viewerRoot .viewerTitle span,
+.viewerRoot .viewerBridgeChip,
+.viewerRoot .viewerModeChip{font-size:10px}
 
 /* Subtle interaction polish; geometry and colors stay intact. */
 @media (hover:hover){
@@ -213,6 +275,8 @@
   .peakHeroPage .peakHeroSecondary,
   .authRoot .authPrimary,
   .authRoot .authTelegram,
+  .platformRoot .pButton,
+  .platformRoot .platformNav a,
   .studentWorkspaceShell .sidebarTestOpen,
   .studentWorkspaceShell .sectionCard a{
     transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background-color .16s ease;
@@ -229,7 +293,11 @@
   .peakHeroPage .peakHeroPrimary,
   .peakHeroPage .peakHeroSecondary,
   .authRoot .authPrimary,
-  .authRoot .authTelegram{
+  .authRoot .authTelegram,
+  .platformRoot .pButton{
     min-height:46px;
   }
+
+  .platformRoot .resultActions>a{min-height:46px}
+  .platformRoot .platformNav a{min-height:40px}
 }
