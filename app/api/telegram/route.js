@@ -13,6 +13,10 @@ import {
   assessEssayFromText
 } from "../../../ark-writing-bot/lib/openai.js";
 import { answerGeneralMessage } from "../../../ark-writing-bot/lib/general-chat.js";
+import {
+  getConversationHistory,
+  saveConversationTurn
+} from "../../../ark-writing-bot/lib/memory.js";
 import { createFeedbackPdf } from "../../../ark-writing-bot/lib/pdf.js";
 
 export const runtime = "nodejs";
@@ -100,8 +104,21 @@ async function handleText(incoming, text) {
     return;
   }
 
-  const reply = await answerGeneralMessage(text);
+  let history = [];
+  try {
+    history = await getConversationHistory(businessConnectionId, chatId);
+  } catch (error) {
+    console.warn("Could not load conversation memory", error);
+  }
+
+  const reply = await answerGeneralMessage(text, history);
   await sendMessage(chatId, reply, businessConnectionId);
+
+  try {
+    await saveConversationTurn(businessConnectionId, chatId, text, reply);
+  } catch (error) {
+    console.warn("Could not save conversation memory", error);
+  }
 }
 
 async function handleDocument(incoming, document, caption = "") {
