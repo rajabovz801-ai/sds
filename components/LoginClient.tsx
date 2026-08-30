@@ -144,7 +144,7 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
         {busy ? 'Tekshirilmoqda…' : 'Platformaga kirish'} <span><ArrowRightIcon /></span>
       </button>
 
-      <div className="authDivider"><span>kod hali yo‘qmi?</span></div>
+      <div className="authDivider"><span>Kod hali yo‘qmi?</span></div>
       <Link className="authTelegram" href="https://t.me/arkedu_bot?start=login" target="_blank" rel="noopener noreferrer">
         Telegram botdan kod olish <span><ArrowUpRightIcon /></span>
       </Link>
