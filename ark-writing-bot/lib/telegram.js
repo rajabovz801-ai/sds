@@ -59,3 +59,17 @@ export async function getTelegramFile(fileId) {
     filePath: file.file_path
   };
 }
+
+export async function getBusinessConnection(businessConnectionId) {
+  if (!businessConnectionId) return null;
+  return telegram("getBusinessConnection", { business_connection_id: businessConnectionId });
+}
+
+export async function readBusinessMessage(businessConnectionId, chatId, messageId) {
+  if (!businessConnectionId || !chatId || !messageId) return false;
+  return telegram("readBusinessMessage", {
+    business_connection_id: businessConnectionId,
+    chat_id: chatId,
+    message_id: messageId
+  });
+}
