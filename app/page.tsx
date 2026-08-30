@@ -135,7 +135,7 @@ export default async function HomePage() {
             <article className="peakBentoCard peakListeningCard">
               <div className="peakCardIcon"><Headphones /></div><span className="peakCardLabel">05 • TO‘RT KO‘NIKMA</span>
               <h3>Bir xil, ravon tajriba</h3>
-              <div className="peakSkillRows"><span><b>R</b>Reading<i /></span><span><b>L</b>Listening<i /></span><span><b>W</b>Writing<i /></span><span><b>S</b>Speaking<i /></span></div>
+              <div className="peakSkillRows"><span><b>R</b> Reading<i /></span><span><b>L</b> Listening<i /></span><span><b>W</b> Writing<i /></span><span><b>S</b> Speaking<i /></span></div>
             </article>
           </div>
         </section>

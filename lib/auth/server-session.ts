@@ -10,22 +10,43 @@ export type StudentSummary = {
   lastName: string;
 };
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isTransientStudentLookupError(error: { code?: string; message?: string } | null) {
+  if (!error) return false;
+  if (error.code === 'PGRST303') return true;
+  const message = String(error.message || '').toLowerCase();
+  return message.includes('connection timed out') || message.includes('fetch failed') || message.includes('timeout');
+}
+
 async function getActiveStudent(studentId: string) {
   const supabase = getServiceSupabase();
-  const { data: student, error } = await supabase
-    .from('students')
-    .select('id,first_name,last_name')
-    .eq('id', studentId)
-    .eq('status', 'active')
-    .maybeSingle();
-  if (error) throw error;
-  const summary = student ? {
-    id: student.id,
-    firstName: student.first_name,
-    lastName: student.last_name || '',
-  } : null;
 
-  return summary;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const { data: student, error } = await supabase
+      .from('students')
+      .select('id,first_name,last_name')
+      .eq('id', studentId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (!error) {
+      return student ? {
+        id: student.id,
+        firstName: student.first_name,
+        lastName: student.last_name || '',
+      } : null;
+    }
+
+    if (attempt === 0 && isTransientStudentLookupError(error)) {
+      await sleep(900);
+      continue;
+    }
+
+    throw error;
+  }
+
+  return null;
 }
 
 export async function getServerSession() {

@@ -5,41 +5,65 @@ import { getServiceSupabase } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-export default async function LeaderboardPage() {
-  const student = await requireStudent('/leaderboard');
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isTransientSupabaseError(error: { code?: string; message?: string } | null) {
+  if (!error) return false;
+  if (error.code === 'PGRST303') return true;
+  const message = String(error.message || '').toLowerCase();
+  return message.includes('connection timed out') || message.includes('fetch failed') || message.includes('timeout');
+}
+
+async function loadLeaderboardRows() {
   const supabase = getServiceSupabase();
 
-  const [
-    { data: studentRows, error: studentsError },
-    { data: sessionRows, error: sessionsError },
-    { data: pointRows, error: pointsError },
-  ] = await Promise.all([
-    supabase
-      .from('students')
-      .select('id,first_name,last_name,last_login_at')
-      .eq('status', 'active')
-      .order('first_name', { ascending: true })
-      .limit(1000),
-    supabase
-      .from('test_sessions')
-      .select('student_id,raw_score,max_score,submitted_at')
-      .eq('status', 'completed')
-      .eq('superseded', false)
-      .not('raw_score', 'is', null)
-      .not('max_score', 'is', null)
-      .not('submitted_at', 'is', null)
-      .order('submitted_at', { ascending: false })
-      .limit(5000),
-    supabase
-      .from('daily_task_completions')
-      .select('student_id,points_awarded,completed_at')
-      .order('completed_at', { ascending: false })
-      .limit(5000),
-  ]);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const results = await Promise.all([
+      supabase
+        .from('students')
+        .select('id,first_name,last_name,last_login_at')
+        .eq('status', 'active')
+        .order('first_name', { ascending: true })
+        .limit(1000),
+      supabase
+        .from('test_sessions')
+        .select('student_id,raw_score,max_score,submitted_at')
+        .eq('status', 'completed')
+        .eq('superseded', false)
+        .not('raw_score', 'is', null)
+        .not('max_score', 'is', null)
+        .not('submitted_at', 'is', null)
+        .order('submitted_at', { ascending: false })
+        .limit(5000),
+      supabase
+        .from('daily_task_completions')
+        .select('student_id,points_awarded,completed_at')
+        .order('completed_at', { ascending: false })
+        .limit(5000),
+    ]);
 
-  if (studentsError) throw studentsError;
-  if (sessionsError) throw sessionsError;
-  if (pointsError) throw pointsError;
+    const errors = results.map((result) => result.error).filter(Boolean);
+    if (errors.length === 0) return results;
+
+    if (attempt === 0 && errors.some((error) => isTransientSupabaseError(error))) {
+      await sleep(900);
+      continue;
+    }
+
+    throw errors[0];
+  }
+
+  throw new Error('Leaderboard data could not be loaded');
+}
+
+export default async function LeaderboardPage() {
+  const student = await requireStudent('/leaderboard');
+
+  const [
+    { data: studentRows },
+    { data: sessionRows },
+    { data: pointRows },
+  ] = await loadLeaderboardRows();
 
   const students = (studentRows || []).map((row) => ({
     id: String(row.id),
