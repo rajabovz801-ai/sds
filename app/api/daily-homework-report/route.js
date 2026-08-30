@@ -71,10 +71,7 @@ function buildReport(data) {
 }
 
 function isSixAmWindow() {
-  const now = new Date();
-  const hour = now.getUTCHours();
-  const minute = now.getUTCMinutes();
-  return hour === 1 && minute <= 25;
+  return new Date().getUTCHours() === 1;
 }
 
 export async function GET() {
