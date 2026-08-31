@@ -1,62 +1,86 @@
-/* Reliable segmented skill performance panel replacing the two fragile line charts. */
+/* Segmented skill performance replaces only the two fragile line charts.
+ * All remaining dashboard cards keep their own visual styles; this file only
+ * controls placement so the dashboard stays balanced and compact.
+ */
 .studentDashboardShell.skillPerformanceMode .studentDailyPanel,
 .studentDashboardShell.skillPerformanceMode .studentMidStack > .studentPanel.compact:first-child{
   display:none!important;
 }
 
+/* Desktop: Skill Performance gets one clean full-width row.
+ * The existing Daily Tasks / Your Progress / Recent Results cards form the
+ * next row without changing their internal design.
+ */
 .studentDashboardShell.skillPerformanceMode .studentDashboardGrid{
-  grid-template-columns:minmax(0,1.3fr) minmax(320px,.7fr)!important;
-  gap:14px!important;
-  align-items:start!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.08fr) minmax(0,.92fr)!important;
+  gap:12px!important;
+  align-items:stretch!important;
 }
 
 .dashboardSkillPerformanceHost{
   grid-column:1 / -1;
+  grid-row:1;
   min-width:0;
 }
 
 .studentDashboardShell.skillPerformanceMode .studentMidStack{
   grid-column:1;
+  grid-row:2;
   display:block;
   min-width:0;
 }
 
 .studentDashboardShell.skillPerformanceMode .studentMidStack .studentDailyTasksCard{
-  min-height:220px;
+  min-height:250px;
+  height:100%;
 }
 
+/* Flatten only the wrapper so the two original right-side cards can sit in
+ * their own grid columns. Their card styling/content remains untouched. */
 .studentDashboardShell.skillPerformanceMode .studentRightStack{
+  display:contents!important;
+}
+
+.studentDashboardShell.skillPerformanceMode .studentProgressSummary{
   grid-column:2;
   grid-row:2;
-  min-width:0;
+  min-height:250px;
+  height:100%;
+}
+
+.studentDashboardShell.skillPerformanceMode .recentPanel{
+  grid-column:3;
+  grid-row:2;
+  min-height:250px;
+  height:100%;
 }
 
 .studentSkillPerformancePanel{
   min-height:0!important;
   overflow:hidden;
-  border-radius:20px!important;
+  border-radius:18px!important;
 }
 
 .studentSkillPerformanceHeader{
-  min-height:66px!important;
-  padding:14px 18px!important;
+  min-height:60px!important;
+  padding:12px 16px!important;
   align-items:center!important;
 }
 
 .studentSkillPerformanceHeader>div{
   display:flex;
   align-items:center;
-  gap:11px;
+  gap:10px;
 }
 
 .studentSkillPerformanceTitleIcon{
-  width:34px;
-  height:34px;
+  width:32px;
+  height:32px;
   padding:8px;
   display:grid;
   place-items:center;
   border:1px solid #ded8cf;
-  border-radius:11px;
+  border-radius:10px;
   background:#fffdf8;
   color:#173c6c;
 }
@@ -67,29 +91,30 @@
 }
 
 .studentSkillPerformanceHeader h2{
-  font-size:15px!important;
+  font-size:14px!important;
   font-weight:650!important;
   letter-spacing:-.025em!important;
 }
 
 .studentSkillPerformanceHeader p{
-  margin-top:3px!important;
-  font-size:8px!important;
+  margin-top:2px!important;
+  font-size:7.5px!important;
 }
 
+/* Four skills in ONE row on normal desktop widths. */
 .skillPerformanceGrid{
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-  padding:14px;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  padding:12px;
 }
 
 .skillPerformanceCard{
   min-width:0;
-  min-height:142px;
-  padding:16px 17px 17px;
+  min-height:118px;
+  padding:13px 14px 14px;
   border:1px solid #ded8cf;
-  border-radius:16px;
+  border-radius:15px;
   background:#fffdf9;
   transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease;
 }
@@ -97,32 +122,32 @@
 .skillPerformanceCard:hover{
   transform:translateY(-2px);
   border-color:#c8c0b5;
-  box-shadow:0 9px 22px rgba(23,43,70,.045);
+  box-shadow:0 8px 18px rgba(23,43,70,.04);
 }
 
 .skillPerformanceTop{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:14px;
+  gap:10px;
 }
 
 .skillPerformanceName{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:9px;
   min-width:0;
 }
 
 .skillPerformanceIcon{
-  width:43px;
-  height:43px;
-  padding:10px;
-  flex:0 0 43px;
+  width:38px;
+  height:38px;
+  padding:9px;
+  flex:0 0 38px;
   display:grid;
   place-items:center;
   border:1px solid #e1ddd6;
-  border-radius:14px;
+  border-radius:12px;
   background:#fff;
 }
 
@@ -138,43 +163,44 @@
 
 .skillPerformanceName strong{
   display:block;
-  font-size:14px;
+  font-size:12px;
   font-weight:600;
   letter-spacing:-.02em;
 }
 
 .skillPerformanceName small{
   display:block;
-  margin-top:2px;
+  margin-top:1px;
   color:#9299a3;
-  font-size:7px;
+  font-size:6.5px;
+  white-space:nowrap;
 }
 
 .skillPerformanceBand{
   flex:0 0 auto;
   color:#707988;
-  font-size:9px;
+  font-size:7.5px;
   white-space:nowrap;
 }
 
 .skillPerformanceBand b{
   color:#10233f;
-  font-size:13px;
+  font-size:11px;
   font-weight:650;
 }
 
 .skillPerformanceSegments{
   display:grid;
-  grid-template-columns:repeat(28,minmax(3px,1fr));
-  gap:4px;
-  margin-top:17px;
-  height:43px;
+  grid-template-columns:repeat(28,minmax(2px,1fr));
+  gap:2px;
+  margin-top:14px;
+  height:31px;
 }
 
 .skillPerformanceSegments i{
   display:block;
   height:100%;
-  border-radius:4px;
+  border-radius:3px;
   background:#e6e7e9;
   transition:background .18s ease,transform .18s ease;
 }
@@ -188,45 +214,66 @@
   transform:translateY(-1px);
 }
 
-@media(max-width:1280px){
+@media(max-width:1380px){
+  .skillPerformanceGrid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .skillPerformanceCard{min-height:122px}
+}
+
+@media(max-width:1180px){
   .studentDashboardShell.skillPerformanceMode .studentDashboardGrid{
-    grid-template-columns:1fr!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
-  .studentDashboardShell.skillPerformanceMode .studentMidStack,
-  .studentDashboardShell.skillPerformanceMode .studentRightStack{
-    grid-column:1!important;
-    grid-row:auto!important;
+  .dashboardSkillPerformanceHost{grid-column:1 / -1}
+  .studentDashboardShell.skillPerformanceMode .studentMidStack{
+    grid-column:1;
+    grid-row:2;
   }
-  .studentDashboardShell.skillPerformanceMode .studentRightStack{
-    grid-template-columns:1fr 1fr;
-    grid-template-rows:auto;
+  .studentDashboardShell.skillPerformanceMode .studentProgressSummary{
+    grid-column:2;
+    grid-row:2;
+  }
+  .studentDashboardShell.skillPerformanceMode .recentPanel{
+    grid-column:1 / -1;
+    grid-row:3;
+    min-height:0;
+    height:auto;
   }
 }
 
 @media(max-width:760px){
+  .studentDashboardShell.skillPerformanceMode .studentDashboardGrid{
+    grid-template-columns:1fr!important;
+  }
+  .studentDashboardShell.skillPerformanceMode .studentMidStack,
+  .studentDashboardShell.skillPerformanceMode .studentProgressSummary,
+  .studentDashboardShell.skillPerformanceMode .recentPanel{
+    grid-column:1!important;
+    grid-row:auto!important;
+    min-height:0;
+    height:auto;
+  }
   .skillPerformanceGrid{
     grid-template-columns:1fr;
     padding:10px;
   }
   .skillPerformanceCard{
-    min-height:126px;
-    padding:14px;
+    min-height:112px;
+    padding:13px;
   }
   .skillPerformanceSegments{
-    gap:3px;
-    height:36px;
-  }
-  .studentDashboardShell.skillPerformanceMode .studentRightStack{
-    grid-template-columns:1fr;
+    gap:2px;
+    height:28px;
   }
 }
 
 @media(max-width:460px){
   .skillPerformanceSegments{
     grid-template-columns:repeat(14,minmax(4px,1fr));
-    height:30px;
+    height:27px;
   }
   .skillPerformanceSegments i:nth-child(n+15){display:none}
-  .skillPerformanceBand{font-size:8px}
-  .skillPerformanceBand b{font-size:12px}
+  .skillPerformanceBand{font-size:7px}
+  .skillPerformanceBand b{font-size:10px}
 }
