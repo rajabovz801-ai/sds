@@ -122,7 +122,7 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
   const router = useRouter();
 
   useEffect(() => {
-    const timer = window.setInterval(() => setClock(new Date()), 1000);
+    const timer = window.setInterval(() => setClock(new Date()), 60000);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -142,13 +142,10 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
         if (!cancelled) setLive(false);
       }
     }
-    const interval = window.setInterval(refresh, 8000);
-    const onFocus = () => refresh();
-    window.addEventListener('focus', onFocus);
+    const interval = window.setInterval(refresh, 60000);
     return () => {
       cancelled = true;
       window.clearInterval(interval);
-      window.removeEventListener('focus', onFocus);
     };
   }, [previewMode]);
 
@@ -166,13 +163,10 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
       }
     }
     refreshPoints();
-    const interval = window.setInterval(refreshPoints, 12000);
-    const onFocus = () => refreshPoints();
-    window.addEventListener('focus', onFocus);
+    const interval = window.setInterval(refreshPoints, 60000);
     return () => {
       cancelled = true;
       window.clearInterval(interval);
-      window.removeEventListener('focus', onFocus);
     };
   }, [previewMode]);
 
@@ -187,7 +181,7 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
   const studyPct = Math.min(100, Math.round((data.weeklyStudyHours / data.weeklyGoalHours) * 100));
   const nextGap = data.overallBand === null || data.nextTargetBand === null ? null : Math.max(0, data.nextTargetBand - data.overallBand);
   const todayLabel = new Intl.DateTimeFormat('uz-UZ', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(clock);
-  const timeLabel = new Intl.DateTimeFormat('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(clock);
+  const timeLabel = new Intl.DateTimeFormat('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false }).format(clock);
   const recent = useMemo(() => data.recentResults, [data.recentResults]);
 
   return (
