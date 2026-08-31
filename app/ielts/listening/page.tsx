@@ -16,7 +16,7 @@ export default async function IeltsListeningPage() {
         tests={tests}
         variant="sidebar"
       />
-      <IeltsTestScopeFilter skill="listening" tests={tests.map((test) => ({ id: test.id, testScope: test.testScope }))} />
+      <IeltsTestScopeFilter skill="listening" tests={tests.map((test) => ({ id: test.id, testScope: test.testScope || null }))} />
     </StudentWorkspaceShellClient>
   );
 }
