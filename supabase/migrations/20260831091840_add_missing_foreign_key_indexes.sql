@@ -1,0 +1,10 @@
+create index if not exists attempts_test_id_idx on public.attempts(test_id);
+create index if not exists bot_notifications_attempt_id_idx on public.bot_notifications(attempt_id);
+create index if not exists daily_task_completions_session_id_idx on public.daily_task_completions(session_id);
+create index if not exists mocks_reading_test_id_idx on public.mocks(reading_test_id);
+create index if not exists mocks_listening_test_id_idx on public.mocks(listening_test_id);
+create index if not exists mocks_writing_test_id_idx on public.mocks(writing_test_id);
+create index if not exists mocks_speaking_test_id_idx on public.mocks(speaking_test_id);
+create index if not exists teddy_bot_deliveries_target_id_idx on public.teddy_bot_deliveries(target_id);
+create index if not exists teddy_bot_outbox_target_id_idx on public.teddy_bot_outbox(target_id);
+create index if not exists teddy_bot_schedule_targets_target_id_idx on public.teddy_bot_schedule_targets(target_id);
