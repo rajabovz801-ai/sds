@@ -213,8 +213,13 @@ export function AdminTestScopeBridge() {
     document.addEventListener('change', onSelectChange, true);
 
     const observer = new MutationObserver(() => {
-      ensureField();
-      decorateRows();
+      observer.disconnect();
+      try {
+        ensureField();
+        decorateRows();
+      } finally {
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
     });
     observer.observe(document.body, { childList: true, subtree: true });
     ensureField();
