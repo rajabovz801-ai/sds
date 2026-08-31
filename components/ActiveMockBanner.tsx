@@ -16,7 +16,7 @@ export function ActiveMockBanner({ mock }: { mock: ActiveMockData | null }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!mock) return;
+    if (!mock || mock.attempt?.status === 'completed') return;
     const welcome = document.querySelector<HTMLElement>('.studentWelcome');
     if (!welcome?.parentElement) return;
     const mount = document.createElement('div');
@@ -32,7 +32,7 @@ export function ActiveMockBanner({ mock }: { mock: ActiveMockData | null }) {
     };
   }, [mock]);
 
-  if (!mock || !host) return null;
+  if (!mock || mock.attempt?.status === 'completed' || !host) return null;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
