@@ -7,7 +7,7 @@
 .studentDashboardShell,
 .studentWorkspaceShell{
   font-family:var(--font-poppins),"Segoe UI",Arial,sans-serif!important;
-  background:#f6f7f9;
+  background:#f5efe6;
   color:#11233f;
 }
 
@@ -22,11 +22,11 @@
   font-family:inherit;
 }
 
-/* Sidebar: white, light and rounded like the reference, but with ARK navy. */
+/* Sidebar: warm cream-white so white content cards stay visually separated. */
 .studentDashboardShell .studentSidebar,
 .studentWorkspaceShell .studentSidebar{
-  background:#fff;
-  border-right:1px solid #e4e7eb;
+  background:#fbf7f0;
+  border-right:1px solid #ded8cf;
   backdrop-filter:none;
 }
 
@@ -51,9 +51,9 @@
 .studentWorkspaceShell .studentSideNav a{
   min-height:48px;
   padding:0 14px;
-  border:1px solid #e1e5ea;
+  border:1px solid #ddd8d0;
   border-radius:15px;
-  background:#fff;
+  background:#fffdf9;
   color:#27384f;
   font-size:11px;
   font-weight:500;
@@ -62,45 +62,55 @@
 
 .studentDashboardShell .studentSideNav a:hover,
 .studentWorkspaceShell .studentSideNav a:hover{
-  background:#f7f9fc;
-  border-color:#cbd4df;
+  background:#f1ece4;
+  border-color:#c8c0b5;
   color:#102b52;
 }
 
+/* Strong active state so Dashboard / IELTS / CEFR never disappears into the background. */
 .studentDashboardShell .studentSideNav a.active,
 .studentWorkspaceShell .studentSideNav a.active{
-  background:#edf3fb;
-  border-color:#5879a4;
-  color:#102b52;
-  box-shadow:none;
+  background:#173c6c!important;
+  border-color:#173c6c!important;
+  color:#fff!important;
+  box-shadow:0 7px 18px rgba(23,60,108,.16)!important;
+}
+
+.studentDashboardShell .studentSideNav a.active svg,
+.studentWorkspaceShell .studentSideNav a.active svg,
+.studentDashboardShell .studentSideNav a.active span,
+.studentWorkspaceShell .studentSideNav a.active span{
+  color:#fff!important;
+  stroke:#fff!important;
 }
 
 .studentDashboardShell .studentSideNav a.active small,
 .studentWorkspaceShell .studentSideNav a.active small{
-  background:#dfe9f6;
-  color:#385b85;
+  background:rgba(255,255,255,.16)!important;
+  color:#fff!important;
 }
 
 .studentDashboardShell .studentSideProfile,
 .studentWorkspaceShell .studentSideProfile{
-  border-color:#e1e5ea;
+  border-color:#ded8cf;
   border-radius:15px;
+  background:#fffdf9;
   box-shadow:none;
 }
 
 .studentDashboardShell .studentSideProfile button,
 .studentWorkspaceShell .studentSideProfile button{
-  border:1px solid #e4e7eb;
+  border:1px solid #e1dcd4;
   border-radius:10px;
-  background:#f8f9fb;
+  background:#f6f1e9;
 }
 
-/* Main page surfaces: less shadow, more crisp borders. */
+/* Main page surfaces: warm ivory instead of flat white. */
 .studentWorkspaceShell .workspaceHero,
 .studentDashboardShell .studentWelcome{
-  border:1px solid #e0e4e9;
+  border:1px solid #ddd7cf;
   border-radius:22px;
-  background:#fff;
+  background:#fffdf8;
   box-shadow:none;
 }
 
@@ -119,8 +129,8 @@
 }
 
 .studentWorkspaceShell .sidebarLibraryHero{
-  background:#fff;
-  border-color:#e0e4e9;
+  background:#fffdf8;
+  border-color:#ddd7cf;
   box-shadow:none;
 }
 
@@ -137,15 +147,15 @@
   font-weight:700;
 }
 
-/* Cards: compact white surfaces with thin neutral borders. */
+/* Cards: soft ivory surfaces with enough contrast from the cream page. */
 .studentWorkspaceShell .sectionCard,
 .studentWorkspaceShell .trackChoiceCard,
 .studentWorkspaceShell .sidebarTestCard,
 .studentDashboardShell .studentMetric,
 .studentDashboardShell .studentPanel,
 .studentDashboardShell .achievementGrid article{
-  background:#fff;
-  border-color:#dfe3e8;
+  background:#fffdf9;
+  border-color:#ddd8d0;
   box-shadow:none;
 }
 
@@ -162,7 +172,7 @@
 .studentWorkspaceShell .sectionCard:hover,
 .studentWorkspaceShell .trackChoiceCard:hover,
 .studentDashboardShell .achievementGrid article:hover{
-  border-color:#bcc7d4;
+  border-color:#bbb2a7;
   box-shadow:0 8px 20px rgba(23,43,70,.05);
   transform:translateY(-2px);
 }
@@ -188,9 +198,9 @@
   max-width:100%;
   padding:4px;
   gap:2px;
-  border:1px solid #e2e6eb;
+  border:1px solid #ddd7cf;
   border-radius:13px;
-  background:#eef0f3;
+  background:#e9e3da;
   overflow-x:auto;
   scrollbar-width:none;
 }
@@ -208,11 +218,11 @@
   box-shadow:none;
 }
 .studentWorkspaceShell .ieltsScopeFilterBar button:hover{
-  background:rgba(255,255,255,.7);
+  background:rgba(255,253,248,.8);
   color:#233a59;
 }
 .studentWorkspaceShell .ieltsScopeFilterBar button.active{
-  background:#fff;
+  background:#fffdf8;
   color:#102b52;
   box-shadow:0 1px 4px rgba(20,35,55,.08);
 }
@@ -244,8 +254,8 @@
 
 .studentWorkspaceShell .sectionOpen,
 .studentWorkspaceShell .trackChoiceAction{
-  border-color:#dce1e7;
-  background:#fff;
+  border-color:#d9d3ca;
+  background:#fffdf8;
 }
 
 .studentWorkspaceShell .sectionOpen strong,
@@ -259,7 +269,11 @@
   box-shadow:none;
 }
 
-/* Dashboard: flatter modern analytics cards. */
+/* Dashboard: flatter modern analytics cards with visible separation. */
+.studentDashboardShell .studentDashMain,
+.studentWorkspaceShell .studentWorkspaceMain{
+  background:transparent;
+}
 .studentDashboardShell .studentMetric{
   border-radius:16px;
 }
@@ -274,7 +288,7 @@
   border-radius:17px;
 }
 .studentDashboardShell .studentPanel>header{
-  border-bottom:1px solid #eef0f3;
+  border-bottom:1px solid #ece7df;
 }
 .studentDashboardShell .studentPanel h2{
   font-size:13px;
@@ -291,18 +305,18 @@
   box-shadow:none;
 }
 .studentDashboardShell .studentProgressSummary>a{
-  background:#fff;
+  background:#fffdf8;
   color:#102b52;
   font-weight:600;
 }
 .studentDashboardShell .studentProgressSummary>a:hover{
-  background:#f1f5fa;
+  background:#f2ede6;
 }
 
 .studentDashboardShell .studentSideDailySummary,
 .studentWorkspaceShell .studentSideDailySummary{
-  border:1px solid #ffd8d0;
-  background:#fff7f4;
+  border:1px solid #f1cfc7;
+  background:#fff3ee;
 }
 
 /* Form controls and common action buttons on student pages. */
