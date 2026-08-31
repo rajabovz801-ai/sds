@@ -1,3 +1,4 @@
+import { IeltsTestScopeFilter } from '@/components/IeltsTestScopeFilter';
 import { SkillLibraryClient } from '@/components/SkillLibraryClient';
 import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
 import { requireStudent } from '@/lib/auth/server-session';
@@ -15,6 +16,7 @@ export default async function IeltsListeningPage() {
         tests={tests}
         variant="sidebar"
       />
+      <IeltsTestScopeFilter skill="listening" tests={tests.map((test) => ({ id: test.id, testScope: test.testScope }))} />
     </StudentWorkspaceShellClient>
   );
 }
