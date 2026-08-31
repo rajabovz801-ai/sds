@@ -19,6 +19,7 @@ import './ielts-library-card-fix.css';
 import './practice-hub.css';
 import './ui-safety-polish.css';
 import './scoreup-inspired-polish.css';
+import './student-premium-density.css';
 
 const poppins = Poppins({
   subsets: ['latin'],
