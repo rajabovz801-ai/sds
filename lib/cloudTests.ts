@@ -3,6 +3,7 @@ import { getPublicSupabase, getServiceSupabase } from '@/lib/supabase/server';
 export type TestTrack = 'ielts' | 'cefr';
 export type TestSkill = 'reading' | 'listening' | 'writing' | 'speaking' | 'full-mock' | 'vocabulary';
 export type TestStatus = 'published' | 'draft';
+export type TestScope = 'part-1' | 'part-2' | 'part-3' | 'part-4' | 'passage-1' | 'passage-2' | 'passage-3' | 'full-test';
 
 export type CloudTest = {
   id: string;
@@ -11,6 +12,7 @@ export type CloudTest = {
   track: TestTrack;
   skill: TestSkill;
   status: TestStatus;
+  testScope: TestScope | null;
   fileName: string;
   filePath: string;
   durationMinutes: number;
@@ -25,14 +27,14 @@ export type CloudTest = {
 
 type TestRow = {
   id:string; title:string; description:string|null; track:TestTrack; skill:TestSkill; status:TestStatus;
-  file_name:string; file_path:string; duration_minutes?:number|null; daily_task_enabled?:boolean|null; daily_task_points?:number|null;
+  test_scope?:TestScope|null; file_name:string; file_path:string; duration_minutes?:number|null; daily_task_enabled?:boolean|null; daily_task_points?:number|null;
   daily_task_started_at?:string|null; daily_task_expires_at?:string|null; created_at:string; updated_at:string;
 };
 
 export function mapTest(row: TestRow): CloudTest {
   return {
     id:row.id,title:row.title,description:row.description||'',track:row.track,skill:row.skill,status:row.status,
-    fileName:row.file_name,filePath:row.file_path,durationMinutes:Number(row.duration_minutes)||60,
+    testScope:row.test_scope||null,fileName:row.file_name,filePath:row.file_path,durationMinutes:Number(row.duration_minutes)||60,
     dailyTaskEnabled:Boolean(row.daily_task_enabled),dailyTaskPoints:Number(row.daily_task_points)||20,
     dailyTaskStartedAt:row.daily_task_started_at||null,dailyTaskExpiresAt:row.daily_task_expires_at||null,
     createdAt:row.created_at,updatedAt:row.updated_at
