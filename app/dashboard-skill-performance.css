@@ -1,23 +1,22 @@
 /* Segmented skill performance replaces only the two fragile line charts.
- * All remaining dashboard cards keep their own visual styles; this file only
- * controls placement so the dashboard stays balanced and compact.
+ * The rest of the dashboard cards keep their existing visual language.
  */
 .studentDashboardShell.skillPerformanceMode .studentDailyPanel,
 .studentDashboardShell.skillPerformanceMode .studentMidStack > .studentPanel.compact:first-child{
   display:none!important;
 }
 
-/* Desktop layout:
- * Row 1 = Skill Performance, full width to the very end of the dashboard row.
- * Row 2 = Daily Tasks / Your Progress / Recent Results, all on one line.
- * No internal card styling is changed here.
+/* Desktop layout
+ * Row 1: Skill Performance — full width.
+ * Row 2: Daily Tasks / Your Progress / Recent Results — one balanced row.
  */
 .studentDashboardShell.skillPerformanceMode .studentDashboardGrid{
   display:grid!important;
   grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:12px!important;
+  gap:14px!important;
   align-items:stretch!important;
   width:100%!important;
+  margin-bottom:18px!important;
 }
 
 .dashboardSkillPerformanceHost{
@@ -38,12 +37,10 @@
 
 .studentDashboardShell.skillPerformanceMode .studentMidStack .studentDailyTasksCard{
   width:100%!important;
-  min-height:250px;
-  height:100%;
+  min-height:266px!important;
+  height:100%!important;
 }
 
-/* Flatten only the wrapper so the two original right-side cards can sit in
- * columns 2 and 3. Their own design, colors and content stay untouched. */
 .studentDashboardShell.skillPerformanceMode .studentRightStack{
   display:contents!important;
 }
@@ -53,8 +50,9 @@
   grid-row:2!important;
   width:100%!important;
   min-width:0!important;
-  min-height:250px;
-  height:100%;
+  min-height:266px!important;
+  height:100%!important;
+  overflow:hidden;
 }
 
 .studentDashboardShell.skillPerformanceMode .recentPanel{
@@ -62,22 +60,29 @@
   grid-row:2!important;
   width:100%!important;
   min-width:0!important;
-  min-height:250px;
-  height:100%;
+  min-height:266px!important;
+  height:100%!important;
+  overflow:hidden;
 }
 
+/* A softer, more premium finish so the section does not end abruptly. */
 .studentSkillPerformancePanel{
   width:100%!important;
   max-width:none!important;
   min-height:0!important;
   overflow:hidden;
-  border-radius:18px!important;
+  border-radius:20px!important;
+  border:1px solid rgba(16,35,63,.10)!important;
+  background:linear-gradient(180deg,#fffdf9 0%,#fbf7f0 100%)!important;
+  box-shadow:0 14px 38px rgba(53,43,33,.055)!important;
 }
 
 .studentSkillPerformanceHeader{
-  min-height:60px!important;
-  padding:12px 16px!important;
+  min-height:62px!important;
+  padding:13px 17px!important;
   align-items:center!important;
+  border-bottom:1px solid rgba(16,35,63,.08)!important;
+  background:rgba(255,253,249,.76)!important;
 }
 
 .studentSkillPerformanceHeader>div{
@@ -87,15 +92,16 @@
 }
 
 .studentSkillPerformanceTitleIcon{
-  width:32px;
-  height:32px;
+  width:33px;
+  height:33px;
   padding:8px;
   display:grid;
   place-items:center;
   border:1px solid #ded8cf;
-  border-radius:10px;
+  border-radius:11px;
   background:#fffdf8;
   color:#173c6c;
+  box-shadow:0 5px 14px rgba(16,35,63,.04);
 }
 
 .studentSkillPerformanceTitleIcon svg{
@@ -114,7 +120,6 @@
   font-size:7.5px!important;
 }
 
-/* Keep all four skills in one row on normal desktop widths. */
 .skillPerformanceGrid{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
@@ -124,18 +129,20 @@
 
 .skillPerformanceCard{
   min-width:0;
-  min-height:118px;
+  min-height:116px;
   padding:13px 14px 14px;
-  border:1px solid #ded8cf;
-  border-radius:15px;
-  background:#fffdf9;
-  transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+  border:1px solid rgba(16,35,63,.10);
+  border-radius:16px;
+  background:rgba(255,255,255,.72);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+  transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease,background .18s ease;
 }
 
 .skillPerformanceCard:hover{
   transform:translateY(-2px);
-  border-color:#c8c0b5;
-  box-shadow:0 8px 18px rgba(23,43,70,.04);
+  border-color:rgba(16,35,63,.17);
+  background:#fff;
+  box-shadow:0 9px 20px rgba(23,43,70,.045);
 }
 
 .skillPerformanceTop{
@@ -227,7 +234,11 @@
   transform:translateY(-1px);
 }
 
-/* Only collapse the four skill cards when the content area truly becomes narrow. */
+/* Keep the next section from visually colliding with the dashboard cards. */
+.studentDashboardShell.skillPerformanceMode .studentAchievements{
+  margin-top:4px!important;
+}
+
 @media(max-width:1040px){
   .skillPerformanceGrid{
     grid-template-columns:repeat(2,minmax(0,1fr));
@@ -235,7 +246,6 @@
   .skillPerformanceCard{min-height:122px}
 }
 
-/* Tablet: preserve the three existing cards as long as practical, then stack cleanly. */
 @media(max-width:900px){
   .studentDashboardShell.skillPerformanceMode .studentDashboardGrid{
     grid-template-columns:1fr!important;
@@ -246,8 +256,8 @@
   .studentDashboardShell.skillPerformanceMode .recentPanel{
     grid-column:1!important;
     grid-row:auto!important;
-    min-height:0;
-    height:auto;
+    min-height:0!important;
+    height:auto!important;
   }
 }
 
