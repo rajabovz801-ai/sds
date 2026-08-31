@@ -5,6 +5,8 @@ import { getServiceSupabase, HTML_TESTS_BUCKET } from '@/lib/supabase/server';
 const tracks = ['ielts', 'cefr'] as const;
 const skills = ['reading', 'listening', 'writing', 'speaking', 'full-mock'] as const;
 const statuses = ['draft', 'published'] as const;
+const listeningScopes = ['part-1', 'part-2', 'part-3', 'part-4', 'full-test'] as const;
+const readingScopes = ['passage-1', 'passage-2', 'passage-3', 'full-test'] as const;
 const MAX_DIRECT_HTML_BYTES = 50 * 1024 * 1024;
 
 type Track = typeof tracks[number];
@@ -17,6 +19,8 @@ type Metadata = {
   track: Track;
   skill: Skill;
   status: Status;
+  testScope: string | null;
+  testScopeProvided: boolean;
   durationMinutes: number;
   fileName: string;
   filePath: string;
@@ -37,6 +41,14 @@ function safeName(fileName: string) {
   return fileName.replace(/[^a-zA-Z0-9._-]+/g, '-').slice(-120);
 }
 
+function parseTestScope(track: string, skill: string, raw: unknown) {
+  if (track !== 'ielts' || (skill !== 'listening' && skill !== 'reading')) return { ok: true, value: null as string | null };
+  const value = String(raw || '').trim();
+  if (!value) return { ok: true, value: null as string | null };
+  const allowed = skill === 'listening' ? listeningScopes : readingScopes;
+  return allowed.includes(value as never) ? { ok: true, value } : { ok: false, value: null as string | null };
+}
+
 function parseMetadata(body: Record<string, unknown>): Metadata | null {
   const title = String(body.title || '').trim();
   const description = String(body.description || '').trim();
@@ -47,14 +59,16 @@ function parseMetadata(body: Record<string, unknown>): Metadata | null {
   const fileName = String(body.fileName || '').trim();
   const filePath = String(body.filePath || '').trim();
   const fileSize = Number(body.fileSize || 0);
+  const testScopeProvided = Object.prototype.hasOwnProperty.call(body, 'testScope');
+  const scope = parseTestScope(track, skill, body.testScope);
 
   if (!title || title.length > 120 || description.length > 500) return null;
-  if (!tracks.includes(track) || !skills.includes(skill) || !statuses.includes(status)) return null;
+  if (!tracks.includes(track) || !skills.includes(skill) || !statuses.includes(status) || !scope.ok) return null;
   if (!Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 240) return null;
   if (!validHtmlName(fileName) || fileSize <= 0 || fileSize > MAX_DIRECT_HTML_BYTES) return null;
   if (!filePath.startsWith(`${track}/${skill}/`) || filePath.includes('..')) return null;
 
-  return { title, description, track, skill, status, durationMinutes, fileName, filePath, fileSize };
+  return { title, description, track, skill, status, testScope: scope.value, testScopeProvided, durationMinutes, fileName, filePath, fileSize };
 }
 
 async function objectExists(filePath: string) {
@@ -145,6 +159,7 @@ export async function POST(request: NextRequest) {
         track: metadata.track,
         skill: metadata.skill,
         status: metadata.status,
+        test_scope: metadata.testScope,
         duration_minutes: metadata.durationMinutes,
         file_name: metadata.fileName,
         file_path: metadata.filePath,
@@ -161,7 +176,7 @@ export async function POST(request: NextRequest) {
 
     const { data: previous, error: previousError } = await supabase
       .from('tests')
-      .select('id,file_path')
+      .select('id,file_path,test_scope')
       .eq('id', testId)
       .single();
     if (previousError || !previous) {
@@ -169,7 +184,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Tahrirlanayotgan test topilmadi.' }, { status: 404 });
     }
 
-    const { data, error } = await supabase.from('tests').update({
+    const update: Record<string, unknown> = {
       title: metadata.title,
       description: metadata.description,
       track: metadata.track,
@@ -179,7 +194,10 @@ export async function POST(request: NextRequest) {
       file_name: metadata.fileName,
       file_path: metadata.filePath,
       updated_at: new Date().toISOString(),
-    }).eq('id', testId).select('*').single();
+    };
+    if (metadata.testScopeProvided) update.test_scope = metadata.testScope;
+
+    const { data, error } = await supabase.from('tests').update(update).eq('id', testId).select('*').single();
     if (error) throw error;
 
     if (previous.file_path && previous.file_path !== metadata.filePath) {
