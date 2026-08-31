@@ -1,0 +1,232 @@
+/* Reliable segmented skill performance panel replacing the two fragile line charts. */
+.studentDashboardShell.skillPerformanceMode .studentDailyPanel,
+.studentDashboardShell.skillPerformanceMode .studentMidStack > .studentPanel.compact:first-child{
+  display:none!important;
+}
+
+.studentDashboardShell.skillPerformanceMode .studentDashboardGrid{
+  grid-template-columns:minmax(0,1.3fr) minmax(320px,.7fr)!important;
+  gap:14px!important;
+  align-items:start!important;
+}
+
+.dashboardSkillPerformanceHost{
+  grid-column:1 / -1;
+  min-width:0;
+}
+
+.studentDashboardShell.skillPerformanceMode .studentMidStack{
+  grid-column:1;
+  display:block;
+  min-width:0;
+}
+
+.studentDashboardShell.skillPerformanceMode .studentMidStack .studentDailyTasksCard{
+  min-height:220px;
+}
+
+.studentDashboardShell.skillPerformanceMode .studentRightStack{
+  grid-column:2;
+  grid-row:2;
+  min-width:0;
+}
+
+.studentSkillPerformancePanel{
+  min-height:0!important;
+  overflow:hidden;
+  border-radius:20px!important;
+}
+
+.studentSkillPerformanceHeader{
+  min-height:66px!important;
+  padding:14px 18px!important;
+  align-items:center!important;
+}
+
+.studentSkillPerformanceHeader>div{
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+
+.studentSkillPerformanceTitleIcon{
+  width:34px;
+  height:34px;
+  padding:8px;
+  display:grid;
+  place-items:center;
+  border:1px solid #ded8cf;
+  border-radius:11px;
+  background:#fffdf8;
+  color:#173c6c;
+}
+
+.studentSkillPerformanceTitleIcon svg{
+  width:100%!important;
+  height:100%!important;
+}
+
+.studentSkillPerformanceHeader h2{
+  font-size:15px!important;
+  font-weight:650!important;
+  letter-spacing:-.025em!important;
+}
+
+.studentSkillPerformanceHeader p{
+  margin-top:3px!important;
+  font-size:8px!important;
+}
+
+.skillPerformanceGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  padding:14px;
+}
+
+.skillPerformanceCard{
+  min-width:0;
+  min-height:142px;
+  padding:16px 17px 17px;
+  border:1px solid #ded8cf;
+  border-radius:16px;
+  background:#fffdf9;
+  transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+
+.skillPerformanceCard:hover{
+  transform:translateY(-2px);
+  border-color:#c8c0b5;
+  box-shadow:0 9px 22px rgba(23,43,70,.045);
+}
+
+.skillPerformanceTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+
+.skillPerformanceName{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.skillPerformanceIcon{
+  width:43px;
+  height:43px;
+  padding:10px;
+  flex:0 0 43px;
+  display:grid;
+  place-items:center;
+  border:1px solid #e1ddd6;
+  border-radius:14px;
+  background:#fff;
+}
+
+.skillPerformanceIcon svg{
+  width:100%!important;
+  height:100%!important;
+}
+
+.skillPerformance-listening .skillPerformanceIcon{color:#7d55ea;background:#f5f0ff}
+.skillPerformance-reading .skillPerformanceIcon{color:#3f74df;background:#eef4ff}
+.skillPerformance-speaking .skillPerformanceIcon{color:#31a66e;background:#edf9f2}
+.skillPerformance-writing .skillPerformanceIcon{color:#ff6b58;background:#fff1ed}
+
+.skillPerformanceName strong{
+  display:block;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:-.02em;
+}
+
+.skillPerformanceName small{
+  display:block;
+  margin-top:2px;
+  color:#9299a3;
+  font-size:7px;
+}
+
+.skillPerformanceBand{
+  flex:0 0 auto;
+  color:#707988;
+  font-size:9px;
+  white-space:nowrap;
+}
+
+.skillPerformanceBand b{
+  color:#10233f;
+  font-size:13px;
+  font-weight:650;
+}
+
+.skillPerformanceSegments{
+  display:grid;
+  grid-template-columns:repeat(28,minmax(3px,1fr));
+  gap:4px;
+  margin-top:17px;
+  height:43px;
+}
+
+.skillPerformanceSegments i{
+  display:block;
+  height:100%;
+  border-radius:4px;
+  background:#e6e7e9;
+  transition:background .18s ease,transform .18s ease;
+}
+
+.skillPerformance-listening .skillPerformanceSegments i.filled{background:#8b62f1}
+.skillPerformance-reading .skillPerformanceSegments i.filled{background:#4d7fe7}
+.skillPerformance-speaking .skillPerformanceSegments i.filled{background:#43ae78}
+.skillPerformance-writing .skillPerformanceSegments i.filled{background:#ff765f}
+
+.skillPerformanceCard:hover .skillPerformanceSegments i.filled{
+  transform:translateY(-1px);
+}
+
+@media(max-width:1280px){
+  .studentDashboardShell.skillPerformanceMode .studentDashboardGrid{
+    grid-template-columns:1fr!important;
+  }
+  .studentDashboardShell.skillPerformanceMode .studentMidStack,
+  .studentDashboardShell.skillPerformanceMode .studentRightStack{
+    grid-column:1!important;
+    grid-row:auto!important;
+  }
+  .studentDashboardShell.skillPerformanceMode .studentRightStack{
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto;
+  }
+}
+
+@media(max-width:760px){
+  .skillPerformanceGrid{
+    grid-template-columns:1fr;
+    padding:10px;
+  }
+  .skillPerformanceCard{
+    min-height:126px;
+    padding:14px;
+  }
+  .skillPerformanceSegments{
+    gap:3px;
+    height:36px;
+  }
+  .studentDashboardShell.skillPerformanceMode .studentRightStack{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:460px){
+  .skillPerformanceSegments{
+    grid-template-columns:repeat(14,minmax(4px,1fr));
+    height:30px;
+  }
+  .skillPerformanceSegments i:nth-child(n+15){display:none}
+  .skillPerformanceBand{font-size:8px}
+  .skillPerformanceBand b{font-size:12px}
+}
