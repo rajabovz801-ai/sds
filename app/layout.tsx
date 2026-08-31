@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Poppins } from 'next/font/google';
 import './globals.css';
 import './platform.css';
 import './landing-home-v4.css';
@@ -17,6 +18,14 @@ import './student-workspace-shell.css';
 import './ielts-library-card-fix.css';
 import './practice-hub.css';
 import './ui-safety-polish.css';
+import './scoreup-inspired-polish.css';
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-poppins',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'ARK EDUCATION — IELTS & CEFR Exam Platform',
@@ -25,7 +34,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="uz">
+    <html lang="uz" className={poppins.variable}>
       <body>{children}</body>
     </html>
   );
