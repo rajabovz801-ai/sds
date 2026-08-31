@@ -1,0 +1,375 @@
+/*
+ * ARK Education — premium density pass for student-facing pages.
+ * Visual-only overrides: no exam iframe, admin, test, result or data logic is changed.
+ */
+
+/* ---- Global student surface rhythm ---- */
+.studentDashboardShell,
+.studentWorkspaceShell{
+  --premium-paper:#fffdf9;
+  --premium-cream:#f5efe6;
+  --premium-line:#ddd7ce;
+  --premium-navy:#173c6c;
+  --premium-text:#10233f;
+  --premium-muted:#6d7888;
+}
+
+.studentWorkspaceShell .studentWorkspaceMain,
+.studentDashboardShell .studentDashMain{
+  padding-top:20px;
+}
+
+/* Slightly richer depth without making the UI glossy. */
+.studentWorkspaceShell .workspaceHero,
+.studentWorkspaceShell .sectionCard,
+.studentWorkspaceShell .trackChoiceCard,
+.studentWorkspaceShell .sidebarTestCard,
+.studentWorkspaceShell .libraryEmpty,
+.studentDashboardShell .studentWelcome,
+.studentDashboardShell .studentMetric,
+.studentDashboardShell .studentPanel{
+  box-shadow:0 10px 28px rgba(49,41,31,.045);
+}
+
+/* ---- Skill / section pages: compact premium composition ---- */
+.studentWorkspaceShell .workspaceHeroCompact{
+  min-height:158px;
+  padding:23px 28px;
+  border-radius:20px;
+}
+.studentWorkspaceShell .workspaceHeroCompact:after{
+  width:220px;
+  height:220px;
+  right:-120px;
+  top:-132px;
+  opacity:.82;
+}
+.studentWorkspaceShell .workspaceHeroCompact h1{
+  margin:10px 0 8px;
+  font-size:clamp(31px,3.15vw,46px);
+  line-height:1.02;
+  letter-spacing:-.048em;
+}
+.studentWorkspaceShell .workspaceHeroCompact .workspaceHeroCopy>p{
+  max-width:700px;
+  font-size:11px;
+  line-height:1.55;
+}
+.studentWorkspaceShell .workspaceEyebrow{
+  font-size:7px;
+  letter-spacing:.14em;
+}
+.studentWorkspaceShell .workspaceTrackBadge{
+  min-width:148px;
+  padding:13px 15px;
+  border-radius:15px;
+  background:rgba(255,253,249,.92);
+  box-shadow:0 7px 18px rgba(31,39,52,.035);
+}
+.studentWorkspaceShell .workspaceTrackBadge small{font-size:6px}
+.studentWorkspaceShell .workspaceTrackBadge strong{font-size:20px}
+.studentWorkspaceShell .workspaceTrackBadge span{font-size:7.5px}
+
+.studentWorkspaceShell .sectionCardGrid{
+  gap:14px;
+  margin-top:14px;
+}
+.studentWorkspaceShell .sectionCard{
+  min-height:312px;
+  padding:21px;
+  border-radius:20px;
+  border-color:var(--premium-line);
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.studentWorkspaceShell .sectionCard:after{
+  width:145px;
+  height:145px;
+  right:-78px;
+  top:-82px;
+  opacity:.78;
+}
+.studentWorkspaceShell .sectionCard:hover{
+  transform:translateY(-3px);
+  border-color:#c2b9ad;
+  box-shadow:0 16px 34px rgba(41,48,61,.075);
+}
+.studentWorkspaceShell .sectionCardIcon{
+  width:48px;
+  height:48px;
+  padding:13px;
+  border-radius:15px;
+  box-shadow:0 8px 18px rgba(30,47,69,.08);
+}
+.studentWorkspaceShell .sectionCardTop small{font-size:7px}
+.studentWorkspaceShell .sectionCardCopy{margin-top:18px}
+.studentWorkspaceShell .sectionCardCopy>span{font-size:6.5px}
+.studentWorkspaceShell .sectionCardCopy h2{
+  margin:5px 0 8px;
+  font-size:25px;
+  line-height:1.08;
+}
+.studentWorkspaceShell .sectionCardCopy p{
+  max-width:96%;
+  font-size:10.25px;
+  line-height:1.52;
+}
+.studentWorkspaceShell .sectionFacts{
+  gap:7px;
+  margin-top:15px;
+}
+.studentWorkspaceShell .sectionFacts span{font-size:8px}
+.studentWorkspaceShell .sectionFacts i{
+  width:5px;
+  height:5px;
+  box-shadow:0 0 0 3px rgba(255,107,88,.10);
+}
+.studentWorkspaceShell .sectionOpen{
+  height:47px;
+  padding:0 6px 0 14px;
+  border-radius:13px;
+  background:rgba(255,253,249,.95);
+}
+.studentWorkspaceShell .sectionOpen strong{font-size:9px}
+.studentWorkspaceShell .sectionOpen>span{
+  width:34px;
+  height:34px;
+  padding:9px;
+  border-radius:10px;
+}
+
+/* Practice cards use the same premium density instead of their old taller override. */
+.studentWorkspaceShell .practiceSectionGrid{
+  gap:14px;
+  max-width:900px;
+}
+.studentWorkspaceShell .practiceSectionGrid .sectionCard{
+  min-height:312px;
+}
+
+/* ---- Track-choice cards ---- */
+.studentWorkspaceShell .trackChoiceGrid{
+  gap:15px;
+  margin-top:15px;
+}
+.studentWorkspaceShell .trackChoiceCard{
+  min-height:330px;
+  padding:22px;
+  border-radius:21px;
+}
+.studentWorkspaceShell .trackChoiceCard:after{
+  width:170px;
+  height:170px;
+  right:-92px;
+  top:-92px;
+  opacity:.8;
+}
+.studentWorkspaceShell .trackChoiceIcon{
+  width:50px;
+  height:50px;
+  padding:13px;
+  border-radius:15px;
+  box-shadow:0 8px 18px rgba(16,35,63,.10);
+}
+.studentWorkspaceShell .trackChoiceCopy{margin-top:20px}
+.studentWorkspaceShell .trackChoiceCopy h2{
+  margin:6px 0 8px;
+  font-size:28px;
+}
+.studentWorkspaceShell .trackChoiceCopy p{
+  font-size:10.5px;
+  line-height:1.55;
+}
+.studentWorkspaceShell .trackChoiceMeta{margin-top:15px}
+.studentWorkspaceShell .trackChoiceMeta span{padding:6px 8px;font-size:7px}
+.studentWorkspaceShell .trackChoiceAction{
+  height:49px;
+  border-radius:13px;
+}
+.studentWorkspaceShell .trackChoiceAction span{
+  width:35px;
+  height:35px;
+  padding:9px;
+  border-radius:10px;
+}
+
+/* ---- Listening / Reading / Writing test libraries ---- */
+.studentWorkspaceShell .sidebarLibraryHero{
+  min-height:156px;
+  padding:23px 28px;
+  border-radius:20px;
+}
+.studentWorkspaceShell .sidebarLibraryHero h1{
+  margin:10px 0 8px;
+  font-size:clamp(31px,3.05vw,45px);
+}
+.studentWorkspaceShell .sidebarLibraryHero p{font-size:10.75px}
+.studentWorkspaceShell .sidebarLibraryHero .libraryHeroIcon{
+  width:62px;
+  height:62px;
+  padding:16px;
+  border-radius:18px;
+  box-shadow:0 10px 22px rgba(16,47,77,.11);
+}
+.studentWorkspaceShell .sidebarLibraryHeading{
+  margin:20px 0 12px;
+}
+.studentWorkspaceShell .sidebarLibraryHeading h2{font-size:21px}
+.studentWorkspaceShell .ieltsScopeFilterBar{
+  padding:3px;
+  border-radius:12px;
+}
+.studentWorkspaceShell .ieltsScopeFilterBar button{
+  min-height:32px;
+  padding:0 11px;
+  border-radius:9px;
+  font-size:9px;
+}
+.studentWorkspaceShell .sidebarTestGrid{
+  gap:14px;
+}
+.studentWorkspaceShell .sidebarTestCard{
+  min-height:285px;
+  padding:19px;
+  border-radius:18px;
+}
+.studentWorkspaceShell .sidebarTestCard .testLibraryTop>span{
+  width:48px;
+  height:48px;
+  padding:13px;
+  border-radius:14px;
+}
+.studentWorkspaceShell .sidebarTestCard .testLibraryCopy{margin-top:17px}
+.studentWorkspaceShell .sidebarTestCard .testLibraryCopy h3{
+  min-height:0;
+  margin:6px 0 7px;
+  font-size:18px;
+  line-height:1.18;
+}
+.studentWorkspaceShell .sidebarAttemptMeta{
+  margin-top:12px;
+}
+.studentWorkspaceShell .sidebarTestOpen{
+  min-height:45px;
+  border-radius:12px;
+}
+.studentWorkspaceShell .libraryEmpty{
+  min-height:235px;
+  padding:32px 22px;
+  border-radius:20px;
+}
+
+/* ---- Dashboard: premium separation + less oversized blocks ---- */
+.studentDashboardShell .studentWelcome{
+  min-height:178px;
+  padding:26px 30px;
+  border-radius:21px;
+}
+.studentDashboardShell .studentWelcome:after{
+  width:230px;
+  height:230px;
+  right:-110px;
+  top:-125px;
+}
+.studentDashboardShell .studentWelcome h1{
+  margin:10px 0 9px;
+  font-size:clamp(29px,3vw,45px);
+  line-height:1.02;
+}
+.studentDashboardShell .studentWelcome p{
+  font-size:10px;
+  line-height:1.55;
+}
+.studentDashboardShell .studentMetricGrid{
+  gap:11px;
+  margin-top:12px;
+}
+.studentDashboardShell .studentMetric{
+  min-height:104px;
+  padding:14px;
+  border-radius:16px;
+}
+.studentDashboardShell .studentMetricIcon{
+  width:48px;
+  height:48px;
+  border-radius:15px;
+}
+.studentDashboardShell .studentMetricIcon svg{width:22px;height:22px}
+.studentDashboardShell .studentMetricIcon img{width:42px;height:42px}
+.studentDashboardShell .studentMetric strong{font-size:21px}
+.studentDashboardShell .studentDashboardGrid{
+  gap:11px;
+  margin-top:12px;
+}
+.studentDashboardShell .studentPanel{
+  border-radius:17px;
+  border-color:var(--premium-line);
+}
+.studentDashboardShell .studentPanel>header{
+  min-height:55px;
+  padding:13px 15px 9px;
+}
+.studentDashboardShell .studentProgressSummary{
+  border-radius:17px;
+  box-shadow:0 12px 26px rgba(16,43,82,.11);
+}
+.studentDashboardShell .achievementGrid{
+  gap:9px;
+}
+.studentDashboardShell .achievementGrid article{
+  min-height:118px;
+  border-radius:14px;
+}
+
+/* Daily Tasks / profile blocks remain special but visually consistent. */
+.studentDashboardShell .studentSideDailySummary,
+.studentWorkspaceShell .studentSideDailySummary{
+  border-radius:16px;
+  box-shadow:0 7px 18px rgba(65,43,31,.035);
+}
+.studentDashboardShell .studentSideProfile,
+.studentWorkspaceShell .studentSideProfile{
+  box-shadow:0 5px 14px rgba(35,43,56,.025);
+}
+
+/* Premium focus and hover feedback for keyboard / mouse users. */
+.studentDashboardShell a:focus-visible,
+.studentWorkspaceShell a:focus-visible,
+.studentDashboardShell button:focus-visible,
+.studentWorkspaceShell button:focus-visible{
+  outline:2px solid rgba(23,60,108,.42);
+  outline-offset:2px;
+}
+
+@media(max-width:1280px){
+  .studentWorkspaceShell .sectionCard{min-height:300px}
+  .studentWorkspaceShell .sidebarTestCard{min-height:270px}
+}
+
+@media(max-width:940px){
+  .studentWorkspaceShell .workspaceHeroCompact,
+  .studentWorkspaceShell .sidebarLibraryHero{
+    min-height:145px;
+    padding:21px 22px;
+  }
+  .studentWorkspaceShell .sectionCard,
+  .studentWorkspaceShell .practiceSectionGrid .sectionCard{
+    min-height:285px;
+  }
+  .studentDashboardShell .studentWelcome{min-height:165px;padding:23px 24px}
+}
+
+@media(max-width:620px){
+  .studentWorkspaceShell .workspaceHeroCompact,
+  .studentWorkspaceShell .sidebarLibraryHero{
+    padding:19px 17px;
+  }
+  .studentWorkspaceShell .workspaceTrackBadge{margin-top:14px}
+  .studentWorkspaceShell .sectionCard,
+  .studentWorkspaceShell .practiceSectionGrid .sectionCard{
+    min-height:270px;
+    padding:18px;
+  }
+  .studentWorkspaceShell .sectionCardCopy h2{font-size:23px}
+  .studentWorkspaceShell .sidebarTestCard{min-height:255px;padding:17px}
+  .studentDashboardShell .studentWelcome{min-height:155px;padding:21px 18px}
+}
