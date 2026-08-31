@@ -5,12 +5,22 @@ import { checkAdminRequest } from '@/lib/adminAuth';
 const tracks = ['ielts', 'cefr'];
 const skills = ['reading', 'listening', 'writing', 'speaking', 'full-mock', 'vocabulary'];
 const statuses = ['draft', 'published'];
+const listeningScopes = ['part-1', 'part-2', 'part-3', 'part-4', 'full-test'];
+const readingScopes = ['passage-1', 'passage-2', 'passage-3', 'full-test'];
 const MAX_HTML_BYTES = 10 * 1024 * 1024;
 
 function authResponse(request: NextRequest) {
   const auth = checkAdminRequest(request);
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
   return null;
+}
+
+function parseTestScope(track: string, skill: string, raw: unknown) {
+  if (track !== 'ielts' || (skill !== 'listening' && skill !== 'reading')) return { ok: true, value: null as string | null };
+  const value = String(raw || '').trim();
+  if (!value) return { ok: true, value: null as string | null };
+  const allowed = skill === 'listening' ? listeningScopes : readingScopes;
+  return allowed.includes(value) ? { ok: true, value } : { ok: false, value: null as string | null };
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -39,8 +49,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const skill = String(body.skill || '');
     const status = String(body.status || '');
     const durationMinutes = Number(body.durationMinutes || 60);
+    const hasTestScope = Object.prototype.hasOwnProperty.call(body, 'testScope');
+    const scope = hasTestScope ? parseTestScope(track, skill, body.testScope) : { ok: true, value: null as string | null };
 
-    if (!title || title.length > 120 || description.length > 500 || !tracks.includes(track) || !skills.includes(skill) || !statuses.includes(status) || !Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 240) {
+    if (!title || title.length > 120 || description.length > 500 || !tracks.includes(track) || !skills.includes(skill) || !statuses.includes(status) || !Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 240 || !scope.ok) {
       return NextResponse.json({ error: 'Test ma’lumotlari noto‘g‘ri.' }, { status: 400 });
     }
     if (file && (!/\.html?$/i.test(file.name) || !['text/html', 'application/octet-stream', ''].includes(file.type))) {
@@ -51,7 +63,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     const supabase = getServiceSupabase();
-    const { data: current, error: currentError } = await supabase.from('tests').select('file_path').eq('id', id).maybeSingle();
+    const { data: current, error: currentError } = await supabase.from('tests').select('file_path,test_scope').eq('id', id).maybeSingle();
     if (currentError) throw currentError;
     if (!current) return NextResponse.json({ error: 'Test topilmadi.' }, { status: 404 });
 
@@ -64,6 +76,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       duration_minutes: durationMinutes,
       updated_at: new Date().toISOString(),
     };
+    if (hasTestScope) update.test_scope = scope.value;
 
     if (file) {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, '-').slice(-120);
