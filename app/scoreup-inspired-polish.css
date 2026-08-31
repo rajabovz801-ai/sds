@@ -1,0 +1,336 @@
+/*
+ * ARK student UI polish inspired by the clean, rounded feel of modern IELTS apps.
+ * Keeps ARK branding/colors while using lighter surfaces, Poppins typography,
+ * flatter cards and clearer controls. Exam iframe contents are intentionally untouched.
+ */
+
+.studentDashboardShell,
+.studentWorkspaceShell{
+  font-family:var(--font-poppins),"Segoe UI",Arial,sans-serif!important;
+  background:#f6f7f9;
+  color:#11233f;
+}
+
+.studentDashboardShell button,
+.studentDashboardShell input,
+.studentDashboardShell select,
+.studentDashboardShell textarea,
+.studentWorkspaceShell button,
+.studentWorkspaceShell input,
+.studentWorkspaceShell select,
+.studentWorkspaceShell textarea{
+  font-family:inherit;
+}
+
+/* Sidebar: white, light and rounded like the reference, but with ARK navy. */
+.studentDashboardShell .studentSidebar,
+.studentWorkspaceShell .studentSidebar{
+  background:#fff;
+  border-right:1px solid #e4e7eb;
+  backdrop-filter:none;
+}
+
+.studentDashboardShell .studentBrandMark,
+.studentWorkspaceShell .studentBrandMark{
+  border-radius:13px;
+  box-shadow:none;
+}
+
+.studentDashboardShell .studentBrand>span:last-child strong,
+.studentWorkspaceShell .studentBrand>span:last-child strong{
+  font-weight:700;
+  letter-spacing:-.02em;
+}
+
+.studentDashboardShell .studentSideNav,
+.studentWorkspaceShell .studentSideNav{
+  gap:9px;
+}
+
+.studentDashboardShell .studentSideNav a,
+.studentWorkspaceShell .studentSideNav a{
+  min-height:48px;
+  padding:0 14px;
+  border:1px solid #e1e5ea;
+  border-radius:15px;
+  background:#fff;
+  color:#27384f;
+  font-size:11px;
+  font-weight:500;
+  box-shadow:none;
+}
+
+.studentDashboardShell .studentSideNav a:hover,
+.studentWorkspaceShell .studentSideNav a:hover{
+  background:#f7f9fc;
+  border-color:#cbd4df;
+  color:#102b52;
+}
+
+.studentDashboardShell .studentSideNav a.active,
+.studentWorkspaceShell .studentSideNav a.active{
+  background:#edf3fb;
+  border-color:#5879a4;
+  color:#102b52;
+  box-shadow:none;
+}
+
+.studentDashboardShell .studentSideNav a.active small,
+.studentWorkspaceShell .studentSideNav a.active small{
+  background:#dfe9f6;
+  color:#385b85;
+}
+
+.studentDashboardShell .studentSideProfile,
+.studentWorkspaceShell .studentSideProfile{
+  border-color:#e1e5ea;
+  border-radius:15px;
+  box-shadow:none;
+}
+
+.studentDashboardShell .studentSideProfile button,
+.studentWorkspaceShell .studentSideProfile button{
+  border:1px solid #e4e7eb;
+  border-radius:10px;
+  background:#f8f9fb;
+}
+
+/* Main page surfaces: less shadow, more crisp borders. */
+.studentWorkspaceShell .workspaceHero,
+.studentDashboardShell .studentWelcome{
+  border:1px solid #e0e4e9;
+  border-radius:22px;
+  background:#fff;
+  box-shadow:none;
+}
+
+.studentWorkspaceShell .workspaceHero h1,
+.studentDashboardShell .studentWelcome h1,
+.studentWorkspaceShell .soonCard h1{
+  font-weight:600;
+  letter-spacing:-.045em;
+}
+
+.studentWorkspaceShell .workspaceHeroCopy>p,
+.studentDashboardShell .studentWelcome p,
+.studentWorkspaceShell .soonCard>p{
+  color:#687588;
+  font-weight:400;
+}
+
+.studentWorkspaceShell .sidebarLibraryHero{
+  background:#fff;
+  border-color:#e0e4e9;
+  box-shadow:none;
+}
+
+.studentWorkspaceShell .sidebarLibraryHero h1{
+  font-weight:600;
+  letter-spacing:-.045em;
+}
+
+.studentWorkspaceShell .libraryBreadcrumb{
+  font-weight:500;
+}
+
+.studentWorkspaceShell .sidebarLibraryHeading>div>span{
+  font-weight:700;
+}
+
+/* Cards: compact white surfaces with thin neutral borders. */
+.studentWorkspaceShell .sectionCard,
+.studentWorkspaceShell .trackChoiceCard,
+.studentWorkspaceShell .sidebarTestCard,
+.studentDashboardShell .studentMetric,
+.studentDashboardShell .studentPanel,
+.studentDashboardShell .achievementGrid article{
+  background:#fff;
+  border-color:#dfe3e8;
+  box-shadow:none;
+}
+
+.studentWorkspaceShell .sectionCard,
+.studentWorkspaceShell .trackChoiceCard{
+  border-radius:18px;
+}
+
+.studentWorkspaceShell .sidebarTestCard{
+  border-radius:17px;
+}
+
+.studentWorkspaceShell .sidebarTestCard:hover,
+.studentWorkspaceShell .sectionCard:hover,
+.studentWorkspaceShell .trackChoiceCard:hover,
+.studentDashboardShell .achievementGrid article:hover{
+  border-color:#bcc7d4;
+  box-shadow:0 8px 20px rgba(23,43,70,.05);
+  transform:translateY(-2px);
+}
+
+.studentWorkspaceShell .sidebarTestCard .testLibraryCopy h3,
+.studentWorkspaceShell .sectionCardCopy h2,
+.studentWorkspaceShell .trackChoiceCopy h2,
+.studentDashboardShell .studentPanel h2{
+  font-weight:600;
+  letter-spacing:-.025em;
+}
+
+.studentWorkspaceShell .sidebarTestCard .testLibraryCopy>span,
+.studentWorkspaceShell .sectionCardCopy>span,
+.studentWorkspaceShell .trackChoiceCopy>span{
+  font-weight:600;
+  letter-spacing:.08em;
+}
+
+/* Test filters: segmented-control appearance rather than a bulky dropdown shell. */
+.studentWorkspaceShell .ieltsScopeFilterBar{
+  width:max-content;
+  max-width:100%;
+  padding:4px;
+  gap:2px;
+  border:1px solid #e2e6eb;
+  border-radius:13px;
+  background:#eef0f3;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.studentWorkspaceShell .ieltsScopeFilterBar::-webkit-scrollbar{display:none}
+.studentWorkspaceShell .ieltsScopeFilterBar button{
+  min-height:34px;
+  padding:0 12px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:#6b7482;
+  font-size:10px;
+  font-weight:500;
+  white-space:nowrap;
+  box-shadow:none;
+}
+.studentWorkspaceShell .ieltsScopeFilterBar button:hover{
+  background:rgba(255,255,255,.7);
+  color:#233a59;
+}
+.studentWorkspaceShell .ieltsScopeFilterBar button.active{
+  background:#fff;
+  color:#102b52;
+  box-shadow:0 1px 4px rgba(20,35,55,.08);
+}
+
+/* Primary actions: solid, clear buttons similar to the reference instead of gradients. */
+.studentWorkspaceShell .sidebarTestOpen,
+.studentWorkspaceShell .sectionOpen,
+.studentWorkspaceShell .trackChoiceAction,
+.studentDashboardShell .studentProgressSummary>a,
+.studentDashboardShell .studentSideDailySummary,
+.studentWorkspaceShell .studentSideDailySummary{
+  border-radius:11px;
+  box-shadow:none;
+}
+
+.studentWorkspaceShell .sidebarTestOpen{
+  min-height:44px;
+  background:#173c6c;
+  border-color:#173c6c;
+  color:#fff;
+  font-size:10px;
+  font-weight:600;
+}
+.studentWorkspaceShell .sidebarTestOpen:hover{
+  background:#102b52;
+  border-color:#102b52;
+  color:#fff;
+}
+
+.studentWorkspaceShell .sectionOpen,
+.studentWorkspaceShell .trackChoiceAction{
+  border-color:#dce1e7;
+  background:#fff;
+}
+
+.studentWorkspaceShell .sectionOpen strong,
+.studentWorkspaceShell .trackChoiceAction strong{
+  font-weight:600;
+}
+
+.studentWorkspaceShell .sectionOpen>span,
+.studentWorkspaceShell .trackChoiceAction>span{
+  border-radius:10px;
+  box-shadow:none;
+}
+
+/* Dashboard: flatter modern analytics cards. */
+.studentDashboardShell .studentMetric{
+  border-radius:16px;
+}
+.studentDashboardShell .studentMetric small,
+.studentDashboardShell .studentMetric span{
+  font-weight:400;
+}
+.studentDashboardShell .studentMetric strong{
+  font-weight:600;
+}
+.studentDashboardShell .studentPanel{
+  border-radius:17px;
+}
+.studentDashboardShell .studentPanel>header{
+  border-bottom:1px solid #eef0f3;
+}
+.studentDashboardShell .studentPanel h2{
+  font-size:13px;
+}
+.studentDashboardShell .recentRow strong,
+.studentDashboardShell .achievementGrid strong{
+  font-weight:600;
+}
+
+/* Keep ARK accents, but remove excessive glossy gradients from supporting surfaces. */
+.studentDashboardShell .studentProgressSummary{
+  border-radius:18px;
+  background:#102b52;
+  box-shadow:none;
+}
+.studentDashboardShell .studentProgressSummary>a{
+  background:#fff;
+  color:#102b52;
+  font-weight:600;
+}
+.studentDashboardShell .studentProgressSummary>a:hover{
+  background:#f1f5fa;
+}
+
+.studentDashboardShell .studentSideDailySummary,
+.studentWorkspaceShell .studentSideDailySummary{
+  border:1px solid #ffd8d0;
+  background:#fff7f4;
+}
+
+/* Form controls and common action buttons on student pages. */
+.studentWorkspaceShell .pButton,
+.studentDashboardShell .pButton,
+.studentWorkspaceShell select,
+.studentDashboardShell select{
+  border-radius:10px;
+  font-weight:500;
+  box-shadow:none;
+}
+
+@media(max-width:940px){
+  .studentDashboardShell .studentSideNav a,
+  .studentWorkspaceShell .studentSideNav a{
+    min-height:39px;
+    border-radius:12px;
+  }
+}
+
+@media(max-width:620px){
+  .studentWorkspaceShell .workspaceHero,
+  .studentDashboardShell .studentWelcome{
+    border-radius:18px;
+  }
+  .studentWorkspaceShell .sidebarTestCard,
+  .studentWorkspaceShell .sectionCard,
+  .studentWorkspaceShell .trackChoiceCard{
+    border-radius:15px;
+  }
+}
