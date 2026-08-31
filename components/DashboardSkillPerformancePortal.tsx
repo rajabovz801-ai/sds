@@ -97,13 +97,10 @@ export function DashboardSkillPerformancePortal({ initialData }: Props) {
       }
     }
 
-    const interval = window.setInterval(refresh, 10000);
-    const onFocus = () => refresh();
-    window.addEventListener('focus', onFocus);
+    const interval = window.setInterval(refresh, 60000);
     return () => {
       cancelled = true;
       window.clearInterval(interval);
-      window.removeEventListener('focus', onFocus);
     };
   }, []);
 
