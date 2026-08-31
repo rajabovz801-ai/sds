@@ -20,6 +20,7 @@ import './practice-hub.css';
 import './ui-safety-polish.css';
 import './scoreup-inspired-polish.css';
 import './student-premium-density.css';
+import './dashboard-skill-performance.css';
 
 const poppins = Poppins({
   subsets: ['latin'],
