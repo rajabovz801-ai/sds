@@ -12,7 +12,7 @@ export type CloudTest = {
   track: TestTrack;
   skill: TestSkill;
   status: TestStatus;
-  testScope: TestScope | null;
+  testScope?: TestScope | null;
   fileName: string;
   filePath: string;
   durationMinutes: number;
