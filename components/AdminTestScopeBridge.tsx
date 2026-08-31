@@ -212,6 +212,7 @@ export function AdminTestScopeBridge() {
     document.addEventListener('click', onClickCapture, true);
     document.addEventListener('change', onSelectChange, true);
 
+    // Keep DOM decoration stable: disconnect while mutating to avoid self-triggered loops.
     const observer = new MutationObserver(() => {
       observer.disconnect();
       try {
