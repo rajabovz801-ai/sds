@@ -20,6 +20,7 @@ const adminSecurityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
   serverExternalPackages: ['pdfkit'],
   outputFileTracingIncludes: {
     '/api/telegram': ['./node_modules/pdfkit/js/data/*.afm'],
