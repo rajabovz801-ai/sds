@@ -1,0 +1,73 @@
+/* Compact admin density — layout only, no auth/data/test behavior. */
+.adminTopbar{height:74px!important}
+.adminBrand>span{width:40px!important;height:40px!important;padding:9px!important;border-radius:13px!important}
+.adminNav{height:42px!important;border-radius:13px!important}
+.adminNav button{height:32px!important;padding:0 10px!important}
+.adminTopActions{gap:6px!important}
+.adminSecureChip,.adminTopActions button{height:36px!important}
+
+.adminMain{padding:20px 0 46px!important}
+.adminHero{min-height:118px!important;gap:24px!important}
+.adminHero h1{margin:7px 0 4px!important;font-size:32px!important}
+.adminHero p{font-size:10px!important}
+.adminMetrics{gap:6px!important}
+.adminMetricsFour{grid-template-columns:repeat(4,92px)!important}
+.adminMetrics>div{padding:10px 11px!important;border-radius:13px!important}
+.adminMetrics strong{font-size:20px!important}
+
+.adminOverview{gap:10px!important}
+.adminChartGrid,.adminOverviewGrid{gap:10px!important}
+.adminPanel{border-radius:18px!important}
+.adminPanelHeading{min-height:62px!important;padding:12px 15px!important}
+.adminPanelHeading h2,.adminStudentListHead h2{font-size:14px!important}
+.adminPanelHeading>strong{font-size:23px!important}
+.adminBarChart{height:215px!important;padding:23px 18px 15px!important;gap:10px!important}
+.adminSkillBars{min-height:215px!important;padding:15px 16px!important;gap:14px!important}
+.adminRecentResults{padding:5px 14px 10px!important}
+.adminRecentResults>div{min-height:52px!important;padding:6px 2px!important}
+.adminLeaderboard{padding:5px 14px 10px!important}
+.adminLeaderboard button{min-height:52px!important;padding:6px 2px!important}
+
+.adminRoot .adminLayout{gap:10px!important}
+.adminRoot .adminFormCard,.adminRoot .adminLibrary{border-radius:18px!important}
+.adminRoot .adminSectionHeader{min-height:64px!important;padding:12px 15px!important}
+.adminRoot .adminForm{padding:15px!important}
+.adminRoot .field{margin-bottom:10px!important}
+.adminRoot .field input,.adminRoot .field select{height:40px!important}
+.adminRoot .field textarea{min-height:70px!important}
+.adminRoot .dropZone{min-height:88px!important;margin-bottom:10px!important;padding:13px!important}
+.adminTestList{padding:5px 11px 10px!important}
+.adminTestRow{min-height:68px!important;padding:8px 5px!important}
+
+.adminStudentsLayout{gap:10px!important}
+.adminStudentList{height:600px!important}
+.adminStudentDetail{min-height:600px!important}
+.adminStudentListHead{padding:13px 14px 11px!important;gap:9px!important}
+.adminStudentRows{padding:6px!important}
+.adminStudentRows>button{min-height:56px!important;padding:7px!important}
+.adminStudentProfile{min-height:86px!important;padding:14px 16px!important}
+.adminStudentProfile>span{width:49px!important;height:49px!important;border-radius:15px!important}
+.adminStudentSummary{padding:15px!important;grid-template-columns:100px repeat(3,1fr)!important;gap:8px!important}
+.adminStudentSummary>div:not(.adminAccuracyRing){min-height:86px!important;padding:12px!important}
+.adminAccuracyRing{width:88px!important;height:88px!important}
+.adminAccuracyRing>span{width:66px!important;height:66px!important}
+.adminStudentResultsHead{padding:13px 16px 10px!important}
+.adminStudentResults{padding:0 12px 12px!important}
+.adminStudentResults article{min-height:70px!important;padding:9px 5px!important}
+.adminStudentTrend{margin:0 15px 7px!important;padding:13px 14px!important}
+
+@media(max-width:1180px){
+  .adminMetricsFour{grid-template-columns:repeat(2,92px)!important}
+}
+@media(max-width:980px){
+  .adminTopbar{height:auto!important;min-height:76px!important;padding:9px 0!important}
+  .adminMain{padding-top:14px!important}
+  .adminHero{min-height:auto!important;padding:10px 0 18px!important}
+  .adminStudentList{height:440px!important}
+  .adminStudentDetail{min-height:0!important}
+}
+@media(max-width:700px){
+  .adminHero h1{font-size:29px!important}
+  .adminMetricsFour{grid-template-columns:repeat(2,1fr)!important}
+  .adminStudentSummary{grid-template-columns:1fr 1fr!important}
+}
