@@ -61,7 +61,6 @@ function SkillCard({
 
 export function DashboardSkillPerformancePortal({ initialData }: Props) {
   const [host, setHost] = useState<HTMLElement | null>(null);
-  const [data, setData] = useState(initialData);
 
   useEffect(() => {
     const grid = document.querySelector<HTMLElement>('.studentDashboardGrid');
@@ -84,32 +83,15 @@ export function DashboardSkillPerformancePortal({ initialData }: Props) {
     };
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function refresh() {
-      try {
-        const response = await fetch('/api/dashboard', { cache: 'no-store' });
-        if (!response.ok) return;
-        const next = await response.json() as DashboardData;
-        if (!cancelled) setData(next);
-      } catch {
-        // Keep the last good snapshot visible if the live refresh is temporarily unavailable.
-      }
-    }
-
-    const interval = window.setInterval(refresh, 60000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, []);
-
+  // StudentDashboardClient already owns the live dashboard refresh cycle.
+  // Reusing the server-provided snapshot here avoids a second identical
+  // /api/dashboard request every minute from this presentation-only portal.
   const bands = useMemo(() => ({
-    listening: data.listeningBand,
-    reading: data.readingBand,
-    speaking: latestRecentBand(data, 'speaking'),
-    writing: latestRecentBand(data, 'writing'),
-  }), [data]);
+    listening: initialData.listeningBand,
+    reading: initialData.readingBand,
+    speaking: latestRecentBand(initialData, 'speaking'),
+    writing: latestRecentBand(initialData, 'writing'),
+  }), [initialData]);
 
   if (!host) return null;
 
