@@ -1,0 +1,237 @@
+/* Final ARK admin premium layer — layout/typography only. No auth, API, exam or data behavior. */
+.adminRoot{
+  --adm-ink:#10233f;
+  --adm-ink-2:#173653;
+  --adm-paper:#fffdf8;
+  --adm-cream:#f4ecdf;
+  --adm-cream-2:#faf6ef;
+  --adm-line:rgba(16,35,63,.095);
+  --adm-line-strong:rgba(16,35,63,.15);
+  --adm-muted:#718096;
+  --adm-coral:#ff6b58;
+  --adm-green:#2f8f71;
+  font-family:Inter,"Avenir Next","Segoe UI Variable","SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  font-kerning:normal;
+  font-feature-settings:"kern" 1,"liga" 1,"calt" 1;
+}
+.adminRoot *,
+.adminRoot *::before,
+.adminRoot *::after{box-sizing:border-box}
+.adminRoot button,
+.adminRoot input,
+.adminRoot select,
+.adminRoot textarea{font-family:inherit}
+.adminRoot button:disabled{cursor:not-allowed}
+
+/* Top shell */
+.adminRoot .adminTopbar{gap:18px!important}
+.adminRoot .adminBrand{min-width:190px}
+.adminRoot .adminBrand>span{box-shadow:0 12px 28px rgba(255,107,88,.18)!important}
+.adminRoot .adminBrand strong{font-size:16px!important;letter-spacing:-.02em;font-weight:800}
+.adminRoot .adminBrand small{font-size:8px!important;letter-spacing:.15em!important;font-weight:800}
+.adminRoot .adminNav{padding:4px!important;border-color:rgba(255,255,255,.085)!important;background:rgba(5,18,34,.34)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.adminRoot .adminNav button{min-width:104px;height:34px!important;padding:0 13px!important;border-radius:10px!important;font-size:10.5px!important;font-weight:780!important;letter-spacing:-.005em}
+.adminRoot .adminNav button.active{box-shadow:0 8px 20px rgba(0,0,0,.14)!important}
+.adminRoot .adminSecureChip,.adminRoot .adminTopActions button{height:38px!important;border-radius:11px!important;font-size:9.5px!important;font-weight:760!important}
+.adminRoot .adminTopActions button{transition:background .16s ease,border-color .16s ease,transform .16s ease}
+.adminRoot .adminTopActions button:hover{transform:translateY(-1px)}
+
+/* Shared content cards */
+.adminRoot .adminFormCard,
+.adminRoot .adminLibrary,
+.adminRoot .adminPanel,
+.adminRoot .adminStudentList,
+.adminRoot .adminStudentDetail{
+  border-color:var(--adm-line)!important;
+  border-radius:20px!important;
+  background:rgba(255,253,248,.985)!important;
+  box-shadow:0 16px 44px rgba(33,39,45,.06)!important;
+}
+.adminRoot .adminSectionHeader,
+.adminRoot .adminPanelHeading,
+.adminRoot .adminStudentListHead,
+.adminRoot .adminStudentResultsHead{
+  border-color:rgba(16,35,63,.075)!important;
+}
+.adminRoot .adminSectionHeader h2,
+.adminRoot .adminPanelHeading h2,
+.adminRoot .adminStudentListHead h2,
+.adminRoot .adminStudentResultsHead h3{
+  color:var(--adm-ink)!important;
+  letter-spacing:-.025em!important;
+  font-weight:790!important;
+}
+.adminRoot .adminSectionHeader p,
+.adminRoot .adminPanelHeading small,
+.adminRoot .adminStudentListHead small,
+.adminRoot .adminStudentResultsHead small{
+  color:#8a94a1!important;
+}
+
+/* Tests workspace */
+.adminRoot .adminLayout{grid-template-columns:minmax(315px,.62fr) minmax(0,1.38fr)!important;gap:14px!important;align-items:start}
+.adminRoot .adminFormCard{position:sticky;top:14px;overflow:hidden}
+.adminRoot .adminFormCard .adminSectionHeader{min-height:68px!important;padding:13px 15px!important}
+.adminRoot .adminFormCard .adminSectionHeader>span,
+.adminRoot .adminLibrary .adminSectionHeader>span{width:36px!important;height:36px!important;padding:9px!important;border-radius:11px!important;background:#edf2f1!important;color:#315d63!important}
+.adminRoot .adminSectionHeader h2{font-size:14px!important}
+.adminRoot .adminSectionHeader p{margin-top:4px!important;font-size:9.5px!important;line-height:1.4!important}
+.adminRoot .adminForm{padding:15px!important}
+.adminRoot .field{gap:6px!important;margin-bottom:10px!important}
+.adminRoot .field label{color:#47586d!important;font-size:9.5px!important;font-weight:800!important;letter-spacing:.01em}
+.adminRoot .field input,
+.adminRoot .field select,
+.adminRoot .field textarea{
+  border-color:rgba(16,35,63,.11)!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  color:#19314d!important;
+  font-size:11px!important;
+  font-weight:620!important;
+  box-shadow:inset 0 1px 0 rgba(16,35,63,.015);
+}
+.adminRoot .field input,.adminRoot .field select{height:40px!important;padding:0 11px!important}
+.adminRoot .field textarea{min-height:70px!important;padding:10px 11px!important;line-height:1.5!important}
+.adminRoot .field input:focus,
+.adminRoot .field select:focus,
+.adminRoot .field textarea:focus{
+  border-color:rgba(49,93,99,.38)!important;
+  box-shadow:0 0 0 3px rgba(49,93,99,.065)!important;
+}
+.adminRoot .twoFields{gap:9px!important}
+.adminRoot .dropZone{min-height:80px!important;margin:3px 0 11px!important;padding:11px 12px!important;border-color:rgba(16,35,63,.15)!important;border-radius:14px!important;background:linear-gradient(145deg,#faf7f1,#f7f2e9)!important}
+.adminRoot .dropZone>span{width:38px!important;height:38px!important;padding:10px!important;border-radius:11px!important;background:#173653!important}
+.adminRoot .dropZone b{font-size:10.5px!important;font-weight:800!important}
+.adminRoot .dropZone small{font-size:9px!important;line-height:1.35!important}
+.adminRoot .formActions{gap:7px!important}
+.adminRoot .formActions .pButton{min-height:40px!important;border-radius:11px!important;padding:0 13px!important;font-size:9.5px!important;font-weight:820!important;box-shadow:none!important}
+.adminRoot .formActions .pButtonPrimary{background:linear-gradient(135deg,#10233f,#183d61)!important}
+
+.adminRoot .adminLibrary{overflow:hidden}
+.adminRoot .adminLibraryHeader{min-height:67px!important;background:rgba(255,253,248,.82)!important}
+.adminRoot .adminLibraryHeader .adminSectionHeader{min-height:67px!important;padding:12px 15px!important}
+.adminRoot .adminSearch{height:38px!important;border-radius:11px!important;border-color:rgba(16,35,63,.10)!important;background:#fbf8f2!important}
+.adminRoot .adminSearch input{font-size:10px!important;font-weight:620!important}
+.adminRoot .adminTestList{padding:4px 10px 10px!important}
+.adminRoot .adminTestRow{min-height:65px!important;padding:8px 5px!important;grid-template-columns:39px minmax(0,1fr) auto!important;gap:10px!important;border-color:rgba(16,35,63,.065)!important;transition:background .15s ease}
+.adminRoot .adminTestRow:hover{background:#faf7f1}
+.adminRoot .adminTestFile{width:38px!important;height:38px!important;padding:10px!important;border-radius:11px!important;background:#edf2f1!important}
+.adminRoot .adminTestCopy>div{gap:6px!important}
+.adminRoot .adminTestCopy>div>span{font-size:8px!important;letter-spacing:.08em!important;font-weight:850!important}
+.adminRoot .adminTestCopy h3{margin:4px 0 3px!important;font-size:12px!important;line-height:1.25!important;font-weight:790!important;letter-spacing:-.01em}
+.adminRoot .adminTestCopy small{font-size:8.7px!important;line-height:1.3!important}
+.adminRoot .adminTestCopy i{padding:3px 6px!important;font-size:6.5px!important;letter-spacing:.04em}
+.adminRoot .adminRowActions{gap:5px!important}
+.adminRoot .adminRowActions a,
+.adminRoot .adminRowActions button{width:32px!important;height:32px!important;padding:8px!important;border-radius:9px!important;background:#fff!important}
+.adminRoot .adminRowActionsWide>button:first-child{width:auto!important;min-width:58px!important;padding:0 10px!important;font-size:8.5px!important;font-weight:850!important}
+.adminRoot .adminRowActionsWide .startTest{background:#eaf7f0!important;color:#1c7654!important;border-color:rgba(28,118,84,.13)!important}
+.adminRoot .adminRowActionsWide .stopTest{background:#fff1ed!important;color:#a64a40!important;border-color:rgba(166,74,64,.12)!important}
+
+/* Students workspace */
+.adminRoot .adminStudentsLayout{grid-template-columns:minmax(285px,330px) minmax(0,1fr)!important;gap:14px!important;align-items:start}
+.adminRoot .adminStudentList{height:620px!important;overflow:hidden}
+.adminRoot .adminStudentListHead{min-height:72px!important;padding:12px 13px 10px!important;gap:8px!important;background:rgba(255,253,248,.86)}
+.adminRoot .adminStudentListHead h2{font-size:14px!important}
+.adminRoot .adminStudentListHead .adminSearch{width:100%!important;max-width:160px!important;margin:0!important}
+.adminRoot .adminStudentRows{padding:5px!important;overflow:auto;scrollbar-width:thin;scrollbar-color:#d5cdc1 transparent}
+.adminRoot .adminStudentRows>button{min-height:58px!important;padding:7px 8px!important;border-radius:12px!important;gap:9px!important;transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.adminRoot .adminStudentRows>button:hover{transform:translateX(1px)}
+.adminRoot .adminStudentRows>button.active{background:#edf2f1!important;border-color:rgba(49,93,99,.12)!important;box-shadow:inset 3px 0 0 #315d63!important}
+.adminRoot .adminStudentRows>button>span{width:38px!important;height:38px!important;border-radius:11px!important;font-size:10px!important}
+.adminRoot .adminStudentRows b{font-size:11px!important;line-height:1.25!important;font-weight:790!important}
+.adminRoot .adminStudentRows small{margin-top:3px!important;font-size:8.5px!important;line-height:1.3!important}
+.adminRoot .adminStudentRows i{padding:4px 6px!important;border-radius:999px!important;font-size:6.5px!important;letter-spacing:.04em!important}
+
+.adminRoot .adminStudentDetail{min-height:620px!important;overflow:hidden}
+.adminRoot .adminStudentProfile{min-height:90px!important;padding:14px 16px!important;grid-template-columns:50px minmax(0,1fr) auto!important;gap:12px!important;background:linear-gradient(135deg,#fffdf8,#fbf7f0)}
+.adminRoot .adminStudentProfile>span{width:50px!important;height:50px!important;border-radius:15px!important;background:#e8efee!important;color:#315d63!important;font-size:13px!important}
+.adminRoot .adminStudentProfile small{font-size:8px!important;letter-spacing:.12em!important}
+.adminRoot .adminStudentProfile h2{margin:4px 0 3px!important;font-size:19px!important;letter-spacing:-.035em!important}
+.adminRoot .adminStudentProfile p{font-size:9.5px!important;line-height:1.4!important}
+.adminRoot .adminStudentProfile>button{min-height:36px!important;padding:0 11px!important;border-radius:10px!important;font-size:9px!important;font-weight:820!important}
+.adminRoot .adminStudentSummary{padding:13px 15px!important;grid-template-columns:86px repeat(3,1fr)!important;gap:8px!important}
+.adminRoot .adminStudentSummary>div:not(.adminAccuracyRing){min-height:78px!important;padding:11px!important;border-radius:14px!important;background:#faf6ef!important;border:1px solid rgba(16,35,63,.07)!important}
+.adminRoot .adminStudentSummary small{font-size:7.5px!important;letter-spacing:.08em!important}
+.adminRoot .adminStudentSummary strong{font-size:20px!important;letter-spacing:-.035em!important}
+.adminRoot .adminStudentSummary span{font-size:8px!important}
+.adminRoot .adminAccuracyRing{width:82px!important;height:82px!important}
+.adminRoot .adminAccuracyRing>span{width:62px!important;height:62px!important}
+.adminRoot .adminStudentTrend{margin:0 15px 7px!important;padding:11px 13px!important;border-radius:14px!important;grid-template-columns:125px minmax(0,1fr)!important;gap:14px!important;background:#faf6ef!important}
+.adminRoot .adminStudentTrend h3{margin-top:4px!important;font-size:14px!important}
+.adminRoot .adminStudentTrendBars{height:70px!important;gap:7px!important}
+.adminRoot .adminStudentTrendBars>span{min-width:21px!important}
+.adminRoot .adminStudentResultsHead{padding:12px 15px 9px!important}
+.adminRoot .adminStudentResultsHead h3{margin-top:4px!important;font-size:15px!important}
+.adminRoot .adminStudentResults{padding:0 12px 12px!important}
+.adminRoot .adminStudentResults article{min-height:67px!important;padding:8px 5px!important;gap:10px!important;border-color:rgba(16,35,63,.065)!important}
+.adminRoot .adminStudentResults h4{font-size:11px!important;line-height:1.25!important;font-weight:780!important}
+.adminRoot .adminStudentResults article small{font-size:8.3px!important}
+.adminRoot .adminResultNumbers{gap:5px!important}
+.adminRoot .adminResultNumbers>span{min-width:58px!important;padding:7px 8px!important;border-radius:10px!important;background:#faf6ef!important}
+.adminRoot .adminResultNumbers small{font-size:6.5px!important}
+.adminRoot .adminResultNumbers b{font-size:10px!important}
+
+/* Feedback / empty / loading */
+.adminRoot .adminAlert{border-radius:12px!important;font-size:10px!important;line-height:1.45!important;box-shadow:0 8px 20px rgba(20,35,48,.04)}
+.adminRoot .adminLoading,.adminRoot .emptyState,.adminRoot .adminNoResults{color:#7d8895}
+.adminRoot .adminLoading p,.adminRoot .emptyState p,.adminRoot .adminNoResults p{font-size:10px!important;line-height:1.5!important}
+.adminRoot .emptyState h3{font-size:14px!important;letter-spacing:-.02em}
+
+/* Scroll / overflow hardening */
+.adminRoot .adminLibrary,
+.adminRoot .adminFormCard,
+.adminRoot .adminStudentList,
+.adminRoot .adminStudentDetail,
+.adminRoot .adminTestCopy,
+.adminRoot .adminStudentProfile>div,
+.adminRoot .adminStudentRows>button>div,
+.adminRoot .adminResultNumbers{min-width:0}
+.adminRoot .adminTestCopy h3,
+.adminRoot .adminTestCopy small,
+.adminRoot .adminStudentRows b,
+.adminRoot .adminStudentRows small,
+.adminRoot .adminStudentProfile h2,
+.adminRoot .adminStudentProfile p{overflow:hidden;text-overflow:ellipsis}
+.adminRoot .adminTestCopy h3,
+.adminRoot .adminTestCopy small,
+.adminRoot .adminStudentRows b,
+.adminRoot .adminStudentRows small{white-space:nowrap}
+.adminRoot :where(input,select,textarea,button,a):focus-visible{outline:2px solid rgba(49,93,99,.36)!important;outline-offset:2px!important}
+
+@media(max-width:1180px){
+  .adminRoot .adminLayout{grid-template-columns:minmax(290px,.65fr) minmax(0,1.35fr)!important}
+  .adminRoot .adminStudentsLayout{grid-template-columns:300px minmax(0,1fr)!important}
+  .adminRoot .adminStudentSummary{grid-template-columns:82px repeat(3,1fr)!important}
+}
+@media(max-width:980px){
+  .adminRoot .adminBrand{min-width:auto}
+  .adminRoot .adminLayout,.adminRoot .adminStudentsLayout{grid-template-columns:1fr!important}
+  .adminRoot .adminFormCard{position:static}
+  .adminRoot .adminStudentList{height:410px!important}
+  .adminRoot .adminStudentDetail{min-height:0!important}
+  .adminRoot .adminStudentListHead .adminSearch{max-width:240px!important}
+}
+@media(max-width:700px){
+  .adminRoot .adminTopbar{gap:10px!important}
+  .adminRoot .adminNav button{min-width:0;flex:1;padding:0 8px!important;font-size:9.5px!important}
+  .adminRoot .adminStudentProfile{grid-template-columns:46px minmax(0,1fr)!important}
+  .adminRoot .adminStudentProfile>span{width:46px!important;height:46px!important}
+  .adminRoot .adminStudentProfile>button{grid-column:1/-1;width:100%}
+  .adminRoot .adminStudentSummary{grid-template-columns:1fr 1fr!important}
+  .adminRoot .adminAccuracyRing{margin:auto}
+  .adminRoot .adminStudentTrend{grid-template-columns:1fr!important}
+  .adminRoot .adminStudentResults article{grid-template-columns:1fr!important}
+  .adminRoot .adminResultNumbers{width:100%;display:grid!important;grid-template-columns:repeat(4,1fr)!important}
+  .adminRoot .adminResultNumbers>span{min-width:0!important}
+}
+@media(max-width:480px){
+  .adminRoot .adminLibraryHeader{display:block}
+  .adminRoot .adminLibraryHeader .adminSearch{width:calc(100% - 24px)!important;margin:0 12px 12px!important}
+  .adminRoot .adminTestRow{grid-template-columns:37px minmax(0,1fr)!important}
+  .adminRoot .adminRowActionsWide{grid-column:2;flex-wrap:wrap}
+  .adminRoot .adminResultNumbers{grid-template-columns:repeat(2,1fr)!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .adminRoot *{scroll-behavior:auto!important;transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}
+}

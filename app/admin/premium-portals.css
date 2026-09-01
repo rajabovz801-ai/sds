@@ -1,0 +1,162 @@
+/* Admin portal polish. Loaded only by /admin and scoped by semantic ARIA labels. */
+section[aria-label="Admin natijalar boshqaruvi"]{
+  font-family:Inter,"Avenir Next","Segoe UI Variable","SF Pro Display","Helvetica Neue",Arial,sans-serif!important;
+  background:linear-gradient(145deg,#f3eadc,#faf6ef 55%,#f5eee3)!important;
+  color:#10233f!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"] *{box-sizing:border-box}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child{
+  width:min(1400px,calc(100% - 42px))!important;
+  padding-top:24px!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:first-child{
+  margin-bottom:14px!important;
+  align-items:center!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:first-child small{
+  color:#b06451!important;
+  font-size:8px!important;
+  font-weight:880!important;
+  letter-spacing:.14em!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:first-child h2{
+  margin:5px 0 5px!important;
+  font-size:29px!important;
+  line-height:1!important;
+  letter-spacing:-.045em!important;
+  font-weight:790!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:first-child p{
+  color:#75808e!important;
+  font-size:10px!important;
+  line-height:1.5!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"] button{
+  font-family:inherit!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:first-child button{
+  height:36px!important;
+  border-radius:10px!important;
+  padding:0 11px!important;
+  border-color:rgba(16,35,63,.10)!important;
+  background:rgba(255,253,248,.92)!important;
+  color:#42546a!important;
+  font-size:9px!important;
+  font-weight:800!important;
+  box-shadow:0 5px 14px rgba(34,39,43,.035)!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:first-child button:hover{
+  background:#10233f!important;
+  color:#fff!important;
+}
+
+/* Five result KPIs */
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(2){
+  gap:8px!important;
+  margin-bottom:10px!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(2)>div{
+  min-height:78px!important;
+  padding:12px 13px!important;
+  border:1px solid rgba(16,35,63,.085)!important;
+  border-radius:14px!important;
+  background:rgba(255,253,248,.95)!important;
+  box-shadow:0 10px 28px rgba(37,39,40,.04)!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(2) small{
+  color:#8d96a1!important;font-size:7.5px!important;font-weight:850!important;letter-spacing:.09em!important
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(2) strong{
+  margin-top:5px!important;font-size:21px!important;letter-spacing:-.04em!important
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(2) span{
+  margin-top:2px!important;color:#8b949e!important;font-size:8px!important
+}
+
+/* Filter command bar */
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(3){
+  gap:8px!important;
+  padding:10px!important;
+  border:1px solid rgba(16,35,63,.09)!important;
+  border-radius:15px 15px 0 0!important;
+  background:rgba(255,253,248,.96)!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(3) input,
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(3) select{
+  height:40px!important;
+  border:1px solid rgba(16,35,63,.10)!important;
+  border-radius:10px!important;
+  background:#faf7f1!important;
+  color:#273c55!important;
+  font:680 10px/1.2 inherit!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(3) input:focus,
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(3) select:focus{
+  outline:none!important;
+  border-color:rgba(49,93,99,.34)!important;
+  box-shadow:0 0 0 3px rgba(49,93,99,.055)!important;
+}
+
+/* Data table */
+section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(4){
+  border-color:rgba(16,35,63,.09)!important;
+  border-radius:0 0 17px 17px!important;
+  background:#fffdf8!important;
+  box-shadow:0 16px 42px rgba(35,39,43,.055)!important;
+  scrollbar-gutter:stable;
+}
+section[aria-label="Admin natijalar boshqaruvi"] table{
+  font-size:10px!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"] th{
+  padding:10px 12px!important;
+  background:#faf7f1!important;
+  color:#8290a0!important;
+  font-size:8px!important;
+  font-weight:880!important;
+  letter-spacing:.07em!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"] td{
+  padding:11px 12px!important;
+  border-color:rgba(16,35,63,.055)!important;
+  font-size:10px!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"] tbody tr{transition:background .14s ease}
+section[aria-label="Admin natijalar boshqaruvi"] tbody tr:hover{background:#faf6ef!important}
+section[aria-label="Admin natijalar boshqaruvi"] td b{font-weight:780!important}
+
+/* Result detail drawer: direct second child exists only when a result is open. */
+section[aria-label="Admin natijalar boshqaruvi"]>div:nth-child(2){
+  background:rgba(6,17,30,.44)!important;
+  backdrop-filter:blur(7px)!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:nth-child(2)>aside{
+  width:min(470px,100%)!important;
+  background:#fffdf8!important;
+  box-shadow:-26px 0 78px rgba(7,18,31,.22)!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:nth-child(2)>aside>div:first-child{
+  padding:19px 20px!important;
+  background:linear-gradient(145deg,#fffdf8,#faf6ef)!important;
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:nth-child(2)>aside h3{
+  font-size:19px!important;letter-spacing:-.035em!important
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:nth-child(2)>aside p{
+  color:#7a8592!important;font-size:9px!important;line-height:1.45!important
+}
+section[aria-label="Admin natijalar boshqaruvi"]>div:nth-child(2)>aside>div:nth-child(2){padding:16px 20px 24px!important}
+
+section[aria-label="Admin natijalar boshqaruvi"] :where(button,input,select):focus-visible{
+  outline:2px solid rgba(49,93,99,.36)!important;
+  outline-offset:2px!important;
+}
+@media(max-width:760px){
+  section[aria-label="Admin natijalar boshqaruvi"]>div:first-child{width:calc(100% - 20px)!important;padding-top:16px!important}
+  section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:first-child{align-items:flex-start!important}
+  section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:first-child h2{font-size:25px!important}
+  section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(2){grid-template-columns:repeat(2,1fr)!important}
+}
+@media(max-width:480px){
+  section[aria-label="Admin natijalar boshqaruvi"]>div:first-child>div:nth-child(2){grid-template-columns:1fr!important}
+}
