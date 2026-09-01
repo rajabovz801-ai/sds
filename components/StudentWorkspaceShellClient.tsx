@@ -42,6 +42,7 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
     let cancelled = false;
 
     async function loadSidebarSummary() {
+      if (document.visibilityState === 'hidden') return;
       try {
         const response = await fetch('/api/gamification', { cache: 'no-store' });
         if (!response.ok) return;
@@ -55,13 +56,18 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
     }
 
     loadSidebarSummary();
-    const interval = window.setInterval(loadSidebarSummary, 12000);
+    const interval = window.setInterval(loadSidebarSummary, 60000);
     const onFocus = () => loadSidebarSummary();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') loadSidebarSummary();
+    };
     window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibilityChange);
     return () => {
       cancelled = true;
       window.clearInterval(interval);
       window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, []);
 
