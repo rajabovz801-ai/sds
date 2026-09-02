@@ -3,7 +3,7 @@ import './compact.css';
 import './premium-final.css';
 import './premium-portals.css';
 
-// Admin presentation layers are isolated to this route; deploy marker: premium-final.
+// Admin presentation layers are isolated to this route; deploy marker: premium-final-2026-09-02.
 export default function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return children;
 }
