@@ -5,6 +5,7 @@ import './platform.css';
 import './landing-home-v4.css';
 import './landing-professional-polish.css';
 import './auth.css';
+import './mobile-public-hardening.css';
 
 const poppins = Poppins({
   subsets: ['latin'],

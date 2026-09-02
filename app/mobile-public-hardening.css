@@ -1,0 +1,217 @@
+/* ARK Education — public landing/auth mobile hardening. Desktop is untouched. */
+
+@media (max-width: 900px) {
+  .peakHeroPage,
+  .authRoot {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: clip;
+  }
+
+  .peakHeroNav,
+  .peakHeroMain,
+  .peakPlatform,
+  .peakFinalCta,
+  .peakHeroCopy,
+  .peakHeroVisual,
+  .peakVisualGlass,
+  .peakBentoGrid,
+  .peakBentoCard,
+  .authMain,
+  .authIntro,
+  .authCard {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .peakHeroPage img,
+  .peakHeroPage video,
+  .authRoot img,
+  .authRoot video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .peakHeroPage a,
+  .peakHeroPage button,
+  .authRoot a,
+  .authRoot button {
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 720px) {
+  .peakHeroNavShell {
+    padding: 8px max(8px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left));
+  }
+  .peakHeroNav {
+    width: 100%;
+    min-height: 60px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: 18px;
+  }
+  .peakHeroLinks { display: none; }
+  .peakHeroBrand { min-width: 0; }
+  .peakHeroBrandMark {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 13px;
+  }
+  .peakHeroBrandCopy { min-width: 0; }
+  .peakHeroBrandCopy strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+  .peakHeroBrandCopy small { display: none; }
+  .peakHeroNavActions { gap: 4px; }
+  .peakHeroSignIn {
+    min-height: 42px;
+    padding-inline: 10px;
+  }
+  .peakHeroSignup {
+    min-height: 44px;
+    padding-left: 13px;
+    gap: 7px;
+    border-radius: 14px;
+  }
+  .peakHeroSignup > span {
+    width: 26px;
+    height: 26px;
+  }
+
+  .peakHeroMain {
+    width: calc(100% - 24px);
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 30px 0 42px;
+  }
+  .peakHeroCopy { padding: 8px 0 0; }
+  .peakHeroCopy h1 {
+    max-width: 100%;
+    font-size: clamp(44px, 13.5vw, 65px);
+    overflow-wrap: anywhere;
+  }
+  .peakHeroLead {
+    margin-top: 18px;
+    font-size: 14px;
+  }
+  .peakHeroActions {
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 22px;
+  }
+  .peakHeroPrimary,
+  .peakHeroSecondary {
+    min-height: 52px;
+  }
+  .peakHeroProof {
+    width: 100%;
+    grid-template-columns: 1fr 1fr 1fr;
+    margin-top: 25px;
+  }
+  .peakHeroProof > div {
+    min-width: 0;
+    padding-inline: 11px;
+  }
+  .peakHeroProof strong { font-size: 13px; }
+  .peakHeroProof span { font-size: 8px; line-height: 1.35; }
+
+  .peakHeroVisual { width: 100%; }
+  .peakVisualGlass { min-height: 420px; }
+  .peakHeroArtwork { width: 112%; }
+  .peakScoreFloat { right: 4px; bottom: 18px; }
+  .peakSkillsFloat { left: 4px; bottom: 12px; max-width: calc(100% - 150px); overflow: hidden; }
+
+  .peakPlatform {
+    width: calc(100% - 20px);
+    padding: 48px 12px 14px;
+    border-radius: 28px;
+  }
+  .peakSectionHeading { margin-bottom: 27px; padding-inline: 6px; }
+  .peakSectionHeading h2 { font-size: clamp(36px, 11vw, 52px); }
+  .peakSectionHeading p { font-size: 13px; }
+  .peakBentoGrid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    gap: 12px;
+  }
+  .peakBentoCard,
+  .peakTrackCard {
+    grid-row: auto;
+    min-height: 280px;
+    padding: 22px;
+    border-radius: 23px;
+  }
+  .peakTrackPills {
+    position: static;
+    margin-top: 24px;
+  }
+  .peakTimerDial {
+    width: 125px;
+    height: 125px;
+  }
+
+  .peakFinalCta {
+    width: calc(100% - 24px);
+    display: block;
+    padding: 25px 20px;
+    border-radius: 24px;
+  }
+  .peakFinalCta .peakHeroPrimary { margin-top: 18px; }
+
+  .authTopbar {
+    width: calc(100% - 24px);
+    min-width: 0;
+  }
+  .authMain {
+    width: calc(100% - 24px);
+  }
+  .authIntro h2 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 480px) {
+  .peakHeroNavActions { flex: 0 0 auto; }
+  .peakHeroSignIn { font-size: 11px; padding-inline: 8px; }
+  .peakHeroSignup { font-size: 0; padding: 0 8px; }
+  .peakHeroSignup > span { margin: 0; }
+
+  .peakHeroMain { width: calc(100% - 18px); }
+  .peakHeroCopy h1 { font-size: clamp(40px, 13vw, 54px); }
+  .peakHeroEyebrow { max-width: 100%; font-size: 8px; }
+  .peakHeroActions { display: grid; grid-template-columns: 1fr; }
+  .peakHeroPrimary,
+  .peakHeroSecondary { width: 100%; justify-content: space-between; }
+  .peakHeroProof { grid-template-columns: 1fr; gap: 9px; }
+  .peakHeroProof > div {
+    padding: 9px 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(30,45,69,.10);
+  }
+  .peakHeroProof > div:first-child { border-top: 0; }
+  .peakVisualGlass { min-height: 340px; }
+  .peakScoreFloat { width: 118px; padding: 11px; }
+  .peakScoreFloat strong { font-size: 30px; }
+  .peakSkillsFloat { display: none; }
+
+  .peakBentoCard,
+  .peakTrackCard { min-height: 250px; padding: 19px; }
+  .peakCardLabel { position: static; margin: -7px 0 14px; }
+  .peakTimerDial { position: static; margin: 20px auto 0; }
+
+  .authMain { width: calc(100% - 20px); }
+  .authCard { padding: 19px; }
+  .authCodeField input,
+  .mockCodeForm input {
+    font-size: 20px;
+    max-width: 100%;
+  }
+}
