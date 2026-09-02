@@ -1,10 +1,12 @@
 /* Practice uses the same shared workspace language as IELTS and CEFR. */
 .practiceSectionGrid{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  max-width:920px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  max-width:none;
+  width:100%;
 }
 
 .practiceSectionGrid .sectionCard{
+  min-width:0;
   min-height:360px;
 }
 
@@ -17,16 +19,30 @@
   color:#243b57;
 }
 
+.practiceSectionGrid a.practiceSectionOpen{
+  cursor:pointer;
+}
+
+.practiceSectionGrid a.practiceSectionOpen:hover>span{
+  background:#10233f;
+  color:#fff;
+}
+
 /* Practice is live now. Suppress any stale SOON marker from older nav renderers. */
 .studentSideNav a[href="/practice"] small,
 .platformNav a[href="/practice"] .soonDot{
   display:none!important;
 }
 
-@media(max-width:900px){
+@media(max-width:1180px){
+  .practiceSectionGrid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:760px){
   .practiceSectionGrid{
     grid-template-columns:1fr;
-    max-width:none;
   }
   .practiceSectionGrid .sectionCard{
     min-height:330px;
