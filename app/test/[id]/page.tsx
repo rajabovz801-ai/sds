@@ -2,6 +2,7 @@ import { ListeningFullscreenResumeFix } from '@/components/ListeningFullscreenRe
 import { ListeningIframeCleanup } from '@/components/ListeningIframeCleanup';
 import { MockExamCompanion } from '@/components/MockExamCompanion';
 import { MockListeningAnswerCompatibility } from '@/components/MockListeningAnswerCompatibility';
+import { TestReliabilityGuard } from '@/components/TestReliabilityGuard';
 import { TestViewerClient } from '@/components/TestViewerClient';
 import { requireStudent } from '@/lib/auth/server-session';
 import { getPublishedTest } from '@/lib/cloudTests';
@@ -37,6 +38,7 @@ export default async function TestPage({
   const isListening = test.skill === 'listening';
   return (
     <>
+      <TestReliabilityGuard />
       <ListeningIframeCleanup enabled={isListening} />
       <ListeningFullscreenResumeFix enabled={isListening} />
       <MockListeningAnswerCompatibility enabled={isListening && mode === 'mock'} />
