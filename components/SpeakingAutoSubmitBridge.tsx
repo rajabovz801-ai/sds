@@ -46,7 +46,7 @@ export function SpeakingAutoSubmitBridge() {
       root.querySelectorAll<HTMLElement>('[class*="error"]').forEach((element) => {
         const text = element.textContent || '';
         if (text.includes(FAILURE_TEXT)) {
-          element.textContent = 'Javob avtomatik yuborilmadi. Internetni tekshirib, qayta Record qiling.';
+          element.textContent = 'Javob yuborilmadi. Bir ozdan keyin qayta Record qilib ko‘ring.';
         }
       });
     };

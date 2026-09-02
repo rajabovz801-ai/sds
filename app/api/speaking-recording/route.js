@@ -89,6 +89,18 @@ async function activeStudentFromSession() {
   };
 }
 
+async function teacherIdFromDatabase() {
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase
+    .from("ark_bot_teacher_config")
+    .select("telegram_user_id")
+    .eq("id", "default")
+    .maybeSingle();
+  if (error) throw error;
+  const teacherId = Number(data?.telegram_user_id);
+  return Number.isSafeInteger(teacherId) && teacherId > 0 ? String(teacherId) : "";
+}
+
 async function buildForwardHeaders() {
   const headers = { [FORWARDED_HEADER]: "1" };
 
@@ -184,6 +196,12 @@ async function receiveFromStudent(request) {
     return Response.json({ ok: false, error: "invalid_speaking_selection" }, { status: 400 });
   }
 
+  const teacherId = await teacherIdFromDatabase();
+  if (!teacherId) {
+    console.error("Speaking teacher chat is not registered in ark_bot_teacher_config");
+    return Response.json({ ok: false, error: "teacher_chat_not_registered" }, { status: 503 });
+  }
+
   const forwardHeaders = await buildForwardHeaders();
   if (!forwardHeaders) {
     console.error("Speaking forward authentication is not configured");
@@ -194,6 +212,7 @@ async function receiveFromStudent(request) {
   outgoing.append("audio", audio, `day-${selection.day.day}-${selection.topic.id}-q${selection.questionIndex + 1}.mp3`);
   outgoing.append("studentId", student.id);
   outgoing.append("studentName", student.name);
+  outgoing.append("teacherId", teacherId);
   outgoing.append("day", String(selection.day.day));
   outgoing.append("dayTitle", selection.day.title);
   outgoing.append("topicTitle", selection.topic.title);
@@ -244,8 +263,15 @@ async function deliverFromWritingBot(request) {
   const questionText = cleanText(form.get("questionText"), 280);
   const duration = Math.max(1, Math.min(300, Math.round(Number(form.get("duration")) || 0)));
 
-  const reportData = await prepareDailyReport();
-  const teacherId = reportData?.teacher?.telegram_user_id;
+  const forwardedTeacherId = cleanText(form.get("teacherId"), 40);
+  let teacherId = /^\d{5,20}$/.test(forwardedTeacherId) ? forwardedTeacherId : "";
+  if (!teacherId) {
+    const reportData = await prepareDailyReport();
+    const fallbackTeacherId = Number(reportData?.teacher?.telegram_user_id);
+    if (Number.isSafeInteger(fallbackTeacherId) && fallbackTeacherId > 0) {
+      teacherId = String(fallbackTeacherId);
+    }
+  }
   if (!teacherId) {
     return Response.json({ ok: false, error: "teacher_chat_not_registered" }, { status: 503 });
   }
