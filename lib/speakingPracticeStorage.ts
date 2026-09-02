@@ -4,7 +4,9 @@ import { getServiceSupabase } from '@/lib/supabase/server';
 
 export const SPEAKING_PRACTICE_AUDIO_BUCKET = 'speaking-practice-audio';
 
-export async function ensureSpeakingPracticeAudioBucket() {
+let bucketReadyPromise: Promise<void> | null = null;
+
+async function ensureBucketOnce() {
   const supabase = getServiceSupabase();
   const { data, error } = await supabase.storage.listBuckets();
   if (error) throw error;
@@ -16,6 +18,16 @@ export async function ensureSpeakingPracticeAudioBucket() {
     allowedMimeTypes: ['audio/mpeg', 'audio/mp3'],
   });
   if (createError && !/already exists/i.test(createError.message || '')) throw createError;
+}
+
+export async function ensureSpeakingPracticeAudioBucket() {
+  if (!bucketReadyPromise) {
+    bucketReadyPromise = ensureBucketOnce().catch((error) => {
+      bucketReadyPromise = null;
+      throw error;
+    });
+  }
+  await bucketReadyPromise;
 }
 
 function safeSegment(value: string) {
