@@ -1,0 +1,348 @@
+/* ARK Education — mobile/tablet responsive hardening.
+ * Scoped, presentation-only overrides. Desktop (941px+) is intentionally untouched.
+ */
+
+@media (max-width: 940px) {
+  /* Student dashboard/workspace shell */
+  .studentDashboardShell,
+  .studentWorkspaceShell {
+    width: 100%;
+    max-width: 100vw;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .studentWorkspaceShell .studentSidebar {
+    width: 100%;
+    max-width: 100vw;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 9px 10px;
+    overflow: hidden;
+    box-shadow: 0 7px 22px rgba(31, 43, 60, .045);
+  }
+
+  .studentWorkspaceShell .studentBrand {
+    min-width: 0;
+    padding: 0;
+  }
+
+  .studentWorkspaceShell .studentBrandMark {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 12px;
+  }
+
+  .studentWorkspaceShell .studentSideNav {
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .studentWorkspaceShell .studentSideNav::-webkit-scrollbar { display: none; }
+  .studentWorkspaceShell .studentSideNav a {
+    flex: 0 0 auto;
+    min-width: max-content;
+    min-height: 40px;
+    padding-inline: 10px;
+    scroll-snap-align: start;
+  }
+
+  /* Daily Tasks remains in the nav, so the large sidebar card is unnecessary on phones. */
+  .studentWorkspaceShell .studentSideDailySummary { display: none !important; }
+
+  /* Keep logout accessible on mobile instead of losing it with the desktop profile card. */
+  .studentWorkspaceShell .studentSideProfile {
+    display: grid !important;
+    grid-template-columns: 40px !important;
+    width: 40px;
+    height: 40px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible;
+  }
+  .studentWorkspaceShell .studentSideProfile > span,
+  .studentWorkspaceShell .studentSideProfile > div { display: none !important; }
+  .studentWorkspaceShell .studentSideProfile > button {
+    width: 40px;
+    height: 40px;
+    padding: 11px;
+    border: 1px solid rgba(16, 35, 63, .10);
+    border-radius: 12px;
+    background: #fffdf9;
+  }
+
+  .studentWorkspaceShell .studentWorkspaceMain,
+  .studentDashboardShell .studentDashMain {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .studentWorkspaceShell .workspacePage,
+  .studentWorkspaceShell .workspaceHero,
+  .studentWorkspaceShell .workspaceHeroCopy,
+  .studentWorkspaceShell .sectionCardGrid,
+  .studentWorkspaceShell .sectionCard,
+  .studentWorkspaceShell .trackChoiceGrid,
+  .studentWorkspaceShell .trackChoiceCard,
+  .studentWorkspaceShell .sidebarLibrary,
+  .studentWorkspaceShell .sidebarLibraryHero,
+  .studentWorkspaceShell .sidebarTestGrid,
+  .studentWorkspaceShell .sidebarTestCard,
+  .studentDashboardShell .studentWelcome,
+  .studentDashboardShell .studentMetricGrid,
+  .studentDashboardShell .studentDashboardGrid,
+  .studentDashboardShell .studentPanel {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .studentWorkspaceShell img,
+  .studentWorkspaceShell video,
+  .studentWorkspaceShell canvas,
+  .studentDashboardShell img,
+  .studentDashboardShell video,
+  .studentDashboardShell canvas {
+    max-width: 100%;
+  }
+
+  .studentWorkspaceShell iframe,
+  .studentDashboardShell iframe,
+  .viewerRoot iframe,
+  iframe.viewerFrame {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .studentWorkspaceShell audio,
+  .studentDashboardShell audio {
+    max-width: 100%;
+  }
+
+  /* Cards/grids stack cleanly before they become cramped. */
+  .studentWorkspaceShell .practiceSectionGrid,
+  .studentWorkspaceShell .sectionCardGrid,
+  .studentWorkspaceShell .trackChoiceGrid,
+  .studentWorkspaceShell .sidebarTestGrid {
+    width: 100%;
+  }
+
+  /* Charts and result rows should scroll locally rather than widen the entire page. */
+  .studentDashboardShell .dashChartWrap,
+  .studentDashboardShell .studentAchievements,
+  .studentWorkspaceShell .libraryBreadcrumb,
+  .studentWorkspaceShell .ieltsScopeFilterBar {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .studentWorkspaceShell .ieltsScopeFilterBar {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .studentWorkspaceShell .ieltsScopeFilterBar::-webkit-scrollbar { display: none; }
+  .studentWorkspaceShell .ieltsScopeFilterBar button { flex: 0 0 auto; white-space: nowrap; }
+
+  /* Mock/test/result viewer */
+  .viewerRoot,
+  .examPreflight,
+  .platformRoot .mockSessionGrid,
+  .platformRoot .resultGrid {
+    width: 100%;
+    max-width: 100vw;
+    min-width: 0;
+  }
+  .viewerFrame {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Admin: preserve actions while allowing compact horizontal navigation. */
+  .adminRoot {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: clip;
+  }
+  .adminRoot .adminTopbar,
+  .adminRoot .adminMain,
+  .adminRoot .adminLayout,
+  .adminRoot .adminFormCard,
+  .adminRoot .adminLibrary,
+  .adminRoot .adminStudentList,
+  .adminRoot .adminStudentDetail {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .adminRoot .adminNav {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+  .adminRoot .adminNav::-webkit-scrollbar { display: none; }
+  .adminRoot .adminNav button {
+    flex: 0 0 auto;
+    min-height: 42px;
+    white-space: nowrap;
+  }
+  .adminRoot .adminRowActions,
+  .adminRoot .adminRowActionsWide,
+  .adminRoot .formActions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 620px) {
+  .studentWorkspaceShell .studentWorkspaceMain,
+  .studentDashboardShell .studentDashMain {
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+    padding-bottom: calc(40px + env(safe-area-inset-bottom));
+  }
+
+  .studentWorkspaceShell .studentSidebar {
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+
+  .studentWorkspaceShell .studentSideNav a {
+    min-height: 42px;
+    padding-inline: 9px;
+    font-size: 10px;
+  }
+  .studentWorkspaceShell .studentSideNav a svg {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+  }
+
+  .studentWorkspaceShell .workspaceHero,
+  .studentWorkspaceShell .workspaceHeroCompact,
+  .studentWorkspaceShell .sidebarLibraryHero,
+  .studentDashboardShell .studentWelcome {
+    border-radius: 19px;
+  }
+
+  .studentWorkspaceShell .workspaceHeroCompact h1,
+  .studentWorkspaceShell .sidebarLibraryHero h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .studentWorkspaceShell .workspaceTrackBadge,
+  .studentWorkspaceShell .counter {
+    max-width: 100%;
+  }
+
+  .studentWorkspaceShell .libraryBreadcrumb {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .studentWorkspaceShell .libraryBreadcrumb::-webkit-scrollbar { display: none; }
+
+  /* iOS Safari: >=16px prevents focus zoom without changing desktop typography. */
+  .studentWorkspaceShell input,
+  .studentWorkspaceShell select,
+  .studentWorkspaceShell textarea,
+  .adminRoot input,
+  .adminRoot select,
+  .adminRoot textarea {
+    font-size: 16px !important;
+  }
+
+  .studentWorkspaceShell button,
+  .studentWorkspaceShell a,
+  .adminRoot button,
+  .adminRoot a {
+    touch-action: manipulation;
+  }
+
+  .studentWorkspaceShell .sectionOpen,
+  .studentWorkspaceShell .sidebarTestOpen,
+  .studentWorkspaceShell .pButton,
+  .adminRoot .pButton {
+    min-height: 44px;
+  }
+
+  .viewerBar {
+    max-width: 100vw;
+    padding-left: max(7px, env(safe-area-inset-left));
+    padding-right: max(7px, env(safe-area-inset-right));
+  }
+  .viewerTitle,
+  .viewerBridgeChip {
+    min-width: 0;
+  }
+
+  .examPreflight,
+  .examSecurityLock {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  .adminRoot .adminTopbar,
+  .adminRoot .adminMain {
+    width: calc(100% - 20px);
+  }
+  .adminRoot .adminTopbar {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  .adminRoot .adminHero h1 {
+    overflow-wrap: anywhere;
+  }
+  .adminRoot .adminSearch {
+    max-width: calc(100% - 24px);
+  }
+  .adminRoot .adminTestCopy h3,
+  .adminRoot .adminTestCopy small {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .studentWorkspaceShell .studentSidebar {
+    grid-template-columns: 38px minmax(0, 1fr) 38px;
+    gap: 6px;
+  }
+  .studentWorkspaceShell .studentBrandMark,
+  .studentWorkspaceShell .studentSideProfile,
+  .studentWorkspaceShell .studentSideProfile > button {
+    width: 38px;
+    height: 38px;
+  }
+  .studentWorkspaceShell .studentBrandMark { flex-basis: 38px; padding: 9px; }
+  .studentWorkspaceShell .studentSideProfile > button { padding: 10px; }
+
+  .studentWorkspaceShell .studentSideNav a {
+    min-height: 38px;
+    padding-inline: 8px;
+    gap: 7px;
+  }
+
+  .studentWorkspaceShell .workspaceHeroCompact h1,
+  .studentWorkspaceShell .sidebarLibraryHero h1 {
+    font-size: clamp(28px, 9vw, 36px);
+  }
+}
