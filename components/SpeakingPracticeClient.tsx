@@ -31,7 +31,7 @@ function formatSeconds(value: number) {
 }
 
 export function SpeakingPracticeClient({ studentName }: { studentName: string }) {
-  const [selectedDay, setSelectedDay] = useState(1);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [openPhrases, setOpenPhrases] = useState<Record<string, boolean>>({});
   const [recordings, setRecordings] = useState<Record<string, Recording>>({});
@@ -46,8 +46,10 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
   const startedAtRef = useRef(0);
   const urlsRef = useRef<string[]>([]);
 
-  const day = SPEAKING_DAYS.find((item) => item.day === selectedDay) ?? SPEAKING_DAYS[0];
-  const selectedTopic = day.topics.find((topic) => topic.id === selectedTopicId) ?? null;
+  const day = selectedDay === null
+    ? null
+    : SPEAKING_DAYS.find((item) => item.day === selectedDay) ?? null;
+  const selectedTopic = day?.topics.find((topic) => topic.id === selectedTopicId) ?? null;
   const totalQuestions = useMemo(
     () => SPEAKING_DAYS.reduce((sum, item) => sum + item.topics.reduce((topicSum, topic) => topicSum + topic.questions.length, 0), 0),
     [],
@@ -70,8 +72,12 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
     urlsRef.current.forEach((url) => URL.revokeObjectURL(url));
   }, []);
 
-  function questionKey(topicId: string, questionIndex: number) {
-    return `d${day.day}-${topicId}-q${questionIndex + 1}`;
+  function questionKey(dayNumber: number, topicId: string, questionIndex: number) {
+    return `d${dayNumber}-${topicId}-q${questionIndex + 1}`;
+  }
+
+  function scrollToStage() {
+    window.setTimeout(() => document.getElementById('speaking-stage')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
   }
 
   function chooseDay(dayNumber: number) {
@@ -80,15 +86,32 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
     setSelectedTopicId(null);
     setOpenPhrases({});
     setMicError('');
-    window.setTimeout(() => document.getElementById('speaking-topics')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+    scrollToStage();
   }
 
   function chooseTopic(topicId: string) {
-    if (activeRecording) return;
+    if (activeRecording || !day) return;
     setSelectedTopicId(topicId);
     setOpenPhrases({});
     setMicError('');
-    window.setTimeout(() => document.getElementById('speaking-questions')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+    scrollToStage();
+  }
+
+  function backToDays() {
+    if (activeRecording) return;
+    setSelectedDay(null);
+    setSelectedTopicId(null);
+    setOpenPhrases({});
+    setMicError('');
+    scrollToStage();
+  }
+
+  function backToTopics() {
+    if (activeRecording) return;
+    setSelectedTopicId(null);
+    setOpenPhrases({});
+    setMicError('');
+    scrollToStage();
   }
 
   async function startRecording(key: string) {
@@ -152,9 +175,11 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
     if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
   }
 
-  const dayRecordedCount = Object.keys(recordings).filter((key) => key.startsWith(`d${day.day}-`)).length;
-  const selectedTopicRecordedCount = selectedTopic
-    ? selectedTopic.questions.filter((_, index) => recordings[questionKey(selectedTopic.id, index)]).length
+  const dayRecordedCount = day
+    ? Object.keys(recordings).filter((key) => key.startsWith(`d${day.day}-`)).length
+    : 0;
+  const selectedTopicRecordedCount = day && selectedTopic
+    ? selectedTopic.questions.filter((_, index) => recordings[questionKey(day.day, selectedTopic.id, index)]).length
     : 0;
 
   return (
@@ -165,7 +190,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
         <div className={styles.heroCopy}>
           <span className={styles.eyebrow}><MicIcon /> SPEAKING PRACTICE · PART 1</span>
           <h1>10 kunlik <em>Speaking Sprint</em></h1>
-          <p>Har kuni 10 ta IELTS Part 1 topic. Topicni oching, savollarni ko‘ring, useful phrases’dan foydalaning va javobingizni ovozga yozib mashq qiling.</p>
+          <p>Avval Day bo‘limini, keyin topicni tanlang. Savollar, useful phrases va recording aynan tanlangan topic ichida ochiladi.</p>
           <div className={styles.heroFacts}>
             <span><strong>10</strong> Day</span>
             <span><strong>100</strong> Topic</span>
@@ -180,145 +205,166 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
         </div>
       </section>
 
-      <section className={styles.section} aria-labelledby="speaking-days-title">
-        <div className={styles.sectionHead}>
-          <div>
-            <span>01 · DAILY PLAN</span>
-            <h2 id="speaking-days-title">Day 1 — Day 10</h2>
-            <p>Bir Day tanlang. Har birida aynan 10 ta Part 1 topic mavjud.</p>
-          </div>
-          <strong className={styles.counter}>10 DAY</strong>
-        </div>
-        <div className={styles.dayGrid}>
-          {SPEAKING_DAYS.map((item) => (
-            <button
-              type="button"
-              key={item.day}
-              className={`${styles.dayCard} ${selectedDay === item.day ? styles.dayCardActive : ''}`}
-              onClick={() => chooseDay(item.day)}
-              disabled={Boolean(activeRecording)}
-            >
-              <div className={styles.dayTop}><span>DAY</span><strong>{String(item.day).padStart(2, '0')}</strong></div>
-              <h3>{item.title}</h3>
-              <p>{item.subtitle}</p>
-              <div className={styles.dayMeta}><span>10 topics</span><span>40 questions</span></div>
+      <div id="speaking-stage" style={{ scrollMarginTop: 104 }}>
+        {!day && (
+          <section className={styles.section} aria-labelledby="speaking-days-title">
+            <div className={styles.sectionHead}>
+              <div>
+                <span>01 · DAILY PLAN</span>
+                <h2 id="speaking-days-title">Day 1 — Day 10</h2>
+                <p>Bir bo‘limni tanlang. Har birining ichida aynan 10 ta IELTS Part 1 topic mavjud.</p>
+              </div>
+              <strong className={styles.counter}>10 DAY</strong>
+            </div>
+            <div className={styles.dayGrid}>
+              {SPEAKING_DAYS.map((item) => (
+                <button
+                  type="button"
+                  key={item.day}
+                  className={styles.dayCard}
+                  onClick={() => chooseDay(item.day)}
+                  disabled={Boolean(activeRecording)}
+                >
+                  <div className={styles.dayTop}><span>DAY</span><strong>{String(item.day).padStart(2, '0')}</strong></div>
+                  <h3>{item.title}</h3>
+                  <p>{item.subtitle}</p>
+                  <div className={styles.dayMeta}><span>10 topics</span><span>40 questions</span></div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {day && !selectedTopic && (
+          <section className={styles.section} aria-labelledby="speaking-topics-title">
+            <button type="button" className={styles.back} onClick={backToDays} disabled={Boolean(activeRecording)} style={{ marginBottom: 16 }}>
+              <ArrowLeftIcon /> Barcha bo‘limlar
             </button>
-          ))}
-        </div>
-      </section>
-
-      <section className={styles.section} id="speaking-topics" aria-labelledby="speaking-topics-title">
-        <div className={styles.sectionHead}>
-          <div>
-            <span>02 · DAY {String(day.day).padStart(2, '0')}</span>
-            <h2 id="speaking-topics-title">{day.title}</h2>
-            <p>{day.subtitle}</p>
-          </div>
-          <strong className={styles.counter}>{dayRecordedCount} RECORDED</strong>
-        </div>
-        <div className={styles.topicGrid}>
-          {day.topics.map((topic, index) => {
-            const recorded = topic.questions.filter((_, questionIndex) => recordings[questionKey(topic.id, questionIndex)]).length;
-            return (
-              <button
-                type="button"
-                className={`${styles.topicCard} ${selectedTopicId === topic.id ? styles.topicCardActive : ''}`}
-                key={topic.id}
-                onClick={() => chooseTopic(topic.id)}
-                disabled={Boolean(activeRecording)}
-              >
-                <div className={styles.topicNumber}>{String(index + 1).padStart(2, '0')}</div>
-                <div className={styles.topicCopy}>
-                  <span>PART 1 TOPIC</span>
-                  <h3>{topic.title}</h3>
-                  <p>{recorded}/{topic.questions.length} recorded</p>
-                </div>
-                <span className={styles.topicArrow}>→</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {selectedTopic && (
-        <section className={`${styles.section} ${styles.questionSection}`} id="speaking-questions" aria-labelledby="speaking-questions-title">
-          <div className={styles.questionHeader}>
-            <div>
-              <span>03 · SPEAK & RECORD</span>
-              <h2 id="speaking-questions-title">{selectedTopic.title}</h2>
-              <p>Har savolga tabiiy 20–35 soniyalik javob bering. Frazalarni yodlash uchun emas, javobni rivojlantirish uchun ishlating.</p>
+            <div className={styles.sectionHead}>
+              <div>
+                <span>DAY {String(day.day).padStart(2, '0')} · PART 1 TOPICS</span>
+                <h2 id="speaking-topics-title">{day.title}</h2>
+                <p>{day.subtitle} Topicni tanlang — uning savollari, useful phrases va recording ichkarida ochiladi.</p>
+              </div>
+              <strong className={styles.counter}>{dayRecordedCount} RECORDED</strong>
             </div>
-            <div className={styles.topicProgress}>
-              <strong>{selectedTopicRecordedCount}/{selectedTopic.questions.length}</strong>
-              <span>recorded</span>
-            </div>
-          </div>
-
-          {micError && <div className={styles.error}>{micError}</div>}
-
-          <div className={styles.questionList}>
-            {selectedTopic.questions.map((question, index) => {
-              const key = questionKey(selectedTopic.id, index);
-              const phrasesOpen = Boolean(openPhrases[key]);
-              const recording = recordings[key];
-              const isRecording = activeRecording?.key === key;
-              const anotherRecording = Boolean(activeRecording && !isRecording);
-              const phrases = usefulPhrases(selectedTopic, question);
-
-              return (
-                <article className={`${styles.questionCard} ${isRecording ? styles.questionCardRecording : ''}`} key={key}>
-                  <div className={styles.questionTitleRow}>
-                    <div>
-                      <span>QUESTION {String(index + 1).padStart(2, '0')}</span>
-                      <h3>{question.text}</h3>
+            <div className={styles.topicGrid}>
+              {day.topics.map((topic, index) => {
+                const recorded = topic.questions.filter((_, questionIndex) => recordings[questionKey(day.day, topic.id, questionIndex)]).length;
+                return (
+                  <button
+                    type="button"
+                    className={styles.topicCard}
+                    key={topic.id}
+                    onClick={() => chooseTopic(topic.id)}
+                    disabled={Boolean(activeRecording)}
+                  >
+                    <div className={styles.topicNumber}>{String(index + 1).padStart(2, '0')}</div>
+                    <div className={styles.topicCopy}>
+                      <span>PART 1 TOPIC</span>
+                      <h3>{topic.title}</h3>
+                      <p>{recorded}/{topic.questions.length} recorded</p>
                     </div>
-                    {recording && <span className={styles.savedBadge}><CheckCircleIcon /> SAVED</span>}
-                  </div>
+                    <span className={styles.topicArrow}>→</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
-                  <div className={styles.questionActions}>
-                    <button
-                      type="button"
-                      className={styles.phraseButton}
-                      onClick={() => setOpenPhrases((current) => ({ ...current, [key]: !current[key] }))}
-                    >
-                      <BookOpenIcon /> {phrasesOpen ? 'Hide useful phrases' : 'Show useful phrases'} <span>{phrasesOpen ? '↑' : '↓'}</span>
-                    </button>
+        {day && selectedTopic && (
+          <section className={`${styles.section} ${styles.questionSection}`} aria-labelledby="speaking-questions-title">
+            <button type="button" className={styles.back} onClick={backToTopics} disabled={Boolean(activeRecording)} style={{ marginBottom: 17 }}>
+              <ArrowLeftIcon /> {day.title}
+            </button>
 
-                    {!isRecording ? (
+            <div className={styles.questionHeader}>
+              <div>
+                <span>DAY {String(day.day).padStart(2, '0')} · {day.title.toUpperCase()}</span>
+                <h2 id="speaking-questions-title">{selectedTopic.title}</h2>
+                <p>Har savolga tabiiy 20–35 soniyalik javob bering. Useful phrases’dan 1–2 tasini tabiiy ishlatib, keyin javobingizni Record orqali qayta tinglang.</p>
+              </div>
+              <div className={styles.topicProgress}>
+                <strong>{selectedTopicRecordedCount}/{selectedTopic.questions.length}</strong>
+                <span>recorded</span>
+              </div>
+            </div>
+
+            {micError && <div className={styles.error}>{micError}</div>}
+
+            <div className={styles.questionList}>
+              {selectedTopic.questions.map((question, index) => {
+                const key = questionKey(day.day, selectedTopic.id, index);
+                const phrasesOpen = Boolean(openPhrases[key]);
+                const recording = recordings[key];
+                const isRecording = activeRecording?.key === key;
+                const anotherRecording = Boolean(activeRecording && !isRecording);
+                const phrases = usefulPhrases(selectedTopic, question);
+
+                return (
+                  <article className={`${styles.questionCard} ${isRecording ? styles.questionCardRecording : ''}`} key={key}>
+                    <div className={styles.questionTitleRow}>
+                      <div>
+                        <span>QUESTION {String(index + 1).padStart(2, '0')}</span>
+                        <h3>{question.text}</h3>
+                      </div>
+                      {recording && <span className={styles.savedBadge}><CheckCircleIcon /> SAVED</span>}
+                    </div>
+
+                    <div className={styles.questionActions}>
                       <button
                         type="button"
-                        className={styles.recordButton}
-                        onClick={() => void startRecording(key)}
-                        disabled={anotherRecording}
+                        className={styles.phraseButton}
+                        style={{ fontSize: 10.5 }}
+                        onClick={() => setOpenPhrases((current) => ({ ...current, [key]: !current[key] }))}
                       >
-                        <MicIcon /> {recording ? 'Record again' : 'Record'}
+                        <BookOpenIcon /> {phrasesOpen ? 'Hide useful phrases' : 'Show useful phrases'} <span>{phrasesOpen ? '↑' : '↓'}</span>
                       </button>
-                    ) : (
-                      <button type="button" className={styles.stopButton} onClick={stopRecording}>
-                        <span className={styles.liveDot} /> Stop · {formatSeconds(elapsed)}
-                      </button>
+
+                      {!isRecording ? (
+                        <button
+                          type="button"
+                          className={styles.recordButton}
+                          onClick={() => void startRecording(key)}
+                          disabled={anotherRecording}
+                        >
+                          <MicIcon /> {recording ? 'Record again' : 'Record'}
+                        </button>
+                      ) : (
+                        <button type="button" className={styles.stopButton} onClick={stopRecording}>
+                          <span className={styles.liveDot} /> Stop · {formatSeconds(elapsed)}
+                        </button>
+                      )}
+                    </div>
+
+                    {phrasesOpen && (
+                      <div className={styles.phrasePanel}>
+                        <div className={styles.phrasePanelHead}>
+                          <strong style={{ fontSize: 11.5 }}>Useful language</strong>
+                          <span style={{ fontSize: 9.5 }}>Use 1–2 naturally</span>
+                        </div>
+                        <ul>
+                          {phrases.map((phrase) => (
+                            <li key={phrase} style={{ fontSize: 12.5, lineHeight: 1.6, color: '#4f5969', paddingLeft: 16 }}>{phrase}</li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
-                  </div>
 
-                  {phrasesOpen && (
-                    <div className={styles.phrasePanel}>
-                      <div className={styles.phrasePanelHead}><strong>Useful language</strong><span>Use 1–2 naturally</span></div>
-                      <ul>{phrases.map((phrase) => <li key={phrase}>{phrase}</li>)}</ul>
-                    </div>
-                  )}
-
-                  {recording && !isRecording && (
-                    <div className={styles.audioPanel}>
-                      <div><span><CheckCircleIcon /></span><p><strong>Recording ready</strong><small>{formatSeconds(recording.seconds)} · {recording.type.split(';')[0]}</small></p></div>
-                      <audio controls src={recording.url} preload="metadata" />
-                    </div>
-                  )}
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      )}
+                    {recording && !isRecording && (
+                      <div className={styles.audioPanel}>
+                        <div><span><CheckCircleIcon /></span><p><strong>Recording ready</strong><small>{formatSeconds(recording.seconds)} · {recording.type.split(';')[0]}</small></p></div>
+                        <audio controls src={recording.url} preload="metadata" />
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }
