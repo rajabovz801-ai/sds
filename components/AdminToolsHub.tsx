@@ -7,17 +7,19 @@ import { AdminDailyTasksPanel } from '@/components/AdminDailyTasksPanel';
 import { AdminMockManager } from '@/components/AdminMockManager';
 import { AdminSpeakingMockPanel } from '@/components/AdminSpeakingMockPanel';
 import { AdminSpeakingPracticeInbox } from '@/components/AdminSpeakingPracticeInbox';
+import { AdminSystemHealthPanel } from '@/components/AdminSystemHealthPanel';
 import { AdminTelegramSchedulerPanel } from '@/components/AdminTelegramSchedulerPanel';
 import { AdminVocabularyQuizPanel } from '@/components/AdminVocabularyQuizPanel';
 import { LayoutGridIcon } from '@/components/UiIcons';
 import styles from './AdminToolsHub.module.css';
 
-type Tool = 'vocabulary' | 'daily' | 'speaking' | 'telegram' | 'exam';
+type Tool = 'vocabulary' | 'daily' | 'speaking' | 'health' | 'telegram' | 'exam';
 
 const tabs: Array<{ id: Tool; label: string; note: string; badge: string }> = [
   { id: 'vocabulary', label: 'Vocabulary', note: 'Quiz va PTS', badge: 'V' },
   { id: 'daily', label: 'Daily Tasks', note: '24 soatlik vazifalar', badge: 'D' },
   { id: 'speaking', label: 'Speaking Inbox', note: 'Practice MP3 javoblar', badge: 'S' },
+  { id: 'health', label: 'System Health', note: 'Session va delivery nazorati', badge: 'H' },
   { id: 'telegram', label: 'Telegram', note: 'Xabar va scheduler', badge: 'T' },
   { id: 'exam', label: 'Exam Controls', note: 'Mock, Speaking, retry', badge: 'E' },
 ];
@@ -86,6 +88,7 @@ export function AdminToolsHub() {
             {active === 'vocabulary' && <AdminVocabularyQuizPanel />}
             {active === 'daily' && <AdminDailyTasksPanel />}
             {active === 'speaking' && <AdminSpeakingPracticeInbox />}
+            {active === 'health' && <AdminSystemHealthPanel />}
             {active === 'telegram' && <AdminTelegramSchedulerPanel />}
             {active === 'exam' && (
               <section className={styles.examPanel}>
