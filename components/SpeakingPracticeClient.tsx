@@ -21,6 +21,13 @@ type ActiveRecording = {
 
 type DeliveryState = 'idle' | 'sending' | 'sent' | 'error';
 
+type ProgressResponse = {
+  ok?: boolean;
+  completedKeys?: string[];
+  completedCount?: number;
+  totalQuestions?: number;
+};
+
 function supportedMimeType() {
   if (typeof MediaRecorder === 'undefined') return '';
   for (const type of ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4']) {
@@ -73,6 +80,8 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
   const [openPhrases, setOpenPhrases] = useState<Record<string, boolean>>({});
   const [recordings, setRecordings] = useState<Record<string, Recording>>({});
   const [deliveryStates, setDeliveryStates] = useState<Record<string, DeliveryState>>({});
+  const [completedKeys, setCompletedKeys] = useState<Set<string>>(() => new Set());
+  const [progressLoaded, setProgressLoaded] = useState(false);
   const [activeRecording, setActiveRecording] = useState<ActiveRecording | null>(null);
   const [encodingKey, setEncodingKey] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
@@ -84,6 +93,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
   const recordingKeyRef = useRef('');
   const startedAtRef = useRef(0);
   const urlsRef = useRef<string[]>([]);
+  const deepLinkQuestionRef = useRef<number | null>(null);
 
   const day = selectedDay === null
     ? null
@@ -94,6 +104,61 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
     [],
   );
   const interactionBusy = Boolean(activeRecording || encodingKey);
+
+  function questionKey(dayNumber: number, topicId: string, questionIndex: number) {
+    return `d${dayNumber}-${topicId}-q${questionIndex + 1}`;
+  }
+
+  function isCompleted(key: string) {
+    return completedKeys.has(key) || Boolean(recordings[key]);
+  }
+
+  function markCompleted(key: string) {
+    setCompletedKeys((current) => {
+      if (current.has(key)) return current;
+      const next = new Set(current);
+      next.add(key);
+      return next;
+    });
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch('/api/speaking-recording', { cache: 'no-store', credentials: 'same-origin' })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({})) as ProgressResponse;
+        if (!response.ok || !data?.ok) return;
+        if (!cancelled) setCompletedKeys(new Set(Array.isArray(data.completedKeys) ? data.completedKeys : []));
+      })
+      .catch(() => undefined)
+      .finally(() => { if (!cancelled) setProgressLoaded(true); });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const dayParam = Number(params.get('day'));
+    const topicParam = String(params.get('topic') || '').trim();
+    const questionParam = Number(params.get('q'));
+    const targetDay = SPEAKING_DAYS.find((item) => item.day === dayParam);
+    const targetTopic = targetDay?.topics.find((item) => item.id === topicParam);
+    if (!targetDay) return;
+
+    setSelectedDay(targetDay.day);
+    if (targetTopic) setSelectedTopicId(targetTopic.id);
+    if (targetTopic && Number.isInteger(questionParam) && questionParam >= 1 && questionParam <= targetTopic.questions.length) {
+      deepLinkQuestionRef.current = questionParam - 1;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!day || !selectedTopic || deepLinkQuestionRef.current === null) return;
+    const index = deepLinkQuestionRef.current;
+    deepLinkQuestionRef.current = null;
+    const key = questionKey(day.day, selectedTopic.id, index);
+    window.setTimeout(() => document.getElementById(`speaking-${key}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
+  }, [day, selectedTopic]);
 
   useEffect(() => {
     if (!activeRecording) {
@@ -111,10 +176,6 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
     streamRef.current?.getTracks().forEach((track) => track.stop());
     urlsRef.current.forEach((url) => URL.revokeObjectURL(url));
   }, []);
-
-  function questionKey(dayNumber: number, topicId: string, questionIndex: number) {
-    return `d${dayNumber}-${topicId}-q${questionIndex + 1}`;
-  }
 
   function scrollToStage() {
     window.setTimeout(() => document.getElementById('speaking-stage')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
@@ -248,20 +309,28 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
         credentials: 'same-origin',
       });
       const data = await response.json().catch(() => ({}));
+      if (data?.saved) markCompleted(key);
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'delivery_failed');
+      markCompleted(key);
       setDeliveryStates((current) => ({ ...current, [key]: 'sent' }));
     } catch (error) {
       console.error('Speaking Telegram delivery failed', error);
       setDeliveryStates((current) => ({ ...current, [key]: 'error' }));
-      setMicError('Botga yuborilmadi. Internetni tekshirib, “Qayta yuborish”ni bosing.');
+      setMicError('Javob saqlandi, lekin yetkazishda xatolik bo‘ldi. Tizim holatini ustoz tekshirishi mumkin.');
     }
   }
 
+  const completedCount = useMemo(() => {
+    const keys = new Set(completedKeys);
+    Object.keys(recordings).forEach((key) => keys.add(key));
+    return keys.size;
+  }, [completedKeys, recordings]);
+
   const dayRecordedCount = day
-    ? Object.keys(recordings).filter((key) => key.startsWith(`d${day.day}-`)).length
+    ? day.topics.reduce((sum, topic) => sum + topic.questions.filter((_, index) => isCompleted(questionKey(day.day, topic.id, index))).length, 0)
     : 0;
   const selectedTopicRecordedCount = day && selectedTopic
-    ? selectedTopic.questions.filter((_, index) => recordings[questionKey(day.day, selectedTopic.id, index)]).length
+    ? selectedTopic.questions.filter((_, index) => isCompleted(questionKey(day.day, selectedTopic.id, index))).length
     : 0;
 
   return (
@@ -277,6 +346,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
             <span><strong>10</strong> Day</span>
             <span><strong>100</strong> Topic</span>
             <span><strong>{totalQuestions}</strong> Savol</span>
+            <span><strong>{progressLoaded ? completedCount : '—'}</strong> Completed</span>
           </div>
         </div>
         <div className={styles.studentCard}>
@@ -296,23 +366,30 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                 <h2 id="speaking-days-title">Day 1 — Day 10</h2>
                 <p>Bir bo‘limni tanlang. Har birining ichida aynan 10 ta IELTS Part 1 topic mavjud.</p>
               </div>
-              <strong className={styles.counter}>10 DAY</strong>
+              <strong className={styles.counter}>{completedCount}/{totalQuestions} DONE</strong>
             </div>
             <div className={styles.dayGrid}>
-              {SPEAKING_DAYS.map((item) => (
-                <button
-                  type="button"
-                  key={item.day}
-                  className={styles.dayCard}
-                  onClick={() => chooseDay(item.day)}
-                  disabled={interactionBusy}
-                >
-                  <div className={styles.dayTop}><span>DAY</span><strong>{String(item.day).padStart(2, '0')}</strong></div>
-                  <h3>{item.title}</h3>
-                  <p>{item.subtitle}</p>
-                  <div className={styles.dayMeta}><span>10 topics</span><span>40 questions</span></div>
-                </button>
-              ))}
+              {SPEAKING_DAYS.map((item) => {
+                const itemTotal = item.topics.reduce((sum, topic) => sum + topic.questions.length, 0);
+                const itemDone = item.topics.reduce(
+                  (sum, topic) => sum + topic.questions.filter((_, index) => isCompleted(questionKey(item.day, topic.id, index))).length,
+                  0,
+                );
+                return (
+                  <button
+                    type="button"
+                    key={item.day}
+                    className={styles.dayCard}
+                    onClick={() => chooseDay(item.day)}
+                    disabled={interactionBusy}
+                  >
+                    <div className={styles.dayTop}><span>DAY</span><strong>{String(item.day).padStart(2, '0')}</strong></div>
+                    <h3>{item.title}</h3>
+                    <p>{item.subtitle}</p>
+                    <div className={styles.dayMeta}><span>10 topics</span><span>{itemDone}/{itemTotal} completed</span></div>
+                  </button>
+                );
+              })}
             </div>
           </section>
         )}
@@ -328,11 +405,11 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                 <h2 id="speaking-topics-title">{day.title}</h2>
                 <p>{day.subtitle} Topicni tanlang — uning savollari, useful phrases va recording ichkarida ochiladi.</p>
               </div>
-              <strong className={styles.counter}>{dayRecordedCount} RECORDED</strong>
+              <strong className={styles.counter}>{dayRecordedCount} COMPLETED</strong>
             </div>
             <div className={styles.topicGrid}>
               {day.topics.map((topic, index) => {
-                const recorded = topic.questions.filter((_, questionIndex) => recordings[questionKey(day.day, topic.id, questionIndex)]).length;
+                const recorded = topic.questions.filter((_, questionIndex) => isCompleted(questionKey(day.day, topic.id, questionIndex))).length;
                 return (
                   <button
                     type="button"
@@ -341,11 +418,11 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                     onClick={() => chooseTopic(topic.id)}
                     disabled={interactionBusy}
                   >
-                    <div className={styles.topicNumber}>{String(index + 1).padStart(2, '0')}</div>
+                    <div className={styles.topicNumber}>{recorded === topic.questions.length ? '✓' : String(index + 1).padStart(2, '0')}</div>
                     <div className={styles.topicCopy}>
                       <span>PART 1 TOPIC</span>
                       <h3>{topic.title}</h3>
-                      <p>{recorded}/{topic.questions.length} recorded</p>
+                      <p>{recorded}/{topic.questions.length} completed</p>
                     </div>
                     <span className={styles.topicArrow}>→</span>
                   </button>
@@ -369,7 +446,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
               </div>
               <div className={styles.topicProgress}>
                 <strong>{selectedTopicRecordedCount}/{selectedTopic.questions.length}</strong>
-                <span>recorded</span>
+                <span>completed</span>
               </div>
             </div>
 
@@ -380,6 +457,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                 const key = questionKey(day.day, selectedTopic.id, index);
                 const phrasesOpen = Boolean(openPhrases[key]);
                 const recording = recordings[key];
+                const completed = isCompleted(key);
                 const isRecording = activeRecording?.key === key;
                 const isEncoding = encodingKey === key;
                 const anotherBusy = Boolean((activeRecording && !isRecording) || (encodingKey && !isEncoding));
@@ -387,13 +465,13 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                 const phrases = usefulPhrases(selectedTopic, question);
 
                 return (
-                  <article className={`${styles.questionCard} ${isRecording ? styles.questionCardRecording : ''}`} key={key}>
+                  <article id={`speaking-${key}`} className={`${styles.questionCard} ${isRecording ? styles.questionCardRecording : ''}`} key={key}>
                     <div className={styles.questionTitleRow}>
                       <div>
                         <span>QUESTION {String(index + 1).padStart(2, '0')}</span>
                         <h3>{question.text}</h3>
                       </div>
-                      {recording && <span className={styles.savedBadge}><CheckCircleIcon /> MP3 READY</span>}
+                      {completed && <span className={styles.savedBadge}><CheckCircleIcon /> {recording ? 'MP3 READY' : 'COMPLETED'}</span>}
                     </div>
 
                     <div className={styles.questionActions}>
@@ -421,7 +499,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                           onClick={() => void startRecording(key)}
                           disabled={anotherBusy}
                         >
-                          <MicIcon /> {recording ? 'Record again' : 'Record'}
+                          <MicIcon /> {completed ? 'Record again' : 'Record'}
                         </button>
                       )}
                     </div>

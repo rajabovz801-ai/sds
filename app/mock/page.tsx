@@ -1,5 +1,6 @@
 import { ActiveMockBanner } from '@/components/ActiveMockBanner';
 import { DashboardSkillPerformancePortal } from '@/components/DashboardSkillPerformancePortal';
+import { DashboardSpeakingProgressPortal } from '@/components/DashboardSpeakingProgressPortal';
 import { StudentDashboardClient } from '@/components/StudentDashboardClient';
 import { requireStudent } from '@/lib/auth/server-session';
 import { getActiveMockForStudent } from '@/lib/activeMock';
@@ -13,5 +14,5 @@ export default async function MockPage() {
     getDashboardData(student.id),
     getActiveMockForStudent(student.id),
   ]);
-  return <><StudentDashboardClient student={student} initialData={data} /><DashboardSkillPerformancePortal initialData={data} /><ActiveMockBanner mock={activeMock} /></>;
+  return <><StudentDashboardClient student={student} initialData={data} /><DashboardSpeakingProgressPortal /><DashboardSkillPerformancePortal initialData={data} /><ActiveMockBanner mock={activeMock} /></>;
 }
