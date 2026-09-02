@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
+import { AppClientMonitor } from '@/components/AppClientMonitor';
 import './globals.css';
 import './platform.css';
 import './landing-home-v4.css';
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="uz" className={poppins.variable}>
-      <body>{children}</body>
+      <body><AppClientMonitor />{children}</body>
     </html>
   );
 }
