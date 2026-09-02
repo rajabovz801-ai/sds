@@ -1,5 +1,6 @@
 import { SpeakingAutoSubmitBridge } from '@/components/SpeakingAutoSubmitBridge';
 import { SpeakingPracticeClient } from '@/components/SpeakingPracticeClient';
+import { SpeakingProgressBridge } from '@/components/SpeakingProgressBridge';
 import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
 import { requireStudent } from '@/lib/auth/server-session';
 
@@ -13,6 +14,7 @@ export default async function PracticeSpeakingPage() {
   return (
     <StudentWorkspaceShellClient student={student} active="practice">
       <SpeakingAutoSubmitBridge />
+      <SpeakingProgressBridge studentId={student.id} />
       <SpeakingPracticeClient studentName={studentName} />
     </StudentWorkspaceShellClient>
   );
