@@ -47,6 +47,35 @@ export async function sendDocument(chatId, buffer, filename, caption, businessCo
   return data.result;
 }
 
+export async function sendAudio(chatId, buffer, filename, caption, {
+  businessConnectionId = null,
+  duration = null,
+  title = "Speaking answer",
+  performer = "ARK Education"
+} = {}) {
+  const form = new FormData();
+  form.append("chat_id", String(chatId));
+  if (businessConnectionId) form.append("business_connection_id", businessConnectionId);
+  if (caption) form.append("caption", caption);
+  form.append("parse_mode", "HTML");
+  if (Number.isFinite(Number(duration)) && Number(duration) > 0) {
+    form.append("duration", String(Math.round(Number(duration))));
+  }
+  if (title) form.append("title", String(title).slice(0, 64));
+  if (performer) form.append("performer", String(performer).slice(0, 64));
+  form.append("audio", new Blob([buffer], { type: "audio/mpeg" }), filename || "speaking-answer.mp3");
+
+  const response = await fetch(`${TELEGRAM_API}/bot${token()}/sendAudio`, {
+    method: "POST",
+    body: form
+  });
+  const data = await response.json();
+  if (!data.ok) {
+    throw new Error(`Telegram sendAudio failed: ${data.description || response.status}`);
+  }
+  return data.result;
+}
+
 export async function getTelegramFile(fileId) {
   const file = await telegram("getFile", { file_id: fileId });
   if (!file.file_path) throw new Error("Telegram did not return file_path");
