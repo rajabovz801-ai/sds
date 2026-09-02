@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import * as lame from '@breezystack/lamejs';
 import { ArrowLeftIcon, BookOpenIcon, CheckCircleIcon, MicIcon } from '@/components/UiIcons';
 import { SPEAKING_DAYS, usefulPhrases } from '@/lib/speakingPractice';
 import styles from './SpeakingPracticeClient.module.css';
@@ -10,12 +11,15 @@ type Recording = {
   url: string;
   seconds: number;
   type: string;
+  blob: Blob;
 };
 
 type ActiveRecording = {
   key: string;
   startedAt: number;
 };
+
+type DeliveryState = 'idle' | 'sending' | 'sent' | 'error';
 
 function supportedMimeType() {
   if (typeof MediaRecorder === 'undefined') return '';
@@ -30,12 +34,47 @@ function formatSeconds(value: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
+function toInt16(samples: Float32Array) {
+  const output = new Int16Array(samples.length);
+  for (let i = 0; i < samples.length; i += 1) {
+    const sample = Math.max(-1, Math.min(1, samples[i]));
+    output[i] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+  }
+  return output;
+}
+
+async function encodeMp3(source: Blob) {
+  const context = new AudioContext();
+  try {
+    const decoded = await context.decodeAudioData(await source.arrayBuffer());
+    const samples = toInt16(decoded.getChannelData(0));
+    const encoder = new lame.Mp3Encoder(1, decoded.sampleRate, 64);
+    const parts: BlobPart[] = [];
+    const block = 1152;
+
+    for (let offset = 0; offset < samples.length; offset += block) {
+      const encoded = encoder.encodeBuffer(samples.subarray(offset, offset + block));
+      if (encoded.length > 0) parts.push(Uint8Array.from(encoded).buffer);
+    }
+
+    const tail = encoder.flush();
+    if (tail.length > 0) parts.push(Uint8Array.from(tail).buffer);
+    const mp3 = new Blob(parts, { type: 'audio/mpeg' });
+    if (mp3.size < 100) throw new Error('MP3 encoding failed');
+    return mp3;
+  } finally {
+    await context.close().catch(() => undefined);
+  }
+}
+
 export function SpeakingPracticeClient({ studentName }: { studentName: string }) {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [openPhrases, setOpenPhrases] = useState<Record<string, boolean>>({});
   const [recordings, setRecordings] = useState<Record<string, Recording>>({});
+  const [deliveryStates, setDeliveryStates] = useState<Record<string, DeliveryState>>({});
   const [activeRecording, setActiveRecording] = useState<ActiveRecording | null>(null);
+  const [encodingKey, setEncodingKey] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [micError, setMicError] = useState('');
 
@@ -54,6 +93,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
     () => SPEAKING_DAYS.reduce((sum, item) => sum + item.topics.reduce((topicSum, topic) => topicSum + topic.questions.length, 0), 0),
     [],
   );
+  const interactionBusy = Boolean(activeRecording || encodingKey);
 
   useEffect(() => {
     if (!activeRecording) {
@@ -81,7 +121,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
   }
 
   function chooseDay(dayNumber: number) {
-    if (activeRecording) return;
+    if (interactionBusy) return;
     setSelectedDay(dayNumber);
     setSelectedTopicId(null);
     setOpenPhrases({});
@@ -90,7 +130,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
   }
 
   function chooseTopic(topicId: string) {
-    if (activeRecording || !day) return;
+    if (interactionBusy || !day) return;
     setSelectedTopicId(topicId);
     setOpenPhrases({});
     setMicError('');
@@ -98,7 +138,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
   }
 
   function backToDays() {
-    if (activeRecording) return;
+    if (interactionBusy) return;
     setSelectedDay(null);
     setSelectedTopicId(null);
     setOpenPhrases({});
@@ -107,7 +147,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
   }
 
   function backToTopics() {
-    if (activeRecording) return;
+    if (interactionBusy) return;
     setSelectedTopicId(null);
     setOpenPhrases({});
     setMicError('');
@@ -115,8 +155,9 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
   }
 
   async function startRecording(key: string) {
-    if (activeRecording || recorderRef.current?.state === 'recording') return;
+    if (interactionBusy || recorderRef.current?.state === 'recording') return;
     setMicError('');
+    setDeliveryStates((current) => ({ ...current, [key]: 'idle' }));
 
     try {
       if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
@@ -143,21 +184,32 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
       };
 
       recorder.onerror = () => setMicError('Recording vaqtida xatolik yuz berdi. Qayta urinib ko‘ring.');
-      recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        urlsRef.current.push(url);
+      recorder.onstop = async () => {
+        const source = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
         const seconds = Math.max(1, (Date.now() - startedAtRef.current) / 1000);
         const savedKey = recordingKeyRef.current;
-        setRecordings((current) => {
-          const previous = current[savedKey];
-          if (previous?.url) URL.revokeObjectURL(previous.url);
-          return { ...current, [savedKey]: { url, seconds, type: blob.type } };
-        });
+
         stream.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
         recorderRef.current = null;
         setActiveRecording(null);
+        setEncodingKey(savedKey);
+
+        try {
+          const mp3 = await encodeMp3(source);
+          const url = URL.createObjectURL(mp3);
+          urlsRef.current.push(url);
+          setRecordings((current) => {
+            const previous = current[savedKey];
+            if (previous?.url) URL.revokeObjectURL(previous.url);
+            return { ...current, [savedKey]: { url, seconds, type: 'audio/mpeg', blob: mp3 } };
+          });
+        } catch (error) {
+          console.error('Speaking MP3 encoding failed', error);
+          setMicError('Ovoz yozildi, lekin MP3 tayyorlashda xatolik bo‘ldi. Qayta Record qilib ko‘ring.');
+        } finally {
+          setEncodingKey((current) => current === savedKey ? null : current);
+        }
       };
 
       recorder.start(500);
@@ -167,12 +219,42 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
       streamRef.current = null;
       recorderRef.current = null;
       setActiveRecording(null);
+      setEncodingKey(null);
       setMicError(error instanceof Error ? error.message : 'Mikrofonga ruxsat berilmadi.');
     }
   }
 
   function stopRecording() {
     if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
+  }
+
+  async function sendRecordingToBot(key: string, topicId: string, questionIndex: number) {
+    const recording = recordings[key];
+    if (!recording || !day || deliveryStates[key] === 'sending' || deliveryStates[key] === 'sent') return;
+
+    setMicError('');
+    setDeliveryStates((current) => ({ ...current, [key]: 'sending' }));
+    try {
+      const form = new FormData();
+      form.append('audio', recording.blob, `${key}.mp3`);
+      form.append('day', String(day.day));
+      form.append('topicId', topicId);
+      form.append('questionIndex', String(questionIndex));
+      form.append('duration', String(Math.round(recording.seconds)));
+
+      const response = await fetch('/api/speaking-recording', {
+        method: 'POST',
+        body: form,
+        credentials: 'same-origin',
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'delivery_failed');
+      setDeliveryStates((current) => ({ ...current, [key]: 'sent' }));
+    } catch (error) {
+      console.error('Speaking Telegram delivery failed', error);
+      setDeliveryStates((current) => ({ ...current, [key]: 'error' }));
+      setMicError('Botga yuborilmadi. Internetni tekshirib, “Qayta yuborish”ni bosing.');
+    }
   }
 
   const dayRecordedCount = day
@@ -223,7 +305,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                   key={item.day}
                   className={styles.dayCard}
                   onClick={() => chooseDay(item.day)}
-                  disabled={Boolean(activeRecording)}
+                  disabled={interactionBusy}
                 >
                   <div className={styles.dayTop}><span>DAY</span><strong>{String(item.day).padStart(2, '0')}</strong></div>
                   <h3>{item.title}</h3>
@@ -237,7 +319,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
 
         {day && !selectedTopic && (
           <section className={styles.section} aria-labelledby="speaking-topics-title">
-            <button type="button" className={styles.back} onClick={backToDays} disabled={Boolean(activeRecording)} style={{ marginBottom: 16 }}>
+            <button type="button" className={styles.back} onClick={backToDays} disabled={interactionBusy} style={{ marginBottom: 16 }}>
               <ArrowLeftIcon /> Barcha bo‘limlar
             </button>
             <div className={styles.sectionHead}>
@@ -257,7 +339,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                     className={styles.topicCard}
                     key={topic.id}
                     onClick={() => chooseTopic(topic.id)}
-                    disabled={Boolean(activeRecording)}
+                    disabled={interactionBusy}
                   >
                     <div className={styles.topicNumber}>{String(index + 1).padStart(2, '0')}</div>
                     <div className={styles.topicCopy}>
@@ -275,7 +357,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
 
         {day && selectedTopic && (
           <section className={`${styles.section} ${styles.questionSection}`} aria-labelledby="speaking-questions-title">
-            <button type="button" className={styles.back} onClick={backToTopics} disabled={Boolean(activeRecording)} style={{ marginBottom: 17 }}>
+            <button type="button" className={styles.back} onClick={backToTopics} disabled={interactionBusy} style={{ marginBottom: 17 }}>
               <ArrowLeftIcon /> {day.title}
             </button>
 
@@ -299,7 +381,9 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                 const phrasesOpen = Boolean(openPhrases[key]);
                 const recording = recordings[key];
                 const isRecording = activeRecording?.key === key;
-                const anotherRecording = Boolean(activeRecording && !isRecording);
+                const isEncoding = encodingKey === key;
+                const anotherBusy = Boolean((activeRecording && !isRecording) || (encodingKey && !isEncoding));
+                const delivery = deliveryStates[key] || 'idle';
                 const phrases = usefulPhrases(selectedTopic, question);
 
                 return (
@@ -309,7 +393,7 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                         <span>QUESTION {String(index + 1).padStart(2, '0')}</span>
                         <h3>{question.text}</h3>
                       </div>
-                      {recording && <span className={styles.savedBadge}><CheckCircleIcon /> SAVED</span>}
+                      {recording && <span className={styles.savedBadge}><CheckCircleIcon /> MP3 READY</span>}
                     </div>
 
                     <div className={styles.questionActions}>
@@ -322,18 +406,22 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                         <BookOpenIcon /> {phrasesOpen ? 'Hide useful phrases' : 'Show useful phrases'} <span>{phrasesOpen ? '↑' : '↓'}</span>
                       </button>
 
-                      {!isRecording ? (
+                      {isRecording ? (
+                        <button type="button" className={styles.stopButton} onClick={stopRecording}>
+                          <span className={styles.liveDot} /> Stop · {formatSeconds(elapsed)}
+                        </button>
+                      ) : isEncoding ? (
+                        <button type="button" className={styles.encodingButton} disabled>
+                          MP3 tayyorlanmoqda…
+                        </button>
+                      ) : (
                         <button
                           type="button"
                           className={styles.recordButton}
                           onClick={() => void startRecording(key)}
-                          disabled={anotherRecording}
+                          disabled={anotherBusy}
                         >
                           <MicIcon /> {recording ? 'Record again' : 'Record'}
-                        </button>
-                      ) : (
-                        <button type="button" className={styles.stopButton} onClick={stopRecording}>
-                          <span className={styles.liveDot} /> Stop · {formatSeconds(elapsed)}
                         </button>
                       )}
                     </div>
@@ -352,10 +440,29 @@ export function SpeakingPracticeClient({ studentName }: { studentName: string })
                       </div>
                     )}
 
-                    {recording && !isRecording && (
+                    {recording && !isRecording && !isEncoding && (
                       <div className={styles.audioPanel}>
-                        <div><span><CheckCircleIcon /></span><p><strong>Recording ready</strong><small>{formatSeconds(recording.seconds)} · {recording.type.split(';')[0]}</small></p></div>
-                        <audio controls src={recording.url} preload="metadata" />
+                        <div className={styles.audioMeta}>
+                          <span><CheckCircleIcon /></span>
+                          <p><strong>MP3 recording ready</strong><small>{formatSeconds(recording.seconds)} · audio/mpeg</small></p>
+                        </div>
+                        <div className={styles.audioActions}>
+                          <audio controls src={recording.url} preload="metadata" />
+                          <button
+                            type="button"
+                            className={`${styles.sendButton} ${delivery === 'sent' ? styles.sendButtonSent : ''}`}
+                            onClick={() => void sendRecordingToBot(key, selectedTopic.id, index)}
+                            disabled={delivery === 'sending' || delivery === 'sent'}
+                          >
+                            {delivery === 'sending'
+                              ? 'Yuborilmoqda…'
+                              : delivery === 'sent'
+                                ? 'Botga yuborildi ✓'
+                                : delivery === 'error'
+                                  ? 'Qayta yuborish'
+                                  : 'Botga yuborish'}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </article>
