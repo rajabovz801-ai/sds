@@ -33,6 +33,9 @@ export function SkillLibraryClient({
   tests,
   variant = 'default',
   specialCard,
+  backHref: backHrefOverride,
+  backLabel,
+  contextLabel,
 }: {
   track: TestTrack;
   skill: TestSkill;
@@ -41,8 +44,14 @@ export function SkillLibraryClient({
   tests: CloudTest[];
   variant?: 'default' | 'sidebar';
   specialCard?: ReactNode;
+  backHref?: string;
+  backLabel?: string;
+  contextLabel?: string;
 }) {
-  const backHref = track === 'ielts' ? '/ielts' : '/cefr';
+  const defaultBackHref = track === 'ielts' ? '/ielts' : '/cefr';
+  const backHref = backHrefOverride || defaultBackHref;
+  const navigationLabel = backLabel || track.toUpperCase();
+  const displayContext = contextLabel || track.toUpperCase();
   const SkillIcon = skillIcons[skill];
   const hasMaterials = tests.length > 0 || Boolean(specialCard);
   const testNumberOffset = specialCard ? 1 : 0;
@@ -53,14 +62,14 @@ export function SkillLibraryClient({
         <nav className="libraryBreadcrumb" aria-label="Breadcrumb">
           <Link href="/mock" aria-label="Dashboard"><HomeIcon /></Link>
           <i />
-          <Link href={backHref}>{track.toUpperCase()}</Link>
+          <Link href={backHref}>{navigationLabel}</Link>
           <span>›</span>
           <strong>{skill.charAt(0).toUpperCase() + skill.slice(1)}</strong>
         </nav>
 
         <section className="workspaceHero workspaceHeroCompact libraryHero sidebarLibraryHero">
           <div className="workspaceHeroCopy">
-            <span className="workspaceEyebrow"><SparklesIcon /> {track.toUpperCase()} · {skill.toUpperCase()}</span>
+            <span className="workspaceEyebrow"><SparklesIcon /> {displayContext} · {skill.toUpperCase()}</span>
             <h1>{title}</h1>
             <p>{description}</p>
           </div>
@@ -114,10 +123,10 @@ export function SkillLibraryClient({
 
   return (
     <div className="workspacePage libraryWorkspace">
-      <Link href={backHref} className="workspaceBack"><ArrowLeftIcon /> {track.toUpperCase()} bo‘limlari</Link>
+      <Link href={backHref} className="workspaceBack"><ArrowLeftIcon /> {navigationLabel} bo‘limlari</Link>
       <section className="workspaceHero workspaceHeroCompact libraryHero">
         <div className="workspaceHeroCopy">
-          <span className="workspaceEyebrow"><SparklesIcon /> {track.toUpperCase()} · {skill.toUpperCase()}</span>
+          <span className="workspaceEyebrow"><SparklesIcon /> {displayContext} · {skill.toUpperCase()}</span>
           <h1>{title}</h1>
           <p>{description}</p>
         </div>

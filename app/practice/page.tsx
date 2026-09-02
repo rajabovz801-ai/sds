@@ -4,6 +4,7 @@ import {
   ArrowRightIcon,
   BookOpenIcon,
   FileTextIcon,
+  MicIcon,
 } from '@/components/UiIcons';
 import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
 import { requireStudent } from '@/lib/auth/server-session';
@@ -20,12 +21,12 @@ export default async function PracticePage() {
           <div className="workspaceHeroCopy">
             <span className="workspaceEyebrow"><BookOpenIcon /> PRACTICE WORKSPACE</span>
             <h1>Practice kutubxonasi</h1>
-            <p>Vocabulary va grammar bo‘yicha qisqa, foydali mashqlarni tanlang va muntazam practice qiling.</p>
+            <p>Vocabulary, grammar va speaking bo‘yicha qisqa, foydali mashqlarni tanlang va muntazam practice qiling.</p>
           </div>
           <div className="workspaceTrackBadge">
             <small>ACTIVE TRACK</small>
             <strong>PRACTICE</strong>
-            <span>2 ta bo‘lim faol</span>
+            <span>3 ta bo‘lim faol</span>
           </div>
         </section>
 
@@ -70,6 +71,27 @@ export default async function PracticePage() {
               <strong>Grammar practice</strong>
               <span><ArrowRightIcon /></span>
             </div>
+          </article>
+
+          <article className="sectionCard sectionTone-violet">
+            <div className="sectionCardTop">
+              <span className="sectionCardIcon"><MicIcon /></span>
+              <small>03</small>
+            </div>
+            <div className="sectionCardCopy">
+              <span>READY TO PRACTICE</span>
+              <h2>Speaking Practice</h2>
+              <p>Speaking topshiriqlari orqali javob berish, fikrni rivojlantirish va ravon gapirish ko‘nikmalarini muntazam mashq qiling.</p>
+            </div>
+            <div className="sectionFacts">
+              <span><i />Speaking prompts</span>
+              <span><i />Timed practice</span>
+              <span><i />Fluency building</span>
+            </div>
+            <Link href="/practice/speaking" className="sectionOpen practiceSectionOpen">
+              <strong>Speaking practice</strong>
+              <span><ArrowRightIcon /></span>
+            </Link>
           </article>
         </section>
       </div>
