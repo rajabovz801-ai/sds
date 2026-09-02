@@ -5,6 +5,11 @@ import { cookies } from "next/headers";
 import { SESSION_COOKIE, verifySessionToken } from "../../../lib/auth/session.ts";
 import { getServiceSupabase } from "../../../lib/supabase/server.ts";
 import { SPEAKING_DAYS } from "../../../lib/speakingPractice.ts";
+import {
+  ensureSpeakingPracticeAudioBucket,
+  SPEAKING_PRACTICE_AUDIO_BUCKET,
+  speakingPracticeAudioPath
+} from "../../../lib/speakingPracticeStorage.ts";
 import { sendAudio } from "../../../ark-writing-bot/lib/telegram.js";
 import { prepareDailyReport } from "../../../ark-writing-bot/lib/tracker.js";
 
@@ -67,6 +72,10 @@ function speakingSelection(form) {
   const question = topic?.questions?.[questionIndex];
   if (!day || !topic || !question) return null;
   return { day, topic, question, questionIndex };
+}
+
+function keyFor(day, topicId, questionIndex) {
+  return `d${day}-${topicId}-q${questionIndex + 1}`;
 }
 
 async function activeStudentFromSession() {
@@ -171,6 +180,63 @@ async function verifyForwardRequest(request) {
   return expected.length >= 24 && safeEqual(received, expected);
 }
 
+async function progressForStudent() {
+  const student = await activeStudentFromSession();
+  if (!student) return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
+
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase
+    .from("speaking_practice_recordings")
+    .select("day,topic_id,question_index,telegram_sent,created_at")
+    .eq("student_id", student.id)
+    .order("created_at", { ascending: false })
+    .limit(1000);
+  if (error) throw error;
+
+  const completed = new Set();
+  let deliveredCount = 0;
+  for (const row of data || []) {
+    completed.add(keyFor(row.day, row.topic_id, row.question_index));
+    if (row.telegram_sent) deliveredCount += 1;
+  }
+
+  let next = null;
+  for (const day of SPEAKING_DAYS) {
+    for (const topic of day.topics) {
+      for (let index = 0; index < topic.questions.length; index += 1) {
+        const key = keyFor(day.day, topic.id, index);
+        if (!completed.has(key)) {
+          next = {
+            day: day.day,
+            dayTitle: day.title,
+            topicId: topic.id,
+            topicTitle: topic.title,
+            questionIndex: index,
+            questionText: topic.questions[index].text
+          };
+          break;
+        }
+      }
+      if (next) break;
+    }
+    if (next) break;
+  }
+
+  const totalQuestions = SPEAKING_DAYS.reduce(
+    (sum, day) => sum + day.topics.reduce((topicSum, topic) => topicSum + topic.questions.length, 0),
+    0
+  );
+
+  return Response.json({
+    ok: true,
+    completedKeys: Array.from(completed),
+    completedCount: completed.size,
+    deliveredCount,
+    totalQuestions,
+    next
+  }, { headers: { "Cache-Control": "private, no-store" } });
+}
+
 async function receiveFromStudent(request) {
   if (!sameOrigin(request)) {
     return Response.json({ ok: false, error: "invalid_origin" }, { status: 403 });
@@ -202,14 +268,52 @@ async function receiveFromStudent(request) {
     return Response.json({ ok: false, error: "teacher_chat_not_registered" }, { status: 503 });
   }
 
+  const supabase = getServiceSupabase();
+  await ensureSpeakingPracticeAudioBucket();
+  const storagePath = speakingPracticeAudioPath(student.id, selection.day.day, selection.topic.id, selection.questionIndex);
+  const audioBuffer = Buffer.from(await audio.arrayBuffer());
+
+  const { error: uploadError } = await supabase.storage
+    .from(SPEAKING_PRACTICE_AUDIO_BUCKET)
+    .upload(storagePath, audioBuffer, { contentType: "audio/mpeg", upsert: false });
+  if (uploadError) throw uploadError;
+
+  let recordingId = "";
+  try {
+    const { data: recording, error: insertError } = await supabase
+      .from("speaking_practice_recordings")
+      .insert({
+        student_id: student.id,
+        day: selection.day.day,
+        day_title: selection.day.title,
+        topic_id: selection.topic.id,
+        topic_title: selection.topic.title,
+        question_index: selection.questionIndex,
+        question_text: selection.question.text,
+        audio_path: storagePath,
+        mime_type: "audio/mpeg",
+        size_bytes: audio.size,
+        duration_seconds: duration,
+        telegram_sent: false
+      })
+      .select("id")
+      .single();
+    if (insertError || !recording?.id) throw insertError || new Error("speaking_recording_insert_failed");
+    recordingId = recording.id;
+  } catch (error) {
+    await supabase.storage.from(SPEAKING_PRACTICE_AUDIO_BUCKET).remove([storagePath]).catch(() => undefined);
+    throw error;
+  }
+
   const forwardHeaders = await buildForwardHeaders();
   if (!forwardHeaders) {
+    await supabase.from("speaking_practice_recordings").update({ telegram_error: "speaking_forward_not_configured", updated_at: new Date().toISOString() }).eq("id", recordingId);
     console.error("Speaking forward authentication is not configured");
-    return Response.json({ ok: false, error: "speaking_forward_not_configured" }, { status: 503 });
+    return Response.json({ ok: false, error: "speaking_forward_not_configured", saved: true }, { status: 503 });
   }
 
   const outgoing = new FormData();
-  outgoing.append("audio", audio, `day-${selection.day.day}-${selection.topic.id}-q${selection.questionIndex + 1}.mp3`);
+  outgoing.append("audio", new File([audioBuffer], `day-${selection.day.day}-${selection.topic.id}-q${selection.questionIndex + 1}.mp3`, { type: "audio/mpeg" }));
   outgoing.append("studentId", student.id);
   outgoing.append("studentName", student.name);
   outgoing.append("teacherId", teacherId);
@@ -232,10 +336,17 @@ async function receiveFromStudent(request) {
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok || !body.ok) {
-      console.error("Writing bot speaking forward failed", response.status, body?.error || "unknown");
-      return Response.json({ ok: false, error: "telegram_delivery_failed" }, { status: 502 });
+      const deliveryError = body?.error || `http_${response.status}`;
+      await supabase.from("speaking_practice_recordings").update({ telegram_error: deliveryError, updated_at: new Date().toISOString() }).eq("id", recordingId);
+      console.error("Writing bot speaking forward failed", response.status, deliveryError);
+      return Response.json({ ok: false, error: "telegram_delivery_failed", saved: true, recordingId }, { status: 502 });
     }
-    return Response.json({ ok: true, sent: true });
+
+    await supabase.from("speaking_practice_recordings").update({ telegram_sent: true, telegram_error: null, updated_at: new Date().toISOString() }).eq("id", recordingId);
+    return Response.json({ ok: true, sent: true, saved: true, recordingId });
+  } catch (error) {
+    await supabase.from("speaking_practice_recordings").update({ telegram_error: error?.name === "AbortError" ? "timeout" : "forward_exception", updated_at: new Date().toISOString() }).eq("id", recordingId);
+    throw error;
   } finally {
     clearTimeout(timeout);
   }
@@ -303,6 +414,17 @@ async function deliverFromWritingBot(request) {
   );
 
   return Response.json({ ok: true, sent: true });
+}
+
+export async function GET() {
+  try {
+    const projectId = process.env.VERCEL_PROJECT_ID || "";
+    if (projectId !== ARK_IELTS_PROJECT_ID) return Response.json({ ok: false, error: "unsupported_project" }, { status: 404 });
+    return await progressForStudent();
+  } catch (error) {
+    console.error("Speaking progress read failed", error);
+    return Response.json({ ok: false, error: "speaking_progress_failed" }, { status: 500 });
+  }
 }
 
 export async function POST(request) {
