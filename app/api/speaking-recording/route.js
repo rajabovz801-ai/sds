@@ -1,4 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
+import { getVercelOidcToken } from "@vercel/functions/oidc";
+import { createRemoteJWKSet, decodeJwt, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, verifySessionToken } from "../../../lib/auth/session.ts";
 import { getServiceSupabase } from "../../../lib/supabase/server.ts";
@@ -10,8 +12,17 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const ARK_IELTS_PROJECT_ID = "prj_lCHgfIZ7XUuKo5UbnYxva9Y7RTgo";
+const ARK_IELTS_PROJECT_NAME = "arkielts";
 const WRITING_BOT_PROJECT_ID = "prj_LZ7iM9e956Nsj91z2zeI87TgKO7e";
 const WRITING_BOT_URL = "https://ark-writing-bot.vercel.app/api/speaking-recording";
+const VERCEL_TEAM_ID = "team_a2tPUw7yvQMGgktGnlzlUA4W";
+const VERCEL_TEAM_SLUG = "rajabovz801-7955s-projects";
+const OIDC_TEAM_ISSUER = `https://oidc.vercel.com/${VERCEL_TEAM_SLUG}`;
+const OIDC_GLOBAL_ISSUER = "https://oidc.vercel.com";
+const OIDC_AUDIENCE = `https://vercel.com/${VERCEL_TEAM_SLUG}`;
+const OIDC_SUBJECT = `owner:${VERCEL_TEAM_SLUG}:project:${ARK_IELTS_PROJECT_NAME}:environment:production`;
+const TEAM_JWKS = createRemoteJWKSet(new URL(`${OIDC_TEAM_ISSUER}/.well-known/jwks`));
+const GLOBAL_JWKS = createRemoteJWKSet(new URL(`${OIDC_GLOBAL_ISSUER}/.well-known/jwks`));
 const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
 const FORWARDED_HEADER = "x-ark-speaking-forwarded";
 const SECRET_HEADER = "x-ark-bot-secret";
@@ -78,6 +89,76 @@ async function activeStudentFromSession() {
   };
 }
 
+async function buildForwardHeaders() {
+  const headers = { [FORWARDED_HEADER]: "1" };
+
+  try {
+    const oidcToken = String(await getVercelOidcToken() || "").trim();
+    if (oidcToken) {
+      headers.Authorization = `Bearer ${oidcToken}`;
+      return headers;
+    }
+  } catch (error) {
+    console.warn("Speaking forward OIDC token unavailable", error?.message || "unknown");
+  }
+
+  const secret = String(process.env.BOT_REGISTRATION_SECRET || "").trim();
+  if (secret.length >= 24) {
+    headers[SECRET_HEADER] = secret;
+    return headers;
+  }
+
+  return null;
+}
+
+async function verifyOidcForward(request) {
+  const authorization = String(request.headers.get("authorization") || "").trim();
+  if (!authorization.toLowerCase().startsWith("bearer ")) return false;
+  const token = authorization.slice(7).trim();
+  if (!token) return false;
+
+  try {
+    const unverified = decodeJwt(token);
+    let issuer;
+    let jwks;
+
+    if (unverified.iss === OIDC_TEAM_ISSUER) {
+      issuer = OIDC_TEAM_ISSUER;
+      jwks = TEAM_JWKS;
+    } else if (unverified.iss === OIDC_GLOBAL_ISSUER) {
+      issuer = OIDC_GLOBAL_ISSUER;
+      jwks = GLOBAL_JWKS;
+    } else {
+      return false;
+    }
+
+    const { payload } = await jwtVerify(token, jwks, {
+      algorithms: ["RS256"],
+      issuer,
+      audience: OIDC_AUDIENCE,
+      subject: OIDC_SUBJECT
+    });
+
+    return payload.owner_id === VERCEL_TEAM_ID
+      && payload.owner === VERCEL_TEAM_SLUG
+      && payload.project_id === ARK_IELTS_PROJECT_ID
+      && payload.project === ARK_IELTS_PROJECT_NAME
+      && payload.environment === "production";
+  } catch (error) {
+    console.warn("Speaking forward OIDC verification failed", error?.code || error?.message || "unknown");
+    return false;
+  }
+}
+
+async function verifyForwardRequest(request) {
+  if (request.headers.get(FORWARDED_HEADER) !== "1") return false;
+  if (await verifyOidcForward(request)) return true;
+
+  const expected = String(process.env.BOT_REGISTRATION_SECRET || "").trim();
+  const received = String(request.headers.get(SECRET_HEADER) || "").trim();
+  return expected.length >= 24 && safeEqual(received, expected);
+}
+
 async function receiveFromStudent(request) {
   if (!sameOrigin(request)) {
     return Response.json({ ok: false, error: "invalid_origin" }, { status: 403 });
@@ -103,9 +184,9 @@ async function receiveFromStudent(request) {
     return Response.json({ ok: false, error: "invalid_speaking_selection" }, { status: 400 });
   }
 
-  const secret = String(process.env.BOT_REGISTRATION_SECRET || "").trim();
-  if (secret.length < 24) {
-    console.error("Speaking forward secret is missing");
+  const forwardHeaders = await buildForwardHeaders();
+  if (!forwardHeaders) {
+    console.error("Speaking forward authentication is not configured");
     return Response.json({ ok: false, error: "speaking_forward_not_configured" }, { status: 503 });
   }
 
@@ -125,10 +206,7 @@ async function receiveFromStudent(request) {
   try {
     const response = await fetch(WRITING_BOT_URL, {
       method: "POST",
-      headers: {
-        [FORWARDED_HEADER]: "1",
-        [SECRET_HEADER]: secret
-      },
+      headers: forwardHeaders,
       body: outgoing,
       cache: "no-store",
       signal: controller.signal
@@ -145,10 +223,7 @@ async function receiveFromStudent(request) {
 }
 
 async function deliverFromWritingBot(request) {
-  const expected = String(process.env.BOT_REGISTRATION_SECRET || "").trim();
-  const received = String(request.headers.get(SECRET_HEADER) || "").trim();
-  const forwarded = request.headers.get(FORWARDED_HEADER) === "1";
-  if (!forwarded || expected.length < 24 || !safeEqual(received, expected)) {
+  if (!(await verifyForwardRequest(request))) {
     return Response.json({ ok: false, error: "unauthorized_forward" }, { status: 401 });
   }
 
