@@ -66,7 +66,6 @@ export default async function TypingToolPage() {
         <section className={styles.library}>
           <div className={styles.libraryHead}>
             <div><small>EXERCISE LIBRARY</small><h2>Typing mashqlari</h2></div>
-            <span>Start bosing va matnni aynan ko‘chirib yozing.</span>
           </div>
 
           {exercises.length ? (
