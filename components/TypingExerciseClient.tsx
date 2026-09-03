@@ -2,7 +2,15 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeftIcon, CheckCircleIcon, ClockIcon, RepeatIcon, TargetIcon, ZapIcon } from '@/components/UiIcons';
+import {
+  ArrowLeftIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  EditIcon,
+  RepeatIcon,
+  TargetIcon,
+  ZapIcon,
+} from '@/components/UiIcons';
 import styles from './TypingExerciseClient.module.css';
 
 type Exercise = {
@@ -133,7 +141,6 @@ export function TypingExerciseClient({ exercise }: Props) {
         <section className={styles.promptCard}>
           <small>{exercise.promptTitle}</small>
           <h1>{exercise.title}</h1>
-          <p>{exercise.prompt}</p>
         </section>
 
         {!finished ? (
@@ -172,17 +179,16 @@ export function TypingExerciseClient({ exercise }: Props) {
             <div className={styles.resultIntro}>
               <small>TYPING RESULT</small>
               <h2>Exercise yakunlandi</h2>
-              <p>{exercise.title} bo‘yicha natijangiz.</p>
             </div>
             <div className={styles.metrics}>
               <article><span className={styles.metricViolet}><ZapIcon /></span><div><small>Speed</small><strong>{wpm} WPM</strong><p>Words Per Minute</p></div></article>
               <article><span className={styles.metricGreen}><TargetIcon /></span><div><small>Accuracy</small><strong>{accuracy}%</strong><p>{correctChars} correct characters</p></div></article>
-              <article><span className={styles.metricRed}>×</span><div><small>Errors</small><strong>{errors}</strong><p>Mistyped words</p></div></article>
+              <article><span className={styles.metricRed}><EditIcon /></span><div><small>Errors</small><strong>{errors}</strong><p>Mistyped words</p></div></article>
               <article><span className={styles.metricBlue}><ClockIcon /></span><div><small>Time</small><strong>{formatTime(elapsed)}</strong><p>{typedWords}/{totalWords} words typed</p></div></article>
             </div>
             <div className={styles.resultActions}>
               <button type="button" onClick={() => reset()}><RepeatIcon /> Try again</button>
-              <Link href="/study-tools/typing">Exercises’ga qaytish <ArrowLeftIcon /></Link>
+              <Link href="/study-tools/typing"><ArrowLeftIcon /> Exercises’ga qaytish</Link>
             </div>
           </section>
         )}
