@@ -7,14 +7,16 @@ import { AdminDailyTasksPanel } from '@/components/AdminDailyTasksPanel';
 import { AdminMockManager } from '@/components/AdminMockManager';
 import { AdminSpeakingMockPanel } from '@/components/AdminSpeakingMockPanel';
 import { AdminSpeakingPracticeInbox } from '@/components/AdminSpeakingPracticeInbox';
+import { AdminStudentPointsPanel } from '@/components/AdminStudentPointsPanel';
 import { AdminTelegramSchedulerPanel } from '@/components/AdminTelegramSchedulerPanel';
 import { AdminVocabularyQuizPanel } from '@/components/AdminVocabularyQuizPanel';
 import { LayoutGridIcon } from '@/components/UiIcons';
 import styles from './AdminToolsHub.module.css';
 
-type Tool = 'vocabulary' | 'daily' | 'speaking' | 'telegram' | 'exam';
+type Tool = 'points' | 'vocabulary' | 'daily' | 'speaking' | 'telegram' | 'exam';
 
 const tabs: Array<{ id: Tool; label: string; note: string; badge: string }> = [
+  { id: 'points', label: 'PTS', note: 'Berish va ayirish', badge: 'P' },
   { id: 'vocabulary', label: 'Vocabulary', note: 'Quiz va PTS', badge: 'V' },
   { id: 'daily', label: 'Daily Tasks', note: '24 soatlik vazifalar', badge: 'D' },
   { id: 'speaking', label: 'Speaking Inbox', note: 'Practice MP3 javoblar', badge: 'S' },
@@ -24,7 +26,7 @@ const tabs: Array<{ id: Tool; label: string; note: string; badge: string }> = [
 
 export function AdminToolsHub() {
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState<Tool>('vocabulary');
+  const [active, setActive] = useState<Tool>('points');
   const [topbarHost, setTopbarHost] = useState<HTMLElement | null>(null);
   const [bodyHost, setBodyHost] = useState<HTMLElement | null>(null);
 
@@ -83,6 +85,7 @@ export function AdminToolsHub() {
           </nav>
 
           <main className={styles.content}>
+            {active === 'points' && <AdminStudentPointsPanel />}
             {active === 'vocabulary' && <AdminVocabularyQuizPanel />}
             {active === 'daily' && <AdminDailyTasksPanel />}
             {active === 'speaking' && <AdminSpeakingPracticeInbox />}
