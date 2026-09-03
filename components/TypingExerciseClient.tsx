@@ -50,6 +50,39 @@ function mistypedWords(typed: string, target: string) {
   return typedWords.reduce((sum, word, index) => sum + (word === targetWords[index] ? 0 : 1), 0);
 }
 
+function wrongWordIndexes(typed: string, target: string) {
+  const indexes = new Set<number>();
+  let cursor = 0;
+
+  while (cursor < target.length) {
+    if (/\s/.test(target[cursor])) {
+      cursor += 1;
+      continue;
+    }
+
+    const start = cursor;
+    while (cursor < target.length && !/\s/.test(target[cursor])) cursor += 1;
+    const end = cursor;
+    if (typed.length <= start) continue;
+
+    const comparedEnd = Math.min(end, typed.length);
+    let wrong = false;
+    for (let index = start; index < comparedEnd; index += 1) {
+      if (typed[index] !== target[index]) {
+        wrong = true;
+        break;
+      }
+    }
+
+    if (!wrong && typed.length > end && end < target.length && typed[end] !== target[end]) wrong = true;
+    if (!wrong) continue;
+
+    for (let index = start; index < end; index += 1) indexes.add(index);
+  }
+
+  return indexes;
+}
+
 export function TypingExerciseClient({ exercise }: Props) {
   const target = useMemo(() => exercise.content.replace(/\r/g, '').replace(/\n{2,}/g, '\n'), [exercise.content]);
   const [typed, setTyped] = useState('');
@@ -62,6 +95,7 @@ export function TypingExerciseClient({ exercise }: Props) {
 
   const totalWords = useMemo(() => wordCount(target), [target]);
   const typedWords = useMemo(() => wordCount(typed), [typed]);
+  const wrongWords = useMemo(() => wrongWordIndexes(typed, target), [target, typed]);
   const correctChars = useMemo(() => {
     let correct = 0;
     for (let index = 0; index < typed.length; index += 1) {
@@ -167,7 +201,9 @@ export function TypingExerciseClient({ exercise }: Props) {
                   const done = index < typed.length;
                   const current = index === typed.length;
                   const correct = done && typed[index] === character;
-                  const className = done ? (correct ? styles.correct : styles.wrong) : current ? styles.current : styles.pending;
+                  const wordWrong = wrongWords.has(index) && !/\s/.test(character);
+                  const stateClass = done ? (correct ? styles.correct : styles.wrong) : current ? styles.current : styles.pending;
+                  const className = `${stateClass}${wordWrong ? ` ${styles.wrongWord}` : ''}`;
                   return <span key={index} ref={current ? currentRef : undefined} className={className}>{character}</span>;
                 })}
               </div>
