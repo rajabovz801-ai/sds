@@ -9,14 +9,16 @@ import { AdminSpeakingMockPanel } from '@/components/AdminSpeakingMockPanel';
 import { AdminSpeakingPracticeInbox } from '@/components/AdminSpeakingPracticeInbox';
 import { AdminStudentPointsPanel } from '@/components/AdminStudentPointsPanel';
 import { AdminTelegramSchedulerPanel } from '@/components/AdminTelegramSchedulerPanel';
+import { AdminTypingExercisesPanel } from '@/components/AdminTypingExercisesPanel';
 import { AdminVocabularyQuizPanel } from '@/components/AdminVocabularyQuizPanel';
 import { LayoutGridIcon } from '@/components/UiIcons';
 import styles from './AdminToolsHub.module.css';
 
-type Tool = 'points' | 'vocabulary' | 'daily' | 'speaking' | 'telegram' | 'exam';
+type Tool = 'points' | 'typing' | 'vocabulary' | 'daily' | 'speaking' | 'telegram' | 'exam';
 
 const tabs: Array<{ id: Tool; label: string; note: string; badge: string }> = [
   { id: 'points', label: 'PTS', note: 'Berish va ayirish', badge: 'P' },
+  { id: 'typing', label: 'Typing', note: 'Exercise va sample', badge: 'Y' },
   { id: 'vocabulary', label: 'Vocabulary', note: 'Quiz va PTS', badge: 'V' },
   { id: 'daily', label: 'Daily Tasks', note: '24 soatlik vazifalar', badge: 'D' },
   { id: 'speaking', label: 'Speaking Inbox', note: 'Practice MP3 javoblar', badge: 'S' },
@@ -86,6 +88,7 @@ export function AdminToolsHub() {
 
           <main className={styles.content}>
             {active === 'points' && <AdminStudentPointsPanel />}
+            {active === 'typing' && <AdminTypingExercisesPanel />}
             {active === 'vocabulary' && <AdminVocabularyQuizPanel />}
             {active === 'daily' && <AdminDailyTasksPanel />}
             {active === 'speaking' && <AdminSpeakingPracticeInbox />}
