@@ -1,5 +1,13 @@
 import Link from 'next/link';
-import { ArrowLeftIcon, ArrowRightIcon, PenToolIcon } from '@/components/UiIcons';
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckCircleIcon,
+  FileTextIcon,
+  PenToolIcon,
+  TargetIcon,
+  ZapIcon,
+} from '@/components/UiIcons';
 import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
 import styles from '@/components/TypingLibrary.module.css';
 import { requireStudent } from '@/lib/auth/server-session';
@@ -37,16 +45,21 @@ export default async function TypingToolPage() {
         <Link href="/study-tools" className={styles.back}><ArrowLeftIcon /> Tools</Link>
 
         <section className={styles.hero}>
-          <div>
+          <div className={styles.heroCopy}>
             <span className={styles.heroIcon}><PenToolIcon /></span>
-            <small className={styles.eyebrow}>TYPING PRACTICE</small>
-            <h1>Typing</h1>
-            <p>IELTS sample matnlarini ko‘chirib yozing, tezlik va aniqligingizni oshiring. Har exercise oxirida WPM, accuracy, errors va vaqt natijangiz chiqadi.</p>
+            <div>
+              <small className={styles.eyebrow}>TYPING PRACTICE</small>
+              <h1>Typing</h1>
+              <p>IELTS sample matnlarini aynan ko‘chirib yozing va typing tezligi hamda aniqligingizni rivojlantiring.</p>
+            </div>
           </div>
           <div className={styles.miniCard}>
-            <small>ACTIVE EXERCISES</small>
-            <strong>{exercises.length}</strong>
-            <span>Admin tomonidan boshqariladi</span>
+            <span className={styles.miniIcon}><FileTextIcon /></span>
+            <div>
+              <small>ACTIVE EXERCISES</small>
+              <strong>{exercises.length}</strong>
+              <span>Typing mashqlari</span>
+            </div>
           </div>
         </section>
 
@@ -61,16 +74,17 @@ export default async function TypingToolPage() {
               {exercises.map((exercise, index) => (
                 <article key={exercise.id} className={styles.card}>
                   <div className={styles.cardTop}>
-                    <span className={styles.number}>{String(index + 1).padStart(2, '0')}</span>
-                    <span className={styles.words}>{countWords(exercise.content)} WORDS</span>
+                    <span className={styles.number}><PenToolIcon /><b>{String(index + 1).padStart(2, '0')}</b></span>
+                    <span className={styles.words}><FileTextIcon /> {countWords(exercise.content)} WORDS</span>
                   </div>
                   <div className={styles.cardCopy}>
                     <small>{exercise.prompt_title || 'WRITING TASK 2'}</small>
                     <h3>{exercise.title}</h3>
-                    <p>{exercise.prompt}</p>
                   </div>
                   <div className={styles.facts}>
-                    <span><i />Speed</span><span><i />Accuracy</span><span><i />Spelling</span>
+                    <span><ZapIcon />Speed</span>
+                    <span><TargetIcon />Accuracy</span>
+                    <span><CheckCircleIcon />Spelling</span>
                   </div>
                   <Link href={`/study-tools/typing/${exercise.id}`} className={styles.start}>
                     <strong>Start</strong><span><ArrowRightIcon /></span>
