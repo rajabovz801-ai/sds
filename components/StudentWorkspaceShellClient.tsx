@@ -95,7 +95,7 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
           <Link className={active === 'ielts' ? 'active' : ''} href="/ielts"><GlobeIcon /><span>IELTS</span></Link>
           <Link className={active === 'cefr' ? 'active' : ''} href="/cefr"><LayersIcon /><span>CEFR</span></Link>
           <Link className={active === 'practice' ? 'active' : ''} href="/practice"><BookOpenIcon /><span>Practice</span></Link>
-          <Link className={active === 'tools' ? 'active' : ''} href="/study-tools"><SparklesIcon /><span>Tools</span><small>SOON</small></Link>
+          <Link className={active === 'tools' ? 'active' : ''} href="/study-tools"><SparklesIcon /><span>Tools</span></Link>
           <Link className={active === 'daily-tasks' ? 'active' : ''} href="/daily-tasks"><CalendarCheckIcon /><span>Daily Tasks</span></Link>
           <Link className={active === 'leaderboard' ? 'active' : ''} href="/leaderboard"><AwardIcon /><span>Leaderboard</span></Link>
         </nav>
