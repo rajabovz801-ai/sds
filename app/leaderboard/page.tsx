@@ -40,6 +40,11 @@ async function loadLeaderboardRows() {
         .select('student_id,points_awarded,completed_at')
         .order('completed_at', { ascending: false })
         .limit(5000),
+      supabase
+        .from('student_point_adjustments')
+        .select('student_id,points,created_at')
+        .order('created_at', { ascending: false })
+        .limit(5000),
     ]);
 
     const errors = results.map((result) => result.error).filter(Boolean);
@@ -63,6 +68,7 @@ export default async function LeaderboardPage() {
     { data: studentRows },
     { data: sessionRows },
     { data: pointRows },
+    { data: adjustmentRows },
   ] = await loadLeaderboardRows();
 
   const students = (studentRows || []).map((row) => ({
@@ -81,13 +87,23 @@ export default async function LeaderboardPage() {
     }))
     .filter((row) => row.studentId && row.submittedAt && Number.isFinite(row.rawScore) && Number.isFinite(row.maxScore) && row.maxScore > 0);
 
-  const pointEvents = (pointRows || [])
+  const taskPointEvents = (pointRows || [])
     .map((row) => ({
       studentId: String(row.student_id || ''),
       points: Number(row.points_awarded) || 0,
       completedAt: String(row.completed_at || ''),
     }))
     .filter((row) => row.studentId && row.completedAt);
+
+  const adminPointEvents = (adjustmentRows || [])
+    .map((row) => ({
+      studentId: String(row.student_id || ''),
+      points: Number(row.points) || 0,
+      completedAt: String(row.created_at || ''),
+    }))
+    .filter((row) => row.studentId && row.completedAt);
+
+  const pointEvents = [...taskPointEvents, ...adminPointEvents];
 
   return (
     <StudentWorkspaceShellClient student={student} active="leaderboard">
