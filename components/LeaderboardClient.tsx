@@ -46,7 +46,7 @@ function formatMoment(value: string) { if(!value) return 'Hali kirmagan'; const 
 function StudentAvatar({ row, compact = false }: { row: StudentItem; compact?: boolean }) {
   return (
     <span className={compact ? styles.miniAvatar : styles.avatar}>
-      {row.avatarUrl ? <img src={row.avatarUrl} alt="" /> : initials(row.firstName, row.lastName)}
+      {row.avatarUrl ? <img src={row.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 'inherit' }} /> : initials(row.firstName, row.lastName)}
     </span>
   );
 }
