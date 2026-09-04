@@ -21,7 +21,7 @@ async function loadLeaderboardRows() {
     const results = await Promise.all([
       supabase
         .from('students')
-        .select('id,first_name,last_name,last_login_at')
+        .select('id,first_name,last_name,last_login_at,avatar_url')
         .eq('status', 'active')
         .order('first_name', { ascending: true })
         .limit(1000),
@@ -76,6 +76,7 @@ export default async function LeaderboardPage() {
     firstName: String(row.first_name || ''),
     lastName: String(row.last_name || ''),
     lastLoginAt: row.last_login_at ? String(row.last_login_at) : '',
+    avatarUrl: row.avatar_url ? String(row.avatar_url) : null,
   }));
 
   const attempts = (sessionRows || [])
