@@ -88,7 +88,7 @@ export function LeaderboardClient({ currentStudentId, students, attempts, pointE
       .map((item,index)=>({...item,rank:index+1}));
   }, [attempts, period, pointEvents, students]);
 
-  const podium=rows.slice(0,3); const podiumDisplay=podium.length>=3?[podium[1],podium[0],podium[2]]:podium; const tableRows=rows; const monthLabel=new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(new Date()); const current=rows.find(r=>r.id===currentStudentId);
+  const podium=rows.slice(0,3); const podiumDisplay=podium.length>=3?[podium[1],podium[0],podium[2]]:podium; const current=rows.find(r=>r.id===currentStudentId); const topTen=rows.slice(0,10); const tableRows=current&&current.rank>10?[...topTen,current]:topTen; const monthLabel=new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(new Date());
 
   return <div className={styles.leaderboardPage}>
     <section className={styles.hero}><div className={styles.heroCopy}><span className={styles.heroTrophy}><span className={styles.heroTrophyHalo}><TrophyPremiumIcon /></span></span><div><div className={styles.eyebrow}>LEADERBOARD</div><h1>Leaderboard</h1><p>PTS, test natijalari va faoliyat asosida avtomatik tuziladigan o‘quvchilar reytingi.</p></div></div><div className={styles.season}><span className={styles.seasonIcon}><CalendarPremiumIcon /></span><div><small>JORIY DAVR</small><strong>{monthLabel}</strong><span>Natijalar jonli yangilanadi</span></div></div></section>
