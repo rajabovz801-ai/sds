@@ -44,9 +44,25 @@ function streakFor(studentId: string, attempts: AttemptItem[]) { const days=[...
 function formatMoment(value: string) { if(!value) return 'Hali kirmagan'; const date=new Date(value); if(Number.isNaN(date.getTime())) return '—'; return new Intl.DateTimeFormat('uz-UZ',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(date); }
 
 function StudentAvatar({ row, compact = false }: { row: StudentItem; compact?: boolean }) {
+  const size = compact ? 35 : 68;
   return (
-    <span className={compact ? styles.miniAvatar : styles.avatar}>
-      {row.avatarUrl ? <img src={row.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: 'inherit' }} /> : initials(row.firstName, row.lastName)}
+    <span
+      className={compact ? styles.miniAvatar : styles.avatar}
+      style={{
+        width: size,
+        height: size,
+        minWidth: size,
+        minHeight: size,
+        maxWidth: size,
+        maxHeight: size,
+        aspectRatio: '1 / 1',
+        flex: `0 0 ${size}px`,
+        alignSelf: 'center',
+        overflow: 'hidden',
+        borderRadius: '50%',
+      }}
+    >
+      {row.avatarUrl ? <img src={row.avatarUrl} alt="" style={{ width: size, height: size, minWidth: size, minHeight: size, maxWidth: size, maxHeight: size, objectFit: 'cover', objectPosition: 'center', display: 'block', borderRadius: '50%' }} /> : initials(row.firstName, row.lastName)}
     </span>
   );
 }
