@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
   AwardIcon,
@@ -21,6 +20,7 @@ import {
   TargetIcon,
   ZapIcon,
 } from '@/components/UiIcons';
+import { StudentProfileMenu } from '@/components/StudentProfileMenu';
 import type { StudentSummary } from '@/lib/auth/server-session';
 import type { DashboardData, DashboardPoint } from '@/lib/dashboard';
 import { achievementAssets } from '@/components/achievementAssets';
@@ -115,16 +115,7 @@ type StudentDashboardClientProps = {
 
 export function StudentDashboardClient({ student, initialData: initialData, previewMode = false, onExitPreview }: StudentDashboardClientProps) {
   const [data, setData] = useState(initialData);
-  const [clock, setClock] = useState(new Date());
-  const [live, setLive] = useState(true);
-  const [loggingOut, setLoggingOut] = useState(false);
   const [totalPts, setTotalPts] = useState(0);
-  const router = useRouter();
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setClock(new Date()), 60000);
-    return () => window.clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     if (previewMode) return;
@@ -134,12 +125,9 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
         const res = await fetch('/api/dashboard', { cache: 'no-store' });
         if (!res.ok) throw new Error('refresh failed');
         const next = await res.json() as DashboardData;
-        if (!cancelled) {
-          setData(next);
-          setLive(true);
-        }
+        if (!cancelled) setData(next);
       } catch {
-        if (!cancelled) setLive(false);
+        // Keep the current dashboard visible if a live refresh fails.
       }
     }
     const interval = window.setInterval(refresh, 60000);
@@ -170,18 +158,8 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
     };
   }, [previewMode]);
 
-  async function logout() {
-    if (previewMode || loggingOut) return;
-    setLoggingOut(true);
-    try { await fetch('/api/auth/logout', { method: 'POST' }); }
-    finally { router.replace('/'); router.refresh(); }
-  }
-
-  const initials = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`.toUpperCase() || 'AR';
   const studyPct = Math.min(100, Math.round((data.weeklyStudyHours / data.weeklyGoalHours) * 100));
   const nextGap = data.overallBand === null || data.nextTargetBand === null ? null : Math.max(0, data.nextTargetBand - data.overallBand);
-  const todayLabel = new Intl.DateTimeFormat('uz-UZ', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(clock);
-  const timeLabel = new Intl.DateTimeFormat('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false }).format(clock);
   const recent = useMemo(() => data.recentResults, [data.recentResults]);
 
   return (
@@ -202,15 +180,16 @@ export function StudentDashboardClient({ student, initialData: initialData, prev
           <div><small>DAILY TASKS</small><strong>{totalPts} PTS</strong><em><FlameIcon /> {data.studyStreak} kun streak</em></div>
           <b>→</b>
         </Link>
-        <div className="studentSideProfile"><span>{initials}</span><div><small>{previewMode ? 'ADMIN PREVIEW' : 'STUDENT'}</small><strong>{student.firstName} {student.lastName}</strong></div><button type="button" onClick={logout} disabled={previewMode || loggingOut} aria-label={previewMode ? 'Admin preview' : 'Chiqish'}><LogOutIcon /></button></div>
+        <StudentProfileMenu student={student} totalPts={totalPts} streakDays={data.studyStreak} previewMode={previewMode} />
       </aside>
 
       <main className="studentDashMain">
-        <header className="studentDashTopbar">
-          <div><span className={`livePill ${!previewMode && !live ? 'offline' : ''}`}><i />{previewMode ? 'PREVIEW' : live ? 'LIVE' : 'OFFLINE'}</span><strong>{todayLabel}</strong><small>{timeLabel}</small></div>
-          {previewMode && onExitPreview && <button className="adminBackToPanel" type="button" onClick={onExitPreview}><LogOutIcon /><span>Admin panelga qaytish</span></button>}
-          <div className="studentTopProfile"><span>{initials}</span><div><small>{previewMode ? 'ADMIN PREVIEW' : 'STUDENT'}</small><strong>{student.firstName} {student.lastName}</strong></div></div>
-        </header>
+        {previewMode && (
+          <header className="studentDashTopbar">
+            <div><span className="livePill"><i />PREVIEW</span></div>
+            {onExitPreview && <button className="adminBackToPanel" type="button" onClick={onExitPreview}><LogOutIcon /><span>Admin panelga qaytish</span></button>}
+          </header>
+        )}
 
         <section className="studentWelcome">
           <div><span className="studentWelcomeEyebrow"><SparklesIcon /> PERSONAL PERFORMANCE</span><h1>Xush kelibsiz, {student.firstName}! <em>Natijalaringiz o‘sib bormoqda.</em></h1><p>{previewMode ? 'Bu admin preview. Student tizimga kirganda aynan shu real-time dashboardni ko‘radi.' : 'Kunlik natijalar, band trendi va yutuqlaringiz Supabase’dagi haqiqiy test natijalari bilan avtomatik yangilanadi.'}</p></div>

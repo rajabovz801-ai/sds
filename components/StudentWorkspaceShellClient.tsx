@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
@@ -13,9 +12,9 @@ import {
   GlobeIcon,
   LayersIcon,
   LayoutGridIcon,
-  LogOutIcon,
   SparklesIcon,
 } from '@/components/UiIcons';
+import { StudentProfileMenu } from '@/components/StudentProfileMenu';
 import type { StudentSummary } from '@/lib/auth/server-session';
 
 type WorkspaceTrack = 'ielts' | 'cefr' | 'practice' | 'tools' | 'daily-tasks' | 'leaderboard';
@@ -32,11 +31,8 @@ type GamificationPayload = {
 };
 
 export function StudentWorkspaceShellClient({ student, active, children }: Props) {
-  const router = useRouter();
-  const [loggingOut, setLoggingOut] = useState(false);
   const [studyStreak, setStudyStreak] = useState(0);
   const [totalPts, setTotalPts] = useState(0);
-  const initials = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`.toUpperCase() || 'AR';
 
   useEffect(() => {
     let cancelled = false;
@@ -71,17 +67,6 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
     };
   }, []);
 
-  async function logout() {
-    if (loggingOut) return;
-    setLoggingOut(true);
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } finally {
-      router.replace('/');
-      router.refresh();
-    }
-  }
-
   return (
     <div className="studentDashboardShell studentWorkspaceShell">
       <aside className="studentSidebar">
@@ -110,11 +95,7 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
           <b>→</b>
         </Link>
 
-        <div className="studentSideProfile">
-          <span>{initials}</span>
-          <div><small>STUDENT</small><strong>{student.firstName} {student.lastName}</strong></div>
-          <button type="button" onClick={logout} disabled={loggingOut} aria-label="Chiqish"><LogOutIcon /></button>
-        </div>
+        <StudentProfileMenu student={student} totalPts={totalPts} streakDays={studyStreak} />
       </aside>
 
       <main className="studentWorkspaceMain">{children}</main>

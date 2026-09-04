@@ -8,6 +8,7 @@ export type StudentSummary = {
   id: string;
   firstName: string;
   lastName: string;
+  avatarUrl?: string | null;
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -25,7 +26,7 @@ async function getActiveStudent(studentId: string) {
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const { data: student, error } = await supabase
       .from('students')
-      .select('id,first_name,last_name')
+      .select('id,first_name,last_name,avatar_url')
       .eq('id', studentId)
       .eq('status', 'active')
       .maybeSingle();
@@ -35,6 +36,7 @@ async function getActiveStudent(studentId: string) {
         id: student.id,
         firstName: student.first_name,
         lastName: student.last_name || '',
+        avatarUrl: student.avatar_url || null,
       } : null;
     }
 
