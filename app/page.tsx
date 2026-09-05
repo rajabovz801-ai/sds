@@ -8,6 +8,10 @@ function ArrowRight() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" /></svg>;
 }
 
+function Check() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>;
+}
+
 function BookOpen() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5h6a3 3 0 0 1 3 3V20a3.5 3.5 0 0 0-3.5-3.5H3Z" /><path d="M21 5.5h-6a3 3 0 0 0-3 3V20a3.5 3.5 0 0 1 3.5-3.5H21Z" /></svg>;
 }
@@ -24,21 +28,13 @@ function Microphone() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" /></svg>;
 }
 
-function Check() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>;
-}
-
-function Trend() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17 10 11l4 4 6-8" /><path d="M15 7h5v5" /></svg>;
-}
-
 const faqItems = [
-  ['Platformada qaysi imtihonlar mavjud?', 'ARK Education Platform’da IELTS va CEFR yo‘nalishlari bo‘yicha practice hamda mock testlar mavjud.'],
-  ['Mock testlar real imtihon formatiga yaqinmi?', 'Ha. Test oqimi, section navigation va vaqt nazorati real imtihon tajribasiga imkon qadar yaqinlashtirilgan.'],
-  ['Qaysi IELTS skillarini practice qilish mumkin?', 'Reading, Listening, Writing va Speaking — to‘rtta asosiy skill bitta profil va bitta platformada ishlaydi.'],
-  ['Natijalar va progress saqlanadimi?', 'Ha. Yakunlangan testlar natijalari profilingizda saqlanadi va progressni kuzatishga yordam beradi.'],
-  ['Telefonda foydalanish mumkinmi?', 'Asosiy platforma mobil qurilmalarga mos. Full mock uchun esa planshet yoki kompyuter qulayroq tajriba beradi.'],
-  ['Platformaga qanday kiriladi?', 'Kirish tugmasi orqali profilingizga kirasiz va IELTS, CEFR yoki kerakli mock testni tanlaysiz.'],
+  ['Bu platformada qaysi IELTS skillarini ishlash mumkin?', 'Reading, Listening, Writing va Speaking — to‘rtta asosiy IELTS skillini alohida practice yoki full mock formatida ishlash mumkin.'],
+  ['Mock testlar real IELTS formatiga yaqinmi?', 'Ha. Section navigation, savol oqimi, exam-style interfeys va test yakunidagi review real imtihon tajribasiga imkon qadar yaqinlashtirilgan.'],
+  ['IELTS bilan birga CEFR ham bormi?', 'Ha. Platformada IELTS asosiy yo‘nalish sifatida ko‘rsatiladi, CEFR testlari esa alohida yo‘nalish sifatida mavjud.'],
+  ['Natijalar va progress saqlanadimi?', 'Ha. Yakunlangan testlar natijalari profilingizda saqlanadi va skill bo‘yicha progressni kuzatishga yordam beradi.'],
+  ['Full Mock qanday ishlaydi?', 'Full Mock bir nechta skillni ketma-ket exam flow ichida ishlash uchun mo‘ljallangan. Har bir section alohida boshqariladi va natijalar yakunda ko‘rinadi.'],
+  ['Platformaga qanday kiraman?', 'Kirish tugmasini bosing, profilingizga kiring va kerakli IELTS, CEFR yoki Full Mock testini tanlang.'],
 ];
 
 export default async function HomePage() {
@@ -46,155 +42,221 @@ export default async function HomePage() {
   if (await getActiveServerSession()) redirect('/mock');
 
   return (
-    <div className="arkLandingV2">
-      <header className="arkV2Header">
-        <nav className="arkV2Nav" aria-label="Asosiy navigatsiya">
-          <Link href="/" className="arkV2Brand" aria-label="ARK Education bosh sahifa">
-            <span className="arkV2BrandMark"><ArkLogoIcon /></span>
-            <span className="arkV2BrandText"><strong>ARK Education</strong><small>IELTS &amp; CEFR PLATFORM</small></span>
+    <div className="arkIeltsLanding">
+      <header className="arkIeltsHeader">
+        <nav className="arkIeltsNav" aria-label="Asosiy navigatsiya">
+          <Link href="/" className="arkIeltsBrand" aria-label="ARK Education bosh sahifa">
+            <span className="arkIeltsBrandMark"><ArkLogoIcon /></span>
+            <span className="arkIeltsBrandText"><strong>ARK Education</strong><small>IELTS &amp; CEFR EXAM PLATFORM</small></span>
           </Link>
 
-          <div className="arkV2Links">
-            <Link href="#skills">Ko‘nikmalar</Link>
-            <Link href="#platform">Platforma</Link>
+          <div className="arkIeltsLinks">
+            <Link href="#skills">IELTS Skills</Link>
+            <Link href="#full-mock">Full Mock</Link>
+            <Link href="#experience">Exam Experience</Link>
             <Link href="#faq">FAQ</Link>
           </div>
 
-          <div className="arkV2NavActions">
-            <Link href="/login" className="arkV2TextButton">Kirish</Link>
-            <Link href="/login?next=/mock" className="arkV2DarkButton">Mock boshlash <ArrowRight /></Link>
+          <div className="arkIeltsNavActions">
+            <Link href="/login" className="arkIeltsLogin">Kirish</Link>
+            <Link href="/login?next=/mock" className="arkIeltsNavCta">Mock boshlash <ArrowRight /></Link>
           </div>
         </nav>
       </header>
 
       <main>
-        <section className="arkV2Hero">
-          <div className="arkV2HeroCopy">
-            <span className="arkV2Eyebrow"><i /> IELTS • CEFR • FULL MOCK</span>
-            <h1>Imtihonga tayyorlaning.<br /><em>Progressni ko‘ring.</em></h1>
-            <p>ARK Education — IELTS va CEFR uchun practice, full mock, natijalar va progressni bitta tartibli platformada birlashtiradi.</p>
+        <section className="arkIeltsHero">
+          <div className="arkIeltsHeroCopy">
+            <span className="arkIeltsEyebrow"><i /> IELTS • CEFR • FULL MOCK</span>
+            <h1>Real IELTS practice.<br /><em>Real exam experience.</em></h1>
+            <p>Reading, Listening, Writing va Speaking’ni haqiqiy imtihonga yaqin muhitda mashq qiling. Testni bajaring, natijani ko‘ring va keyingi urinishda aynan nimani yaxshilash kerakligini biling.</p>
 
-            <div className="arkV2HeroActions">
-              <Link href="/login?next=/mock" className="arkV2PrimaryButton">Mock testni boshlash <ArrowRight /></Link>
-              <Link href="#platform" className="arkV2OutlineButton">Platformani ko‘rish</Link>
+            <div className="arkIeltsHeroActions">
+              <Link href="/login?next=/mock" className="arkIeltsPrimary">IELTS Mock boshlash <ArrowRight /></Link>
+              <Link href="#experience" className="arkIeltsSecondary">Exam interfeysini ko‘rish</Link>
             </div>
 
-            <div className="arkV2HeroMeta">
-              <span><Check /> 4 ta IELTS skill</span>
-              <span><Check /> IELTS + CEFR</span>
-              <span><Check /> Natija va progress</span>
-            </div>
-          </div>
-
-          <div className="arkV2ProductPreview" aria-label="ARK Education platform preview">
-            <div className="arkV2PreviewTop">
-              <div><span className="arkV2MiniLogo"><ArkLogoIcon /></span><p><strong>Dashboard</strong><small>Bugungi progress</small></p></div>
-              <span className="arkV2PreviewStatus"><i /> Active</span>
-            </div>
-
-            <div className="arkV2PreviewHero">
-              <div><small>HOZIRGI NATIJA</small><strong>6.5</strong><span>+0.5 so‘nggi 30 kunda</span></div>
-              <div className="arkV2TargetRing"><span>Target</span><strong>8.0</strong></div>
-            </div>
-
-            <div className="arkV2SkillProgress">
-              <div><span><b>R</b> Reading</span><em>7.0</em><i><b style={{ width: '78%' }} /></i></div>
-              <div><span><b>L</b> Listening</span><em>6.5</em><i><b style={{ width: '70%' }} /></i></div>
-              <div><span><b>W</b> Writing</span><em>6.0</em><i><b style={{ width: '61%' }} /></i></div>
-              <div><span><b>S</b> Speaking</span><em>6.0</em><i><b style={{ width: '60%' }} /></i></div>
-            </div>
-
-            <div className="arkV2ContinueCard">
-              <div><span>DAVOM ETTIRISH</span><strong>IELTS Reading • Test 06</strong><small>62% yakunlangan</small></div>
-              <span className="arkV2ContinueArrow"><ArrowRight /></span>
+            <div className="arkIeltsHeroChecks">
+              <span><Check /> 4 IELTS skills</span>
+              <span><Check /> Exam-style interface</span>
+              <span><Check /> Results &amp; review</span>
             </div>
           </div>
-        </section>
 
-        <section className="arkV2Trust" aria-label="Platforma imkoniyatlari">
-          <div><strong>4 Skills</strong><span>Reading, Listening, Writing, Speaking</span></div>
-          <div><strong>2 Yo‘nalish</strong><span>IELTS va CEFR</span></div>
-          <div><strong>Full Mock</strong><span>Real test oqimiga yaqin</span></div>
-          <div><strong>Progress</strong><span>Natijalarni bir joyda kuzatish</span></div>
-        </section>
+          <div className="arkExamPreview" aria-label="IELTS exam interface preview">
+            <span className="arkExamFloat">40 Questions • Autosave • Review</span>
+            <div className="arkExamTopbar">
+              <div className="arkExamBrand">
+                <span className="arkExamBrandLogo"><ArkLogoIcon /></span>
+                <p><strong>IELTS Listening</strong><small>ARK EDUCATION MOCK</small></p>
+              </div>
+              <span className="arkExamTimer">Time left <b>29:42</b></span>
+            </div>
 
-        <section className="arkV2Skills" id="skills">
-          <div className="arkV2SectionIntro">
-            <span>4 KO‘NIKMA</span>
-            <h2>Har bir skill uchun <em>aniq muhit.</em></h2>
-            <p>Keraksiz dekoratsiyasiz. Har bir ko‘nikma o‘z vazifasiga mos, toza va fokuslangan interfeysda.</p>
-          </div>
+            <div className="arkExamBody">
+              <aside className="arkExamSidebar">
+                <span className="arkExamSidebarTitle">TEST SECTIONS</span>
+                <div className="arkExamPart active"><b>1</b> Part 1</div>
+                <div className="arkExamPart"><b>2</b> Part 2</div>
+                <div className="arkExamPart"><b>3</b> Part 3</div>
+                <div className="arkExamPart"><b>4</b> Part 4</div>
+              </aside>
 
-          <div className="arkV2SkillGrid">
-            <article><span className="arkV2SkillIcon"><BookOpen /></span><small>01</small><h3>Reading</h3><p>Passage, highlight, savollar va review — bitta tartibli test oqimida.</p></article>
-            <article><span className="arkV2SkillIcon"><Headphones /></span><small>02</small><h3>Listening</h3><p>4 part, audio oqimi va aniq navigation bilan diqqatni testda saqlang.</p></article>
-            <article><span className="arkV2SkillIcon"><PenNib /></span><small>03</small><h3>Writing</h3><p>Task 1 va Task 2 uchun sodda yozish maydoni va submission tartibi.</p></article>
-            <article><span className="arkV2SkillIcon"><Microphone /></span><small>04</small><h3>Speaking</h3><p>Part 1–3 practice, javob berish oqimi va oldingi mashqlar tarixi.</p></article>
+              <div className="arkExamContent">
+                <div className="arkExamQuestionMeta"><span>SECTION 1 • QUESTIONS 1–10</span><b>Question 6 of 40</b></div>
+                <div className="arkExamQuestion">
+                  <small>CHOOSE THE CORRECT LETTER, A, B OR C</small>
+                  <h3>What does the speaker say is the main advantage of the programme?</h3>
+                  <div className="arkExamOptions">
+                    <div className="arkExamOption"><i /><strong>A</strong><span>It is available throughout the year.</span></div>
+                    <div className="arkExamOption selected"><i /><strong>B</strong><span>It gives students practical experience.</span></div>
+                    <div className="arkExamOption"><i /><strong>C</strong><span>It is taught by university lecturers.</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="arkExamNavigator">
+              <div className="arkExamNumbers"><span className="done">1</span><span className="done">2</span><span className="done">3</span><span className="done">4</span><span className="done">5</span><span className="current">6</span><span>7</span><span>8</span></div>
+              <span className="arkExamNext">Next <ArrowRight /></span>
+            </div>
           </div>
         </section>
 
-        <section className="arkV2Platform" id="platform">
-          <div className="arkV2PlatformCopy">
-            <span>PLATFORMA</span>
-            <h2>Faqat test emas.<br /><em>O‘sishni ko‘rsatadigan tizim.</em></h2>
-            <p>Mock topshirishdan keyingi eng muhim narsa — nimani yaxshilash kerakligini tushunish. ARK natijalarni ko‘nikmalar bo‘yicha bir joyda ko‘rsatadi.</p>
-            <ul>
-              <li><Check /> So‘nggi natijalarni ko‘rish</li>
-              <li><Check /> Skill bo‘yicha progressni kuzatish</li>
-              <li><Check /> Keyingi practice’ga tez o‘tish</li>
+        <section className="arkIeltsProof" aria-label="Platforma imkoniyatlari">
+          <div><strong>4 IELTS Skills</strong><span>Reading, Listening, Writing, Speaking</span></div>
+          <div><strong>40-question flow</strong><span>Real test tartibiga yaqin navigatsiya</span></div>
+          <div><strong>Full Mock</strong><span>Bir nechta skill bitta exam flow ichida</span></div>
+          <div><strong>Detailed Review</strong><span>Natija, xatolar va keyingi focus</span></div>
+        </section>
+
+        <section className="arkIeltsSection" id="skills">
+          <div className="arkIeltsSectionHead">
+            <span>IELTS SKILLS</span>
+            <h2>Har bir skill — o‘zining exam muhitida.</h2>
+            <p>Landingning asosiy vazifasi platformaning nima ekanini bir qarashda tushuntirish. Shu sabab har bir skill real test jarayoniga bog‘langan.</p>
+          </div>
+
+          <div className="arkSkillGrid">
+            <article className="arkSkillCard">
+              <div className="arkSkillTop"><span className="arkSkillIcon"><BookOpen /></span><span className="arkSkillIndex">01</span></div>
+              <h3>Reading</h3>
+              <p>Passage, question panel, highlight va review — bir xil fokuslangan test oqimida.</p>
+              <div className="arkSkillTags"><span>3 Passages</span><span>40 Questions</span><span>Highlight</span></div>
+            </article>
+            <article className="arkSkillCard">
+              <div className="arkSkillTop"><span className="arkSkillIcon"><Headphones /></span><span className="arkSkillIndex">02</span></div>
+              <h3>Listening</h3>
+              <p>4 part audio test, section navigation va real-time answer flow bilan practice.</p>
+              <div className="arkSkillTags"><span>4 Parts</span><span>40 Questions</span><span>Audio Flow</span></div>
+            </article>
+            <article className="arkSkillCard">
+              <div className="arkSkillTop"><span className="arkSkillIcon"><PenNib /></span><span className="arkSkillIndex">03</span></div>
+              <h3>Writing</h3>
+              <p>Task 1 va Task 2 uchun ortiqcha elementlarsiz, imtihonga mos yozish maydoni.</p>
+              <div className="arkSkillTags"><span>Task 1</span><span>Task 2</span><span>Submission</span></div>
+            </article>
+            <article className="arkSkillCard">
+              <div className="arkSkillTop"><span className="arkSkillIcon"><Microphone /></span><span className="arkSkillIndex">04</span></div>
+              <h3>Speaking</h3>
+              <p>Part 1–3 practice, savollar ketma-ketligi va speaking history bilan muntazam mashq.</p>
+              <div className="arkSkillTags"><span>Part 1</span><span>Part 2</span><span>Part 3</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section className="arkFullMock" id="full-mock">
+          <div className="arkFullMockCopy">
+            <span>FULL MOCK EXPERIENCE</span>
+            <h2>Bitta test emas.<br /><em>To‘liq imtihon oqimi.</em></h2>
+            <p>Full Mock’da skillar alohida kartochka sifatida emas, bir-biriga ulanadigan imtihon bosqichlari sifatida ko‘rinadi.</p>
+            <ul className="arkFullMockList">
+              <li><Check /> Section bo‘yicha aniq navigation</li>
+              <li><Check /> Javoblar va progress saqlanadi</li>
+              <li><Check /> Yakunda natija va review</li>
             </ul>
           </div>
 
-          <div className="arkV2AnalyticsPanel">
-            <div className="arkV2AnalyticsTop"><div><Trend /><span><small>30 KUNLIK PROGRESS</small><strong>+12%</strong></span></div><em>IELTS</em></div>
-            <div className="arkV2Bars" aria-hidden="true"><i style={{ height: '42%' }} /><i style={{ height: '55%' }} /><i style={{ height: '48%' }} /><i style={{ height: '68%' }} /><i style={{ height: '73%' }} /><i style={{ height: '88%' }} /></div>
-            <div className="arkV2AnalyticsBottom"><span><small>Eng kuchli skill</small><strong>Reading • 7.0</strong></span><span><small>Keyingi fokus</small><strong>Writing • 6.0</strong></span></div>
+          <div className="arkMockFlow" aria-label="Full mock skill flow">
+            <article className="arkMockStage"><b>01</b><h3>Listening</h3><p>Audio + 4 parts + 40 questions</p><span>START</span></article>
+            <article className="arkMockStage"><b>02</b><h3>Reading</h3><p>3 passages + exam navigation</p><span>CONTINUE</span></article>
+            <article className="arkMockStage"><b>03</b><h3>Writing</h3><p>Task 1 + Task 2 submission</p><span>WRITE</span></article>
+            <article className="arkMockStage"><b>04</b><h3>Speaking</h3><p>Part 1–3 structured practice</p><span>FINISH</span></article>
           </div>
         </section>
 
-        <section className="arkV2Steps">
-          <div className="arkV2SectionIntro arkV2SectionIntroCompact">
-            <span>QANDAY ISHLAYDI?</span>
-            <h2>Uchta oddiy qadam.</h2>
+        <section className="arkIeltsExperience" id="experience">
+          <div className="arkReadingPreview" aria-label="Reading interface preview">
+            <div className="arkReadingTop"><strong>IELTS Reading • Passage 2</strong><span>Questions 14–26</span></div>
+            <div className="arkReadingBody">
+              <div className="arkPassagePane">
+                <small>READING PASSAGE 2</small>
+                <h4>The future of urban farming</h4>
+                <div className="arkTextLines"><i /><i /><i className="marked" /><i /><i /><i /></div>
+              </div>
+              <div className="arkQuestionPane">
+                <small>QUESTIONS 14–18</small>
+                <h4>Choose the correct heading.</h4>
+                <div className="arkMiniQuestion">14. Paragraph A discusses the main reason for...</div>
+                <div className="arkMiniSelect"><span>Select answer</span><b>⌄</b></div>
+                <div className="arkMiniQuestion">15. Paragraph B gives an example of...</div>
+                <div className="arkMiniSelect"><span>Select answer</span><b>⌄</b></div>
+              </div>
+            </div>
           </div>
-          <div className="arkV2StepGrid">
-            <article><b>01</b><div><h3>Yo‘nalishni tanlang</h3><p>IELTS, CEFR yoki Full Mock ichidan keraklisini oching.</p></div></article>
-            <article><b>02</b><div><h3>Testni bajaring</h3><p>Real formatga yaqin, fokuslangan test muhitida ishlang.</p></div></article>
-            <article><b>03</b><div><h3>Natijani kuzating</h3><p>Progressni ko‘ring va keyingi practice’ni davom ettiring.</p></div></article>
+
+          <div className="arkIeltsExperienceCopy">
+            <span>EXAM EXPERIENCE</span>
+            <h2>Practice qilayotganda sayt emas, imtihon esga tushsin.</h2>
+            <p>Interfeysdagi har bir element — passage, timer, part navigation, answer field va review — foydalanuvchini testning o‘ziga fokuslash uchun ishlaydi.</p>
+            <ul>
+              <li><Check /> Reading’da passage va questions yonma-yon</li>
+              <li><Check /> Listening’da part va savol navigatsiyasi</li>
+              <li><Check /> Review’da to‘g‘ri va xato javoblar aniq ko‘rinadi</li>
+              <li><Check /> Desktop va mobile uchun moslashtirilgan</li>
+            </ul>
           </div>
         </section>
 
-        <section className="arkV2Faq" id="faq">
-          <div className="arkV2FaqIntro">
+        <section className="arkProgressStrip" aria-label="Progress overview">
+          <div className="arkProgressLead"><span>NATIJALAR</span><strong>Progress — testdan keyin.</strong></div>
+          <div className="arkProgressMetric"><span>Reading</span><strong>7.0</strong></div>
+          <div className="arkProgressMetric"><span>Listening</span><strong>6.5</strong></div>
+          <div className="arkProgressMetric"><span>Writing</span><strong>6.0</strong></div>
+          <div className="arkProgressMetric"><span>Speaking</span><strong>6.0</strong></div>
+        </section>
+
+        <section className="arkIeltsFaq" id="faq">
+          <div className="arkIeltsFaqIntro">
             <span>FAQ</span>
-            <h2>Ko‘p beriladigan savollar.</h2>
-            <p>Platformadan foydalanishdan oldin bilishingiz kerak bo‘lgan asosiy ma’lumotlar.</p>
+            <h2>Platforma haqida asosiy savollar.</h2>
+            <p>IELTS practice va Full Mock’dan foydalanishdan oldin kerak bo‘ladigan qisqa ma’lumotlar.</p>
           </div>
-          <div className="arkV2FaqList">
+          <div className="arkIeltsFaqList">
             {faqItems.map(([question, answer], index) => (
-              <details key={question} className="arkV2FaqItem">
-                <summary><span><b>{String(index + 1).padStart(2, '0')}</b>{question}</span><i /></summary>
+              <details key={question} className="arkIeltsFaqItem">
+                <summary><span><b>{String(index + 1).padStart(2, '0')}</b>{question}</span><i className="arkIeltsFaqPlus" /></summary>
                 <p>{answer}</p>
               </details>
             ))}
           </div>
         </section>
 
-        <section className="arkV2FinalCta">
-          <div><span>ARK EDUCATION PLATFORM</span><h2>Keyingi natijangiz shu yerdan boshlanadi.</h2><p>Profilingizga kiring va birinchi practice yoki full mock testingizni boshlang.</p></div>
-          <Link href="/login?next=/mock" className="arkV2LightButton">Platformaga kirish <ArrowRight /></Link>
+        <section className="arkIeltsFinal">
+          <div className="arkIeltsFinalCopy"><span>ARK EDUCATION • IELTS PLATFORM</span><h2>Keyingi mock testingizni real exam muhitida boshlang.</h2><p>IELTS • CEFR • FULL MOCK • RESULTS • REVIEW</p></div>
+          <Link href="/login?next=/mock" className="arkIeltsFinalButton">Platformaga kirish <ArrowRight /></Link>
         </section>
       </main>
 
-      <footer className="arkV2Footer">
-        <div className="arkV2FooterTop">
-          <Link href="/" className="arkV2Brand" aria-label="ARK Education">
-            <span className="arkV2BrandMark"><ArkLogoIcon /></span>
-            <span className="arkV2BrandText"><strong>ARK Education</strong><small>IELTS &amp; CEFR PLATFORM</small></span>
+      <footer className="arkIeltsFooter">
+        <div className="arkIeltsFooterTop">
+          <Link href="/" className="arkIeltsBrand" aria-label="ARK Education">
+            <span className="arkIeltsBrandMark"><ArkLogoIcon /></span>
+            <span className="arkIeltsBrandText"><strong>ARK Education</strong><small>IELTS &amp; CEFR EXAM PLATFORM</small></span>
           </Link>
-          <nav><Link href="#skills">Ko‘nikmalar</Link><Link href="#platform">Platforma</Link><Link href="#faq">FAQ</Link><Link href="/login">Kirish</Link></nav>
+          <nav><Link href="#skills">IELTS Skills</Link><Link href="#full-mock">Full Mock</Link><Link href="#experience">Exam Experience</Link><Link href="/login">Kirish</Link></nav>
         </div>
-        <div className="arkV2FooterBottom"><p>© 2026 ARK Education Platform. All information reserved.</p><span>IELTS • CEFR • FULL MOCK</span></div>
+        <div className="arkIeltsFooterBottom"><p>© 2026 ARK Education Platform. All information reserved.</p><span>IELTS • CEFR • FULL MOCK</span></div>
       </footer>
     </div>
   );
