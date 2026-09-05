@@ -66,9 +66,9 @@ export default async function HomePage() {
       <main>
         <section className="peakHeroMain">
           <div className="peakHeroCopy">
-            <div className="peakHeroEyebrow"><Sparkles /> YANGI AVLOD IMTIHON PLATFORMASI</div>
-            <h1>Imtihonga emas, <em>natijaga tayyorlaning.</em></h1>
-            <p className="peakHeroLead">Haqiqiy imtihon muhiti, aniq vaqt nazorati va IELTS hamda CEFR uchun tushunarli natija tahlili — barchasi bitta platformada.</p>
+            <div className="peakHeroEyebrow"><Sparkles /> ARK EDUCATION PLATFORM • IELTS &amp; CEFR</div>
+            <h1>Real exam.<br />Real progress.<br /><em>Real results.</em></h1>
+            <p className="peakHeroLead">ARK Education Platform — IELTS va CEFR uchun haqiqiy imtihon muhiti, aniq vaqt nazorati, professional practice va tushunarli natija tahlili bitta premium platformada.</p>
 
             <div className="peakHeroActions">
               <Link href="/login?next=/mock" className="peakHeroPrimary">Mock testni boshlash <b><ArrowRight /></b></Link>
@@ -76,7 +76,7 @@ export default async function HomePage() {
             </div>
 
             <div className="peakHeroProof" aria-label="Platforma afzalliklari">
-              <div><strong>40</strong><span>savolli real format</span></div>
+              <div><strong>4 Skills</strong><span>Reading • Listening • Writing • Speaking</span></div>
               <div><strong>IELTS + CEFR</strong><span>bitta profil ichida</span></div>
               <div><strong>24/7</strong><span>istalgan payt mashq</span></div>
             </div>
@@ -145,6 +145,27 @@ export default async function HomePage() {
           <Link href="/login?next=/mock" className="peakHeroPrimary">Platformaga kirish <b><ArrowRight /></b></Link>
         </section>
       </main>
+
+      <footer
+        className="peakHeroNavShell"
+        aria-label="ARK Education Platform footer"
+        style={{ position: 'relative', top: 'auto', marginTop: 20, paddingTop: 18, paddingBottom: 22, borderTop: '1px solid rgba(30,45,69,.07)', borderBottom: 0, background: 'transparent' }}
+      >
+        <div className="peakHeroNav" style={{ minHeight: 78 }}>
+          <Link href="/" className="peakHeroBrand" aria-label="ARK Education Platform">
+            <span className="peakHeroBrandMark"><ArkLogoIcon /></span>
+            <span className="peakHeroBrandCopy"><strong>ARK Education</strong><small>PREMIUM EXAM PLATFORM</small></span>
+          </Link>
+
+          <p style={{ margin: 0, justifySelf: 'center', color: '#788292', fontSize: 11, fontWeight: 650, letterSpacing: '.01em', textAlign: 'center' }}>
+            © 2026 ARK Education Platform. All information reserved.
+          </p>
+
+          <span className="peakHeroSignIn" style={{ pointerEvents: 'none', whiteSpace: 'nowrap', color: '#7b8493', fontSize: 10, letterSpacing: '.1em' }}>
+            IELTS • CEFR • MOCK
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
