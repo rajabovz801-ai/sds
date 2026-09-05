@@ -1,0 +1,189 @@
+.arkIeltsLanding{
+  --ai-navy:#10213d;
+  --ai-navy-2:#19365f;
+  --ai-coral:#f36f5f;
+  --ai-cream:#f7f3ec;
+  --ai-paper:#fffdfa;
+  --ai-ink:#152036;
+  --ai-muted:#6d7685;
+  --ai-line:#dedbd4;
+  --ai-blue:#5f8fb9;
+  min-height:100svh;
+  overflow-x:clip;
+  background:var(--ai-cream);
+  color:var(--ai-ink);
+  font-family:var(--font-poppins),"Segoe UI",sans-serif;
+}
+.arkIeltsLanding *{box-sizing:border-box}
+.arkIeltsLanding a{color:inherit;text-decoration:none}
+.arkIeltsLanding svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.arkIeltsHeader{position:sticky;top:0;z-index:60;padding:14px 24px 0;background:linear-gradient(180deg,rgba(247,243,236,.98),rgba(247,243,236,.90),rgba(247,243,236,0));backdrop-filter:blur(14px)}
+.arkIeltsNav{width:min(1380px,100%);min-height:68px;margin:auto;padding:10px 12px 10px 15px;border:1px solid rgba(16,33,61,.10);border-radius:20px;background:rgba(255,253,250,.94);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:26px;box-shadow:0 10px 32px rgba(28,36,49,.05)}
+.arkIeltsBrand{display:flex;align-items:center;gap:11px;min-width:max-content}
+.arkIeltsBrandMark{width:44px;height:44px;padding:10px;border-radius:13px;display:grid;place-items:center;background:var(--ai-coral);color:#fff;box-shadow:0 9px 22px rgba(243,111,95,.22)}
+.arkIeltsBrandMark svg{width:100%;height:100%}
+.arkIeltsBrandText{display:grid;gap:4px;line-height:1}
+.arkIeltsBrandText strong{font-size:14px;letter-spacing:-.02em}
+.arkIeltsBrandText small{color:#9398a2;font-size:7px;font-weight:800;letter-spacing:.14em}
+.arkIeltsLinks{justify-self:center;display:flex;align-items:center;gap:26px;color:#647082;font-size:11px;font-weight:650}
+.arkIeltsLinks a{transition:.18s ease}.arkIeltsLinks a:hover{color:var(--ai-navy)}
+.arkIeltsNavActions{display:flex;align-items:center;gap:8px}
+.arkIeltsLogin{padding:11px 13px;color:#435066;font-size:11px;font-weight:700}
+.arkIeltsNavCta,.arkIeltsPrimary,.arkIeltsSecondary,.arkIeltsFinalButton{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:13px;font-weight:750;transition:transform .18s ease,box-shadow .18s ease}
+.arkIeltsNavCta{min-height:44px;padding:0 16px;background:var(--ai-navy);color:#fff!important;font-size:11px;box-shadow:0 10px 24px rgba(16,33,61,.15)}
+.arkIeltsNavCta svg,.arkIeltsPrimary svg,.arkIeltsFinalButton svg{width:16px;height:16px}
+.arkIeltsNavCta:hover,.arkIeltsPrimary:hover,.arkIeltsFinalButton:hover{transform:translateY(-2px)}
+
+.arkIeltsHero{width:min(1380px,calc(100% - 64px));margin:0 auto;padding:92px 0 64px;display:grid;grid-template-columns:minmax(0,.88fr) minmax(540px,1.12fr);gap:72px;align-items:center}
+.arkIeltsHeroCopy{max-width:660px}
+.arkIeltsEyebrow{display:inline-flex;align-items:center;gap:9px;color:#6a7484;font-size:9px;font-weight:800;letter-spacing:.14em}
+.arkIeltsEyebrow i{width:8px;height:8px;border-radius:50%;background:var(--ai-coral);box-shadow:0 0 0 5px rgba(243,111,95,.11)}
+.arkIeltsHero h1{max-width:720px;margin:23px 0 0;color:var(--ai-navy);font-size:clamp(56px,5.5vw,86px);line-height:.98;letter-spacing:-.064em;font-weight:720}
+.arkIeltsHero h1 em{font-style:normal;color:var(--ai-coral)}
+.arkIeltsHeroCopy>p{max-width:610px;margin:27px 0 0;color:var(--ai-muted);font-size:16px;line-height:1.72;letter-spacing:-.012em}
+.arkIeltsHeroActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:31px}
+.arkIeltsPrimary{min-height:56px;padding:0 21px;background:var(--ai-coral);color:#fff!important;font-size:12px;box-shadow:0 15px 30px rgba(243,111,95,.20)}
+.arkIeltsSecondary{min-height:56px;padding:0 20px;border:1px solid rgba(16,33,61,.12);background:rgba(255,253,250,.72);color:#344158!important;font-size:12px}
+.arkIeltsHeroChecks{display:flex;gap:18px;flex-wrap:wrap;margin-top:27px;color:#687283;font-size:10px;font-weight:600}
+.arkIeltsHeroChecks span{display:flex;align-items:center;gap:7px}
+.arkIeltsHeroChecks svg{width:14px;height:14px;color:#4b8c69;stroke-width:2.2}
+
+.arkExamPreview{position:relative;min-height:610px;border:1px solid rgba(16,33,61,.10);border-radius:28px;background:#fff;box-shadow:0 34px 70px rgba(30,39,52,.13);overflow:hidden}
+.arkExamPreview:before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--ai-coral),#f5ab80 48%,#6c9ac2)}
+.arkExamTopbar{height:72px;padding:0 22px;border-bottom:1px solid #e9e6e0;display:flex;align-items:center;justify-content:space-between;background:#fffdfa}
+.arkExamBrand{display:flex;align-items:center;gap:10px}
+.arkExamBrandLogo{width:34px;height:34px;padding:8px;border-radius:10px;background:var(--ai-navy);color:#fff;display:grid;place-items:center}
+.arkExamBrandLogo svg{width:100%;height:100%}
+.arkExamBrand p{display:grid;gap:3px;margin:0;line-height:1}
+.arkExamBrand strong{font-size:11px;color:var(--ai-navy)}
+.arkExamBrand small{font-size:7px;color:#9298a2;letter-spacing:.1em}
+.arkExamTimer{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e1ded8;border-radius:10px;background:#f8f5ef;color:#586274;font-size:9px;font-weight:750}
+.arkExamTimer b{color:var(--ai-navy);font-size:12px}
+.arkExamBody{display:grid;grid-template-columns:150px 1fr;min-height:474px}
+.arkExamSidebar{padding:21px 15px;border-right:1px solid #ebe8e2;background:#f8f5ef}
+.arkExamSidebarTitle{display:block;margin-bottom:14px;color:#8a909b;font-size:7px;font-weight:800;letter-spacing:.12em}
+.arkExamPart{display:flex;align-items:center;gap:9px;padding:10px;border-radius:9px;color:#778091;font-size:9px;font-weight:700}
+.arkExamPart b{width:22px;height:22px;border:1px solid #d8d5cf;border-radius:7px;background:#fff;display:grid;place-items:center;color:#647082;font-size:8px}
+.arkExamPart.active{background:#fff;color:var(--ai-navy);box-shadow:0 5px 16px rgba(27,35,46,.06)}
+.arkExamPart.active b{border-color:var(--ai-navy);background:var(--ai-navy);color:#fff}
+.arkExamContent{padding:26px 28px 24px}
+.arkExamQuestionMeta{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:15px;border-bottom:1px solid #ece9e4}
+.arkExamQuestionMeta span{color:#7f8794;font-size:8px;font-weight:800;letter-spacing:.08em}
+.arkExamQuestionMeta b{padding:6px 9px;border-radius:999px;background:#fff0ed;color:#b95043;font-size:8px}
+.arkExamQuestion{margin-top:24px}
+.arkExamQuestion>small{color:#8b929d;font-size:8px;font-weight:800;letter-spacing:.1em}
+.arkExamQuestion h3{max-width:610px;margin:9px 0 18px;color:#17243a;font-size:18px;line-height:1.42;letter-spacing:-.02em}
+.arkExamOptions{display:grid;gap:9px}
+.arkExamOption{min-height:48px;padding:0 14px;border:1px solid #e1ded8;border-radius:10px;display:flex;align-items:center;gap:11px;background:#fff;color:#4d5869;font-size:10px}
+.arkExamOption i{width:17px;height:17px;border:1.5px solid #aeb5bf;border-radius:50%;background:#fff}
+.arkExamOption strong{width:18px;color:var(--ai-navy);font-size:9px}
+.arkExamOption.selected{border-color:#93abc4;background:#f4f8fb;color:#21344e}
+.arkExamOption.selected i{border:5px solid var(--ai-navy-2)}
+.arkExamNavigator{height:64px;padding:0 18px;border-top:1px solid #e9e6e0;display:flex;align-items:center;justify-content:space-between;background:#fffdfa}
+.arkExamNumbers{display:flex;align-items:center;gap:5px}
+.arkExamNumbers span{width:28px;height:28px;border:1px solid #d9d6d0;border-radius:7px;display:grid;place-items:center;color:#777f8c;background:#fff;font-size:8px;font-weight:750}
+.arkExamNumbers span.done{background:var(--ai-navy);border-color:var(--ai-navy);color:#fff}
+.arkExamNumbers span.current{border-color:var(--ai-coral);color:var(--ai-coral);font-weight:850}
+.arkExamNext{height:34px;padding:0 12px;border-radius:9px;background:var(--ai-navy);color:#fff;display:flex;align-items:center;gap:7px;font-size:8px;font-weight:800}
+.arkExamNext svg{width:13px;height:13px}
+.arkExamFloat{position:absolute;right:20px;top:-18px;padding:10px 13px;border:1px solid rgba(16,33,61,.10);border-radius:12px;background:#fffdfa;box-shadow:0 12px 30px rgba(20,31,47,.12);color:#445168;font-size:8px;font-weight:750}
+
+.arkIeltsProof{width:min(1380px,calc(100% - 64px));margin:0 auto;padding:25px 0;border-top:1px solid rgba(16,33,61,.10);border-bottom:1px solid rgba(16,33,61,.10);display:grid;grid-template-columns:repeat(4,1fr)}
+.arkIeltsProof div{padding:0 28px;border-left:1px solid rgba(16,33,61,.09);display:grid;gap:4px}
+.arkIeltsProof div:first-child{padding-left:0;border-left:0}
+.arkIeltsProof strong{font-size:14px;color:var(--ai-navy);letter-spacing:-.02em}
+.arkIeltsProof span{color:#8a919c;font-size:9px}
+
+.arkIeltsSection{width:min(1380px,calc(100% - 64px));margin:0 auto;padding:112px 0 0}
+.arkIeltsSectionHead{max-width:760px;margin-bottom:36px}
+.arkIeltsSectionHead>span,.arkFullMockCopy>span,.arkIeltsExperienceCopy>span,.arkIeltsFaqIntro>span,.arkIeltsFinalCopy>span{color:#748095;font-size:9px;font-weight:800;letter-spacing:.14em}
+.arkIeltsSectionHead h2,.arkFullMockCopy h2,.arkIeltsExperienceCopy h2,.arkIeltsFaqIntro h2{margin:13px 0 0;color:var(--ai-navy);font-size:clamp(40px,4.3vw,64px);line-height:1.02;letter-spacing:-.055em;font-weight:700}
+.arkIeltsSectionHead p,.arkFullMockCopy>p,.arkIeltsExperienceCopy>p,.arkIeltsFaqIntro p{max-width:650px;margin:17px 0 0;color:var(--ai-muted);font-size:14px;line-height:1.72}
+
+.arkSkillGrid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(16,33,61,.10);border-radius:24px;overflow:hidden;background:rgba(255,253,250,.55)}
+.arkSkillCard{min-height:300px;padding:28px;border-left:1px solid rgba(16,33,61,.09);display:flex;flex-direction:column;transition:.18s ease}
+.arkSkillCard:first-child{border-left:0}.arkSkillCard:hover{background:#fff;transform:translateY(-2px)}
+.arkSkillTop{display:flex;align-items:center;justify-content:space-between}
+.arkSkillIcon{width:48px;height:48px;padding:13px;border:1px solid rgba(16,33,61,.10);border-radius:14px;background:#fff;color:#547da6;display:grid;place-items:center}
+.arkSkillIcon svg{width:100%;height:100%}
+.arkSkillIndex{color:#a0a5ad;font-size:8px;font-weight:800;letter-spacing:.12em}
+.arkSkillCard h3{margin:auto 0 0;color:var(--ai-navy);font-size:27px;letter-spacing:-.04em}
+.arkSkillCard p{margin:10px 0 0;color:#737d8b;font-size:11px;line-height:1.62}
+.arkSkillTags{display:flex;gap:6px;flex-wrap:wrap;margin-top:17px}
+.arkSkillTags span{padding:6px 8px;border-radius:999px;background:#f5f2ec;color:#7d8591;font-size:7px;font-weight:750}
+.arkSkillCard:nth-child(2) .arkSkillIcon{color:#466f96}.arkSkillCard:nth-child(3) .arkSkillIcon{color:#df6e5b}.arkSkillCard:nth-child(4) .arkSkillIcon{color:#4d8b6e}
+
+.arkFullMock{width:min(1380px,calc(100% - 64px));margin:112px auto 0;padding:68px 70px;border-radius:30px;background:var(--ai-navy);color:#fff;display:grid;grid-template-columns:minmax(0,.82fr) minmax(520px,1.18fr);gap:70px;align-items:center;box-shadow:0 28px 65px rgba(16,33,61,.16)}
+.arkFullMockCopy h2{color:#fff}.arkFullMockCopy h2 em{font-style:normal;color:#ff8a7c}
+.arkFullMockCopy>p{color:#aeb9c9}
+.arkFullMockList{list-style:none;padding:0;margin:25px 0 0;display:grid;gap:11px}
+.arkFullMockList li{display:flex;align-items:center;gap:9px;color:#dbe2eb;font-size:10px}
+.arkFullMockList svg{width:15px;height:15px;color:#69c395;stroke-width:2.2}
+.arkMockFlow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.arkMockStage{min-height:245px;padding:19px 16px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:rgba(255,255,255,.045);display:flex;flex-direction:column}
+.arkMockStage b{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.08);display:grid;place-items:center;color:#fff;font-size:9px}
+.arkMockStage h3{margin:auto 0 0;font-size:15px;letter-spacing:-.03em}.arkMockStage p{margin:7px 0 0;color:#99a7ba;font-size:8px;line-height:1.55}
+.arkMockStage span{margin-top:14px;color:#718199;font-size:7px;font-weight:800;letter-spacing:.08em}
+.arkMockStage:nth-child(1){border-top:2px solid #6fa1cc}.arkMockStage:nth-child(2){border-top:2px solid #7aa88f}.arkMockStage:nth-child(3){border-top:2px solid #ef806e}.arkMockStage:nth-child(4){border-top:2px solid #b18bc5}
+
+.arkIeltsExperience{width:min(1380px,calc(100% - 64px));margin:112px auto 0;display:grid;grid-template-columns:minmax(480px,1.06fr) minmax(0,.94fr);gap:72px;align-items:center}
+.arkReadingPreview{border:1px solid rgba(16,33,61,.11);border-radius:25px;background:#fff;overflow:hidden;box-shadow:0 25px 55px rgba(25,34,47,.09)}
+.arkReadingTop{height:58px;padding:0 18px;border-bottom:1px solid #ebe8e2;background:#fffdfa;display:flex;align-items:center;justify-content:space-between}
+.arkReadingTop strong{font-size:10px;color:var(--ai-navy)}.arkReadingTop span{font-size:8px;color:#7f8794}
+.arkReadingBody{display:grid;grid-template-columns:1fr 1fr;min-height:370px}
+.arkPassagePane,.arkQuestionPane{padding:23px}
+.arkPassagePane{border-right:1px solid #ece9e4;background:#fcfaf6}
+.arkPassagePane small,.arkQuestionPane small{font-size:7px;color:#949aa3;font-weight:800;letter-spacing:.1em}
+.arkPassagePane h4,.arkQuestionPane h4{margin:8px 0 12px;color:#24324a;font-size:13px}
+.arkTextLines{display:grid;gap:8px}.arkTextLines i{height:6px;border-radius:999px;background:#e6e3dd}.arkTextLines i:nth-child(2){width:91%}.arkTextLines i:nth-child(3){width:96%}.arkTextLines i:nth-child(4){width:80%}.arkTextLines i:nth-child(5){width:88%}.arkTextLines i.marked{width:70%;background:#ffe69a}
+.arkMiniQuestion{margin-top:13px;padding:12px;border:1px solid #e2dfd9;border-radius:9px;color:#596475;font-size:8px;line-height:1.5;background:#fff}
+.arkMiniSelect{margin-top:10px;height:32px;padding:0 10px;border:1px solid #cfd4da;border-radius:8px;display:flex;align-items:center;justify-content:space-between;color:#6f7885;font-size:8px;background:#fff}
+.arkIeltsExperienceCopy ul{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:12px}
+.arkIeltsExperienceCopy li{display:flex;align-items:center;gap:10px;color:#4f5a6b;font-size:11px}
+.arkIeltsExperienceCopy li svg{width:15px;height:15px;color:#4f8c6d;stroke-width:2.2}
+
+.arkProgressStrip{width:min(1380px,calc(100% - 64px));margin:100px auto 0;padding:28px 32px;border:1px solid rgba(16,33,61,.10);border-radius:22px;background:rgba(255,253,250,.65);display:grid;grid-template-columns:1.3fr repeat(4,1fr);align-items:center;gap:10px}
+.arkProgressLead span{display:block;color:#8a929d;font-size:8px;font-weight:800;letter-spacing:.12em}.arkProgressLead strong{display:block;margin-top:5px;color:var(--ai-navy);font-size:20px;letter-spacing:-.04em}
+.arkProgressMetric{padding-left:24px;border-left:1px solid rgba(16,33,61,.09);display:grid;gap:4px}.arkProgressMetric span{font-size:8px;color:#9197a1}.arkProgressMetric strong{font-size:17px;color:var(--ai-navy)}
+
+.arkIeltsFaq{width:min(1180px,calc(100% - 64px));margin:112px auto 0;display:grid;grid-template-columns:.72fr 1.28fr;gap:70px;align-items:start}
+.arkIeltsFaqList{border-top:1px solid rgba(16,33,61,.11)}
+.arkIeltsFaqItem{border-bottom:1px solid rgba(16,33,61,.11)}
+.arkIeltsFaqItem summary{list-style:none;cursor:pointer;min-height:76px;padding:0 4px;display:flex;align-items:center;justify-content:space-between;gap:20px;color:#27354b;font-size:12px;font-weight:700}
+.arkIeltsFaqItem summary::-webkit-details-marker{display:none}
+.arkIeltsFaqItem summary span{display:flex;align-items:center;gap:14px}.arkIeltsFaqItem summary b{color:#a0a5ad;font-size:8px;letter-spacing:.12em}
+.arkIeltsFaqPlus{width:22px;height:22px;position:relative}.arkIeltsFaqPlus:before,.arkIeltsFaqPlus:after{content:"";position:absolute;left:5px;right:5px;top:10px;height:1px;background:#687385}.arkIeltsFaqPlus:after{transform:rotate(90deg);transition:.18s ease}.arkIeltsFaqItem[open] .arkIeltsFaqPlus:after{transform:rotate(0)}
+.arkIeltsFaqItem p{max-width:720px;margin:0;padding:0 42px 20px 42px;color:#747e8b;font-size:10px;line-height:1.7}
+
+.arkIeltsFinal{width:min(1380px,calc(100% - 64px));margin:112px auto 0;padding:56px 60px;border-radius:28px;background:#182942;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:40px}
+.arkIeltsFinalCopy h2{max-width:800px;margin:10px 0 0;font-size:clamp(34px,4vw,58px);line-height:1.03;letter-spacing:-.055em}.arkIeltsFinalCopy p{margin:14px 0 0;color:#aab5c5;font-size:11px}
+.arkIeltsFinalButton{min-height:52px;padding:0 19px;background:#fff;color:var(--ai-navy)!important;font-size:11px;white-space:nowrap;box-shadow:0 12px 28px rgba(0,0,0,.14)}
+
+.arkIeltsFooter{width:min(1380px,calc(100% - 64px));margin:0 auto;padding:36px 0 30px}
+.arkIeltsFooterTop{display:flex;align-items:center;justify-content:space-between;gap:30px;padding-bottom:25px;border-bottom:1px solid rgba(16,33,61,.10)}
+.arkIeltsFooterTop nav{display:flex;gap:22px;color:#747d8b;font-size:9px;font-weight:650}
+.arkIeltsFooterBottom{padding-top:19px;display:flex;align-items:center;justify-content:space-between;gap:20px;color:#9a9fa7;font-size:8px}.arkIeltsFooterBottom p{margin:0}
+
+@media(max-width:1150px){
+  .arkIeltsLinks{display:none}
+  .arkIeltsHero{grid-template-columns:1fr;gap:48px;padding-top:70px}.arkIeltsHeroCopy{max-width:800px}.arkExamPreview{max-width:820px}
+  .arkSkillGrid{grid-template-columns:1fr 1fr}.arkSkillCard:nth-child(3){border-left:0;border-top:1px solid rgba(16,33,61,.09)}.arkSkillCard:nth-child(4){border-top:1px solid rgba(16,33,61,.09)}
+  .arkFullMock{grid-template-columns:1fr;gap:42px}.arkIeltsExperience{grid-template-columns:1fr;gap:44px}.arkReadingPreview{max-width:850px}
+  .arkIeltsFaq{grid-template-columns:1fr;gap:34px}
+}
+@media(max-width:760px){
+  .arkIeltsHeader{padding:9px 10px 0}.arkIeltsNav{min-height:60px;border-radius:16px;padding:8px 9px}.arkIeltsBrandMark{width:38px;height:38px}.arkIeltsBrandText small{display:none}.arkIeltsLogin{display:none}.arkIeltsNavCta{min-height:40px;padding:0 12px;font-size:9px}
+  .arkIeltsHero,.arkIeltsProof,.arkIeltsSection,.arkFullMock,.arkIeltsExperience,.arkProgressStrip,.arkIeltsFaq,.arkIeltsFinal,.arkIeltsFooter{width:min(100% - 28px,1380px)}
+  .arkIeltsHero{padding:62px 0 44px}.arkIeltsHero h1{font-size:46px}.arkIeltsHeroCopy>p{font-size:14px}.arkIeltsPrimary,.arkIeltsSecondary{width:100%}
+  .arkExamPreview{min-height:0;border-radius:20px}.arkExamBody{grid-template-columns:1fr}.arkExamSidebar{display:none}.arkExamContent{padding:20px}.arkExamFloat{display:none}.arkExamQuestion h3{font-size:16px}.arkExamNumbers span:nth-child(n+6){display:none}
+  .arkIeltsProof{grid-template-columns:1fr 1fr}.arkIeltsProof div{padding:14px;border-left:0;border-top:1px solid rgba(16,33,61,.08)}.arkIeltsProof div:nth-child(odd){border-right:1px solid rgba(16,33,61,.08)}
+  .arkIeltsSection{padding-top:82px}.arkSkillGrid{grid-template-columns:1fr}.arkSkillCard{min-height:240px;border-left:0;border-top:1px solid rgba(16,33,61,.09)}.arkSkillCard:first-child{border-top:0}
+  .arkFullMock{margin-top:82px;padding:38px 22px}.arkMockFlow{grid-template-columns:1fr 1fr}.arkMockStage{min-height:180px}
+  .arkIeltsExperience{margin-top:82px}.arkReadingBody{grid-template-columns:1fr}.arkPassagePane{border-right:0;border-bottom:1px solid #ece9e4}.arkQuestionPane{min-height:260px}
+  .arkProgressStrip{margin-top:76px;grid-template-columns:1fr 1fr;padding:22px}.arkProgressLead{grid-column:1/-1;padding-bottom:12px}.arkProgressMetric{padding:12px 0 0;border-left:0;border-top:1px solid rgba(16,33,61,.09)}
+  .arkIeltsFaq{margin-top:82px}.arkIeltsFaqItem summary{font-size:10px}.arkIeltsFaqItem p{padding-left:0;padding-right:20px}
+  .arkIeltsFinal{margin-top:82px;padding:38px 24px;display:grid}.arkIeltsFinalButton{width:100%}
+  .arkIeltsFooterTop{align-items:flex-start;flex-direction:column}.arkIeltsFooterTop nav{flex-wrap:wrap}.arkIeltsFooterBottom{align-items:flex-start;flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){.arkIeltsNavCta,.arkIeltsPrimary,.arkIeltsFinalButton,.arkSkillCard{transition:none}}
