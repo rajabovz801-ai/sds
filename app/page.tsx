@@ -29,6 +29,33 @@ function Microphone() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" /></svg>;
 }
 
+const faqItems = [
+  {
+    question: 'Platformada qaysi imtihonlarni ishlash mumkin?',
+    answer: 'ARK Education Platform orqali IELTS va CEFR yo‘nalishlarida practice hamda mock testlarni ishlashingiz mumkin.',
+  },
+  {
+    question: 'Mock testlar real imtihondagidek vaqt bilan ishlaydimi?',
+    answer: 'Ha. Mock testlar real imtihon ritmiga yaqin vaqt nazorati va tartibli section navigation bilan ishlaydi.',
+  },
+  {
+    question: 'Qaysi IELTS skillarini practice qilish mumkin?',
+    answer: 'Reading, Listening, Writing va Speaking — to‘rtta asosiy skill bitta platforma ichida jamlangan.',
+  },
+  {
+    question: 'Natijalar va progress saqlanadimi?',
+    answer: 'Test yakunlangach natijalar profilingizda ko‘rinadi va keyingi practice uchun progressni kuzatishga yordam beradi.',
+  },
+  {
+    question: 'Platformadan telefonda foydalanish mumkinmi?',
+    answer: 'Ha, landing va asosiy sahifalar mobil qurilmalarga moslashtirilgan. Full mock uchun kattaroq ekran qulayroq tajriba beradi.',
+  },
+  {
+    question: 'Platformaga qanday kiraman?',
+    answer: 'Kirish tugmasini bosing, o‘zingizga berilgan kirish ma’lumotlari orqali profilingizga kiring va kerakli yo‘nalishni tanlang.',
+  },
+];
+
 export default async function HomePage() {
   if (await getAdminServerSession()) redirect('/admin');
   if (await getActiveServerSession()) redirect('/mock');
@@ -49,6 +76,7 @@ export default async function HomePage() {
             <Link href="/login?next=/ielts">IELTS</Link>
             <Link href="/login?next=/cefr">CEFR</Link>
             <Link href="#skills">4 Skills</Link>
+            <Link href="#faq">FAQ</Link>
             <Link href="/login?next=/mock">Mock testlar</Link>
           </div>
 
@@ -129,30 +157,67 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="peakFinalCta">
-          <div><span>BOSHLASHGA TAYYORMISIZ?</span><h2>Birinchi mock testingizni boshlang.</h2><p>Kod orqali kiring va kerakli imtihon yo‘nalishini tanlang.</p></div>
+        <section className="peakLandingFlow" aria-labelledby="how-it-works-title">
+          <div className="peakLandingFlowHead">
+            <span>HOW IT WORKS</span>
+            <h2 id="how-it-works-title">Practice. Review. <em>Improve.</em></h2>
+            <p>Ortiqcha murakkabliksiz — kerakli testni tanlang, real formatda ishlang va natijangizni kuzating.</p>
+          </div>
+          <div className="peakLandingFlowGrid">
+            <article><span>01</span><h3>Yo‘nalishni tanlang</h3><p>IELTS yoki CEFR ichidan kerakli skill va test turini oching.</p></article>
+            <article><span>02</span><h3>Real formatda ishlang</h3><p>Tartibli navigation va exam-style muhitda practice yoki mock bajaring.</p></article>
+            <article><span>03</span><h3>Natijani tahlil qiling</h3><p>Natijangizni ko‘ring, progressni kuzating va keyingi practice’ni rejalashtiring.</p></article>
+          </div>
+        </section>
+
+        <section className="peakFaq" id="faq" aria-labelledby="faq-title">
+          <div className="peakFaqHead">
+            <span>FAQ</span>
+            <h2 id="faq-title">Frequently Asked Questions</h2>
+            <p>ARK Education Platform haqida eng ko‘p beriladigan savollar.</p>
+          </div>
+
+          <div className="peakFaqList">
+            {faqItems.map((item, index) => (
+              <details className="peakFaqItem" key={item.question}>
+                <summary>
+                  <span><b>{String(index + 1).padStart(2, '0')}</b>{item.question}</span>
+                  <i aria-hidden="true" />
+                </summary>
+                <p>{item.answer}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        <section className="peakFinalCta peakFinalCtaPro">
+          <div>
+            <span>READY TO START?</span>
+            <h2>Real practice starts here.</h2>
+            <p>Profilingizga kiring, kerakli yo‘nalishni tanlang va birinchi mock testingizni boshlang.</p>
+          </div>
           <Link href="/login?next=/mock" className="peakHeroPrimary">Platformaga kirish <b><ArrowRight /></b></Link>
         </section>
       </main>
 
-      <footer
-        className="peakHeroNavShell"
-        aria-label="ARK Education Platform footer"
-        style={{ position: 'relative', top: 'auto', marginTop: 20, paddingTop: 18, paddingBottom: 22, borderTop: '1px solid rgba(30,45,69,.07)', borderBottom: 0, background: 'transparent' }}
-      >
-        <div className="peakHeroNav" style={{ minHeight: 78 }}>
+      <footer className="peakLandingFooter" aria-label="ARK Education Platform footer">
+        <div className="peakLandingFooterMain">
           <Link href="/" className="peakHeroBrand" aria-label="ARK Education Platform">
             <span className="peakHeroBrandMark"><ArkLogoIcon /></span>
             <span className="peakHeroBrandCopy"><strong>ARK Education</strong><small>PREMIUM EXAM PLATFORM</small></span>
           </Link>
 
-          <p style={{ margin: 0, justifySelf: 'center', color: '#788292', fontSize: 11, fontWeight: 650, letterSpacing: '.01em', textAlign: 'center' }}>
-            © 2026 ARK Education Platform. All information reserved.
-          </p>
+          <nav className="peakLandingFooterLinks" aria-label="Footer navigatsiya">
+            <Link href="#skills">4 Skills</Link>
+            <Link href="#faq">FAQ</Link>
+            <Link href="/login?next=/mock">Mock testlar</Link>
+            <Link href="/login">Kirish</Link>
+          </nav>
+        </div>
 
-          <span className="peakHeroSignIn" style={{ pointerEvents: 'none', whiteSpace: 'nowrap', color: '#7b8493', fontSize: 10, letterSpacing: '.1em' }}>
-            IELTS • CEFR • MOCK
-          </span>
+        <div className="peakLandingFooterBottom">
+          <p>© 2026 ARK Education Platform. All information reserved.</p>
+          <span>IELTS • CEFR • MOCK</span>
         </div>
       </footer>
     </div>
