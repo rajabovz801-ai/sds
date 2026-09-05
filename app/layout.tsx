@@ -4,6 +4,7 @@ import './globals.css';
 import './platform.css';
 import './landing-home-v4.css';
 import './landing-professional-polish.css';
+import './landing-skills-showcase.css';
 import './auth.css';
 import './mobile-public-hardening.css';
 
