@@ -21,6 +21,14 @@ function BookOpen() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2Z" /><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7Z" /></svg>;
 }
 
+function PenNib() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 4 6 6-9 9-7 1 1-7 9-9Z" /><path d="m12 6 6 6M4 20l6-6" /></svg>;
+}
+
+function Microphone() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" /></svg>;
+}
+
 function Timer() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2M9 2h6" /></svg>;
 }
@@ -52,7 +60,7 @@ export default async function HomePage() {
           <div className="peakHeroLinks" aria-label="Asosiy navigatsiya">
             <Link href="/login?next=/ielts">IELTS</Link>
             <Link href="/login?next=/cefr">CEFR</Link>
-            <Link href="/login?next=/mock">Mock testlar</Link>
+            <Link href="#skills">4 Skills</Link>
             <Link href="#platform">Imkoniyatlar</Link>
           </div>
 
@@ -72,7 +80,7 @@ export default async function HomePage() {
 
             <div className="peakHeroActions">
               <Link href="/login?next=/mock" className="peakHeroPrimary">Mock testni boshlash <b><ArrowRight /></b></Link>
-              <Link href="#platform" className="peakHeroSecondary">Platformani ko‘rish</Link>
+              <Link href="#skills" className="peakHeroSecondary">4 skillni ko‘rish</Link>
             </div>
 
             <div className="peakHeroProof" aria-label="Platforma afzalliklari">
@@ -136,6 +144,72 @@ export default async function HomePage() {
               <div className="peakCardIcon"><Headphones /></div><span className="peakCardLabel">05 • TO‘RT KO‘NIKMA</span>
               <h3>Bir xil, ravon tajriba</h3>
               <div className="peakSkillRows"><span><b>R</b> Reading<i /></span><span><b>L</b> Listening<i /></span><span><b>W</b> Writing<i /></span><span><b>S</b> Speaking<i /></span></div>
+            </article>
+          </div>
+        </section>
+
+        <section className="peakSkillsShowcase" id="skills">
+          <div className="peakSectionHeading">
+            <span className="peakSectionKicker">4 SKILLS • ONE PLATFORM</span>
+            <h2>Har bir skill uchun <em>professional muhit.</em></h2>
+            <p>Reading, Listening, Writing va Speaking alohida tajribaga ega, lekin barchasi bitta ARK dizayn tizimi va progress oqimida ishlaydi.</p>
+          </div>
+
+          <div className="peakSkillShowcaseGrid">
+            <article className="peakSkillShowcaseCard peakSkillReading">
+              <div className="peakSkillShowcaseCopy">
+                <div className="peakSkillShowcaseTop"><span className="peakSkillShowcaseIcon"><BookOpen /></span><span className="peakSkillShowcaseIndex">01 • READING</span></div>
+                <h3>Reading</h3>
+                <p>Passage va savollarni qulay boshqaring, highlight qiling va real imtihondagidek navigation bilan ishlang.</p>
+                <div className="peakSkillTags"><span>Passage view</span><span>Highlight</span><span>Review</span></div>
+              </div>
+              <div className="peakSkillVisualFrame" aria-hidden="true">
+                <Image className="peakSkillPng" src="/assets/ark-hero-premium.png" alt="" width={780} height={560} sizes="(max-width:720px) 85vw, 28vw" />
+                <span className="peakSkillVisualBadge"><BookOpen /></span>
+                <div className="peakSkillVisualCard"><div className="peakSkillVisualCardTop"><span>PASSAGE 01</span><span>ACTIVE</span></div><div className="peakSkillVisualLines"><i /><i /><i /></div></div>
+              </div>
+            </article>
+
+            <article className="peakSkillShowcaseCard peakSkillListening">
+              <div className="peakSkillShowcaseCopy">
+                <div className="peakSkillShowcaseTop"><span className="peakSkillShowcaseIcon"><Headphones /></span><span className="peakSkillShowcaseIndex">02 • LISTENING</span></div>
+                <h3>Listening</h3>
+                <p>Audio oqimi, part navigation va savollar bir ekranda — diqqatni bo‘lmasdan real test ritmida ishlash uchun.</p>
+                <div className="peakSkillTags"><span>4 Parts</span><span>Audio flow</span><span>Auto save</span></div>
+              </div>
+              <div className="peakSkillVisualFrame" aria-hidden="true">
+                <Image className="peakSkillPng" src="/assets/ark-hero-cream.png" alt="" width={780} height={560} sizes="(max-width:720px) 85vw, 28vw" />
+                <span className="peakSkillVisualBadge"><Headphones /></span>
+                <div className="peakSkillVisualCard"><div className="peakSkillVisualCardTop"><span>LISTENING • PART 2</span><span>PLAYING</span></div><div className="peakSkillVisualLines"><i /><i /><i /></div></div>
+              </div>
+            </article>
+
+            <article className="peakSkillShowcaseCard peakSkillWriting">
+              <div className="peakSkillShowcaseCopy">
+                <div className="peakSkillShowcaseTop"><span className="peakSkillShowcaseIcon"><PenNib /></span><span className="peakSkillShowcaseIndex">03 • WRITING</span></div>
+                <h3>Writing</h3>
+                <p>Task 1 va Task 2 uchun toza yozish maydoni, vaqt nazorati va submission tarixini professional ko‘rinishda boshqaring.</p>
+                <div className="peakSkillTags"><span>Task 1</span><span>Task 2</span><span>Submission</span></div>
+              </div>
+              <div className="peakSkillVisualFrame" aria-hidden="true">
+                <Image className="peakSkillPng" src="/assets/ark-login-secure.png" alt="" width={780} height={560} sizes="(max-width:720px) 85vw, 28vw" />
+                <span className="peakSkillVisualBadge"><PenNib /></span>
+                <div className="peakSkillVisualCard"><div className="peakSkillVisualCardTop"><span>WRITING • TASK 2</span><span>SAVED</span></div><div className="peakSkillVisualLines"><i /><i /><i /></div></div>
+              </div>
+            </article>
+
+            <article className="peakSkillShowcaseCard peakSkillSpeaking">
+              <div className="peakSkillShowcaseCopy">
+                <div className="peakSkillShowcaseTop"><span className="peakSkillShowcaseIcon"><Microphone /></span><span className="peakSkillShowcaseIndex">04 • SPEAKING</span></div>
+                <h3>Speaking</h3>
+                <p>Part 1–3 savollari, tayyorlanish va javob berish oqimi orqali speaking practice’ni aniq va tartibli bajaring.</p>
+                <div className="peakSkillTags"><span>Part 1–3</span><span>Practice</span><span>History</span></div>
+              </div>
+              <div className="peakSkillVisualFrame" aria-hidden="true">
+                <Image className="peakSkillPng" src="/assets/ark-hero-premium.png" alt="" width={780} height={560} sizes="(max-width:720px) 85vw, 28vw" />
+                <span className="peakSkillVisualBadge"><Microphone /></span>
+                <div className="peakSkillVisualCard"><div className="peakSkillVisualCardTop"><span>SPEAKING • PART 2</span><span>READY</span></div><div className="peakSkillVisualLines"><i /><i /><i /></div></div>
+              </div>
             </article>
           </div>
         </section>
