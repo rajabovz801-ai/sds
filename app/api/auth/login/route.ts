@@ -192,6 +192,7 @@ export async function POST(request: NextRequest) {
     response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
     return response;
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Login server error' }, { status: 500 });
+    console.error('Student login failed', error);
+    return NextResponse.json({ error: 'Login server error' }, { status: 500 });
   }
 }
