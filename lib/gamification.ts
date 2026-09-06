@@ -6,10 +6,22 @@ export type GamificationSummary = {
   streakDays: number;
   completedTasks: number;
   completedTestIds: string[];
+  completedShadowingIds: string[];
 };
 
 type CompletionRow = {
   test_id: string;
+  points_awarded: number | string;
+  completed_at: string;
+};
+
+type ShadowingCompletionRow = {
+  shadowing_id: string;
+  points_awarded: number | string;
+  completed_at: string;
+};
+
+type PointsRow = {
   points_awarded: number | string;
   completed_at: string;
 };
@@ -31,7 +43,7 @@ function dayKey(date: Date) {
   }).format(date);
 }
 
-function streakFrom(rows: CompletionRow[]) {
+function streakFrom(rows: PointsRow[]) {
   const keys = [...new Set(rows.map((row) => dayKey(new Date(row.completed_at))))].sort().reverse();
   if (!keys.length) return 0;
   const today = dayKey(new Date());
@@ -49,10 +61,16 @@ function streakFrom(rows: CompletionRow[]) {
 
 export async function getGamificationSummary(studentId: string): Promise<GamificationSummary> {
   const supabase = getServiceSupabase();
-  const [completionQuery, adjustmentQuery] = await Promise.all([
+  const [completionQuery, shadowingQuery, adjustmentQuery] = await Promise.all([
     supabase
       .from('daily_task_completions')
       .select('test_id,points_awarded,completed_at')
+      .eq('student_id', studentId)
+      .order('completed_at', { ascending: true })
+      .limit(1000),
+    supabase
+      .from('shadowing_daily_task_completions')
+      .select('shadowing_id,points_awarded,completed_at')
       .eq('student_id', studentId)
       .order('completed_at', { ascending: true })
       .limit(1000),
@@ -65,14 +83,17 @@ export async function getGamificationSummary(studentId: string): Promise<Gamific
   ]);
 
   if (completionQuery.error) throw completionQuery.error;
+  if (shadowingQuery.error) throw shadowingQuery.error;
   if (adjustmentQuery.error) throw adjustmentQuery.error;
 
-  const rows = (completionQuery.data || []) as CompletionRow[];
+  const testRows = (completionQuery.data || []) as CompletionRow[];
+  const shadowingRows = (shadowingQuery.data || []) as ShadowingCompletionRow[];
+  const taskRows: PointsRow[] = [...testRows, ...shadowingRows];
   const adjustments = (adjustmentQuery.data || []) as AdjustmentRow[];
   const today = dayKey(new Date());
-  const taskTotal = rows.reduce((sum, row) => sum + Math.max(0, Number(row.points_awarded) || 0), 0);
+  const taskTotal = taskRows.reduce((sum, row) => sum + Math.max(0, Number(row.points_awarded) || 0), 0);
   const adminTotal = adjustments.reduce((sum, row) => sum + (Number(row.points) || 0), 0);
-  const todayTaskPts = rows
+  const todayTaskPts = taskRows
     .filter((row) => dayKey(new Date(row.completed_at)) === today)
     .reduce((sum, row) => sum + Math.max(0, Number(row.points_awarded) || 0), 0);
   const todayAdminPts = adjustments
@@ -82,8 +103,9 @@ export async function getGamificationSummary(studentId: string): Promise<Gamific
   return {
     totalPts: Math.max(0, taskTotal + adminTotal),
     todayPts: Math.max(0, todayTaskPts + todayAdminPts),
-    streakDays: streakFrom(rows),
-    completedTasks: rows.length,
-    completedTestIds: rows.map((row) => row.test_id),
+    streakDays: streakFrom(taskRows),
+    completedTasks: taskRows.length,
+    completedTestIds: testRows.map((row) => row.test_id),
+    completedShadowingIds: shadowingRows.map((row) => row.shadowing_id),
   };
 }
