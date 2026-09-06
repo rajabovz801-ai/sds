@@ -15,6 +15,7 @@ import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellC
 import { requireStudent } from '@/lib/auth/server-session';
 import { listDailyTasks, type CloudTest } from '@/lib/cloudTests';
 import { getGamificationSummary } from '@/lib/gamification';
+import { listDailyShadowing } from '@/lib/shadowing';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +29,14 @@ function taskIcon(test: CloudTest) {
 
 export default async function DailyTasksPage() {
   const student = await requireStudent('/daily-tasks');
-  const [tests, summary] = await Promise.all([
+  const [tests, shadowing, summary] = await Promise.all([
     listDailyTasks(),
+    listDailyShadowing(),
     getGamificationSummary(student.id),
   ]);
   const completedIds = new Set(summary.completedTestIds);
+  const completedShadowingIds = new Set(summary.completedShadowingIds);
+  const totalTasks = tests.length + shadowing.length;
 
   return (
     <StudentWorkspaceShellClient student={student} active="daily-tasks">
@@ -40,7 +44,7 @@ export default async function DailyTasksPage() {
         <section className="dailyTasksHero">
           <div className="dailyTasksEyebrow"><CalendarCheckIcon /> DAILY TASKS</div>
           <h1>Kunlik vazifalar</h1>
-          <p>Admin tanlagan kunlik vazifalar shu yerda chiqadi. Har bir vazifa PTS va streak tizimiga ulanadi.</p>
+          <p>Admin tanlagan test va shadowing vazifalari shu yerda chiqadi. Har bir vazifa PTS va streak tizimiga ulanadi.</p>
         </section>
 
         <section className="dailyTasksOverview">
@@ -61,15 +65,15 @@ export default async function DailyTasksPage() {
         <section className="dailyTasksFeed">
           <header>
             <div><small>ADMIN SELECTED</small><h2>Faol vazifalar</h2></div>
-            <span>{tests.length} ta vazifa</span>
+            <span>{totalTasks} ta vazifa</span>
           </header>
 
-          {tests.length ? (
+          {totalTasks ? (
             <div className="dailyTasksList">
               {tests.map((test) => {
                 const completed = completedIds.has(test.id);
                 return (
-                  <article className={`dailyTaskRow ${completed ? 'completed' : ''}`} key={test.id}>
+                  <article className={`dailyTaskRow ${completed ? 'completed' : ''}`} key={`test-${test.id}`}>
                     <span className="dailyTaskRowIcon">{taskIcon(test)}</span>
                     <div className="dailyTaskRowCopy">
                       <small>{test.track.toUpperCase()} · {test.skill.toUpperCase()}</small>
@@ -86,11 +90,33 @@ export default async function DailyTasksPage() {
                   </article>
                 );
               })}
+
+              {shadowing.map((lesson) => {
+                const completed = completedShadowingIds.has(lesson.id);
+                const title = `Shadowing ${lesson.sequenceNo}. ${lesson.title}`;
+                return (
+                  <article className={`dailyTaskRow ${completed ? 'completed' : ''}`} key={`shadowing-${lesson.id}`}>
+                    <span className="dailyTaskRowIcon"><HeadphonesIcon /></span>
+                    <div className="dailyTaskRowCopy">
+                      <small>TOOLS · SHADOWING</small>
+                      <strong>{title}</strong>
+                      <span>{completed ? 'Bajarilgan · PTS hisoblangan' : 'Videoni ko‘ring va PTS oling'}</span>
+                    </div>
+                    <div className="dailyTaskReward">
+                      <small>{completed ? 'EARNED' : 'REWARD'}</small>
+                      <strong>{completed ? '✓' : `+${lesson.dailyTaskPoints} PTS`}</strong>
+                    </div>
+                    <Link href={`/study-tools/shadowing/${lesson.id}`} aria-label={`${title} ni ochish`}>
+                      <span>{completed ? 'Ko‘rish' : 'Boshlash'}</span><ArrowRightIcon />
+                    </Link>
+                  </article>
+                );
+              })}
             </div>
           ) : (
             <div className="dailyTasksEmpty">
               <strong>Hozircha daily task belgilanmagan</strong>
-              <p>Admin paneldan kerakli test Daily Task sifatida yoqilganda shu yerda chiqadi.</p>
+              <p>Admin paneldan test yoki Shadowing Daily Task sifatida yoqilganda shu yerda chiqadi.</p>
             </div>
           )}
         </section>
