@@ -10,6 +10,7 @@ type Row = {
   track: string;
   skill: string;
   status: string;
+  source?: 'test' | 'shadowing';
   daily_task_enabled: boolean;
   daily_task_points: number;
   daily_task_started_at: string | null;
@@ -73,16 +74,19 @@ export function AdminDailyTasksPanel() {
   }
 
   async function save(row: Row, enabled: boolean, points: number) {
-    setBusyId(row.id);
+    const rowKey = `${row.source || 'test'}:${row.id}`;
+    setBusyId(rowKey);
     try {
       const response = await fetch('/api/admin/daily-tasks', {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ id: row.id, enabled, points }),
+        body: JSON.stringify({ id: row.id, enabled, points, source: row.source || 'test' }),
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Saqlanmadi.');
-      setRows((current) => current.map((item) => item.id === row.id ? body.test : item));
+      setRows((current) => current.map((item) => (
+        item.id === row.id && (item.source || 'test') === (row.source || 'test') ? body.test : item
+      )));
       setMessage(enabled
         ? `${row.title}: Daily Task 24 soatga yoqildi.`
         : `${row.title}: Daily Task’dan olindi.`);
@@ -108,7 +112,7 @@ export function AdminDailyTasksPanel() {
         <span className={styles.headingCopy}>
           <small>GAMIFICATION CONTROL</small>
           <strong>Daily Tasks boshqaruvi</strong>
-          <span>Daily Task yoqilgandan boshlab 24 soat faol turadi va keyin avtomatik yo‘qoladi.</span>
+          <span>Test va Shadowing vazifalarini 24 soatga yoqing. PTS va streak tizimi avtomatik ulanadi.</span>
         </span>
         <span className={styles.headingMeta}>
           <b>{loaded ? `${activeCount} ACTIVE` : 'DROPDOWN'}</b>
@@ -123,8 +127,9 @@ export function AdminDailyTasksPanel() {
             <div className={styles.list}>
               {sortedRows.map((row) => {
                 const active = isActive(row);
+                const rowKey = `${row.source || 'test'}:${row.id}`;
                 return (
-                  <article className={`${styles.row} ${active ? styles.on : ''}`} key={row.id}>
+                  <article className={`${styles.row} ${active ? styles.on : ''}`} key={rowKey}>
                     <div className={styles.copy}>
                       <small>{row.track.toUpperCase()} · {row.skill.toUpperCase()} · {row.status.toUpperCase()}</small>
                       <strong>{row.title}</strong>
@@ -132,18 +137,18 @@ export function AdminDailyTasksPanel() {
                     </div>
                     <label className={styles.points}>
                       <ZapIcon /><span>PTS</span>
-                      <input type="number" min="0" max="100" defaultValue={row.daily_task_points || 20} disabled={busyId === row.id} onBlur={(event) => {
+                      <input type="number" min="0" max="100" defaultValue={row.daily_task_points || 20} disabled={busyId === rowKey} onBlur={(event) => {
                         const value = Math.max(0, Math.min(100, Math.round(Number(event.target.value) || 20)));
                         if (value !== row.daily_task_points) void save(row, active, value);
                       }} />
                     </label>
-                    <button className={active ? styles.disable : styles.enable} disabled={busyId === row.id || row.status !== 'published'} onClick={() => void save(row, !active, row.daily_task_points || 20)} type="button">
-                      {busyId === row.id ? 'Saqlanmoqda…' : active ? 'Daily Task’dan olish' : '24 soatga Daily Task qilish'}
+                    <button className={active ? styles.disable : styles.enable} disabled={busyId === rowKey || row.status !== 'published'} onClick={() => void save(row, !active, row.daily_task_points || 20)} type="button">
+                      {busyId === rowKey ? 'Saqlanmoqda…' : active ? 'Daily Task’dan olish' : '24 soatga Daily Task qilish'}
                     </button>
                   </article>
                 );
               })}
-              {!sortedRows.length && !loading ? <div className={styles.empty}>Testlar topilmadi.</div> : null}
+              {!sortedRows.length && !loading ? <div className={styles.empty}>Daily Task materiallari topilmadi.</div> : null}
             </div>
           )}
         </div>

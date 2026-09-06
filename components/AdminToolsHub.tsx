@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { AdminAttemptResetPanel } from '@/components/AdminAttemptResetPanel';
 import { AdminDailyTasksPanel } from '@/components/AdminDailyTasksPanel';
 import { AdminMockManager } from '@/components/AdminMockManager';
+import { AdminShadowingPanel } from '@/components/AdminShadowingPanel';
 import { AdminSpeakingMockPanel } from '@/components/AdminSpeakingMockPanel';
 import { AdminSpeakingPracticeInbox } from '@/components/AdminSpeakingPracticeInbox';
 import { AdminStudentPointsPanel } from '@/components/AdminStudentPointsPanel';
@@ -14,11 +15,12 @@ import { AdminVocabularyQuizPanel } from '@/components/AdminVocabularyQuizPanel'
 import { LayoutGridIcon } from '@/components/UiIcons';
 import styles from './AdminToolsHub.module.css';
 
-type Tool = 'points' | 'typing' | 'vocabulary' | 'daily' | 'speaking' | 'telegram' | 'exam';
+type Tool = 'points' | 'typing' | 'shadowing' | 'vocabulary' | 'daily' | 'speaking' | 'telegram' | 'exam';
 
 const tabs: Array<{ id: Tool; label: string; note: string; badge: string }> = [
   { id: 'points', label: 'PTS', note: 'Berish va ayirish', badge: 'P' },
   { id: 'typing', label: 'Typing', note: 'Exercise va sample', badge: 'Y' },
+  { id: 'shadowing', label: 'Shadowing', note: 'Video va script', badge: 'H' },
   { id: 'vocabulary', label: 'Vocabulary', note: 'Quiz va PTS', badge: 'V' },
   { id: 'daily', label: 'Daily Tasks', note: '24 soatlik vazifalar', badge: 'D' },
   { id: 'speaking', label: 'Speaking Inbox', note: 'Practice MP3 javoblar', badge: 'S' },
@@ -89,6 +91,7 @@ export function AdminToolsHub() {
           <main className={styles.content}>
             {active === 'points' && <AdminStudentPointsPanel />}
             {active === 'typing' && <AdminTypingExercisesPanel />}
+            {active === 'shadowing' && <AdminShadowingPanel />}
             {active === 'vocabulary' && <AdminVocabularyQuizPanel />}
             {active === 'daily' && <AdminDailyTasksPanel />}
             {active === 'speaking' && <AdminSpeakingPracticeInbox />}
