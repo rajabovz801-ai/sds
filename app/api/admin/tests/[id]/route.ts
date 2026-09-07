@@ -114,14 +114,30 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   try {
     const { id } = await params;
     const supabase = getServiceSupabase();
-    const { data: row, error: readError } = await supabase.from('tests').select('file_path').eq('id', id).single();
+    const { data: row, error: readError } = await supabase.from('tests').select('file_path').eq('id', id).maybeSingle();
     if (readError) throw readError;
+    if (!row) return NextResponse.json({ error: 'Test topilmadi.' }, { status: 404 });
+
+    const [{ count: sessionCount, error: sessionError }, { count: attemptCount, error: attemptError }, { count: mockCount, error: mockError }] = await Promise.all([
+      supabase.from('test_sessions').select('id', { count: 'exact', head: true }).eq('test_id', id),
+      supabase.from('attempts').select('id', { count: 'exact', head: true }).eq('test_id', id),
+      supabase.from('mocks').select('id', { count: 'exact', head: true }).or(`listening_test_id.eq.${id},reading_test_id.eq.${id},writing_test_id.eq.${id},speaking_test_id.eq.${id}`),
+    ]);
+    if (sessionError) throw sessionError;
+    if (attemptError) throw attemptError;
+    if (mockError) throw mockError;
+
+    if ((sessionCount || 0) > 0 || (attemptCount || 0) > 0 || (mockCount || 0) > 0) {
+      return NextResponse.json({
+        error: 'Bu testda urinishlar yoki Full Mock bog‘lanishi mavjud. Natijalar yo‘qolmasligi uchun uni o‘chirib bo‘lmaydi. Kerak bo‘lsa test statusini Draft qiling.',
+      }, { status: 409 });
+    }
 
     const { error: deleteError } = await supabase.from('tests').delete().eq('id', id);
     if (deleteError) throw deleteError;
 
     let storageWarning = false;
-    if (row?.file_path) {
+    if (row.file_path) {
       const { error: storageError } = await supabase.storage.from(HTML_TESTS_BUCKET).remove([row.file_path]);
       storageWarning = Boolean(storageError);
     }
