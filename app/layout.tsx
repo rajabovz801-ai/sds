@@ -17,8 +17,24 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://arkielts.vercel.app'),
   title: 'ARK EDUCATION — IELTS & CEFR Exam Platform',
   description: 'Professional IELTS and CEFR practice platform with realistic exam interfaces, full mock exams, detailed results and progress tracking.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    url: '/',
+    siteName: 'ARK EDUCATION',
+    title: 'ARK EDUCATION — IELTS & CEFR Exam Platform',
+    description: 'IELTS and CEFR practice with realistic exam interfaces, full mock exams, results and review.',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'ARK EDUCATION — IELTS & CEFR Exam Platform',
+    description: 'IELTS and CEFR practice with realistic exam interfaces, full mock exams, results and review.',
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
