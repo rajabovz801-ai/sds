@@ -49,6 +49,9 @@ async function processManagerUpdate(origin, update) {
   if (message.from?.is_bot || message.sender_business_bot) return;
 
   if (isStaffChat(message)) {
+    if (message.document || message.photo?.length || message.voice || message.audio) {
+      return;
+    }
     if (message.text || message.caption) {
       await handleStaffManagerMessage(incoming);
     }

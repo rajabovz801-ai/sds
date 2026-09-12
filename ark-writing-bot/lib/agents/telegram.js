@@ -47,6 +47,50 @@ export async function sendAgentMessage(agentKey, chatId, text) {
   return result;
 }
 
+export async function sendAgentChatAction(agentKey, chatId, action = "typing") {
+  const token = getToken(agentKey);
+  return callWithToken(token, "sendChatAction", { chat_id: chatId, action });
+}
+
+export async function getAgentTelegramFile(agentKey, fileId) {
+  const token = getToken(agentKey);
+  const file = await callWithToken(token, "getFile", { file_id: fileId });
+  if (!file?.file_path) throw new Error("Telegram did not return file_path");
+
+  const response = await fetch(`${API}/file/bot${token}/${file.file_path}`);
+  if (!response.ok) throw new Error(`Unable to download Telegram file: ${response.status}`);
+  const arrayBuffer = await response.arrayBuffer();
+  return {
+    buffer: Buffer.from(arrayBuffer),
+    filePath: file.file_path
+  };
+}
+
+export async function sendAgentDocument(agentKey, chatId, buffer, filename, caption = "") {
+  const token = getToken(agentKey);
+  const form = new FormData();
+  form.append("chat_id", String(chatId));
+  if (caption) form.append("caption", String(caption).slice(0, 1000));
+  form.append("document", new Blob([buffer], { type: "application/pdf" }), filename || "writing-feedback.pdf");
+
+  const response = await fetch(`${API}/bot${token}/sendDocument`, {
+    method: "POST",
+    body: form
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) {
+    throw new Error(`Telegram sendDocument failed: ${data.description || response.status}`);
+  }
+  return data.result;
+}
+
+export async function sendAgentSticker(agentKey, chatId, stickerFileId = "") {
+  const sticker = String(stickerFileId || "").trim();
+  if (!sticker) return null;
+  const token = getToken(agentKey);
+  return callWithToken(token, "sendSticker", { chat_id: chatId, sticker });
+}
+
 export async function setupAgentWebhook(agentKey, webhookUrl, secretToken = null) {
   const token = getToken(agentKey);
   const payload = {

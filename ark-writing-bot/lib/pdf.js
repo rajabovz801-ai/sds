@@ -17,14 +17,16 @@ function band(value) {
   return Number.isFinite(n) ? n.toFixed(1) : safe(value);
 }
 
-function addHeading(doc, text, size = 15) {
-  doc.moveDown(0.7);
+function addHeading(doc, text, size = 14) {
+  doc.moveDown(0.8);
   doc.font("Helvetica-Bold").fontSize(size).text(text);
-  doc.moveDown(0.25);
+  doc.moveDown(0.2);
+  doc.moveTo(doc.x, doc.y).lineTo(doc.page.width - 48, doc.y).stroke();
+  doc.moveDown(0.35);
 }
 
 function addBody(doc, text, options = {}) {
-  doc.font("Helvetica").fontSize(10.5).text(safe(text), { lineGap: 2, ...options });
+  doc.font("Helvetica").fontSize(10.5).text(safe(text), { lineGap: 2.2, ...options });
 }
 
 function ensureSpace(doc, needed = 90) {
@@ -34,80 +36,98 @@ function ensureSpace(doc, needed = 90) {
 export function createFeedbackPdf(assessment, studentName = "Student") {
   return new Promise((resolve, reject) => {
     const chunks = [];
-    const doc = new PDFDocument({ size: "A4", margin: 48, info: { Title: "ARK Writing Feedback" } });
+    const doc = new PDFDocument({
+      size: "A4",
+      margin: 48,
+      info: { Title: "ARK Education IELTS Writing Feedback" }
+    });
+
     doc.on("data", chunk => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    doc.font("Helvetica-Bold").fontSize(22).text("ARK Writing Feedback");
-    doc.font("Helvetica").fontSize(10).text(`Student: ${safe(studentName)}`);
+    doc.font("Helvetica-Bold").fontSize(11).text("ARK EDUCATION CENTRE", { align: "center" });
+    doc.font("Helvetica-Bold").fontSize(22).text("IELTS Writing Feedback", { align: "center" });
+    doc.moveDown(0.5);
+    doc.font("Helvetica").fontSize(10).text(`O'quvchi: ${safe(studentName)}`);
     doc.text(`Task: ${safe(assessment.title, "Writing Task")}`);
-    doc.text(`Type: ${safe(assessment.task_type, "Unknown")}    Word count: ${safe(assessment.word_count)}`);
-    doc.moveDown(0.6);
-    doc.font("Helvetica-Bold").fontSize(18).text(`Estimated Band: ${band(assessment.estimated_band)}`);
+    doc.text(`Turi: ${safe(assessment.task_type, "Unknown")}    So'zlar soni: ${safe(assessment.word_count)}`);
     doc.moveDown(0.6);
 
+    if (Array.isArray(assessment.corrections) && assessment.corrections.length) {
+      addHeading(doc, "1. Birinchi navbatda: xatolar va tuzatishlar");
+      assessment.corrections.slice(0, 18).forEach((item, i) => {
+        ensureSpace(doc, 105);
+        doc.font("Helvetica-Bold").fontSize(10.5).text(`${i + 1}. ${safe(item.category, "Xato")}`);
+        doc.font("Helvetica").fontSize(10).text(`Siz yozgansiz: ${safe(item.original)}`);
+        doc.font("Helvetica-Bold").fontSize(10).text(`To'g'riroq variant: ${safe(item.corrected)}`);
+        doc.font("Helvetica").fontSize(9.5).text(`Nima uchun: ${safe(item.reason)}`, { lineGap: 2 });
+        doc.moveDown(0.5);
+      });
+    } else {
+      addHeading(doc, "1. Birinchi navbatda: xatolar va tuzatishlar");
+      addBody(doc, "Aniq correction ro'yxati topilmadi yoki submission yetarli darajada o'qilmadi.");
+    }
+
+    addHeading(doc, "2. IELTS band tahlili");
+    doc.font("Helvetica-Bold").fontSize(18).text(`Taxminiy Overall Band: ${band(assessment.estimated_band)}`);
+    doc.moveDown(0.5);
+
     const criteria = [
-      ["Task Response / Achievement", assessment.task_response],
+      ["Task Achievement / Response", assessment.task_response],
       ["Coherence & Cohesion", assessment.coherence_cohesion],
       ["Lexical Resource", assessment.lexical_resource],
       ["Grammar Range & Accuracy", assessment.grammar_accuracy]
     ];
 
     for (const [name, item] of criteria) {
-      ensureSpace(doc, 75);
+      ensureSpace(doc, 80);
       doc.font("Helvetica-Bold").fontSize(11.5).text(`${name}: ${band(item?.band)}`);
       addBody(doc, item?.feedback);
       doc.moveDown(0.4);
     }
 
-    addHeading(doc, "Overall Feedback");
+    addHeading(doc, "3. Ustoz uslubidagi umumiy feedback");
     addBody(doc, assessment.summary);
 
     if (Array.isArray(assessment.paragraph_feedback) && assessment.paragraph_feedback.length) {
-      addHeading(doc, "Paragraph-by-paragraph");
+      addHeading(doc, "4. Paragrafma-paragraf tahlil");
       for (const item of assessment.paragraph_feedback) {
-        ensureSpace(doc, 70);
+        ensureSpace(doc, 75);
         doc.font("Helvetica-Bold").fontSize(10.5).text(safe(item.section));
         addBody(doc, item.feedback);
-        doc.moveDown(0.3);
+        doc.moveDown(0.35);
       }
     }
 
-    if (Array.isArray(assessment.corrections) && assessment.corrections.length) {
-      addHeading(doc, "Important Corrections");
-      assessment.corrections.slice(0, 18).forEach((item, i) => {
-        ensureSpace(doc, 90);
-        doc.font("Helvetica-Bold").fontSize(10.5).text(`${i + 1}. ${safe(item.category, "Correction")}`);
-        doc.font("Helvetica").fontSize(10).text(`Original: ${safe(item.original)}`);
-        doc.font("Helvetica-Bold").fontSize(10).text(`Better: ${safe(item.corrected)}`);
-        doc.font("Helvetica").fontSize(9.5).text(`Why: ${safe(item.reason)}`, { lineGap: 2 });
-        doc.moveDown(0.45);
-      });
-    }
-
     if (Array.isArray(assessment.better_sentences) && assessment.better_sentences.length) {
-      addHeading(doc, "Stronger Sentence Options");
-      assessment.better_sentences.slice(0, 5).forEach((item, i) => {
-        ensureSpace(doc, 65);
-        doc.font("Helvetica").fontSize(10).text(`${i + 1}. ${safe(item.original)}`);
-        doc.font("Helvetica-Bold").fontSize(10).text(`   -> ${safe(item.improved)}`);
-        doc.moveDown(0.35);
+      addHeading(doc, "5. Kuchliroq yozish variantlari");
+      assessment.better_sentences.slice(0, 6).forEach((item, i) => {
+        ensureSpace(doc, 70);
+        doc.font("Helvetica").fontSize(10).text(`${i + 1}. Sizning gapingiz: ${safe(item.original)}`);
+        doc.font("Helvetica-Bold").fontSize(10).text(`   Yaxshiroq: ${safe(item.improved)}`);
+        doc.moveDown(0.4);
       });
     }
 
     if (Array.isArray(assessment.top_priorities) && assessment.top_priorities.length) {
-      addHeading(doc, "Top Priorities");
-      assessment.top_priorities.slice(0, 5).forEach((item, i) => addBody(doc, `${i + 1}. ${item}`));
+      addHeading(doc, "6. Keyingi Writing uchun vazifa");
+      assessment.top_priorities.slice(0, 5).forEach((item, i) => {
+        addBody(doc, `${i + 1}. ${item}`);
+        doc.moveDown(0.15);
+      });
     }
 
     if (assessment.note) {
-      addHeading(doc, "Note", 12);
+      addHeading(doc, "Eslatma", 12);
       addBody(doc, assessment.note);
     }
 
     doc.moveDown(1.2);
-    doc.font("Helvetica").fontSize(8).text("ARK Writing Feedback - automated assessment support", { align: "center" });
+    doc.font("Helvetica").fontSize(8).text(
+      "ARK Education Centre - avtomatik IELTS Writing baholash yordami. Yakuniy rasmiy IELTS band emas.",
+      { align: "center" }
+    );
     doc.end();
   });
 }
