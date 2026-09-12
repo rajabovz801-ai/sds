@@ -21,9 +21,8 @@ async function telegram(method, payload) {
 export async function GET(request) {
   try {
     const url = new URL(request.url);
-    const webhookUrl = `${url.origin}/api/telegram`;
-
-    await telegram("setWebhook", {
+    const webhookUrl = `${url.origin}/api/telegram/manager`;
+    const payload = {
       url: webhookUrl,
       allowed_updates: [
         "message",
@@ -33,7 +32,12 @@ export async function GET(request) {
         "deleted_business_messages"
       ],
       drop_pending_updates: false
-    });
+    };
+
+    const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (secret && /^[A-Za-z0-9_-]{1,256}$/.test(secret)) payload.secret_token = secret;
+
+    await telegram("setWebhook", payload);
 
     const info = await telegram("getWebhookInfo", {});
     return Response.json({
