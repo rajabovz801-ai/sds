@@ -28,6 +28,12 @@ function assignmentLine(agentKey, instruction) {
   return `${agent.emoji} @${agent.username}, topshiriq: ${short}`;
 }
 
+function isWaitingForWritingSubmission(instruction = "", route = []) {
+  if (route.length !== 1 || route[0] !== "checker") return false;
+  const value = String(instruction).toLowerCase().replace(/[’ʻ`]/g, "'");
+  return /writing|essay/.test(value) && /(yuboraman|jo['‘]?nataman|tashlayman|hozir yubor|hozir writing|tekshirib berasan|tekshirib ber|yuborsam)/i.test(value);
+}
+
 async function analystContext(instruction) {
   if (!/(report|natija|progress|bajargan|bajarmagan|qilmagan|homework|vazifa|guruh)/i.test(instruction)) {
     return "Live database report was not requested for this instruction.";
@@ -56,6 +62,21 @@ export async function handleStaffManagerMessage(incoming) {
     incoming.businessConnectionId
   );
 
+  if (isWaitingForWritingSubmission(instruction, route)) {
+    await sendMessage(incoming.chatId, assignmentLine("checker", instruction), incoming.businessConnectionId);
+    await sendAgentMessage(
+      "checker",
+      incoming.chatId,
+      "✍️ Yuboring. DOCX, PDF, rasm yoki TXT faylni shu guruhga tashlang. Avval xatolarni ko'rsataman, keyin IELTS band va o'zbekcha PDF feedback beraman."
+    );
+    await sendMessage(
+      incoming.chatId,
+      "🧸 Teddy Manager\n⏳ ARK Checker writing faylini kutmoqda. Fayl kelgach task tugaydi.",
+      incoming.businessConnectionId
+    );
+    return;
+  }
+
   let previous = "";
   for (const agentKey of route) {
     await sendMessage(incoming.chatId, assignmentLine(agentKey, instruction), incoming.businessConnectionId);
@@ -83,7 +104,7 @@ export async function handleStaffManagerMessage(incoming) {
 
   await sendMessage(
     incoming.chatId,
-    `🧸 Teddy Manager\n✅ Agentlar ishini tugatdi. Keyingi buyruqni shu yerga yozavering.`,
+    "🧸 Teddy Manager\n✅ Agentlar ishini tugatdi. Keyingi buyruqni shu yerga yozavering.",
     incoming.businessConnectionId
   );
 }
