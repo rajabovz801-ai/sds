@@ -42,41 +42,42 @@ function band(value) {
 
 function correctionPreview(assessment) {
   const corrections = Array.isArray(assessment?.corrections) ? assessment.corrections : [];
-  if (!corrections.length) return "Aniq grammatik/leksik xato ro'yxati topilmadi yoki matn yetarli emas.";
+  if (!corrections.length) return "Bu safar aniq correction ro'yxati kam chiqdi. PDF ichida umumiy tahlilni berdim.";
 
   return corrections.slice(0, 5).map((item, index) => {
     const original = safeText(item?.original).slice(0, 220) || "-";
     const corrected = safeText(item?.corrected).slice(0, 220) || "-";
     const reason = safeText(item?.reason).slice(0, 260) || "Izoh berilmagan";
-    return `${index + 1}. ${original}\n→ ${corrected}\nSabab: ${reason}`;
+    return `${index + 1}. ${original}\n→ ${corrected}\nNega: ${reason}`;
   }).join("\n\n");
 }
 
 function resultMessage(assessment) {
   const corrections = Array.isArray(assessment?.corrections) ? assessment.corrections : [];
   const priorities = Array.isArray(assessment?.top_priorities) ? assessment.top_priorities.filter(Boolean).slice(0, 3) : [];
+  const overall = band(assessment?.estimated_band);
 
   const lines = [
-    "📝 ARK Checker",
-    "✅ Writing tekshirildi.",
+    `Ko'rib chiqdim. Hozircha taxminiy overall ${overall}.`,
+    corrections.length
+      ? `Eng avval shu ${Math.min(corrections.length, 5)} ta joyni tuzatish kerak:`
+      : "Katta xatolar ko'p emas, lekin bandni ushlab turgan joylar bor:",
     "",
-    `🔴 Birinchi xatolar (${corrections.length} ta muhim correction):`,
     correctionPreview(assessment),
     "",
-    "📊 IELTS natija:",
-    `Overall: ${band(assessment?.estimated_band)}`,
-    `Task Achievement/Response: ${band(assessment?.task_response?.band)}`,
-    `Coherence & Cohesion: ${band(assessment?.coherence_cohesion?.band)}`,
-    `Lexical Resource: ${band(assessment?.lexical_resource?.band)}`,
-    `Grammar Range & Accuracy: ${band(assessment?.grammar_accuracy?.band)}`
+    "Bandlar:",
+    `• Task Achievement/Response: ${band(assessment?.task_response?.band)}`,
+    `• Coherence & Cohesion: ${band(assessment?.coherence_cohesion?.band)}`,
+    `• Lexical Resource: ${band(assessment?.lexical_resource?.band)}`,
+    `• Grammar Range & Accuracy: ${band(assessment?.grammar_accuracy?.band)}`
   ];
 
   if (priorities.length) {
-    lines.push("", "📌 Keyingi Writing uchun asosiy fokus:");
+    lines.push("", "Keyingi Writingda aynan shularga qarang:");
     priorities.forEach((item, index) => lines.push(`${index + 1}. ${safeText(item)}`));
   }
 
-  lines.push("", "📎 Batafsil o'zbekcha feedback PDF faylda.");
+  lines.push("", "Batafsil feedbackni PDFga ham solib qo'ydim 👇");
   return lines.join("\n");
 }
 
@@ -89,7 +90,7 @@ async function sendStarted(chatId) {
   await sendAgentMessage(
     "checker",
     chatId,
-    "✍️ Writing olindi. Avval xatolarni tekshiryapman, keyin band score va PDF feedback beraman."
+    "Oldim 👍 Hozir ko'rib chiqaman. Avval xatolarni ajrataman, keyin bandini beraman."
   );
 }
 
@@ -105,7 +106,7 @@ async function finish(chatId, assessment, message) {
     chatId,
     pdf,
     `${cleanFilename(name)}_ARK_Writing_Feedback.pdf`,
-    "ARK Writing Feedback — xatolar, band tahlili va keyingi fokus"
+    "Batafsil feedback: xatolar, band tahlili va keyingi fokus"
   );
 }
 
@@ -118,7 +119,7 @@ async function assessDocument(message) {
     await sendAgentMessage(
       "checker",
       message.chat.id,
-      "Bu fayl formatini hozir Writing uchun ocholmayman. DOCX, PDF, TXT yoki rasm yuboring."
+      "Buni ocholmayapman. DOCX, PDF, TXT yoki rasm qilib yuboring, shunda tekshiraman."
     );
     return true;
   }
@@ -169,7 +170,7 @@ export async function handleCheckerWritingSubmission(message) {
     await sendAgentMessage(
       "checker",
       message.chat.id,
-      `⚠️ Writingni tekshirishda texnik muammo chiqdi: ${String(error?.message || "unknown error").slice(0, 250)}`
+      "Bir joyda texnik muammo chiqdi. Faylni yana bir marta yuborib ko'ring, men qayta tekshiraman."
     ).catch(() => {});
     return true;
   }
