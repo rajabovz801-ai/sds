@@ -7,7 +7,7 @@ import {
   handleQuizPollAnswer,
   handleStudentSubmission,
   recordGroupMember
-} from "../../../../ark-writing-bot/lib/agents/assignment-workflow.js";
+} from "../../../../ark-writing-bot/lib/agents/assignment-workflow-v2.js";
 import { handleStaffManagerMessage } from "../../../../ark-writing-bot/lib/agents/manager.js";
 
 export const runtime = "nodejs";
@@ -78,7 +78,7 @@ async function processManagerUpdate(origin, update) {
 }
 
 export async function GET() {
-  return Response.json({ ok: true, service: "Teddy Manager", ready: true, quiet_student_groups: true, assignment_tracking: true });
+  return Response.json({ ok: true, service: "Teddy Manager", ready: true, quiet_student_groups: true, assignment_tracking: true, secured_store: true });
 }
 
 export async function POST(request) {
