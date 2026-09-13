@@ -6,6 +6,7 @@ import {
 } from "../tracker.js";
 import { AGENTS, stripBotMentions } from "./config.js";
 import { tryHandleQuizRequest, tryHandleStaffAssignment } from "./assignment-workflow.js";
+import { tryHandleLocalQuizPreview } from "./quiz-preview.js";
 import { runAgent } from "./openai.js";
 import { sendAgentMessage } from "./telegram.js";
 
@@ -132,6 +133,10 @@ export async function handleStaffManagerMessage(incoming) {
   }
 
   try {
+    if (await tryHandleLocalQuizPreview(incoming)) {
+      await remember(incoming, history, instruction, "Interactive local quiz preview handled without persistent storage.");
+      return;
+    }
     if (await tryHandleQuizRequest(incoming)) {
       await remember(incoming, history, instruction, "Interactive quiz workflow handled the request.");
       return;
@@ -142,7 +147,7 @@ export async function handleStaffManagerMessage(incoming) {
     }
   } catch (error) {
     console.error("Staff workflow failed", error);
-    await sendMessage(incoming.chatId, `🧸 Hozir shu ishda texnik muammo chiqdi: ${String(error?.message || "unknown error").slice(0, 220)}`, incoming.businessConnectionId);
+    await sendMessage(incoming.chatId, "🧸 Hozir shu ishda texnik muammo chiqdi. Men logni saqladim — qayta urinib ko'ramiz.", incoming.businessConnectionId);
     return;
   }
 
