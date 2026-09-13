@@ -18,6 +18,9 @@ export async function handleAgentUpdate(agentKey, update) {
   if (!message?.chat?.id) return;
   if (message.from?.is_bot) return;
 
+  // Specialist bots are staff-only in groups. Student-group chatter, mentions and side conversations stay silent.
+  if (isGroupMessage(message) && !isStaffChat(message)) return;
+
   if (agentKey === "checker" && isStaffChat(message) && !looksLikeAssignmentRouting(message)) {
     const handled = await handleCheckerWritingSubmission(message);
     if (handled) return;
