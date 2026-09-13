@@ -1,9 +1,13 @@
 import { waitUntil } from "@vercel/functions";
 import {
-  isAddressedToTeddy,
   isGroupMessage,
   isStaffChat
 } from "../../../../ark-writing-bot/lib/agents/config.js";
+import {
+  handleQuizPollAnswer,
+  handleStudentSubmission,
+  recordGroupMember
+} from "../../../../ark-writing-bot/lib/agents/assignment-workflow.js";
 import { handleStaffManagerMessage } from "../../../../ark-writing-bot/lib/agents/manager.js";
 
 export const runtime = "nodejs";
@@ -39,6 +43,11 @@ async function forwardToLegacy(origin, update) {
 }
 
 async function processManagerUpdate(origin, update) {
+  if (update?.poll_answer) {
+    await handleQuizPollAnswer(update);
+    return;
+  }
+
   const incoming = incomingFrom(update);
   if (!incoming?.chatId) {
     await forwardToLegacy(origin, update);
@@ -49,21 +58,27 @@ async function processManagerUpdate(origin, update) {
   if (message.from?.is_bot || message.sender_business_bot) return;
 
   if (isStaffChat(message)) {
-    if (message.document || message.photo?.length || message.voice || message.audio) {
-      return;
-    }
-    if (message.text || message.caption) {
-      await handleStaffManagerMessage(incoming);
-    }
+    if (message.text || message.caption) await handleStaffManagerMessage(incoming);
     return;
   }
 
-  if (isGroupMessage(message) && !isAddressedToTeddy(message)) return;
+  if (isGroupMessage(message)) {
+    await recordGroupMember(message).catch(error => console.warn("Could not learn group member", error?.message || error));
+    const handled = await handleStudentSubmission(message).catch(error => {
+      console.error("Student submission workflow failed", error);
+      return false;
+    });
+    if (handled) return;
+
+    // Student groups stay quiet by design. Ordinary chat, mentions and side conversations are ignored.
+    return;
+  }
+
   await forwardToLegacy(origin, update);
 }
 
 export async function GET() {
-  return Response.json({ ok: true, service: "Teddy Manager", ready: true });
+  return Response.json({ ok: true, service: "Teddy Manager", ready: true, quiet_student_groups: true, assignment_tracking: true });
 }
 
 export async function POST(request) {
