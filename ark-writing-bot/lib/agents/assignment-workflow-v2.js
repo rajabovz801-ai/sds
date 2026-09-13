@@ -6,6 +6,7 @@ import { sendAgentMessage, sendAgentQuizPoll } from "./telegram.js";
 const STORE_URL = "https://svdigxqdivcmljirjwhk.supabase.co/functions/v1/ark-agent-store";
 const STAFF_TITLE = "ARK AI STAFF";
 const GROUP_TYPES = new Set(["group", "supergroup"]);
+const GENERIC_TARGET_TITLES = new Set(["test", "quiz", "group", "guruh", "homework", "vazifa"]);
 const TZ = "Asia/Tashkent";
 
 function botToken() {
@@ -46,11 +47,10 @@ function tashkentParts(date = new Date()) {
 
 function localIsoAt(hour, minute, dayOffset = 0) {
   const p = tashkentParts();
-  const base = new Date(`${p.year}-${p.month}-${p.day}T00:00:00+05:00`);
-  base.setUTCDate(base.getUTCDate() + dayOffset);
-  const y = base.getUTCFullYear();
-  const m = String(base.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(base.getUTCDate()).padStart(2, "0");
+  const anchor = new Date(Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) + dayOffset));
+  const y = anchor.getUTCFullYear();
+  const m = String(anchor.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(anchor.getUTCDate()).padStart(2, "0");
   return new Date(`${y}-${m}-${d}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00+05:00`).toISOString();
 }
 
@@ -61,11 +61,12 @@ function timePlan(text = "") {
   let sendAt = new Date().toISOString();
   let deadlineAt = null;
   for (const item of matches) {
-    const around = value.slice(Math.max(0, item.index - 35), item.index + item.raw.length + 35);
+    const around = value.slice(Math.max(0, item.index - 60), item.index + item.raw.length + 70);
     const iso = localIsoAt(item.hour, item.minute, tomorrow);
     if (/gacha|deadline|topshir|yakun|oxirgi/.test(around)) deadlineAt = iso;
     else if (/yubor|jo'nat|send|chiqar|tashla/.test(around) && !/gacha/.test(around)) sendAt = iso;
   }
+  if (matches.length === 1 && sendAt === null) sendAt = localIsoAt(matches[0].hour, matches[0].minute, tomorrow);
   if (matches.length === 1 && !deadlineAt && /gacha|deadline|topshir/.test(value)) deadlineAt = localIsoAt(matches[0].hour, matches[0].minute, tomorrow);
   if (matches.length >= 2 && !deadlineAt) deadlineAt = localIsoAt(matches[matches.length - 1].hour, matches[matches.length - 1].minute, tomorrow);
   const reminderAt = deadlineAt ? new Date(Math.max(Date.now(), new Date(deadlineAt).getTime() - 30 * 60 * 1000)).toISOString() : null;
@@ -73,7 +74,7 @@ function timePlan(text = "") {
 }
 
 function requestedPass(text = "", total = 10) {
-  const ratio = String(text).match(/\b(\d{1,2})\s*\/\s*(\d{1,2})\b/);
+  const ratio = String(text).match(/(?:pass|o['‘]?tish|chegara)?\s*[:=\-]?\s*\b(\d{1,2})\s*\/\s*(\d{1,2})\b/i);
   if (ratio && Number(ratio[2]) === total) return Math.min(total, Math.max(1, Number(ratio[1])));
   const explicit = String(text).match(/(?:pass|o['‘]?tish|chegara)[^\d]{0,12}(\d{1,2})/i);
   if (explicit) return Math.min(total, Math.max(1, Number(explicit[1])));
@@ -81,8 +82,14 @@ function requestedPass(text = "", total = 10) {
 }
 
 function requestedCount(text = "", fallback = 10) {
-  for (const pattern of [/\b(\d{1,2})\s*ta\s*(?:quiz|test|savol)/i, /(?:quiz|test|savol)[^\d]{0,12}(\d{1,2})\s*ta/i, /\b(\d{1,2})\s*(?:questions?|savol)/i]) {
-    const m = String(text).match(pattern);
+  const value = String(text);
+  for (const pattern of [
+    /\b(\d{1,2})\s*ta\s*(?:(?:A1|A2|B1|B2|C1|C2)\s*)?(?:quiz|test|savol)/i,
+    /\b(\d{1,2})\s*ta\b(?=[^\n,.]{0,24}\b(?:quiz|test|savol)\b)/i,
+    /(?:quiz|test|savol)[^\d]{0,16}(\d{1,2})\s*ta/i,
+    /\b(\d{1,2})\s*(?:questions?|savol)/i
+  ]) {
+    const m = value.match(pattern);
     if (m) return Math.max(1, Math.min(20, Number(m[1])));
   }
   return fallback;
@@ -100,9 +107,21 @@ export async function listStudentTargets() {
 export async function matchTarget(text = "") {
   const targets = await listStudentTargets();
   const haystack = ` ${norm(text)} `;
-  const exact = targets.filter(target => haystack.includes(` ${norm(target.title)} `)).sort((a, b) => norm(b.title).length - norm(a.title).length);
+  const exact = targets.filter(target => {
+    const title = norm(target.title);
+    if (!title) return false;
+    if (GENERIC_TARGET_TITLES.has(title)) {
+      return haystack.includes(` ${title} guruh `) || haystack.includes(` ${title} group `) || haystack.includes(` ${title} guruhga `) || haystack.includes(` ${title} groupga `);
+    }
+    return haystack.includes(` ${title} `);
+  }).sort((a, b) => norm(b.title).length - norm(a.title).length);
   if (exact.length) return { target: exact[0], targets, ambiguous: false };
-  const scored = targets.map(target => { const words = norm(target.title).split(" ").filter(word => word.length >= 2); return { target, score: words.reduce((sum, word) => sum + (haystack.includes(` ${word} `) ? 1 : 0), 0) }; }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
+  const scored = targets.map(target => {
+    const title = norm(target.title);
+    if (GENERIC_TARGET_TITLES.has(title)) return { target, score: 0 };
+    const words = title.split(" ").filter(word => word.length >= 2);
+    return { target, score: words.reduce((sum, word) => sum + (haystack.includes(` ${word} `) ? 1 : 0), 0) };
+  }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
   if (!scored.length) return { target: null, targets, ambiguous: false };
   if (scored.length > 1 && scored[0].score === scored[1].score) return { target: null, targets, ambiguous: true };
   return { target: scored[0].target, targets, ambiguous: false };
@@ -152,7 +171,18 @@ export async function tryHandleStaffAssignment(incoming) {
   return true;
 }
 
-function quizTopic(text = "") { return clean(String(text).replace(/\b\d+\s*ta\b/ig, "").replace(/\b(?:quiz|test|mcq|savol)\b/ig, "").replace(/\b(?:yaratib|yarat|tuz|tuzib|qil|tayyorla|ber|yubor|jo['‘]?nat)\w*\b/ig, "").replace(/\b(?:A1|A2|B1|B2|C1|C2)\b/ig, "").replace(/\b(?:guruhga|groupga|guruhiga|groupiga)\b/ig, "")) || "English grammar"; }
+function quizTopic(text = "") {
+  return clean(String(text)
+    .replace(/\b\d+\s*(?:guruh|group)(?:ga|iga)?\s*(?:uchun)?\b/ig, "")
+    .replace(/\b\d+\s*ta\b/ig, "")
+    .replace(/\b(?:quiz|test|mcq|savol)\b/ig, "")
+    .replace(/\b(?:yaratib|yarat|tuz|tuzib|qil|tayyorla|ber|yubor|jo['‘]?nat)\w*\b/ig, "")
+    .replace(/\b(?:A1|A2|B1|B2|C1|C2)\b/ig, "")
+    .replace(/\b(?:guruhga|groupga|guruhiga|groupiga|guruh|group|uchun)\b/ig, "")
+    .replace(/\b(?:bugun|ertaga|today|tomorrow)\b/ig, "")
+    .replace(/\b(?:soat\s*)?\d{1,2}[:.]\d{2}\s*(?:da|ga)?\b/ig, "")
+    .replace(/\bpass\s*\d{1,2}\s*\/\s*\d{1,2}\b/ig, "")) || "English grammar";
+}
 
 async function quizPdf(quiz, passScore) {
   return new Promise((resolve, reject) => {
@@ -224,7 +254,8 @@ export async function tryHandleQuizRequest(incoming) {
     await sendQuizAssignmentNow(assignment);
     await telegram("sendMessage", { chat_id: Number(incoming.chatId), text: `🧸 <b>${html(quiz.title)}</b> quizini ${html(matched.target.title)} guruhiga yubordim.\n<i>${total} ta savol, pass ${passScore}/${total}. Natijani o'zim yig'aman.</i>`, parse_mode: "HTML" });
   } else {
-    await telegram("sendMessage", { chat_id: Number(incoming.chatId), text: `🧸 <b>${html(quiz.title)}</b> tayyor. ${html(matched.target.title)} guruhiga belgilangan vaqtda yuboraman.`, parse_mode: "HTML" });
+    const sendLabel = new Intl.DateTimeFormat("uz-UZ", { timeZone: TZ, hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" }).format(new Date(plan.sendAt));
+    await telegram("sendMessage", { chat_id: Number(incoming.chatId), text: `🧸 <b>${html(quiz.title)}</b> tayyor.\n<b>${html(matched.target.title)}</b> guruhiga <b>${html(sendLabel)}</b> ga rejaladim.\n<i>${total} ta savol • Pass ${passScore}/${total}. Vaqti kelganda o'zi yuboriladi.</i>`, parse_mode: "HTML" });
   }
   return true;
 }
