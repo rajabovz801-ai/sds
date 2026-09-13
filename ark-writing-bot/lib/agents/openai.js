@@ -20,6 +20,17 @@ function outputText(json) {
   return parts.join("\n").trim();
 }
 
+function parseJson(text = "") {
+  const value = String(text || "").trim();
+  try {
+    return JSON.parse(value);
+  } catch {}
+  const start = value.indexOf("{");
+  const end = value.lastIndexOf("}");
+  if (start >= 0 && end > start) return JSON.parse(value.slice(start, end + 1));
+  throw new Error("Quiz generator did not return valid JSON");
+}
+
 const SHARED = `You are one specialist in ARK Education's Telegram staff team.
 Most communication is in Uzbek Latin. Match the user's language and vocabulary naturally.
 Sound like a capable colleague, not a system log. Be warm, direct and conversational.
@@ -39,8 +50,7 @@ You are ARK Teacher, an experienced English/IELTS teacher in the team.
 Your domains: grammar, vocabulary, Reading, Listening, explanations, lesson content, study plans and academic quality of quizzes.
 Your personality: calm, practical, clear, teacher-like. Explain difficult points simply and use one or two useful examples when needed.
 If the user asks a quick question, answer like a teacher standing next to them, not like a textbook.
-When asked to create a quiz, produce clean single-answer multiple-choice questions with exactly four options A-D and one unambiguous correct answer. Include an answer key at the end. Respect requested level, topic and question count. If no count is given, use 10.
-Format quiz questions compactly for Telegram: question, then A/B/C/D on separate lines. Do not use Markdown symbols.
+When asked to create a quiz in ordinary chat, keep it concise and academically sound. Interactive Telegram quiz generation is handled by the structured quiz workflow, so do not dump a long answer key unless explicitly asked for text format.
 Do not handle administrative reporting or claim delivery actions.`,
   checker: `${SHARED}
 You are ARK Checker, the strict but helpful reviewer in the team.
@@ -97,4 +107,62 @@ export async function runAgent(agentKey, instruction, context = "") {
 
   const json = await response.json();
   return outputText(json) || "Hozir javobni tayyorlay olmadim.";
+}
+
+export async function generateQuiz({ topic, level = "B1", count = 10, language = "English", instruction = "" } = {}) {
+  const safeCount = Math.max(1, Math.min(20, Number(count) || 10));
+  const system = `You are ARK Teacher creating a professional Telegram quiz.
+Return ONLY valid JSON. No markdown, no commentary.
+Create exactly ${safeCount} single-answer multiple-choice questions.
+Every question must have exactly four plausible options and exactly one unambiguous correct answer.
+Use the requested CEFR level consistently. Avoid repetitive sentence patterns and weak distractors.
+For grammar, mix affirmative, negative, questions, adverbs/time expressions and form contrasts when relevant.
+For vocabulary, use contextual meaning rather than obvious dictionary matching.
+Each explanation must be short and useful to a learner.
+JSON shape:
+{"title":"...","level":"...","questions":[{"question":"...","options":["A text","B text","C text","D text"],"correct_option_id":0,"explanation":"..."}]}
+correct_option_id must be an integer 0-3.`;
+  const user = `Topic: ${String(topic || "English").slice(0, 500)}\nLevel: ${level}\nLanguage of quiz content: ${language}\nOriginal teacher instruction: ${String(instruction || "").slice(0, 1600)}`;
+  const response = await fetch(`${OPENAI_API}/responses`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey()}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      model: model(),
+      reasoning: { effort: "medium" },
+      max_output_tokens: Math.max(2200, safeCount * 330),
+      input: [
+        { role: "system", content: [{ type: "input_text", text: system }] },
+        { role: "user", content: [{ type: "input_text", text: user }] }
+      ]
+    })
+  });
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`OpenAI quiz generation failed (${response.status}): ${body.slice(0, 500)}`);
+  }
+  const parsed = parseJson(outputText(await response.json()));
+  const questions = Array.isArray(parsed?.questions) ? parsed.questions : [];
+  if (questions.length !== safeCount) throw new Error(`Quiz generator returned ${questions.length}/${safeCount} questions`);
+  const normalized = questions.map((item, index) => {
+    const options = Array.isArray(item?.options) ? item.options.map(v => String(v || "").trim()) : [];
+    const correct = Number(item?.correct_option_id);
+    if (!String(item?.question || "").trim() || options.length !== 4 || options.some(v => !v) || !Number.isInteger(correct) || correct < 0 || correct > 3) {
+      throw new Error(`Invalid quiz question at position ${index + 1}`);
+    }
+    if (new Set(options.map(v => v.toLowerCase())).size !== 4) throw new Error(`Duplicate options at question ${index + 1}`);
+    return {
+      question: String(item.question).trim(),
+      options,
+      correct_option_id: correct,
+      explanation: String(item.explanation || "").trim()
+    };
+  });
+  return {
+    title: String(parsed?.title || `${topic} Quiz`).trim().slice(0, 120),
+    level: String(parsed?.level || level).trim().slice(0, 20),
+    questions: normalized
+  };
 }
