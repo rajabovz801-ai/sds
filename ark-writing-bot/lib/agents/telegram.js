@@ -146,7 +146,7 @@ export async function setupAgentWebhook(agentKey, webhookUrl, secretToken = null
   const token = getToken(agentKey);
   const payload = {
     url: webhookUrl,
-    allowed_updates: ["message"],
+    allowed_updates: ["message", "poll_answer"],
     drop_pending_updates: false
   };
   if (secretToken && /^[A-Za-z0-9_-]{1,256}$/.test(secretToken)) payload.secret_token = secretToken;
