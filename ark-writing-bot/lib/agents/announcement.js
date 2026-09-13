@@ -67,11 +67,14 @@ async function resolveTarget(text) {
     let score = 0;
     const words = title.split(" ").filter(Boolean);
     const isNumeric = /^\d+$/.test(title);
-    const explicitGroupPhrase = value.includes(`${title} guruh`) || value.includes(`${title} group`) || value.includes(`${title} guruhga`) || value.includes(`${title} guruhiga`);
+    const explicitGroupPhrase = value.includes(`${title} guruh`)
+      || value.includes(`${title} group`)
+      || value.includes(`${title} guruhga`)
+      || value.includes(`${title} guruhiga`);
 
     if (isNumeric && hasToken(value, title)) score = 120 + title.length;
-    else if (words.length >= 2 && value.includes(title)) score = 100 + title.length;
     else if (explicitGroupPhrase) score = 110 + title.length;
+    else if (words.length >= 2 && value.includes(title)) score = 100 + title.length;
     else if (!GENERIC_TARGET_WORDS.has(title) && hasToken(value, title)) score = 40 + title.length;
 
     if (score > 0) candidates.push({ target, score });
@@ -85,35 +88,53 @@ async function resolveTarget(text) {
   return { target: candidates[0].target, targets, ambiguous: false };
 }
 
+function normalizedText(text = "") {
+  return String(text).toLowerCase().replace(/[ʻ’`]/g, "'");
+}
+
 function looksLikeAnnouncement(text = "") {
-  const value = String(text).toLowerCase().replace(/[ʻ’`]/g, "'");
+  const value = normalizedText(text);
   const command = /(ogohlantir|xabar\s*ber|xabardor\s*qil|aytib\s*qo'?y|aytinglar|aytib\s*qo'yinglar|eslat|ma'?lum\s*qil)/i.test(value);
-  const event = /\b(test|quiz|imtihon|mock|dars)\b.{0,50}\b(bo'?ladi|o'?tkaziladi|boshlanadi|bor)\b/i.test(value)
-    || /\b(bo'?ladi|o'?tkaziladi|boshlanadi|bor)\b.{0,50}\b(test|quiz|imtihon|mock|dars)\b/i.test(value);
+  const event = /\b(test|quiz|imtihon|mock|dars)\b.{0,80}\b(bo'?ladi|o'?tkaziladi|boshlanadi|bor)\b/i.test(value)
+    || /\b(bo'?ladi|o'?tkaziladi|boshlanadi|bor)\b.{0,80}\b(test|quiz|imtihon|mock|dars)\b/i.test(value);
   return command || event;
+}
+
+function isExplicitQuizCreation(text = "") {
+  const value = normalizedText(text);
+  return /(quiz|test|mcq).{0,30}(tuz|yarat|tayyorla|qilib\s*ber|tashla)|(?:tuz|yarat|tayyorla).{0,30}(quiz|test|mcq)|\b\d{1,2}\s*ta\s*(?:quiz|test|savol)/i.test(value);
+}
+
+function hasWarningCommand(text = "") {
+  return /(ogohlantir|xabar\s*ber|aytib\s*qo['‘]?y|aytinglar|eslat|ma['‘]?lum\s*qil|xabardor\s*qil)/i.test(text);
 }
 
 function timeMentions(text = "") {
   const value = String(text);
+  const normalizedWhole = normalizedText(value);
+  const wholeHasEvent = /\b(test|quiz|imtihon|mock|dars)\b.{0,100}\b(bo'?ladi|o'?tkaziladi|boshlanadi|bor)\b/i.test(normalizedWhole)
+    || /\b(bo'?ladi|o'?tkaziladi|boshlanadi|bor)\b.{0,100}\b(test|quiz|imtihon|mock|dars)\b/i.test(normalizedWhole);
+  const matches = [...value.matchAll(/(?:soat\s*)?(\d{1,2})\s*[:.]\s*(\d{2})/gi)];
   const mentions = [];
-  const re = /(?:soat\s*)?(\d{1,2})\s*[:.]\s*(\d{2})/gi;
-  for (const match of value.matchAll(re)) {
+
+  for (const match of matches) {
     const hour = Number(match[1]);
     const minute = Number(match[2]);
     if (hour < 0 || hour > 23 || minute < 0 || minute > 59) continue;
+
     const start = match.index || 0;
     const end = start + match[0].length;
-    const around = value.slice(Math.max(0, start - 45), Math.min(value.length, end + 55)).toLowerCase().replace(/[ʻ’`]/g, "'");
-    const event = /(test|quiz|imtihon|mock|dars).{0,35}(bo'?ladi|o'?tkaziladi|boshlanadi|bor)/i.test(around)
-      || /(bo'?ladi|o'?tkaziladi|boshlanadi|bor).{0,35}(test|quiz|imtihon|mock|dars)/i.test(around);
+    const around = normalizedText(value.slice(Math.max(0, start - 55), Math.min(value.length, end + 70)));
+    const localEvent = /(test|quiz|imtihon|mock|dars).{0,50}(bo'?ladi|o'?tkaziladi|boshlanadi|bor)/i.test(around)
+      || /(bo'?ladi|o'?tkaziladi|boshlanadi|bor).{0,50}(test|quiz|imtihon|mock|dars)/i.test(around);
     const command = /(yubor|jo'?nat|xabar\s*ber|ogohlantir|eslat|aytib\s*qo'?y|aytinglar)/i.test(around);
+
     mentions.push({
       hour,
       minute,
       label: `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
       start,
-      around,
-      event,
+      event: localEvent || (matches.length === 1 && wholeHasEvent),
       command
     });
   }
@@ -121,7 +142,7 @@ function timeMentions(text = "") {
 }
 
 function eventSubject(text = "") {
-  const value = String(text).toLowerCase().replace(/[ʻ’`]/g, "'");
+  const value = normalizedText(text);
   const skill = value.match(/\b(grammar|reading|listening|writing|speaking|vocabulary|vocab)\b/i)?.[1];
   if (/\bimtihon\b/i.test(value)) return "imtihon";
   if (/\bmock\b/i.test(value)) return "mock test";
@@ -132,26 +153,38 @@ function eventSubject(text = "") {
 }
 
 function dayWord(text = "") {
-  const value = String(text).toLowerCase();
+  const value = normalizedText(text);
   if (/ertaga|tomorrow/.test(value)) return "Ertaga";
   if (/bugun|today/.test(value)) return "Bugun";
   return "Bugun";
 }
 
-function announcementText(text, eventTime = null) {
-  if (eventTime) {
-    const subject = eventSubject(text);
-    return `${dayWord(text)} soat ${eventTime.label} da ${subject} bo'ladi.\n\nIltimos, vaqtida tayyor bo'ling.`;
-  }
-
+function cleanAnnouncementBody(text = "") {
   let body = String(text || "").trim();
   body = body
     .replace(/\b\d+\s*(?:guruh(?:ga|iga)?|group(?:ga|iga)?)\b/ig, "")
     .replace(/\b(?:ogohlantir(?:ib)?(?:\s*qo['‘]?y(?:inglar)?)?|xabar\s*ber(?:inglar)?|xabardor\s*qil(?:inglar)?|aytib\s*qo['‘]?y(?:inglar)?|aytinglar|eslat(?:ib\s*qo['‘]?y(?:inglar)?)?|ma['‘]?lum\s*qil(?:inglar)?)\b/ig, "")
     .replace(/^\s*(?:ki|deb)\s+/i, "")
+    .replace(/^[\s,.;:—–-]+/, "")
+    .replace(/\s+([,.;!?])/g, "$1")
     .replace(/\s{2,}/g, " ")
     .trim();
-  return body || "Muhim e'lon bor. Iltimos, guruhdagi xabarni ko'rib chiqing.";
+  if (body) body = body.charAt(0).toUpperCase() + body.slice(1);
+  return body;
+}
+
+function announcementText(text, eventTime = null) {
+  if (eventTime) {
+    return `${dayWord(text)} soat ${eventTime.label} da ${eventSubject(text)} bo'ladi.\n\nIltimos, vaqtida tayyor bo'ling.`;
+  }
+  return cleanAnnouncementBody(text) || "Muhim e'lon bor. Iltimos, guruhdagi xabarni ko'rib chiqing.";
+}
+
+function announcementHtml(text, eventTime = null) {
+  if (eventTime) {
+    return `${html(dayWord(text))} soat <b>${html(eventTime.label)}</b> da ${html(eventSubject(text))} bo'ladi.\n\n<i>Iltimos, vaqtida tayyor bo'ling.</i>`;
+  }
+  return html(announcementText(text, null));
 }
 
 function localDueIso(hour, minute, text = "") {
@@ -175,10 +208,7 @@ export async function tryHandleStaffAnnouncement(incoming) {
   if (!raw || !looksLikeAnnouncement(raw)) return false;
   if (!/(guruh|group|909|ielts|cefr|404)/i.test(raw)) return false;
 
-  // Explicit quiz-creation commands remain quiz commands, not announcements.
-  const creation = /(quiz|test|mcq).{0,25}(tuz|yarat|tayyorla|qilib\s*ber|tashla)|(?:tuz|yarat|tayyorla).{0,25}(quiz|test|mcq)|\b\d{1,2}\s*ta\s*(?:quiz|test|savol)/i.test(raw);
-  const warning = /(ogohlantir|xabar\s*ber|aytib\s*qo['‘]?y|aytinglar|eslat|ma['‘]?lum\s*qil|xabardor\s*qil)/i.test(raw);
-  if (creation && !warning) return false;
+  if (isExplicitQuizCreation(raw) && !hasWarningCommand(raw)) return false;
 
   const matched = await resolveTarget(raw);
   if (!matched.target) {
@@ -194,13 +224,14 @@ export async function tryHandleStaffAnnouncement(incoming) {
   const times = timeMentions(raw);
   const eventTime = times.find(item => item.event) || null;
   const sendTime = times.find(item => !item.event && item.command) || null;
-  const message = announcementText(raw, eventTime);
+  const plainMessage = announcementText(raw, eventTime);
+  const richMessage = announcementHtml(raw, eventTime);
   const target = matched.target;
 
   if (sendTime) {
     const dueAt = localDueIso(sendTime.hour, sendTime.minute, raw);
     if (new Date(dueAt).getTime() > Date.now() + 20_000) {
-      await enqueueAnnouncement(target.id, `📢 Eslatma\n\n${message}`, dueAt);
+      await enqueueAnnouncement(target.id, `📢 Eslatma\n\n${plainMessage}`, dueAt);
       await telegram("sendMessage", {
         chat_id: Number(incoming.chatId),
         text: `🧸 <b>${html(target.title)}</b> guruhiga e'lonni <b>${sendTime.label}</b> ga rejaladim.${eventTime ? `\n<i>${html(eventTime.label)} — ${html(eventSubject(raw))} vaqti.</i>` : ""}`,
@@ -212,7 +243,7 @@ export async function tryHandleStaffAnnouncement(incoming) {
 
   await telegram("sendMessage", {
     chat_id: Number(target.chat_id),
-    text: `📢 <b>Eslatma</b>\n\n${html(message).replace(/\n/g, "\n")} `,
+    text: `📢 <b>Eslatma</b>\n\n${richMessage}`,
     parse_mode: "HTML"
   });
   await telegram("sendMessage", {
