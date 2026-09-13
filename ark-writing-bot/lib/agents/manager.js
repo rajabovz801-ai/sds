@@ -6,6 +6,7 @@ import {
 } from "../tracker.js";
 import { AGENTS, stripBotMentions } from "./config.js";
 import { tryHandleQuizRequest, tryHandleStaffAssignment } from "./assignment-workflow-v2.js";
+import { tryHandleStaffAnnouncement } from "./announcement.js";
 import { tryHandleLocalQuizPreview, tryHandleLocalQuizResults } from "./quiz-preview.js";
 import { runAgent } from "./openai.js";
 import { sendAgentMessage } from "./telegram.js";
@@ -134,6 +135,10 @@ export async function handleStaffManagerMessage(incoming) {
   }
 
   try {
+    if (await tryHandleStaffAnnouncement(incoming)) {
+      await remember(incoming, history, instruction, "Announcement/reminder workflow handled the request without creating a quiz.");
+      return;
+    }
     if (await tryHandleLocalQuizResults(incoming)) {
       await remember(incoming, history, instruction, "ARK Analyst returned tracked quiz results.");
       return;
