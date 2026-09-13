@@ -26,6 +26,7 @@ export async function GET(request) {
       url: webhookUrl,
       allowed_updates: [
         "message",
+        "poll_answer",
         "business_connection",
         "business_message",
         "edited_business_message",
@@ -43,6 +44,7 @@ export async function GET(request) {
     return Response.json({
       ok: true,
       webhook_url: webhookUrl,
+      quiz_answers: true,
       telegram: {
         url: info.url,
         pending_update_count: info.pending_update_count,

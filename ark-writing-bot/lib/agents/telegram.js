@@ -38,13 +38,64 @@ function chunks(text, max = 3800) {
   return out;
 }
 
+function escapeHtml(value = "") {
+  return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function professionalHtml(text = "") {
+  const lines = String(text || "").split("\n");
+  let firstDone = false;
+  return lines.map(raw => {
+    const line = escapeHtml(raw);
+    const trimmed = raw.trim();
+    if (!trimmed) return "";
+    if (!firstDone) {
+      firstDone = true;
+      return `<b>${line}</b>`;
+    }
+    const label = trimmed.match(/^(Overall|Task Achievement|Task Response|Coherence(?: &amp; | & )?Cohesion|Lexical Resource|Grammar(?: Range &amp; Accuracy| Range & Accuracy)?|Deadline|Pass|Score|Natija|Topshirdi|Topshirmadi|Bajardi|Bajarmadi|Hali yubormaganlar|Keyingi Writing uchun asosiy fokus|Eng muhim \d+ ta xato)\s*:/i);
+    if (label) {
+      const colon = raw.indexOf(":");
+      return `<b>${escapeHtml(raw.slice(0, colon + 1))}</b>${escapeHtml(raw.slice(colon + 1))}`;
+    }
+    if (/^(Sabab|Izoh|Fokus):/i.test(trimmed)) {
+      const colon = raw.indexOf(":");
+      return `<i>${escapeHtml(raw.slice(0, colon + 1))}</i>${escapeHtml(raw.slice(colon + 1))}`;
+    }
+    if (/^(Umuman|Bu yerda|Hozir|Avval|Keyin|Batafsil)/i.test(trimmed) && trimmed.length < 220) {
+      return `<i>${line}</i>`;
+    }
+    return line;
+  }).join("\n");
+}
+
 export async function sendAgentMessage(agentKey, chatId, text) {
   const token = getToken(agentKey);
   let result = null;
   for (const part of chunks(text)) {
-    result = await callWithToken(token, "sendMessage", { chat_id: chatId, text: part });
+    result = await callWithToken(token, "sendMessage", {
+      chat_id: chatId,
+      text: professionalHtml(part),
+      parse_mode: "HTML",
+      disable_web_page_preview: true
+    });
   }
   return result;
+}
+
+export async function sendAgentHtml(agentKey, chatId, htmlText) {
+  const token = getToken(agentKey);
+  return callWithToken(token, "sendMessage", {
+    chat_id: chatId,
+    text: String(htmlText || "").slice(0, 4000),
+    parse_mode: "HTML",
+    disable_web_page_preview: true
+  });
+}
+
+export async function sendAgentQuizPoll(agentKey, payload) {
+  const token = getToken(agentKey);
+  return callWithToken(token, "sendPoll", payload);
 }
 
 export async function sendAgentChatAction(agentKey, chatId, action = "typing") {

@@ -8,12 +8,20 @@ import { handleCheckerWritingSubmission } from "./checker-writing.js";
 import { runAgent } from "./openai.js";
 import { sendAgentMessage } from "./telegram.js";
 
+function looksLikeAssignmentRouting(message) {
+  const text = String(message?.caption || message?.text || "").toLowerCase().replace(/[ʻ’`]/g, "'");
+  return /(guruh|group|uyga\s*vazifa|homework|deadline|gacha|yubor|jo'nat|send)/i.test(text);
+}
+
 export async function handleAgentUpdate(agentKey, update) {
   const message = update?.message;
   if (!message?.chat?.id) return;
   if (message.from?.is_bot) return;
 
-  if (agentKey === "checker" && isStaffChat(message)) {
+  // Specialist bots are staff-only in groups. Student-group chatter, mentions and side conversations stay silent.
+  if (isGroupMessage(message) && !isStaffChat(message)) return;
+
+  if (agentKey === "checker" && isStaffChat(message) && !looksLikeAssignmentRouting(message)) {
     const handled = await handleCheckerWritingSubmission(message);
     if (handled) return;
   }
