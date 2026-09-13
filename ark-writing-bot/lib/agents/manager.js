@@ -5,7 +5,7 @@ import {
   savePersistentHistory
 } from "../tracker.js";
 import { AGENTS, stripBotMentions } from "./config.js";
-import { tryHandleQuizRequest, tryHandleStaffAssignment } from "./assignment-workflow.js";
+import { tryHandleQuizRequest, tryHandleStaffAssignment } from "./assignment-workflow-v2.js";
 import { tryHandleLocalQuizPreview } from "./quiz-preview.js";
 import { runAgent } from "./openai.js";
 import { sendAgentMessage } from "./telegram.js";
