@@ -6,7 +6,7 @@ import {
 } from "../tracker.js";
 import { AGENTS, stripBotMentions } from "./config.js";
 import { tryHandleQuizRequest, tryHandleStaffAssignment } from "./assignment-workflow-v2.js";
-import { tryHandleLocalQuizPreview } from "./quiz-preview.js";
+import { tryHandleLocalQuizPreview, tryHandleLocalQuizResults } from "./quiz-preview.js";
 import { runAgent } from "./openai.js";
 import { sendAgentMessage } from "./telegram.js";
 
@@ -17,6 +17,7 @@ function detectRoute(text = "") {
   const operations = /\b(homework|vazifa|deadline|reminder|attendance|davomat|coin|streak|shop|retry|topshirm|yubor)\b/.test(value);
   const analyst = /\b(report|natija|result|progress|leaderboard|statistika|analysis|analiz|bajargan|bajarmagan|qilmagan|sust)\b/.test(value) || /guruh.*(holat|ko['‘]?r|tekshir)/.test(value);
   const teacher = /\b(grammar|vocab|vocabulary|reading|listening|tushuntir|explain|mavzu|lesson|dars)\b/.test(value);
+  if (quiz && analyst) return ["analyst"];
   if (quiz) return ["teacher", "operations"];
   if (checker) return ["checker"];
   if (operations && analyst) return ["operations", "analyst"];
@@ -133,8 +134,12 @@ export async function handleStaffManagerMessage(incoming) {
   }
 
   try {
+    if (await tryHandleLocalQuizResults(incoming)) {
+      await remember(incoming, history, instruction, "ARK Analyst returned tracked quiz results.");
+      return;
+    }
     if (await tryHandleLocalQuizPreview(incoming)) {
-      await remember(incoming, history, instruction, "Interactive local quiz preview handled without persistent storage.");
+      await remember(incoming, history, instruction, "Interactive local quiz is tracked and non-anonymous.");
       return;
     }
     if (await tryHandleQuizRequest(incoming)) {
