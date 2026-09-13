@@ -110,6 +110,48 @@ function formatSendTime(iso) {
   }).format(new Date(iso));
 }
 
+function speakingBlocks(raw = "", topic = "Teacher") {
+  let value = String(raw || "")
+    .replace(/\r/g, "\n")
+    .replace(/\*\*/g, "")
+    .replace(/^#+\s*/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  value = value.replace(/^🎤\s*IELTS\s+Speaking\s+Part\s*1\s*[—-]\s*[^\d]+(?=\s*1\.)/i, "").trim();
+
+  const entries = [];
+  const re = /(?:^|\s)(\d{1,2})\.\s*(.*?)(?=(?:\s\d{1,2}\.\s)|$)/g;
+  let match;
+  while ((match = re.exec(value)) !== null) {
+    const number = Number(match[1]);
+    const block = clean(match[2]);
+    const parts = block.split(/\s*(?:Sample\s*answer|Sample answer|Answer|Javob)\s*:\s*/i);
+    const question = clean(parts.shift() || "").replace(/^Question\s*:\s*/i, "");
+    const answer = clean(parts.join(" "));
+    if (question && answer) entries.push({ number, question, answer });
+  }
+
+  if (!entries.length) {
+    return {
+      html: `<b>🎤 IELTS Speaking Part 1 — ${html(topic)}</b>\n\n${html(value)}`,
+      plain: `🎤 IELTS Speaking Part 1 — ${topic}\n\n${value}`
+    };
+  }
+
+  const htmlBlocks = entries.map(item =>
+    `<b>${item.number}. ${html(item.question)}</b>\n<b>Sample answer:</b>\n${html(item.answer)}`
+  );
+  const plainBlocks = entries.map(item =>
+    `${item.number}. ${item.question}\nSample answer:\n${item.answer}`
+  );
+
+  return {
+    html: `<b>🎤 IELTS Speaking Part 1 — ${html(topic)}</b>\n\n${htmlBlocks.join("\n\n")}`,
+    plain: `🎤 IELTS Speaking Part 1 — ${topic}\n\n${plainBlocks.join("\n\n")}`
+  };
+}
+
 export async function tryHandleSpeakingContentRequest(incoming) {
   const text = incoming?.message?.text || incoming?.message?.caption || "";
   if (!isSpeakingContentRequest(text)) return false;
@@ -137,10 +179,12 @@ export async function tryHandleSpeakingContentRequest(incoming) {
     `For each question, write one Band ${band} sample answer with exactly ${sentenceCount} complete sentences.`,
     "Use natural English suitable for that band. Keep answers realistic and easy for students to learn from.",
     "Output ONLY the finished student material. Do not mention the staff instruction, target group, scheduling, homework workflow, files, replies, or administration.",
-    `Use this plain-text format:\n🎤 IELTS Speaking Part 1 — ${topic}\n\n1. Question\nSample answer: ...\n\n2. Question\nSample answer: ...`
+    `Use exactly this structure:\n🎤 IELTS Speaking Part 1 — ${topic}\n\n1. Question\nSample answer: four-sentence answer\n\n2. Question\nSample answer: four-sentence answer.`,
+    "Keep every numbered question and its sample answer clearly separated."
   ].join("\n");
 
-  const material = clean(await runAgent("teacher", generationInstruction, "This text will be sent directly to students, so it must be polished and student-facing only.")).replace(/\s*\n\s*/g, "\n");
+  const generated = await runAgent("teacher", generationInstruction, "This text will be sent directly to students, so it must be polished and student-facing only.");
+  const material = speakingBlocks(generated, topic);
   const future = new Date(sendAt).getTime() > Date.now() + 30_000;
 
   if (future) {
@@ -152,7 +196,7 @@ export async function tryHandleSpeakingContentRequest(incoming) {
         target_title: matched.target.title,
         created_by: Number(incoming.message?.from?.id || 0) || null,
         title: `Speaking Part 1 — ${topic}`,
-        body: material,
+        body: material.plain,
         assignment_type: "content",
         status: "scheduled",
         send_at: sendAt,
@@ -161,7 +205,15 @@ export async function tryHandleSpeakingContentRequest(incoming) {
         source_chat_id: null,
         source_message_id: null,
         requires_submission: false,
-        payload: { generated_by: "teacher", content_kind: "speaking_part_1", topic, band, question_count: count, sentence_count: sentenceCount }
+        payload: {
+          generated_by: "teacher",
+          content_kind: "speaking_part_1",
+          topic,
+          band,
+          question_count: count,
+          sentence_count: sentenceCount,
+          telegram_html: material.html
+        }
       }
     });
     await telegram("sendMessage", {
@@ -174,7 +226,8 @@ export async function tryHandleSpeakingContentRequest(incoming) {
 
   await telegram("sendMessage", {
     chat_id: Number(matched.target.chat_id),
-    text: material,
+    text: material.html,
+    parse_mode: "HTML",
     disable_web_page_preview: true
   });
   await telegram("sendMessage", {
