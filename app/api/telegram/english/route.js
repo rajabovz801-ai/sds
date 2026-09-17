@@ -84,8 +84,10 @@ async function sendFirstNamePrompt(chatId) {
     text: [
       "🏛 <b>Ark Education | English</b>",
       "",
+      "",
       "<b>English platformasiga xush kelibsiz!</b>",
       "Platformadan foydalanishni boshlash uchun qisqa ro‘yxatdan o‘ting.",
+      "",
       "",
       "👤 <b>Ismingizni yozing.</b>",
       "<i>Masalan: Rustam</i>",
@@ -100,7 +102,9 @@ async function sendSurnamePrompt(chatId, firstName) {
     text: [
       "✅ <b>Ism qabul qilindi.</b>",
       "",
+      "",
       `👤 ${firstName}`,
+      "",
       "",
       "<b>Familiyangizni yozing.</b>",
       "<i>Masalan: Usmonov</i>",
@@ -115,8 +119,10 @@ async function sendConfirmation(chatId, firstName, lastName) {
     text: [
       "👤 <b>Ma’lumotlaringizni tekshiring</b>",
       "",
+      "",
       `<b>Ism:</b> ${firstName}`,
       `<b>Familiya:</b> ${lastName}`,
+      "",
       "",
       "Hammasi to‘g‘ri bo‘lsa, tasdiqlang.",
     ].join("\n"),
@@ -137,16 +143,22 @@ async function sendPlatformEntry(chatId, student, platformToken, justRegistered 
     ? [
         "🎉 <b>Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi!</b>",
         "",
-        fullName ? `👤 <b>${fullName}</b>` : "",
+        "",
+        ...(fullName ? [`👤 <b>${fullName}</b>`, "", ""] : []),
         "Siz endi <b>Ark Education | English</b> platformasidan foydalanishingiz mumkin.",
         "",
+        "",
         "Quyidagi tugma orqali platformaga kiring.",
-      ].filter(Boolean).join("\n")
+      ].join("\n")
     : [
         "🏛 <b>Ark Education | English</b>",
         "",
+        "",
         fullName ? `👋 Xush kelibsiz, <b>${fullName}</b>!` : "👋 Xush kelibsiz!",
+        "",
+        "",
         "Dashboard, video darslar, testlar, kitoblar va reyting platforma ichida.",
+        "",
         "",
         "Quyidagi tugma orqali davom eting.",
       ].join("\n");
