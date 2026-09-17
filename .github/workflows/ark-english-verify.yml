@@ -3,6 +3,7 @@ name: ark-english-verify
 on:
   push:
     branches:
+      - main
       - feat/ark-english-telegram-registration
   pull_request:
 
