@@ -19,6 +19,31 @@ test('Teddy uses Ark Education | English registration copy', () => {
   assert.match(source, /english_reg_edit/);
 });
 
+test('registration is clean and does not use Telegram ForceReply', () => {
+  const source = readRoute();
+  assert.doesNotMatch(source, /force_reply/);
+  assert.match(source, /telegram_registration_sessions/);
+  assert.match(source, /first_name/);
+  assert.match(source, /last_name/);
+});
+
+test('registration copy is polished and concise', () => {
+  const source = readRoute();
+  assert.match(source, /Platformadan foydalanishni boshlash uchun qisqa ro‘yxatdan o‘ting/);
+  assert.match(source, /Ismingizni yozing\./);
+  assert.match(source, /Familiyangizni yozing\./);
+  assert.match(source, /Ma’lumotlaringizni tekshiring/);
+  assert.match(source, /Siz endi <b>Ark Education \| English<\/b> platformasidan foydalanishingiz mumkin/);
+});
+
+test('Rustam Usmonov can bootstrap the first active owner admin', () => {
+  const source = readRoute();
+  assert.match(source, /Rustam/i);
+  assert.match(source, /Usmonov/i);
+  assert.match(source, /admins/);
+  assert.match(source, /owner/);
+});
+
 test('private users are kept out of the legacy AI route', () => {
   const source = readRoute();
   assert.match(source, /AI private replies are intentionally disabled/);
