@@ -28,3 +28,9 @@ test('private users are kept out of the legacy AI route', () => {
 test('Telegram setup points Teddy webhook to the English entry route', () => {
   assert.match(setup, /\/api\/telegram\/english/);
 });
+
+test('Teddy registration does not depend on BOT_REGISTRATION_SECRET at runtime', () => {
+  const source = readRoute();
+  assert.doesNotMatch(source, /BOT_REGISTRATION_SECRET/);
+  assert.match(source, /performStudentAccess/);
+});
