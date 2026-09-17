@@ -1,5 +1,6 @@
 import { waitUntil } from "@vercel/functions";
 import { telegram } from "../../../../ark-writing-bot/lib/telegram.js";
+import { performStudentAccess } from "../../../../lib/arkEnglishStudentAccess";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -19,21 +20,10 @@ function isPrivateMessage(message) {
   return message?.chat?.type === "private";
 }
 
-async function studentAccess(origin, payload) {
-  const secret = (process.env.BOT_REGISTRATION_SECRET || "").trim();
-  if (!secret) throw new Error("BOT_REGISTRATION_SECRET is missing");
-
-  const response = await fetch(`${origin}/api/bot/student-access`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-ark-bot-secret": secret,
-    },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data?.error || "Student access xatoligi");
-  return data;
+async function studentAccess(_origin, payload) {
+  const result = await performStudentAccess(payload);
+  if (result.status >= 400) throw new Error(result.data?.error || "Student access xatoligi");
+  return result.data;
 }
 
 async function sendFirstNamePrompt(chatId) {
