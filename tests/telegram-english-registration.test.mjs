@@ -36,12 +36,12 @@ test('registration copy is polished and concise', () => {
   assert.match(source, /Siz endi <b>Ark Education \| English<\/b> platformasidan foydalanishingiz mumkin/);
 });
 
-test('Rustam Usmonov can bootstrap the first active owner admin', () => {
+test('Rustam Usmonov can bootstrap the first active super admin', () => {
   const source = readRoute();
   assert.match(source, /Rustam/i);
   assert.match(source, /Usmonov/i);
   assert.match(source, /admins/);
-  assert.match(source, /owner/);
+  assert.match(source, /super_admin/);
 });
 
 test('private users are kept out of the legacy AI route', () => {
