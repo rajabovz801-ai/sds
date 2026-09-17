@@ -36,6 +36,12 @@ test('registration copy is polished and concise', () => {
   assert.match(source, /Siz endi <b>Ark Education \| English<\/b> platformasidan foydalanishingiz mumkin/);
 });
 
+test('registration messages have generous spacing between content blocks', () => {
+  const source = readRoute();
+  const doubleBlankBlocks = source.match(/"",\n\s*"",/g) || [];
+  assert.ok(doubleBlankBlocks.length >= 4, 'registration copy should use double blank lines between major blocks');
+});
+
 test('Rustam Usmonov can bootstrap the first active super admin', () => {
   const source = readRoute();
   assert.match(source, /Rustam/i);
