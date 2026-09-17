@@ -21,7 +21,7 @@ async function telegram(method, payload) {
 export async function GET(request) {
   try {
     const url = new URL(request.url);
-    const webhookUrl = `${url.origin}/api/telegram/manager`;
+    const webhookUrl = `${url.origin}/api/telegram/english`;
     const payload = {
       url: webhookUrl,
       allowed_updates: [
@@ -45,6 +45,8 @@ export async function GET(request) {
     return Response.json({
       ok: true,
       webhook_url: webhookUrl,
+      ark_english_entry: true,
+      private_ai: false,
       quiz_answers: true,
       callback_queries: true,
       telegram: {
