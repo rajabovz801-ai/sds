@@ -1,9 +1,10 @@
-import { randomInt, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { hashAccessCode } from '@/lib/auth/codes';
 import { getServiceSupabase } from '@/lib/supabase/server';
 
 const CODE_TTL_MINUTES = 15;
+const PLATFORM_TOKEN_TTL_MINUTES = 10;
 const STUDENT_SELECT = 'id,telegram_id,telegram_username,first_name,last_name,status';
 // Vercel runtime reads BOT_REGISTRATION_SECRET for bot-to-site authentication.
 
@@ -66,6 +67,39 @@ async function issueCode(studentId: string) {
   throw new Error('Kirish kodi yaratilmadi. Qayta urinib ko‘ring.');
 }
 
+async function issuePlatformToken(studentId: string) {
+  const supabase = getServiceSupabase();
+  const now = new Date();
+  const token = randomBytes(32).toString('hex');
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const expiresAt = new Date(now.getTime() + PLATFORM_TOKEN_TTL_MINUTES * 60_000).toISOString();
+
+  await supabase
+    .from('ark_english_platform_tokens')
+    .update({ used_at: now.toISOString() })
+    .eq('student_id', studentId)
+    .is('used_at', null);
+
+  const { error } = await supabase.from('ark_english_platform_tokens').insert({
+    student_id: studentId,
+    token_hash: tokenHash,
+    expires_at: expiresAt,
+    used_at: null,
+  });
+  if (error) throw error;
+  return { platformToken: token, platformExpiresAt: expiresAt };
+}
+
+function publicStudent(student: any) {
+  return {
+    id: student.id,
+    firstName: student.first_name,
+    lastName: student.last_name,
+    username: student.telegram_username,
+    status: student.status,
+  };
+}
+
 export async function POST(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: 'Unauthorized bot request' }, { status: 401 });
@@ -84,16 +118,7 @@ export async function POST(request: NextRequest) {
     if (action === 'profile') {
       const student = await findStudent(telegramId);
       if (!student) return NextResponse.json({ registered: false });
-      return NextResponse.json({
-        registered: true,
-        student: {
-          id: student.id,
-          firstName: student.first_name,
-          lastName: student.last_name,
-          username: student.telegram_username,
-          status: student.status,
-        },
-      });
+      return NextResponse.json({ registered: true, student: publicStudent(student) });
     }
 
     if (action === 'register') {
@@ -140,16 +165,12 @@ export async function POST(request: NextRequest) {
       }
 
       const access = await issueCode(student.id);
+      const platform = await issuePlatformToken(student.id);
       return NextResponse.json({
         registered: true,
-        student: {
-          id: student.id,
-          firstName: student.first_name,
-          lastName: student.last_name,
-          username: student.telegram_username,
-          status: student.status,
-        },
+        student: publicStudent(student),
         ...access,
+        ...platform,
       });
     }
 
@@ -162,17 +183,19 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Avval ro‘yxatdan o‘ting.', registered: false }, { status: 404 });
       }
       const access = await issueCode(student.id);
-      return NextResponse.json({
-        registered: true,
-        student: {
-          id: student.id,
-          firstName: student.first_name,
-          lastName: student.last_name,
-          username: student.telegram_username,
-          status: student.status,
-        },
-        ...access,
-      });
+      return NextResponse.json({ registered: true, student: publicStudent(student), ...access });
+    }
+
+    if (action === 'platform') {
+      const student = await findStudent(telegramId);
+      if (student?.status === 'blocked') {
+        return NextResponse.json({ error: 'Profil admin tomonidan bloklangan.', registered: true, blocked: true }, { status: 403 });
+      }
+      if (!student || student.status !== 'active') {
+        return NextResponse.json({ error: 'Avval ro‘yxatdan o‘ting.', registered: false }, { status: 404 });
+      }
+      const platform = await issuePlatformToken(student.id);
+      return NextResponse.json({ registered: true, student: publicStudent(student), ...platform });
     }
 
     return NextResponse.json({ error: 'Noma’lum action.' }, { status: 400 });
