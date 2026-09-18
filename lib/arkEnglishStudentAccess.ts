@@ -32,6 +32,44 @@ async function findStudent(telegramId: string) {
   return data;
 }
 
+
+async function isEnglishEnrolled(studentId: string) {
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase
+    .from('ark_english_students')
+    .select('student_id,active')
+    .eq('student_id', studentId)
+    .eq('active', true)
+    .maybeSingle();
+  if (error) throw error;
+  return Boolean(data);
+}
+
+async function enrollEnglishStudent(student: any) {
+  const supabase = getServiceSupabase();
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from('ark_english_students')
+    .upsert({
+      student_id: student.id,
+      telegram_id: student.telegram_id,
+      source: 'teddy_bot',
+      active: true,
+      last_seen_at: now,
+    }, { onConflict: 'student_id' });
+  if (error) throw error;
+}
+
+async function touchEnglishEnrollment(studentId: string) {
+  const supabase = getServiceSupabase();
+  const { error } = await supabase
+    .from('ark_english_students')
+    .update({ last_seen_at: new Date().toISOString() })
+    .eq('student_id', studentId)
+    .eq('active', true);
+  if (error) throw error;
+}
+
 async function issueCode(studentId: string) {
   const supabase = getServiceSupabase();
   const now = new Date();
@@ -102,6 +140,8 @@ export async function performStudentAccess(body: any): Promise<StudentAccessResu
   if (action === 'profile') {
     const student = await findStudent(telegramId);
     if (!student) return { status: 200, data: { registered: false } };
+    const enrolled = await isEnglishEnrolled(student.id);
+    if (!enrolled) return { status: 200, data: { registered: false } };
     return { status: 200, data: { registered: true, student: publicStudent(student) } };
   }
 
@@ -148,6 +188,7 @@ export async function performStudentAccess(body: any): Promise<StudentAccessResu
       student = data;
     }
 
+    await enrollEnglishStudent(student);
     const access = await issueCode(student.id);
     const platform = await issuePlatformToken(student.id);
     return {
@@ -166,9 +207,10 @@ export async function performStudentAccess(body: any): Promise<StudentAccessResu
     if (student?.status === 'blocked') {
       return { status: 403, data: { error: 'Profil admin tomonidan bloklangan.', registered: true, blocked: true } };
     }
-    if (!student || student.status !== 'active') {
-      return { status: 404, data: { error: 'Avval ro‘yxatdan o‘ting.', registered: false } };
+    if (!student || student.status !== 'active' || !(await isEnglishEnrolled(student.id))) {
+      return { status: 404, data: { error: 'Avval Ark Education | English botda ro‘yxatdan o‘ting.', registered: false } };
     }
+    await touchEnglishEnrollment(student.id);
     const access = await issueCode(student.id);
     return { status: 200, data: { registered: true, student: publicStudent(student), ...access } };
   }
@@ -178,9 +220,10 @@ export async function performStudentAccess(body: any): Promise<StudentAccessResu
     if (student?.status === 'blocked') {
       return { status: 403, data: { error: 'Profil admin tomonidan bloklangan.', registered: true, blocked: true } };
     }
-    if (!student || student.status !== 'active') {
-      return { status: 404, data: { error: 'Avval ro‘yxatdan o‘ting.', registered: false } };
+    if (!student || student.status !== 'active' || !(await isEnglishEnrolled(student.id))) {
+      return { status: 404, data: { error: 'Avval Ark Education | English botda ro‘yxatdan o‘ting.', registered: false } };
     }
+    await touchEnglishEnrollment(student.id);
     const platform = await issuePlatformToken(student.id);
     return { status: 200, data: { registered: true, student: publicStudent(student), ...platform } };
   }
