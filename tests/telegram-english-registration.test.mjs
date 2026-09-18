@@ -71,3 +71,11 @@ test('Teddy registration does not depend on BOT_REGISTRATION_SECRET at runtime',
   assert.doesNotMatch(source, /BOT_REGISTRATION_SECRET/);
   assert.match(source, /performStudentAccess/);
 });
+
+
+test('English registration uses a dedicated enrollment marker', () => {
+  const helper = fs.readFileSync(new URL('../lib/arkEnglishStudentAccess.ts', import.meta.url), 'utf8');
+  assert.match(helper, /ark_english_students/);
+  assert.match(helper, /enrollEnglishStudent/);
+  assert.match(helper, /isEnglishEnrolled/);
+});
