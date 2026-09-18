@@ -36,10 +36,16 @@ test('registration copy is polished and concise', () => {
   assert.match(source, /Siz endi <b>Ark Education \| English<\/b> platformasidan foydalanishingiz mumkin/);
 });
 
-test('registration messages have generous spacing between content blocks', () => {
+test('registration messages use Tarix-style compact spacing', () => {
   const source = readRoute();
-  const doubleBlankBlocks = source.match(/"",\n\s*"",/g) || [];
-  assert.ok(doubleBlankBlocks.length >= 4, 'registration copy should use double blank lines between major blocks');
+  assert.doesNotMatch(source, /"",\n\s*"",/);
+  assert.match(source, /Quyidagi 🚀 <b>Platformaga kirish<\/b> tugmasi orqali davom eting 👇/);
+});
+
+test('registered user copy says Practice instead of Tests', () => {
+  const source = readRoute();
+  assert.match(source, /Dashboard, video darslar, practice, kitoblar va reytingni platforma ichida ko‘rishingiz mumkin/);
+  assert.doesNotMatch(source, /Dashboard, video darslar, testlar/);
 });
 
 test('Rustam Usmonov can bootstrap the first active super admin', () => {
