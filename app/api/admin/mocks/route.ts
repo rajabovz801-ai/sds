@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       mockIds.length
         ? supabase.from('attempts').select('id,mock_id,student_id,status,started_at,completed_at,overall_score,overall_band').eq('attempt_type', 'mock').in('mock_id', mockIds).order('started_at', { ascending: false })
         : Promise.resolve({ data: [], error: null }),
-      supabase.from('students').select('id,first_name,last_name,status').order('first_name').order('last_name'),
+      supabase.from('students').select('id,first_name,last_name,status,exam_platform_enabled').order('first_name').order('last_name'),
     ]);
     if (testsResult.error) throw testsResult.error;
     if (codesResult.error) throw codesResult.error;
