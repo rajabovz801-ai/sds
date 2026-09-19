@@ -39,7 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const { data: student, error: studentError } = await supabase
       .from('students')
-      .select('id,first_name,last_name,status')
+      .select('id,first_name,last_name,status,exam_platform_enabled')
       .eq('telegram_id', admin.telegram_id)
       .eq('status', 'active')
       .limit(1)
@@ -47,6 +47,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (studentError) throw studentError;
     if (!student) {
       return NextResponse.json({ error: 'Admin preview student profili topilmadi.' }, { status: 409 });
+    }
+    if (student.exam_platform_enabled === true) {
+      return NextResponse.json({ error: 'Admin preview profili real exam student sifatida belgilangan. Xavfsizlik uchun preview to‘xtatildi.' }, { status: 409 });
     }
 
     const { data: previousAttempts, error: previousError } = await supabase
