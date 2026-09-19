@@ -131,9 +131,10 @@ export async function POST(request: NextRequest) {
 
     const { data: student, error: studentError } = await supabase
       .from('students')
-      .select('id,telegram_id,telegram_username,first_name,last_name,status')
+      .select('id,telegram_id,telegram_username,first_name,last_name,status,exam_platform_enabled')
       .eq('id', access.student_id)
       .eq('status', 'active')
+      .eq('exam_platform_enabled', true)
       .maybeSingle();
 
     if (studentError) throw studentError;
