@@ -13,7 +13,7 @@
     radial-gradient(circle at 7% 84%,rgba(255,142,112,.18),transparent 28%),
     radial-gradient(circle at 91% 5%,rgba(64,120,172,.13),transparent 25%),
     linear-gradient(135deg,#f9f3e8 0%,var(--auth-cream) 55%,#efe4d2 100%);
-  font-family:"Avenir Next","Segoe UI Variable","SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  font-family:var(--font-poppins),Poppins,"Segoe UI",Arial,sans-serif;
   -webkit-font-smoothing:antialiased;
 }
 .authRoot:before,.authRoot:after{content:"";position:absolute;border:1px solid rgba(16,35,63,.07);border-radius:50%;pointer-events:none}
@@ -67,3 +67,134 @@
 @media(max-width:620px){.authTopbar{width:calc(100% - 24px);height:74px}.authRoot .arkBrandMark{width:43px;height:43px;border-radius:14px}.authRoot .arkBrandText strong{font-size:13px}.authRoot .arkBrandText small{display:none}.authBack{font-size:0;width:42px;padding:0;justify-content:center}.authMain{width:calc(100% - 28px);padding:30px 0 45px}.authIntro h2{font-size:clamp(42px,13vw,57px)}.authIntro>p{font-size:13px}.authSteps{display:grid;grid-template-columns:1fr 1fr}.authSteps>div{min-width:0}.authSteps>div:last-child{display:none}.authWorkspacePreview{width:100%;margin-top:28px;padding:12px;transform:none}.authPreviewBody{grid-template-columns:120px 1fr}.authPreviewScore{padding:15px}.authPreviewScore strong{font-size:28px}.authCard{padding:35px 22px 22px;border-radius:27px}.authForm h1{font-size:31px}.authInputShell{height:61px}.authInputShell input{font-size:22px}}
 @media(max-width:420px){.authSteps{grid-template-columns:1fr}.authSteps>div:nth-child(2){display:none}.authPreviewBody{grid-template-columns:1fr}.authPreviewSkills{grid-template-columns:repeat(3,1fr)}.authPreviewSkills>span{padding:8px}.authPreviewSkills b{font-size:7px}.authCard{padding-left:18px;padding-right:18px}}
 @media(prefers-reduced-motion:reduce){.authRoot *{transition:none!important}}
+
+
+/* Student secure access — segmented, icon-led code entry. */
+.authAccessEyebrow{
+  width:max-content;
+  padding:7px 10px;
+  border:1px solid rgba(16,35,63,.10);
+  border-radius:999px;
+  background:rgba(255,255,255,.62);
+  color:#5f6d80
+}
+.authAccessEyebrow svg{width:14px!important;height:14px!important;color:#3e8b69!important}
+
+.authStudentCodeField{position:relative;gap:10px}
+.authCodeLabel{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.authCodeLabel label{font-size:10px;font-weight:800;color:#34465e}
+.authCodeLabel>span{
+  display:inline-flex;align-items:center;gap:5px;
+  color:#54806d;font-size:7px;font-weight:800;white-space:nowrap
+}
+.authCodeLabel>span svg{width:12px;height:12px}
+
+.authOtpShell{
+  width:100%;
+  min-height:72px;
+  padding:9px 10px;
+  border:1px solid rgba(16,35,63,.14);
+  border-radius:18px;
+  background:#fff;
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr);
+  align-items:center;
+  gap:9px;
+  box-shadow:0 10px 28px rgba(16,35,63,.045);
+  cursor:text;
+  transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease
+}
+.authOtpShell:hover{border-color:rgba(16,35,63,.23);box-shadow:0 13px 32px rgba(16,35,63,.065)}
+.authOtpKey{
+  width:42px;height:50px;padding:13px;border-radius:13px;
+  background:#f3f5f6;color:#697789;display:grid;place-items:center
+}
+.authOtpKey svg{width:100%;height:100%}
+.authOtpBoxes{min-width:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
+.authOtpBoxes i{
+  height:50px;
+  border:1px solid #e1e4e8;
+  border-radius:11px;
+  background:#fafbfc;
+  color:#aab0b8;
+  display:grid;place-items:center;
+  font-style:normal;
+  font-size:15px;
+  font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+  transition:.16s ease
+}
+.authOtpBoxes i.current{
+  border-color:rgba(243,111,95,.58);
+  background:#fff9f7;
+  box-shadow:0 0 0 3px rgba(243,111,95,.08)
+}
+.authOtpBoxes i.current:after{
+  content:"";
+  width:2px;height:18px;border-radius:2px;background:var(--auth-coral);
+  animation:authCaret 1s steps(1,end) infinite
+}
+.authOtpBoxes i.filled{
+  border-color:rgba(16,35,63,.14);
+  background:#f1f4f7;
+  color:#10233f;
+  font-size:16px
+}
+.authOtpInput{
+  position:absolute!important;
+  width:1px!important;height:1px!important;
+  left:-9999px!important;top:auto!important;
+  opacity:0!important;
+  pointer-events:none!important
+}
+.authStudentCodeField>span{
+  color:#9299a3;
+  font-size:8px;
+  font-weight:600;
+  letter-spacing:.01em
+}
+
+.authForm:not(.authAdminForm) h1{
+  font-weight:750;
+  letter-spacing:-.04em
+}
+.authForm:not(.authAdminForm)>p{
+  max-width:390px;
+  color:#748091
+}
+.authForm:not(.authAdminForm) .authSubmit{
+  min-height:55px;
+  border-radius:15px;
+  font-size:10.5px;
+  letter-spacing:.01em
+}
+.authTelegram{
+  min-height:52px;
+  padding:0 13px;
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1fr) 20px!important;
+  justify-content:stretch!important;
+  text-align:left
+}
+.authTelegramIcon{
+  width:34px!important;height:34px!important;padding:9px!important;
+  border-radius:11px;background:#eaf3f7;color:#28759a;display:grid!important;place-items:center
+}
+.authTelegramIcon svg,.authTelegramArrow svg{width:100%!important;height:100%!important}
+.authTelegram b{font-size:9px;font-weight:800;color:#31445b}
+.authTelegramArrow{width:16px!important;height:16px!important;padding:0!important;color:#6b7788}
+
+@keyframes authCaret{0%,48%{opacity:1}49%,100%{opacity:0}}
+
+@media(max-width:620px){
+  .authOtpShell{grid-template-columns:36px minmax(0,1fr);gap:6px;min-height:65px;padding:7px}
+  .authOtpKey{width:36px;height:46px;padding:11px}
+  .authOtpBoxes{gap:3px}
+  .authOtpBoxes i{height:46px;border-radius:9px;font-size:13px}
+}
+@media(max-width:430px){
+  .authCodeLabel>span{display:none}
+  .authOtpShell{grid-template-columns:1fr}
+  .authOtpKey{display:none}
+  .authOtpBoxes i{height:44px}
+}
