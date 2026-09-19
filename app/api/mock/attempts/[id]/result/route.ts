@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { waitUntil } from '@vercel/functions';
 import { readActiveStudentSession } from '@/lib/auth/active-student';
 import { getServiceSupabase } from '@/lib/supabase/server';
 import { sendAdminTestResult } from '@/lib/telegram-server';
@@ -153,85 +154,115 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Test vaqti tugagan. Kech yuborilgan natija qabul qilinmadi.' }, { status: 409 });
     }
 
+    const elapsedSeconds = Math.max(0, Math.round((Date.now() - new Date(exam.started_at).getTime()) / 1000));
+    const limitSeconds = Math.max(0, Math.round((new Date(exam.expires_at).getTime() - new Date(exam.started_at).getTime()) / 1000));
+    const durationSeconds = Math.min(limitSeconds, integerOrNull(body?.durationSeconds ?? safeDetails.durationSeconds) ?? elapsedSeconds);
+
+    const deliverTelegram = async () => {
+      try {
+        const telegram = await sendAdminTestResult({
+          student: { firstName: student.firstName, lastName: student.lastName, telegramId: student.telegramId },
+          testTitle: test.title,
+          track: test.track || mock.track,
+          section,
+          rawScore,
+          maxScore,
+          band,
+          correct,
+          wrong,
+          unanswered,
+          durationSeconds,
+          submittedAt: savedAt,
+          details,
+        });
+        const deliveredAt = new Date().toISOString();
+        const finalDetails = { ...details, telegram: { ...telegram, updatedAt: deliveredAt } };
+        await Promise.all([
+          supabase
+            .from('section_results')
+            .update({ details: finalDetails })
+            .eq('attempt_id', attempt.id)
+            .eq('section', section),
+          supabase
+            .from('test_sessions')
+            .update({ delivery: telegram, updated_at: deliveredAt })
+            .eq('id', exam.id)
+            .eq('student_id', student.studentId)
+            .eq('superseded', false),
+        ]);
+      } catch (deliveryError) {
+        console.error('Mock result Telegram delivery failed', deliveryError);
+      }
+    };
+
     if (previous) {
       const previousDetails = previous.details && typeof previous.details === 'object'
         ? previous.details as Record<string, unknown>
         : {};
       const previousTelegram = storedDelivery(previousDetails);
       const sameSubmission = Boolean(submissionId && previousDetails.submissionId === submissionId);
-      if (!sameSubmission || Number(previousTelegram.sent || 0) > 0) {
-        return NextResponse.json({ ok: true, duplicate: true, saved: true, result: previous });
+      if (sameSubmission && Number(previousTelegram.sent || 0) <= 0) {
+        waitUntil(deliverTelegram());
       }
-    } else {
-      if (exam.status !== 'in_progress') return NextResponse.json({ ok: true, duplicate: true, saved: true });
-      const { error: resultError } = await supabase
-        .from('section_results')
-        .insert({ attempt_id: attempt.id, section, raw_score: rawScore, max_score: maxScore, band, details });
-      if (resultError) throw resultError;
+      return NextResponse.json({ ok: true, duplicate: true, saved: true, result: previous });
     }
 
-    const elapsedSeconds = Math.max(0, Math.round((Date.now() - new Date(exam.started_at).getTime()) / 1000));
-    const limitSeconds = Math.max(0, Math.round((new Date(exam.expires_at).getTime() - new Date(exam.started_at).getTime()) / 1000));
-    const durationSeconds = Math.min(limitSeconds, integerOrNull(body?.durationSeconds ?? safeDetails.durationSeconds) ?? elapsedSeconds);
-    const telegram = await sendAdminTestResult({
-      student: { firstName: student.firstName, lastName: student.lastName, telegramId: student.telegramId },
-      testTitle: test.title,
-      track: test.track || mock.track,
-      section,
-      rawScore,
-      maxScore,
-      band,
-      correct,
-      wrong,
-      unanswered,
-      durationSeconds,
-      submittedAt: savedAt,
-      details,
-    });
+    if (exam.status !== 'in_progress') {
+      return NextResponse.json({ ok: true, duplicate: true, saved: true });
+    }
 
-    const finalDetails = { ...details, telegram: { ...telegram, updatedAt: new Date().toISOString() } };
-    const [{ data: finalResult, error: resultStateError }, { error: examStateError }] = await Promise.all([
-      supabase
-        .from('section_results')
-        .update({ raw_score: rawScore, max_score: maxScore, band, details: finalDetails })
-        .eq('attempt_id', attempt.id)
-        .eq('section', section)
-        .select('section,raw_score,max_score,band,details,created_at')
-        .single(),
-      supabase
-        .from('test_sessions')
-        .update({
-          status: 'completed',
-          submitted_at: savedAt,
-          raw_score: rawScore,
-          max_score: maxScore,
-          band,
-          correct_count: correct,
-          wrong_count: wrong,
-          unanswered_count: unanswered,
-          duration_seconds: durationSeconds,
-          client_submission_id: submissionId || null,
-          details,
-          delivery: telegram,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', exam.id)
-        .eq('student_id', student.studentId)
-        .eq('superseded', false),
-    ]);
-    if (resultStateError) throw resultStateError;
+    const { data: insertedResult, error: resultError } = await supabase
+      .from('section_results')
+      .insert({ attempt_id: attempt.id, section, raw_score: rawScore, max_score: maxScore, band, details })
+      .select('section,raw_score,max_score,band,details,created_at')
+      .maybeSingle();
+
+    if (resultError) {
+      if ((resultError as { code?: string }).code === '23505') {
+        const { data: duplicateResult, error: duplicateError } = await supabase
+          .from('section_results')
+          .select('section,raw_score,max_score,band,details,created_at')
+          .eq('attempt_id', attempt.id)
+          .eq('section', section)
+          .maybeSingle();
+        if (duplicateError) throw duplicateError;
+        if (duplicateResult) {
+          return NextResponse.json({ ok: true, duplicate: true, saved: true, result: duplicateResult });
+        }
+      }
+      throw resultError;
+    }
+
+    const { error: examStateError } = await supabase
+      .from('test_sessions')
+      .update({
+        status: 'completed',
+        submitted_at: savedAt,
+        raw_score: rawScore,
+        max_score: maxScore,
+        band,
+        correct_count: correct,
+        wrong_count: wrong,
+        unanswered_count: unanswered,
+        duration_seconds: durationSeconds,
+        client_submission_id: submissionId || null,
+        details,
+        updated_at: savedAt,
+      })
+      .eq('id', exam.id)
+      .eq('student_id', student.studentId)
+      .eq('status', 'in_progress')
+      .eq('superseded', false);
     if (examStateError) throw examStateError;
 
-    if (!telegram.configured || telegram.sent === 0) {
-      return NextResponse.json({
-        ok: true,
-        saved: true,
-        deliveryPending: true,
-        result: finalResult,
-      });
-    }
+    waitUntil(deliverTelegram());
 
-    return NextResponse.json({ ok: true, saved: true, result: finalResult });
+    return NextResponse.json({
+      ok: true,
+      saved: true,
+      deliveryPending: true,
+      result: insertedResult,
+    });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Result save server error' }, { status: 500 });
   }
