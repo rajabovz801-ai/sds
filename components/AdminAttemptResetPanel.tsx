@@ -50,6 +50,20 @@ export function AdminAttemptResetPanel() {
     if (open) void loadAttempts();
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [open]);
+
   const students = useMemo(() => {
     const map = new Map<string, { id: string; name: string; telegramId: string }>();
     for (const attempt of attempts) {
