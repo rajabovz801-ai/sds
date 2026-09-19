@@ -212,7 +212,7 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
                 <section className={styles.panel}>
                   <div className={styles.setupHeading}>
                     <div><small>STEP 01</small><h3>Yangi Full Mock tayyorlash</h3></div>
-                    <span>DRAFT FIRST</span>
+                    <span>READY FIRST</span>
                   </div>
 
                   <div className={styles.form}>
@@ -276,7 +276,7 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
                             <small>{mock.candidate_prefix || 'ARK-MOCK'} · {mock.track?.toUpperCase()}</small>
                             <h3>{mock.title}</h3>
                           </div>
-                          <span className={`${styles.pill} ${mock.status === 'published' ? styles.live : ''}`}>{mock.status}</span>
+                          <span className={`${styles.pill} ${mock.status === 'published' ? styles.live : ''}`}>{mock.status === 'published' ? 'LIVE' : mock.status === 'closed' ? 'CLOSED' : 'READY'}</span>
                         </div>
 
                         <div className={styles.mockStats}>
