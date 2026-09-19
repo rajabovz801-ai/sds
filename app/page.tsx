@@ -39,10 +39,10 @@ export default async function HomePage() {
               <Link href="/login?next=/mock" className="arkIeltsPrimary">IELTS Mock boshlash <ArrowRight /></Link>
             </div>
 
-            <div className="arkIeltsHeroChecks">
-              <span><Check /> 4 IELTS skills</span>
-              <span><Check /> Exam-style interface</span>
-              <span><Check /> Results &amp; review</span>
+            <div className="arkHeroBenefits">
+              <span><i><TargetIcon /></i><b>Real exam format</b></span>
+              <span><i><ShieldCheckIcon /></i><b>Secure &amp; autosaved</b></span>
+              <span><i><AwardIcon /></i><b>Clear results</b></span>
             </div>
           </div>
 
@@ -50,21 +50,21 @@ export default async function HomePage() {
             <div className="arkPracticeTop">
               <span>ARK METHOD</span>
               <strong>Practice. Progress. Achieve.</strong>
-              <p>Har bir practice aniq maqsadga ulanadi: ishlang, natijani kuzating va keyingi bosqichga o‘ting.</p>
+              <p>Mashq qiling, progressni ko‘ring va keyingi bosqichga o‘ting.</p>
             </div>
 
             <div className="arkPracticeSteps">
               <article>
                 <span className="arkPracticeIcon"><ZapIcon /></span>
-                <div><small>01 · PRACTICE</small><h3>Real formatda mashq qiling.</h3><p>IELTS va CEFR topshiriqlari fokuslangan exam workspace ichida.</p></div>
+                <div><small>01 · PRACTICE</small><h3>Real formatda mashq qiling.</h3><p>Real exam formatida.</p></div>
               </article>
               <article>
                 <span className="arkPracticeIcon"><TargetIcon /></span>
-                <div><small>02 · PROGRESS</small><h3>Natijani kuzating.</h3><p>Band, accuracy va skill progress bitta shaxsiy dashboardda saqlanadi.</p></div>
+                <div><small>02 · PROGRESS</small><h3>Natijani kuzating.</h3><p>Natijalar dashboardda.</p></div>
               </article>
               <article>
                 <span className="arkPracticeIcon"><AwardIcon /></span>
-                <div><small>03 · ACHIEVE</small><h3>Keyingi darajaga chiqing.</h3><p>Kuchli va zaif tomonlarni ko‘rib, keyingi practice’ni aniq tanlang.</p></div>
+                <div><small>03 · ACHIEVE</small><h3>Keyingi darajaga chiqing.</h3><p>Keyingi maqsadni aniqlang.</p></div>
               </article>
             </div>
 
