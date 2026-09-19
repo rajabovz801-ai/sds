@@ -58,24 +58,71 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
       const { error: testsError } = await supabase.from('tests').update({ status: 'published', updated_at: new Date().toISOString() }).in('id', testIds).eq('mock_only', true);
       if (testsError) throw testsError;
+      const publishedAt = new Date().toISOString();
       const { data: updated, error: updateError } = await supabase.from('mocks').update({
         status: 'published',
         dashboard_enabled: true,
-        starts_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }).eq('id', id).select('id,title,status,dashboard_enabled,starts_at').single();
+        starts_at: publishedAt,
+        ends_at: null,
+        updated_at: publishedAt,
+      }).eq('id', id).select('id,title,status,dashboard_enabled,starts_at,ends_at').single();
       if (updateError) throw updateError;
       return NextResponse.json({ ok: true, mock: updated });
     }
 
+    const closedAt = new Date().toISOString();
+    const testIds = [mock.listening_test_id, mock.reading_test_id].filter(Boolean) as string[];
+
+    const { data: attemptRows, error: attemptLookupError } = await supabase
+      .from('attempts')
+      .select('id')
+      .eq('mock_id', id)
+      .eq('attempt_type', 'mock');
+    if (attemptLookupError) throw attemptLookupError;
+    const attemptIds = (attemptRows || []).map((row) => String(row.id));
+
     const { data: updated, error: updateError } = await supabase.from('mocks').update({
       status: 'closed',
       dashboard_enabled: false,
-      ends_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      ends_at: closedAt,
+      updated_at: closedAt,
     }).eq('id', id).select('id,title,status,dashboard_enabled,ends_at').single();
     if (updateError) throw updateError;
-    return NextResponse.json({ ok: true, mock: updated });
+
+    if (attemptIds.length) {
+      const { error: sessionCloseError } = await supabase
+        .from('test_sessions')
+        .update({ status: 'expired', updated_at: closedAt })
+        .in('mock_attempt_id', attemptIds)
+        .eq('status', 'in_progress');
+      if (sessionCloseError) throw sessionCloseError;
+    }
+
+    const { error: attemptCloseError } = await supabase
+      .from('attempts')
+      .update({ status: 'abandoned' })
+      .eq('mock_id', id)
+      .eq('attempt_type', 'mock')
+      .eq('status', 'in_progress');
+    if (attemptCloseError) throw attemptCloseError;
+
+    if (testIds.length) {
+      const { error: testsCloseError } = await supabase
+        .from('tests')
+        .update({ status: 'draft', updated_at: closedAt })
+        .in('id', testIds)
+        .eq('mock_only', true);
+      if (testsCloseError) throw testsCloseError;
+    }
+
+    return NextResponse.json({
+      ok: true,
+      mock: updated,
+      closed: {
+        attempts: attemptIds.length,
+        mockTests: testIds.length,
+      },
+    });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Mock update server error' }, { status: 500 });
   }
