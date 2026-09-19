@@ -21,6 +21,7 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const pinRef = useRef<HTMLInputElement>(null);
+  const codeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (mode === 'admin') pinRef.current?.focus();
@@ -123,19 +124,40 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
       <h1>Qaytganingizdan xursandmiz.</h1>
       <p>Telegram bot bergan bir martalik kodingizni kiriting. Sessiya keyingi tashriflarda avtomatik taniladi.</p>
 
-      <div className="authCodeField">
-        <label htmlFor="login-code">Bir martalik kirish kodi</label>
-        <div className="authInputShell"><KeyRoundIcon /><input
+      <div className="authCodeField authStudentCodeField">
+        <div className="authCodeLabel">
+          <label htmlFor="login-code">Bir martalik kirish kodi</label>
+          <span><ShieldCheckIcon /> Xavfsiz kirish</span>
+        </div>
+
+        <button
+          className="authOtpShell"
+          type="button"
+          onClick={() => codeRef.current?.focus()}
+          aria-label="Kirish kodini yozish"
+        >
+          <span className="authOtpKey"><KeyRoundIcon /></span>
+          <span className="authOtpBoxes" aria-hidden="true">
+            {Array.from({ length: 8 }, (_, index) => (
+              <i key={index} className={code[index] ? 'filled' : index === code.length ? 'current' : ''}>
+                {code[index] || ''}
+              </i>
+            ))}
+          </span>
+        </button>
+
+        <input
+          ref={codeRef}
           id="login-code"
+          className="authOtpInput"
           value={code}
           onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 8))}
           inputMode="numeric"
           autoComplete="one-time-code"
           autoFocus
-          placeholder="000000"
           aria-describedby="login-help"
-        /></div>
-        <span id="login-help">4–8 xonali, faqat bir marta ishlaydigan kod</span>
+        />
+        <span id="login-help">4–8 xonali kod · faqat bir marta ishlaydi</span>
       </div>
 
       {error && <div className="authError" role="alert">{error}</div>}
