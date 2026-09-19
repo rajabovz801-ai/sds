@@ -483,9 +483,13 @@ body{font-size:16px}
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const adminSession = readAdminSession(request);
-    const studentSession = adminSession ? null : await readActiveStudentSession(request);
+    const adminStudentPreview = Boolean(adminSession) && request.cookies.get('ark_admin_student_preview')?.value === '1';
+    const studentSession = (!adminSession || adminStudentPreview) ? await readActiveStudentSession(request) : null;
     if (!adminSession && !studentSession) {
       return new NextResponse('Student sessiyasi faol emas.', { status: 403 });
+    }
+    if (adminStudentPreview && !studentSession) {
+      return new NextResponse('Admin preview student sessiyasi faol emas.', { status: 403 });
     }
 
     const { id } = await params;
@@ -498,7 +502,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (error || !test) return new NextResponse('Test yopiq yoki topilmadi.', { status: 404 });
 
     let context: BridgeContext;
-    if (adminSession) {
+    if (adminSession && !adminStudentPreview) {
       context = {
         mode: 'preview',
         attemptId: '',
