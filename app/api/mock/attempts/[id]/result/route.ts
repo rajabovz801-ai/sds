@@ -253,6 +253,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           .maybeSingle();
         if (duplicateError) throw duplicateError;
         if (duplicateResult) {
+          await supabase
+            .from('test_sessions')
+            .update({
+              status: 'completed',
+              submitted_at: savedAt,
+              raw_score: duplicateResult.raw_score ?? rawScore,
+              max_score: duplicateResult.max_score ?? maxScore,
+              band: duplicateResult.band ?? band,
+              correct_count: correct,
+              wrong_count: wrong,
+              unanswered_count: unanswered,
+              duration_seconds: durationSeconds,
+              client_submission_id: submissionId || null,
+              details: duplicateResult.details || details,
+              updated_at: savedAt,
+            })
+            .eq('id', exam.id)
+            .eq('student_id', student.studentId)
+            .eq('superseded', false);
           return NextResponse.json({ ok: true, duplicate: true, saved: true, result: duplicateResult });
         }
       }
