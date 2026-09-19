@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['pdfkit'],
   outputFileTracingIncludes: {
     '/api/telegram': ['./node_modules/pdfkit/js/data/*.afm'],
+    '/api/tests/[id]/content': ['./test-content/MOCK02_*.html'],
   },
   async headers() {
     return [
