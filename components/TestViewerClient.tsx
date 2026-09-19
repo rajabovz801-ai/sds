@@ -72,6 +72,25 @@ function firstValue(source: any, keys: string[]) {
   return null;
 }
 
+async function fetchJsonWithRetry(url: string, init: RequestInit, attempts = 3) {
+  let lastError: unknown = null;
+  for (let index = 0; index < attempts; index += 1) {
+    try {
+      const response = await fetch(url, init);
+      const body = await response.json().catch(() => ({})) as Record<string, any>;
+      if (response.ok) return { response, body };
+      const retryable = [408, 425, 429, 500, 502, 503, 504].includes(response.status);
+      if (!retryable || index === attempts - 1) return { response, body };
+      lastError = new Error(body.error || `Server error ${response.status}`);
+    } catch (error) {
+      lastError = error;
+      if (index === attempts - 1) throw error;
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 450 * (2 ** index)));
+  }
+  throw lastError instanceof Error ? lastError : new Error('Serverga ulanib bo‘lmadi.');
+}
+
 function normalizeResultPayload(input: any) {
   const source = input && typeof input === 'object' ? input : {};
   const nested = source.result && typeof source.result === 'object' ? source.result : {};
@@ -172,12 +191,11 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
     }
 
     try {
-      const response = await fetch(`/api/tests/${id}/start`, {
+      const { response, body } = await fetchJsonWithRetry(`/api/tests/${id}/start`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ mode: isMock ? 'mock' : 'practice', attemptId, section }),
       });
-      const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Test boshlanmadi.');
       setExamSession(body as ExamSession);
       setLaunchState('ready');
@@ -216,12 +234,11 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
         const requestBody = isMock
           ? { ...normalizedPayload, result: normalizedPayload, section, testId: id, testSessionId: examSession.sessionId }
           : { ...normalizedPayload, result: normalizedPayload, testId: id, testSessionId: examSession.sessionId };
-        const response = await fetch(endpoint, {
+        const { response, body } = await fetchJsonWithRetry(endpoint, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(requestBody),
         });
-        const body = await response.json();
         if (!response.ok) throw new Error(body.error || 'Natija saqlanmadi.');
         examActiveRef.current = false;
         iframeRef.current?.contentWindow?.postMessage({ type: 'ARK_RESULT_SAVED', payload: body }, '*');
