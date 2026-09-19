@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase/client';
 import styles from './AdminSpeakingMockPanel.module.css';
 
@@ -36,6 +37,7 @@ function date(value: string | null) {
 
 export function AdminSpeakingMockPanel() {
   const [open, setOpen] = useState(false);
+  const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
   const [data, setData] = useState<Data | null>(null);
   const [video, setVideo] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -55,6 +57,7 @@ export function AdminSpeakingMockPanel() {
     }
   }, []);
 
+  useEffect(() => { setPortalHost(document.body); }, []);
   useEffect(() => { if (open) void load(); }, [open, load]);
 
   async function uploadVideo() {
@@ -123,7 +126,7 @@ export function AdminSpeakingMockPanel() {
   return (
     <>
       <button className={styles.launcher} type="button" onClick={() => setOpen(true)}>SPEAKING MOCK</button>
-      {open && (
+      {open && portalHost && createPortal(
         <div className={styles.backdrop} role="dialog" aria-modal="true">
           <aside className={styles.drawer}>
             <header className={styles.head}>
@@ -170,7 +173,8 @@ export function AdminSpeakingMockPanel() {
               </div>
             </section>
           </aside>
-        </div>
+        </div>,
+        portalHost,
       )}
     </>
   );
