@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { getServiceSupabase, HTML_TESTS_BUCKET } from '@/lib/supabase/server';
+import { mockDraftBridgeScript } from '@/lib/mockDraftBridge';
 import { readActiveStudentSession } from '@/lib/auth/active-student';
 import { readAdminSession } from '@/lib/auth/admin-session';
 
@@ -541,10 +544,24 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       };
     }
 
-    const { data: file, error: downloadError } = await service.storage.from(HTML_TESTS_BUCKET).download(test.file_path);
-    if (downloadError || !file) throw downloadError || new Error('HTML file not found');
+    let originalHtml = '';
+    if (String(test.file_path || '').startsWith('repo://')) {
+      const fileName = String(test.file_path).slice('repo://'.length);
+      if (!/^MOCK02_[A-Z]+\.html$/.test(fileName)) {
+        return new NextResponse('Secure exam asset path is invalid.', { status: 400 });
+      }
+      originalHtml = await readFile(path.join(process.cwd(), 'test-content', fileName), 'utf8');
+    } else {
+      const { data: file, error: downloadError } = await service.storage.from(HTML_TESTS_BUCKET).download(test.file_path);
+      if (downloadError || !file) throw downloadError || new Error('HTML file not found');
+      originalHtml = await file.text();
+    }
 
-    const originalHtml = await file.text();
+    if (context.mode === 'mock' && !originalHtml.includes('ARK_DRAFT_STATE')) {
+      const draftBridge = mockDraftBridgeScript();
+      if (/<\/body>/i.test(originalHtml)) originalHtml = originalHtml.replace(/<\/body>/i, `${draftBridge}</body>`);
+      else originalHtml += draftBridge;
+    }
     const html = injectBridge(originalHtml, context);
 
     return new NextResponse(html, {
