@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
+import { AwardIcon, ShieldCheckIcon, TargetIcon, ZapIcon } from '@/components/UiIcons';
 import { getActiveServerSession } from '@/lib/auth/server-session';
 import { getAdminServerSession } from '@/lib/auth/admin-server-session';
 
@@ -83,42 +84,32 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="arkExamPreview" aria-label="IELTS exam interface preview">
-            <span className="arkExamFloat">40 Questions • Autosave • Review</span>
-            <div className="arkExamTopbar">
-              <div className="arkExamBrand">
-                <span className="arkExamBrandLogo"><ArkLogoIcon /></span>
-                <p><strong>IELTS Listening</strong><small>ARK EDUCATION MOCK</small></p>
-              </div>
-              <span className="arkExamTimer">Time left <b>29:42</b></span>
+          <div className="arkPracticeVision" aria-label="ARK Education practice philosophy">
+            <div className="arkPracticeTop">
+              <span>ARK METHOD</span>
+              <strong>Practice. Progress. Achieve.</strong>
+              <p>Har bir practice aniq maqsadga ulanadi: ishlang, natijani kuzating va keyingi bosqichga o‘ting.</p>
             </div>
 
-            <div className="arkExamBody">
-              <aside className="arkExamSidebar">
-                <span className="arkExamSidebarTitle">TEST SECTIONS</span>
-                <div className="arkExamPart active"><b>1</b> Part 1</div>
-                <div className="arkExamPart"><b>2</b> Part 2</div>
-                <div className="arkExamPart"><b>3</b> Part 3</div>
-                <div className="arkExamPart"><b>4</b> Part 4</div>
-              </aside>
-
-              <div className="arkExamContent">
-                <div className="arkExamQuestionMeta"><span>SECTION 1 • QUESTIONS 1–10</span><b>Question 6 of 40</b></div>
-                <div className="arkExamQuestion">
-                  <small>CHOOSE THE CORRECT LETTER, A, B OR C</small>
-                  <h3>What does the speaker say is the main advantage of the programme?</h3>
-                  <div className="arkExamOptions">
-                    <div className="arkExamOption"><i /><strong>A</strong><span>It is available throughout the year.</span></div>
-                    <div className="arkExamOption selected"><i /><strong>B</strong><span>It gives students practical experience.</span></div>
-                    <div className="arkExamOption"><i /><strong>C</strong><span>It is taught by university lecturers.</span></div>
-                  </div>
-                </div>
-              </div>
+            <div className="arkPracticeSteps">
+              <article>
+                <span className="arkPracticeIcon"><ZapIcon /></span>
+                <div><small>01 · PRACTICE</small><h3>Real formatda mashq qiling.</h3><p>IELTS va CEFR topshiriqlari fokuslangan exam workspace ichida.</p></div>
+              </article>
+              <article>
+                <span className="arkPracticeIcon"><TargetIcon /></span>
+                <div><small>02 · PROGRESS</small><h3>Natijani kuzating.</h3><p>Band, accuracy va skill progress bitta shaxsiy dashboardda saqlanadi.</p></div>
+              </article>
+              <article>
+                <span className="arkPracticeIcon"><AwardIcon /></span>
+                <div><small>03 · ACHIEVE</small><h3>Keyingi darajaga chiqing.</h3><p>Kuchli va zaif tomonlarni ko‘rib, keyingi practice’ni aniq tanlang.</p></div>
+              </article>
             </div>
 
-            <div className="arkExamNavigator">
-              <div className="arkExamNumbers"><span className="done">1</span><span className="done">2</span><span className="done">3</span><span className="done">4</span><span className="done">5</span><span className="current">6</span><span>7</span><span>8</span></div>
-              <span className="arkExamNext">Next <ArrowRight /></span>
+            <div className="arkPracticeSecure">
+              <span><ShieldCheckIcon /></span>
+              <div><small>SECURE EXAM PLATFORM</small><strong>One account. One progress history.</strong></div>
+              <b>ARK</b>
             </div>
           </div>
         </section>
