@@ -123,7 +123,7 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
     }
   }
 
-  async function updateMock(id: string, action: 'publish' | 'close') {
+  async function updateMock(id: string, action: 'publish' | 'close' | 'generate-codes') {
     if (busy) return;
     setBusy(true);
     setIsError(false);
@@ -287,9 +287,11 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
                         </div>
 
                         <div className={styles.actions}>
-                          <button className={styles.secondary} disabled={!rows.length} onClick={() => void copyCodes(mock.id)}>Copy codes</button>
+                          {rows.length
+                            ? <button className={styles.secondary} onClick={() => void copyCodes(mock.id)}>Copy codes</button>
+                            : <button className={styles.secondary} disabled={busy} onClick={() => void updateMock(mock.id, 'generate-codes')}>Generate codes</button>}
                           {mock.status !== 'published'
-                            ? <button className={styles.primary} disabled={busy} onClick={() => void updateMock(mock.id, 'publish')}>Open Mock</button>
+                            ? <button className={styles.primary} disabled={busy || !rows.length} onClick={() => void updateMock(mock.id, 'publish')}>Open Mock</button>
                             : <button className={styles.danger} disabled={busy} onClick={() => void updateMock(mock.id, 'close')}>Close Mock</button>}
                         </div>
 
