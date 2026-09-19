@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 export default async function MockAttemptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const student = await requireStudent(`/mock/${id}`);
-  const initialData = await getMockAttempt(student.id, id);
+  const initialData = await getMockAttempt(student.id, id, Boolean(student.adminPreview));
   if (!initialData) notFound();
 
   return (
