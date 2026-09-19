@@ -4,7 +4,7 @@ import { MockExamCompanion } from '@/components/MockExamCompanion';
 import { MockListeningAnswerCompatibility } from '@/components/MockListeningAnswerCompatibility';
 import { TestViewerClient } from '@/components/TestViewerClient';
 import { requireStudent } from '@/lib/auth/server-session';
-import { getPublishedTest } from '@/lib/cloudTests';
+import { getPublishedTest, getTestForAdminPreview } from '@/lib/cloudTests';
 import { notFound } from 'next/navigation';
 
 type Search = Record<string, string | string[] | undefined>;
@@ -29,10 +29,10 @@ export default async function TestPage({
   if (attempt) nextQuery.set('attempt', attempt);
   if (mode) nextQuery.set('mode', mode);
   if (section) nextQuery.set('section', section);
-  const [, test] = await Promise.all([
-    requireStudent(`/test/${id}${nextQuery.size ? `?${nextQuery.toString()}` : ''}`),
-    getPublishedTest(id),
-  ]);
+  const student = await requireStudent(`/test/${id}${nextQuery.size ? `?${nextQuery.toString()}` : ''}`);
+  const test = student.adminPreview
+    ? await getTestForAdminPreview(id)
+    : await getPublishedTest(id);
   if (!test) notFound();
   const isListening = test.skill === 'listening';
   return (
