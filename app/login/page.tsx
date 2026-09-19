@@ -1,12 +1,10 @@
-import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Brand } from '@/components/Brand';
 import { LoginClient } from '@/components/LoginClient';
 import {
   ArrowLeftIcon,
-  BotIcon,
-  CheckCircleIcon,
+  TelegramIcon,
   KeyRoundIcon,
   LogInIcon,
   ShieldCheckIcon,
@@ -41,21 +39,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <p>Real imtihon muhiti, saqlanadigan natijalar va barcha IELTS hamda CEFR materiallari bitta ravon ish maydonida.</p>
 
           <div className="authSteps">
-            <div><b><BotIcon /></b><span>Botni oching</span><small>Shaxsiy kodni oling</small></div>
-            <div><b><KeyRoundIcon /></b><span>Kodni kiriting</span><small>Bir martalik tasdiqlash</small></div>
-            <div><b><LogInIcon /></b><span>Darhol boshlang</span><small>Profilingiz saqlanadi</small></div>
-          </div>
-
-          <div className="authWorkspacePreview" aria-hidden="true">
-            <div className="authPreviewHeader"><span><ShieldCheckIcon /></span><b>Secure exam workspace</b><i><CheckCircleIcon /> Active</i></div>
-            <div className="authPreviewBody">
-              <div className="authPreviewScore"><small>READINESS</small><strong>82%</strong><span><i /></span></div>
-              <div className="authPreviewSkills">
-                <span><b>Listening</b><i style={{ '--progress': '88%' } as CSSProperties} /></span>
-                <span><b>Reading</b><i style={{ '--progress': '74%' } as CSSProperties} /></span>
-                <span><b>Writing</b><i style={{ '--progress': '69%' } as CSSProperties} /></span>
-              </div>
-            </div>
+            <div><b><TelegramIcon /></b><span>Kodni oling</span><small>Telegram orqali</small></div>
+            <div><b><KeyRoundIcon /></b><span>6 raqam kiriting</span><small>Bir martalik kod</small></div>
+            <div><b><LogInIcon /></b><span>Darhol boshlang</span><small>Xavfsiz sessiya</small></div>
           </div>
         </section>
 
