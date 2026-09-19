@@ -10,6 +10,27 @@ import styles from './MockAttemptClient.module.css';
 
 type SectionKey = 'listening' | 'reading';
 
+async function fetchJsonWithRetry(url: string, init: RequestInit = {}, attempts = 3) {
+  let lastError: unknown = null;
+  for (let index = 0; index < attempts; index += 1) {
+    try {
+      const response = await fetch(url, init);
+      const body = await response.json().catch(() => ({})) as Record<string, any>;
+      if (response.ok) return { response, body };
+      const retryable = [408, 425, 429, 500, 502, 503, 504].includes(response.status);
+      if (!retryable || index === attempts - 1) return { response, body };
+      lastError = new Error(body.error || `Server error ${response.status}`);
+    } catch (error) {
+      lastError = error;
+      if (index === attempts - 1) throw error;
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 450 * (2 ** index)));
+  }
+  throw lastError instanceof Error ? lastError : new Error('Serverga ulanib bo‘lmadi.');
+}
+
+
+
 const stageIndex: Record<MockFlowStage, number> = {
   listening_video: 0,
   listening_test: 1,
@@ -42,8 +63,7 @@ export function MockAttemptClient({
   const [finishing, setFinishing] = useState(false);
 
   const load = useCallback(async () => {
-    const response = await fetch(`/api/mock/attempts/${id}`, { cache: 'no-store' });
-    const body = await response.json();
+    const { response, body } = await fetchJsonWithRetry(`/api/mock/attempts/${id}`, { cache: 'no-store' });
     if (!response.ok) throw new Error(body.error || 'Mock attempt yangilanmadi.');
     setData(body as MockAttemptData);
     return body as MockAttemptData;
@@ -58,8 +78,7 @@ export function MockAttemptClient({
     setFinishing(true);
     setError('');
     try {
-      const response = await fetch(`/api/mock/attempts/${id}/finish`, { method: 'POST' });
-      const body = await response.json();
+      const { response, body } = await fetchJsonWithRetry(`/api/mock/attempts/${id}/finish`, { method: 'POST' });
       if (!response.ok) throw new Error(body.error || 'Mock yakunlanmadi.');
       router.replace(`/result/${id}`);
       router.refresh();
@@ -82,12 +101,11 @@ export function MockAttemptClient({
     setBusy(true);
     setError('');
     try {
-      const response = await fetch(`/api/mock/attempts/${id}/progress`, {
+      const { response, body } = await fetchJsonWithRetry(`/api/mock/attempts/${id}/progress`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ section }),
       });
-      const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Instruction holati saqlanmadi.');
       await load();
     } catch (err) {
