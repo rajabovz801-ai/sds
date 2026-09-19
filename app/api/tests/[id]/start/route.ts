@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readActiveStudentSession } from '@/lib/auth/active-student';
+import { readAdminSession } from '@/lib/auth/admin-session';
 import { getServiceSupabase } from '@/lib/supabase/server';
 
 type SectionName = 'reading' | 'listening' | 'writing' | 'speaking';
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const student = await readActiveStudentSession(request);
     if (!student) return NextResponse.json({ error: 'Student sessiyasi faol emas.' }, { status: 403 });
+    const adminPreview = request.cookies.get('ark_admin_student_preview')?.value === '1' && Boolean(readAdminSession(request));
 
     const { id: testId } = await params;
     const body = await request.json().catch(() => ({})) as Record<string, unknown>;
@@ -50,12 +52,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const section = String(body.section || '').toLowerCase() as SectionName;
     const supabase = getServiceSupabase();
 
-    const { data: test, error: testError } = await supabase
+    let testQuery = supabase
       .from('tests')
       .select('id,status,duration_minutes')
-      .eq('id', testId)
-      .eq('status', 'published')
-      .maybeSingle();
+      .eq('id', testId);
+    if (!adminPreview) testQuery = testQuery.eq('status', 'published');
+    const { data: test, error: testError } = await testQuery.maybeSingle();
     if (testError) throw testError;
     if (!test) return NextResponse.json({ error: 'Test hozir yopiq yoki topilmadi.' }, { status: 404 });
 
@@ -76,12 +78,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         return NextResponse.json({ error: 'Mock session faol emas.' }, { status: 409 });
       }
 
-      const { data: mock, error: mockError } = await supabase
+      let mockQuery = supabase
         .from('mocks')
         .select('reading_test_id,listening_test_id,writing_test_id,speaking_test_id,status')
-        .eq('id', attempt.mock_id)
-        .eq('status', 'published')
-        .maybeSingle();
+        .eq('id', attempt.mock_id);
+      if (!adminPreview) mockQuery = mockQuery.eq('status', 'published');
+      const { data: mock, error: mockError } = await mockQuery.maybeSingle();
       if (mockError) throw mockError;
       if (!mock || String(mock[sectionFields[section]] || '') !== testId) {
         return NextResponse.json({ error: 'Test bu mock sectioniga tegishli emas.' }, { status: 403 });
