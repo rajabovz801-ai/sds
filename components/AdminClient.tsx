@@ -325,7 +325,7 @@ export function AdminClient() {
     { label: 'O‘QUVCHILAR', value: overview?.metrics.students ?? '—', note: `${overview?.metrics.activeStudents ?? 0} active` },
     { label: 'YAKUNLANGAN', value: overview?.metrics.completedResults ?? '—', note: 'natija' },
     { label: 'O‘RTACHA', value: overview?.metrics.averageAccuracy != null ? `${overview.metrics.averageAccuracy}%` : '—', note: 'accuracy' },
-    { label: 'LIVE TEST', value: testStats.published, note: `${testStats.draft} yopiq` },
+    { label: 'OCHIQ TEST', value: testStats.published, note: `${testStats.draft} yopiq` },
   ];
 
   return (
@@ -333,16 +333,17 @@ export function AdminClient() {
       <header className="adminTopbar">
         <div className="adminBrand"><span><ArkLogoIcon /></span><div><strong>ARK Control</strong><small>EXAM OPERATIONS</small></div></div>
         <nav className="adminNav" aria-label="Admin bo‘limlari">
-          <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}><LayoutGridIcon /> Overview</button>
+          <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}><LayoutGridIcon /> Dashboard</button>
           <button className={tab === 'tests' ? 'active' : ''} onClick={() => setTab('tests')}><LibraryIcon /> Testlar</button>
           <button className={tab === 'students' ? 'active' : ''} onClick={() => setTab('students')}><UserIcon /> O‘quvchilar</button>
+          <button type="button" onClick={() => window.dispatchEvent(new CustomEvent('ark:admin-open-tool', { detail: 'full-mock' }))}><ShieldCheckIcon /> Full Mock</button>
         </nav>
         <div className="adminTopActions"><span className="adminSecureChip"><ShieldCheckIcon /> Secure session</span><button type="button" onClick={logout}><LogOutIcon /> Chiqish</button></div>
       </header>
 
       <main className="adminMain">
         <section className="adminHero">
-          <div><span><LayoutGridIcon /> LIVE EXAM CONTROL</span><h1>Admin boshqaruvi</h1><p>Testlar, o‘quvchilar, urinishlar va natijalar yagona professional panelda.</p></div>
+          <div><span><LayoutGridIcon /> ARK CONTROL · OPERATIONS</span><h1>Dashboard</h1><p>Testlar, o‘quvchilar, natijalar va mock imtihonlarni bitta boshqaruv markazidan nazorat qiling.</p></div>
           <div className="adminMetrics adminMetricsFour">
             {headlineMetrics.map((metric) => <div key={metric.label}><small>{metric.label}</small><strong>{metric.value}</strong><span>{metric.note}</span></div>)}
           </div>
