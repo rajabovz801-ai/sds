@@ -6,7 +6,7 @@ import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import { ExamSectionsClient } from '@/components/ExamSectionsClient';
 import { SkillLibraryClient } from '@/components/SkillLibraryClient';
 import { StudentDashboardClient } from '@/components/StudentDashboardClient';
-import { LayoutGridIcon, LogOutIcon, UserIcon } from '@/components/UiIcons';
+import { LayoutGridIcon } from '@/components/UiIcons';
 import type { CloudTest, TestSkill, TestTrack } from '@/lib/cloudTests';
 import type { DashboardData } from '@/lib/dashboard';
 import type { StudentSummary } from '@/lib/auth/server-session';
@@ -33,12 +33,50 @@ type AdminTestRow = {
   updated_at: string;
 };
 
-type PreviewStudent = StudentSummary & { telegramId?: string };
-type PreviewResponse = {
-  students: Array<{ id: string; firstName: string; lastName: string; telegramId: string }>;
-  student: PreviewStudent | null;
-  dashboard: DashboardData | null;
-  error?: string;
+const adminUser: StudentSummary = {
+  id: 'admin-preview',
+  firstName: 'Admin',
+  lastName: '',
+  avatarUrl: null,
+};
+
+function blankPoints(count: number, prefix: string) {
+  return Array.from({ length: count }, (_, index) => ({
+    label: `${prefix} ${index + 1}`,
+    value: null,
+    date: new Date(Date.now() - (count - index - 1) * 86_400_000).toISOString(),
+  }));
+}
+
+const adminDashboard: DashboardData = {
+  overallBand: null,
+  readingBand: null,
+  listeningBand: null,
+  weeklyStudyHours: 0,
+  weeklyGoalHours: 14,
+  testsCompleted: 0,
+  dailyResults: blankPoints(14, 'D'),
+  bandTrend: blankPoints(8, 'Wk'),
+  recentResults: [],
+  achievements: [
+    { id: 'first-test', title: 'First Test', description: 'Student view preview', unlocked: false, progress: 0, icon: 'first-test' },
+    { id: 'streak', title: '7-Day Streak', description: 'Student view preview', unlocked: false, progress: 0, icon: 'streak' },
+    { id: 'reading-master', title: 'Reading Master', description: 'Student view preview', unlocked: false, progress: 0, icon: 'study-hero' },
+    { id: 'listening-boost', title: 'Listening Boost', description: 'Student view preview', unlocked: false, progress: 0, icon: 'trophy' },
+    { id: 'ten-tests', title: '10 Tests Finished', description: 'Student view preview', unlocked: false, progress: 0, icon: 'ten-tests' },
+    { id: 'accuracy-ace', title: 'Accuracy Ace', description: 'Student view preview', unlocked: false, progress: 0, icon: 'target' },
+    { id: 'band-seven', title: 'Band 7 Reached', description: 'Student view preview', unlocked: false, progress: 0, icon: 'band7' },
+    { id: 'perfect-section', title: 'Perfect Section', description: 'Student view preview', unlocked: false, progress: 0, icon: 'perfect-vocab' },
+    { id: 'fast-finisher', title: 'Fast Finisher', description: 'Student view preview', unlocked: false, progress: 0, icon: 'fast-learner' },
+    { id: 'consistency', title: 'Consistency Pro', description: 'Student view preview', unlocked: false, progress: 0, icon: 'quote-trophy' },
+  ],
+  unlockedAchievements: 0,
+  studyStreak: 0,
+  focusArea: 'Reading',
+  nextTargetBand: null,
+  readingAverage: null,
+  listeningAverage: null,
+  lastUpdated: new Date().toISOString(),
 };
 
 const skillCopy: Record<Skill, { title: string; description: string }> = {
@@ -69,11 +107,6 @@ export function AdminMenuPreview() {
   const [screen, setScreen] = useState<Screen>({ type: 'home' });
   const [tests, setTests] = useState<CloudTest[]>([]);
   const [testsLoaded, setTestsLoaded] = useState(false);
-  const [students, setStudents] = useState<PreviewResponse['students']>([]);
-  const [student, setStudent] = useState<PreviewStudent | null>(null);
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-  const [selectedId, setSelectedId] = useState('');
-  const [loadingPreview, setLoadingPreview] = useState(false);
   const [previewError, setPreviewError] = useState('');
   const [topbarHost, setTopbarHost] = useState<HTMLElement | null>(null);
   const [bodyHost, setBodyHost] = useState<HTMLElement | null>(null);
@@ -112,42 +145,22 @@ export function AdminMenuPreview() {
     try {
       const response = await fetch('/api/admin/tests', { cache: 'no-store' });
       const body = await response.json();
-      if (!response.ok) return;
+      if (!response.ok) throw new Error(body.error || 'Testlar yuklanmadi.');
       const rows = Array.isArray(body.tests) ? body.tests as AdminTestRow[] : [];
       setTests(rows
         .filter((test) => test.status === 'published' && !test.mock_only)
         .map(mapAdminTest));
       setTestsLoaded(true);
-    } catch {
-      // Student menu remains usable if test library refresh fails.
-    }
-  }
-
-  async function loadStudentPreview(studentId?: string) {
-    setLoadingPreview(true);
-    setPreviewError('');
-    try {
-      const suffix = studentId ? `?studentId=${encodeURIComponent(studentId)}` : '';
-      const response = await fetch(`/api/admin/student-preview${suffix}`, { cache: 'no-store' });
-      const body = await response.json() as PreviewResponse;
-      if (!response.ok) throw new Error(body.error || 'Student preview yuklanmadi.');
-      setStudents(body.students || []);
-      setStudent(body.student);
-      setDashboard(body.dashboard);
-      setSelectedId(body.student?.id || '');
     } catch (error) {
-      setPreviewError(error instanceof Error ? error.message : 'Student preview yuklanmadi.');
-      setStudent(null);
-      setDashboard(null);
-    } finally {
-      setLoadingPreview(false);
+      setPreviewError(error instanceof Error ? error.message : 'Testlar yuklanmadi.');
     }
   }
 
   function openMenu() {
+    setPreviewError('');
     setScreen({ type: 'home' });
     setOpen(true);
-    void Promise.all([loadTests(), loadStudentPreview(selectedId || undefined)]);
+    void loadTests();
   }
 
   const activePath = screen.type === 'home'
@@ -164,24 +177,27 @@ export function AdminMenuPreview() {
   function navigateFromHref(href: string) {
     if (href === '/mock') {
       setScreen({ type: 'home' });
+      setPreviewError('');
       return true;
     }
     if (href === '/ielts' || href === '/cefr') {
       setScreen({ type: 'track', track: href.slice(1) as Track });
+      setPreviewError('');
       return true;
     }
     const skillMatch = href.match(/^\/(ielts|cefr)\/(listening|reading|writing|speaking)$/);
     if (skillMatch) {
       setScreen({ type: 'skill', track: skillMatch[1] as Track, skill: skillMatch[2] as Skill });
+      setPreviewError('');
       return true;
     }
     const testMatch = href.match(/^\/test\/([^/?#]+)/);
     if (testMatch) {
-      window.open(`/api/tests/${testMatch[1]}/content`, '_blank', 'noopener,noreferrer');
+      window.open(`/api/tests/${testMatch[1]}/content?preview=1`, '_blank', 'noopener,noreferrer');
       return true;
     }
     if (['/practice', '/study-tools', '/daily-tasks', '/leaderboard'].includes(href)) {
-      setPreviewError('Bu bo‘lim student sessiyasiga bog‘langan. Admin preview ichida ma’lumot o‘zgartirilmaydi.');
+      setPreviewError('Bu student funksiyasi. Admin ko‘rinishida faqat interfeys preview qilinadi.');
       return true;
     }
     return false;
@@ -208,35 +224,18 @@ export function AdminMenuPreview() {
 
   const portal = open && bodyHost ? createPortal(
     <div className="adminStudentMenuPortal platformRoot" onClickCapture={interceptNavigation}>
-      <div className="adminPreviewToolbar">
-        <div className="adminPreviewLabel"><UserIcon /><span><small>REAL STUDENT VIEW</small><strong>{student ? `${student.firstName} ${student.lastName}` : 'Student tanlanmagan'}</strong></span></div>
-        <label>
-          <span>Student</span>
-          <select
-            value={selectedId}
-            disabled={loadingPreview || !students.length}
-            onChange={(event) => void loadStudentPreview(event.target.value)}
-          >
-            {students.map((item) => <option key={item.id} value={item.id}>{item.firstName} {item.lastName}</option>)}
-          </select>
-        </label>
-        <button type="button" onClick={() => setOpen(false)}><LogOutIcon /><span>Admin panel</span></button>
-      </div>
-
       {previewError && <div className="adminPreviewNotice">{previewError}</div>}
 
-      {loadingPreview && !dashboard ? (
-        <div className="adminPreviewLoading">Student dashboard yuklanmoqda…</div>
-      ) : screen.type === 'home' && student && dashboard ? (
+      {screen.type === 'home' ? (
         <StudentDashboardClient
-          student={student}
-          initialData={dashboard}
+          student={adminUser}
+          initialData={adminDashboard}
           previewMode
           onExitPreview={() => setOpen(false)}
         />
-      ) : screen.type !== 'home' ? (
+      ) : (
         <>
-          <div className="platformBarWrap adminPreviewPlatformBar">
+          <div className="platformBarWrap">
             <header className="platformBar">
               <a href="/mock" className="platformBrand" aria-label="ARK Education platformasi">
                 <span className="platformBrandMark"><ArkLogoIcon /></span>
@@ -250,10 +249,11 @@ export function AdminMenuPreview() {
                 <a href="/study-tools">Tools <span className="soonDot">SOON</span></a>
               </nav>
               <div className="platformActions">
-                <div className="profileChip" title="Admin preview">
-                  <span className="profileAvatar">{student?.firstName?.[0] || 'A'}{student?.lastName?.[0] || ''}</span>
-                  <span className="profileLabel"><small>Preview</small><strong>{student ? `${student.firstName} ${student.lastName}` : 'Student'}</strong></span>
+                <div className="profileChip" title="Admin user preview">
+                  <span className="profileAvatar">AD</span>
+                  <span className="profileLabel"><small>ADMIN</small><strong>Admin</strong></span>
                 </div>
+                <button className="adminPreviewReturn" type="button" onClick={() => setOpen(false)}>Admin panel</button>
               </div>
             </header>
           </div>
@@ -270,21 +270,14 @@ export function AdminMenuPreview() {
             )}
           </main>
         </>
-      ) : (
-        <div className="adminPreviewLoading">Faol student topilmadi.</div>
       )}
 
       <style>{`
         .adminStudentMenuPortal{position:fixed;z-index:10000;inset:0;overflow:auto;background:#f5f6f8}
         .adminMainMenuButton{font-family:var(--font-poppins),Poppins,Arial,sans-serif!important}
-        .adminPreviewToolbar{position:fixed;z-index:10040;top:12px;right:14px;display:flex;align-items:center;gap:8px;padding:7px;border:1px solid #e1e4e8;border-radius:13px;background:rgba(255,255,255,.96);box-shadow:0 12px 32px rgba(17,19,24,.12);backdrop-filter:blur(12px)}
-        .adminPreviewLabel{display:flex;align-items:center;gap:8px;padding:0 6px;color:#17191e}.adminPreviewLabel>svg{width:17px;height:17px;fill:none;stroke:currentColor}.adminPreviewLabel small{display:block;color:#9a7a00;font-size:7px;font-weight:800;letter-spacing:.09em}.adminPreviewLabel strong{display:block;margin-top:1px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}
-        .adminPreviewToolbar label{display:flex;align-items:center;gap:6px}.adminPreviewToolbar label>span{color:#8b919b;font-size:7px;font-weight:800}.adminPreviewToolbar select{height:34px;max-width:190px;border:1px solid #dfe2e6;border-radius:9px;background:#f8f9fa;color:#272b31;padding:0 28px 0 9px;font:650 9px/1 var(--font-poppins),Poppins,Arial,sans-serif}
-        .adminPreviewToolbar button{height:34px;padding:0 10px;border:0;border-radius:9px;background:#0f1116;color:#fff;display:flex;align-items:center;gap:6px;font:750 8px/1 var(--font-poppins),Poppins,Arial,sans-serif;cursor:pointer}.adminPreviewToolbar button svg{width:14px;height:14px;fill:none;stroke:currentColor}
-        .adminPreviewNotice{position:fixed;z-index:10041;right:14px;top:70px;max-width:380px;padding:10px 12px;border:1px solid #eddba2;border-radius:10px;background:#fff9df;color:#725900;font:650 9px/1.45 var(--font-poppins),Poppins,Arial,sans-serif}
-        .adminPreviewLoading{min-height:100vh;display:grid;place-items:center;color:#7f8791;font:650 11px/1.5 var(--font-poppins),Poppins,Arial,sans-serif}
-        .adminPreviewPlatformBar{padding-top:60px}
-        @media(max-width:760px){.adminPreviewToolbar{left:8px;right:8px;top:8px}.adminPreviewLabel{display:none}.adminPreviewToolbar label{flex:1}.adminPreviewToolbar select{width:100%;max-width:none}.adminPreviewToolbar button span{display:none}.adminPreviewNotice{left:8px;right:8px;top:58px;max-width:none}}
+        .adminPreviewNotice{position:fixed;z-index:10041;right:16px;top:72px;max-width:360px;padding:10px 12px;border:1px solid #ecd98c;border-radius:10px;background:#fff9d9;color:#6e5600;font:650 9px/1.45 var(--font-poppins),Poppins,Arial,sans-serif;box-shadow:0 10px 28px rgba(17,19,24,.08)}
+        .adminPreviewReturn{height:34px;padding:0 11px;border:1px solid #dfe2e6;border-radius:9px;background:#0f1116;color:#fff;font:750 8px/1 var(--font-poppins),Poppins,Arial,sans-serif;cursor:pointer}
+        @media(max-width:760px){.adminPreviewNotice{left:8px;right:8px;top:60px;max-width:none}.adminPreviewReturn{padding:0 9px}}
       `}</style>
     </div>,
     bodyHost,
