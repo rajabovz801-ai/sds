@@ -292,3 +292,145 @@
   .arkIeltsFooterTop{align-items:flex-start;flex-direction:column}.arkIeltsFooterTop nav{flex-wrap:wrap}.arkIeltsFooterBottom{align-items:flex-start;flex-direction:column}
 }
 @media(prefers-reduced-motion:reduce){.arkIeltsNavCta,.arkIeltsPrimary,.arkIeltsFinalButton,.arkSkillCard{transition:none}}
+
+
+/* Focused landing: one premium hero, no long marketing scroll. */
+.arkIeltsNav{
+  grid-template-columns:auto 1fr auto;
+  min-height:64px;
+  padding:8px 10px 8px 13px
+}
+.arkIeltsNavActions{grid-column:3}
+.arkIeltsHeader{padding-top:10px}
+.arkIeltsHero{
+  width:min(1260px,calc(100% - 56px));
+  min-height:calc(100svh - 116px);
+  padding:46px 0 30px;
+  grid-template-columns:minmax(0,.9fr) minmax(470px,1.1fr);
+  gap:52px
+}
+.arkIeltsHeroCopy{max-width:600px}
+.arkIeltsHero h1{
+  margin-top:18px;
+  font-size:clamp(52px,5.1vw,76px);
+  line-height:.96
+}
+.arkIeltsHeroCopy>p{
+  max-width:560px;
+  margin-top:20px;
+  font-size:14px;
+  line-height:1.65
+}
+.arkIeltsHeroActions{margin-top:24px}
+.arkIeltsPrimary{min-height:51px;padding:0 18px}
+.arkHeroBenefits{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:18px
+}
+.arkHeroBenefits>span{
+  min-height:38px;
+  padding:6px 10px 6px 7px;
+  border:1px solid rgba(16,33,61,.09);
+  border-radius:12px;
+  background:rgba(255,253,250,.72);
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:#59677b
+}
+.arkHeroBenefits i{
+  width:27px;height:27px;padding:7px;border-radius:9px;
+  background:#eef3f7;color:#315f88;display:grid;place-items:center
+}
+.arkHeroBenefits span:nth-child(2) i{background:#edf7f1;color:#3f8767}
+.arkHeroBenefits span:nth-child(3) i{background:#fff0ec;color:#df6d5d}
+.arkHeroBenefits svg{width:100%;height:100%}
+.arkHeroBenefits b{font-size:7.5px;font-weight:780;white-space:nowrap}
+
+.arkPracticeVision{
+  min-height:408px;
+  padding:25px;
+  border-radius:25px;
+  box-shadow:0 22px 54px rgba(30,39,52,.085),inset 0 1px 0 rgba(255,255,255,.9)
+}
+.arkPracticeVision:before{
+  width:190px;height:190px;right:-96px;top:-108px;
+  box-shadow:0 0 0 42px rgba(243,111,95,.03),0 0 0 84px rgba(243,111,95,.014)
+}
+.arkPracticeVision:after{left:25px;right:25px;top:108px}
+.arkPracticeTop>strong{
+  margin-top:10px;
+  font-size:clamp(28px,2.6vw,39px);
+  letter-spacing:-.045em
+}
+.arkPracticeTop>p{margin-top:8px;font-size:9px}
+.arkPracticeSteps{gap:7px;margin-top:24px}
+.arkPracticeSteps article{
+  min-height:69px;
+  padding:10px 12px;
+  border-radius:14px;
+  grid-template-columns:38px minmax(0,1fr);
+  gap:10px
+}
+.arkPracticeIcon{width:38px;height:38px;padding:10px;border-radius:11px}
+.arkPracticeSteps small{font-size:5.8px}
+.arkPracticeSteps h3{margin-top:2px;font-size:11.5px}
+.arkPracticeSteps p{margin-top:2px;font-size:7px}
+.arkPracticeSecure{
+  min-height:48px;
+  margin-top:8px;
+  padding:0 10px;
+  border-radius:13px;
+  grid-template-columns:30px minmax(0,1fr) auto;
+  gap:9px
+}
+.arkPracticeSecure>span{width:30px;height:30px;padding:8px;border-radius:9px}
+.arkPracticeSecure small{font-size:5.5px}.arkPracticeSecure strong{font-size:8px}
+.arkPracticeSecure>b{width:30px;height:30px;border-radius:9px;font-size:7px}
+
+.arkMinimalFooter{
+  width:min(1260px,calc(100% - 56px));
+  min-height:42px;
+  margin:0 auto;
+  padding:0 2px 13px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  color:#9a9fa7;
+  font-size:7px
+}
+.arkMinimalFooter a{color:#5d6879;font-weight:750}
+
+@media(max-width:1050px){
+  .arkIeltsHero{
+    width:min(820px,calc(100% - 40px));
+    min-height:0;
+    padding:42px 0 28px;
+    grid-template-columns:1fr;
+    gap:28px
+  }
+  .arkPracticeVision{max-width:none}
+  .arkMinimalFooter{width:min(820px,calc(100% - 40px))}
+}
+@media(max-width:760px){
+  .arkIeltsHero{width:calc(100% - 28px);padding:34px 0 22px}
+  .arkIeltsHero h1{font-size:43px}
+  .arkIeltsHeroCopy>p{font-size:12px}
+  .arkHeroBenefits{gap:6px}.arkHeroBenefits>span{flex:1 1 calc(50% - 6px)}
+  .arkPracticeVision{padding:20px 15px;border-radius:20px}
+  .arkPracticeVision:after{left:15px;right:15px;top:104px}
+  .arkPracticeSteps article{min-height:64px}
+  .arkMinimalFooter{width:calc(100% - 28px)}
+}
+@media(max-width:430px){
+  .arkIeltsHero h1{font-size:39px}
+  .arkHeroBenefits>span{flex:1 1 100%}
+  .arkPracticeTop>strong{font-size:29px}
+  .arkPracticeTop>p{font-size:8.5px}
+  .arkMinimalFooter span{display:none}
+  .arkMinimalFooter{justify-content:flex-end}
+}
