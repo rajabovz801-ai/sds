@@ -265,6 +265,32 @@ export function TestViewerClient({ id, initialData: data, attemptId, mode, secti
     return () => window.removeEventListener('message', onMessage);
   }, [attemptId, data.test.id, examSession, id, isMock, router, section]);
 
+  useEffect(() => {
+    if (launchState !== 'ready' || !examSession) return;
+
+    const heartbeat = () => {
+      if (document.visibilityState !== 'visible' || !document.hasFocus()) return;
+      void fetch(`/api/tests/sessions/${examSession.sessionId}/heartbeat`, {
+        method: 'POST',
+        cache: 'no-store',
+        keepalive: true,
+      }).catch(() => undefined);
+    };
+
+    heartbeat();
+    const interval = window.setInterval(heartbeat, 30000);
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') heartbeat();
+    };
+    window.addEventListener('focus', heartbeat);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', heartbeat);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [examSession, launchState]);
+
   const recordViolation = useCallback(() => {
     if (!examSession) return;
     void fetch(`/api/tests/sessions/${examSession.sessionId}/violation`, { method: 'POST' });
