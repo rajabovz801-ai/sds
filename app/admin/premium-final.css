@@ -1,299 +1,306 @@
-/* Final ARK admin premium layer — layout/typography only. No auth, API, exam or data behavior. */
+/* ARK Control — unified tracker-style admin workspace */
 .adminRoot{
-  --adm-ink:#10233f;
-  --adm-ink-2:#173653;
-  --adm-paper:#fffdf8;
-  --adm-cream:#f4ecdf;
-  --adm-cream-2:#faf6ef;
-  --adm-line:rgba(16,35,63,.095);
-  --adm-line-strong:rgba(16,35,63,.15);
-  --adm-muted:#718096;
-  --adm-coral:#ff6b58;
-  --adm-green:#2f8f71;
-  font-family:Inter,"Avenir Next","Segoe UI Variable","SF Pro Display","Helvetica Neue",Arial,sans-serif;
-  font-kerning:normal;
-  font-feature-settings:"kern" 1,"liga" 1,"calt" 1;
+  --admin-bg:#f5f6f8;
+  --admin-panel:#ffffff;
+  --admin-line:#e6e8ec;
+  --admin-line-strong:#d9dde3;
+  --admin-sidebar:#0f1116;
+  --admin-sidebar-2:#191c22;
+  --admin-text:#17191e;
+  --admin-muted:#8b919b;
+  --admin-gold:#f3c316;
+  --admin-gold-soft:#fff6c9;
+  --admin-green:#238153;
+  --admin-green-soft:#eaf7ef;
+  --admin-red:#be4744;
+  --admin-red-soft:#fff0ef;
+  --admin-blue:#315d86;
+  min-height:100vh;
+  background:var(--admin-bg);
+  color:var(--admin-text);
+  font-family:var(--font-poppins),Poppins,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
 }
-.adminRoot *,
-.adminRoot *::before,
-.adminRoot *::after{box-sizing:border-box}
-.adminRoot button,
-.adminRoot input,
-.adminRoot select,
-.adminRoot textarea{font-family:inherit}
-.adminRoot button:disabled{cursor:not-allowed}
+.adminRoot *{box-sizing:border-box}
+.adminWorkspace{min-height:100vh;background:var(--admin-bg);overflow-x:clip}
 
-/* Top shell */
-.adminRoot .adminTopbar{gap:18px!important}
-.adminRoot .adminBrand{min-width:190px}
-.adminRoot .adminBrand>span{box-shadow:0 12px 28px rgba(255,107,88,.18)!important}
-.adminRoot .adminBrand strong{font-size:16px!important;letter-spacing:-.02em;font-weight:800}
-.adminRoot .adminBrand small{font-size:8px!important;letter-spacing:.15em!important;font-weight:800}
-.adminRoot .adminNav{padding:4px!important;border-color:rgba(255,255,255,.085)!important;background:rgba(5,18,34,.34)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
-.adminRoot .adminNav button{min-width:104px;height:34px!important;padding:0 13px!important;border-radius:10px!important;font-size:10.5px!important;font-weight:780!important;letter-spacing:-.005em}
-.adminRoot .adminNav button.active{box-shadow:0 8px 20px rgba(0,0,0,.14)!important}
-.adminRoot .adminSecureChip,.adminRoot .adminTopActions button{height:38px!important;border-radius:11px!important;font-size:9.5px!important;font-weight:760!important}
-.adminRoot .adminTopActions button{transition:background .16s ease,border-color .16s ease,transform .16s ease}
-.adminRoot .adminTopActions button:hover{transform:translateY(-1px)}
+/* Fixed left navigation — matches ARK Tracker structure */
+.adminTopbar{
+  position:fixed!important;z-index:320;inset:0 auto 0 0!important;
+  width:220px!important;height:100svh!important;min-height:100svh!important;
+  padding:22px 14px 16px!important;margin:0!important;
+  border:0!important;border-right:1px solid #24272e!important;border-radius:0!important;
+  background:var(--admin-sidebar)!important;box-shadow:none!important;
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+}
+.adminBrand{
+  min-height:64px!important;padding:2px 7px 22px!important;margin:0 0 16px!important;
+  border-bottom:1px solid #25282f!important;display:flex!important;align-items:center!important;gap:11px!important;
+}
+.adminBrand>span{
+  width:40px!important;height:40px!important;flex:0 0 40px!important;border-radius:11px!important;
+  display:grid!important;place-items:center!important;padding:9px!important;
+  background:#fff!important;color:#111318!important;border:0!important;box-shadow:none!important;
+}
+.adminBrand>span svg{width:22px!important;height:22px!important;fill:none;stroke:currentColor;stroke-width:1.8}
+.adminBrand strong{display:block!important;color:#fff!important;font-size:17px!important;font-weight:800!important;letter-spacing:.055em!important}
+.adminBrand small{display:block!important;margin-top:2px!important;color:#777f8a!important;font-size:8px!important;font-weight:700!important;letter-spacing:.14em!important}
 
-/* Shared content cards */
-.adminRoot .adminFormCard,
-.adminRoot .adminLibrary,
-.adminRoot .adminPanel,
-.adminRoot .adminStudentList,
-.adminRoot .adminStudentDetail{
-  border-color:var(--adm-line)!important;
-  border-radius:20px!important;
-  background:rgba(255,253,248,.985)!important;
-  box-shadow:0 16px 44px rgba(33,39,45,.06)!important;
+.adminNav{
+  width:100%!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;
+  border:0!important;border-radius:0!important;background:transparent!important;
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:5px!important;
+  overflow:visible!important;
 }
-.adminRoot .adminSectionHeader,
-.adminRoot .adminPanelHeading,
-.adminRoot .adminStudentListHead,
-.adminRoot .adminStudentResultsHead{
-  border-color:rgba(16,35,63,.075)!important;
+.adminNav button{
+  position:relative!important;width:100%!important;min-height:44px!important;height:auto!important;
+  padding:10px 11px!important;border:0!important;border-radius:10px!important;background:transparent!important;
+  color:#adb3bd!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;
+  font:650 11.5px/1.2 var(--font-poppins),Poppins,Arial,sans-serif!important;text-align:left!important;cursor:pointer!important;
+  transition:background .15s ease,color .15s ease,transform .15s ease!important;
 }
-.adminRoot .adminSectionHeader h2,
-.adminRoot .adminPanelHeading h2,
-.adminRoot .adminStudentListHead h2,
-.adminRoot .adminStudentResultsHead h3{
-  color:var(--adm-ink)!important;
-  letter-spacing:-.025em!important;
-  font-weight:790!important;
+.adminNav button svg{width:19px!important;height:19px!important;flex:0 0 19px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important}
+.adminNav button:hover{background:#191c21!important;color:#fff!important;transform:translateX(1px)!important}
+.adminNav button.active{background:#24272d!important;color:#fff!important}
+.adminNav button.active:before{
+  content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--admin-gold)
 }
-.adminRoot .adminSectionHeader p,
-.adminRoot .adminPanelHeading small,
-.adminRoot .adminStudentListHead small,
-.adminRoot .adminStudentResultsHead small{
-  color:#8a94a1!important;
+.adminNav button.active svg{color:var(--admin-gold)!important}
+
+.adminTopActions{
+  width:100%!important;margin:auto 0 0!important;padding:16px 0 0!important;border-top:1px solid #24272e!important;
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;
+}
+.adminTopActions>span,.adminTopActions>button{
+  width:100%!important;min-height:40px!important;height:40px!important;margin:0!important;padding:0 11px!important;
+  border:1px solid #292d35!important;border-radius:10px!important;background:#17191f!important;color:#c7cdd5!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;
+  box-shadow:none!important;font:700 9px/1 var(--font-poppins),Poppins,Arial,sans-serif!important;
+}
+.adminTopActions>button{cursor:pointer!important}
+.adminTopActions>button:hover{background:#202329!important;color:#fff!important;border-color:#333842!important}
+.adminTopActions svg{width:16px!important;height:16px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important}
+.adminSecureChip{color:#a8b0ba!important}.adminSecureChip svg{color:var(--admin-gold)!important}
+
+/* Workspace */
+.adminMain{
+  width:auto!important;max-width:none!important;min-height:100vh!important;
+  margin:0 0 0 220px!important;padding:28px 30px 52px!important;background:var(--admin-bg)!important;
+}
+.adminHero{
+  min-height:auto!important;margin:0 0 20px!important;padding:0!important;display:flex!important;
+  align-items:flex-end!important;justify-content:space-between!important;gap:28px!important;
+}
+.adminHero>div:first-child{min-width:0}
+.adminHero>div:first-child>span{
+  display:inline-flex!important;align-items:center!important;gap:7px!important;color:#987900!important;
+  font-size:9px!important;font-weight:800!important;letter-spacing:.13em!important
+}
+.adminHero>div:first-child>span svg{width:15px!important;height:15px!important;fill:none!important;stroke:currentColor!important}
+.adminHero h1{margin:7px 0 4px!important;color:#111318!important;font-size:31px!important;line-height:1.06!important;font-weight:800!important;letter-spacing:-.04em!important}
+.adminHero p{max-width:650px!important;margin:0!important;color:#8a9099!important;font-size:11px!important;line-height:1.5!important}
+.adminMetrics{display:grid!important;min-width:0!important}
+.adminMetricsFour{grid-template-columns:repeat(4,minmax(118px,1fr))!important;gap:9px!important}
+.adminMetrics>div{
+  min-width:0!important;min-height:82px!important;padding:13px 14px!important;border:1px solid var(--admin-line)!important;
+  border-radius:12px!important;background:#fff!important;box-shadow:0 1px 2px rgba(17,19,24,.025)!important;
+}
+.adminMetrics small{display:block!important;color:#9399a3!important;font-size:7.5px!important;font-weight:800!important;letter-spacing:.09em!important;white-space:nowrap!important}
+.adminMetrics strong{display:block!important;margin-top:5px!important;color:#17191e!important;font-size:22px!important;line-height:1!important;font-weight:800!important;letter-spacing:-.03em!important}
+.adminMetrics span{display:block!important;margin-top:5px!important;color:#969ca6!important;font-size:8px!important;white-space:nowrap!important}
+
+/* Alerts */
+.adminAlert{margin:0 0 14px;padding:11px 13px;border-radius:10px;border:1px solid var(--admin-line);font-size:10px;font-weight:700}
+.adminAlertSuccess{background:#edf8f2;border-color:#cde8d8;color:#26704f}
+.adminAlertError{background:#fff0ef;border-color:#efc8c5;color:#a8403d}
+
+/* Generic panels */
+.adminOverview{display:grid!important;gap:14px!important}
+.adminChartGrid,.adminOverviewGrid{display:grid!important;grid-template-columns:minmax(0,1.4fr) minmax(340px,.8fr)!important;gap:14px!important}
+.adminPanel,.adminFormCard,.adminLibrary{
+  min-width:0!important;border:1px solid var(--admin-line)!important;border-radius:13px!important;background:#fff!important;
+  box-shadow:0 1px 2px rgba(17,19,24,.025)!important;overflow:hidden!important
+}
+.adminPanelHeading{
+  min-height:62px!important;padding:13px 16px!important;border-bottom:1px solid #eceef1!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important
+}
+.adminPanelHeading small,.adminStudentListHead small,.adminStudentProfile small,.adminStudentResultsHead small,.adminStudentTrend small{
+  color:#9298a2!important;font-size:7.5px!important;font-weight:800!important;letter-spacing:.105em!important
+}
+.adminPanelHeading h2,.adminStudentListHead h2{margin:4px 0 0!important;color:#17191e!important;font-size:15px!important;font-weight:750!important}
+.adminPanelHeading>strong{color:#17191e!important;font-size:22px!important;font-weight:800!important}
+.adminPanelHeading>button{
+  min-height:31px!important;padding:0 10px!important;border:1px solid var(--admin-line)!important;border-radius:8px!important;
+  background:#f7f8f9!important;color:#5e6671!important;font-size:8px!important;font-weight:750!important;cursor:pointer!important
+}
+.adminPanelHeading>button:hover{background:#fff8da!important;border-color:#ecd46c!important;color:#705700!important}
+
+/* Charts */
+.adminBarChart{height:220px!important;padding:23px 18px 15px!important;display:flex!important;align-items:flex-end!important;justify-content:space-around!important;gap:10px!important;background:linear-gradient(#f0f2f4 1px,transparent 1px)!important;background-size:100% 25%!important}
+.adminBarChart>div{height:100%!important;flex:1!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important}
+.adminBarChart>div>span{position:relative!important;width:min(30px,72%)!important;min-height:5px!important;border-radius:6px 6px 2px 2px!important;background:var(--admin-gold)!important}
+.adminBarChart>div>span i{position:absolute!important;top:-18px!important;left:50%!important;transform:translateX(-50%)!important;color:#666d77!important;font-size:8px!important;font-style:normal!important;font-weight:800!important}
+.adminBarChart>div>small{color:#9298a2!important;font-size:8px!important}
+.adminSkillBars{min-height:220px!important;padding:16px 17px!important;display:grid!important;align-content:center!important;gap:14px!important}
+.adminSkillBars>div{display:grid!important;grid-template-columns:96px minmax(80px,1fr) 42px!important;align-items:center!important;gap:10px!important}
+.adminSkillBars>div>span b{display:block!important;color:#272b31!important;font-size:10px!important;text-transform:capitalize!important}
+.adminSkillBars>div>span small{display:block!important;color:#9aa0aa!important;font-size:7px!important}
+.adminSkillBars>div>i{height:7px!important;border-radius:999px!important;background:#eff1f3!important;overflow:hidden!important}
+.adminSkillBars>div>i>em{display:block!important;height:100%!important;border-radius:inherit!important;background:var(--admin-gold)!important}
+.adminSkillBars>div>strong{color:#575e67!important;font-size:9px!important;text-align:right!important}
+
+/* Recent results / leaderboard */
+.adminRecentResults,.adminLeaderboard{padding:5px 15px 10px!important}
+.adminRecentResults>div,.adminLeaderboard button{
+  min-width:0!important;min-height:52px!important;padding:7px 2px!important;border:0!important;border-bottom:1px solid #eef0f2!important;background:transparent!important;
+  display:grid!important;grid-template-columns:34px minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important;text-align:left!important
+}
+.adminRecentResults>div:last-child,.adminLeaderboard button:last-child{border-bottom:0!important}
+.adminResultAvatar,.adminLeaderboard button>span{
+  width:34px!important;height:34px!important;border-radius:10px!important;background:#f1f2f4!important;color:#555c66!important;
+  display:grid!important;place-items:center!important;font-size:9px!important;font-weight:800!important
+}
+.adminRecentResults b,.adminLeaderboard b{display:block!important;color:#202329!important;font-size:10.5px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.adminRecentResults small,.adminLeaderboard small{display:block!important;margin-top:2px!important;color:#989ea7!important;font-size:7.5px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.adminRecentResults>div>strong,.adminLeaderboard button>strong{color:#876900!important;font-size:9px!important;white-space:nowrap!important}
+.adminLeaderboard button{cursor:pointer!important}.adminLeaderboard button:hover{background:#fffdf2!important}
+
+/* Tests */
+.adminLayout{display:grid!important;grid-template-columns:minmax(310px,.72fr) minmax(0,1.28fr)!important;gap:14px!important;align-items:start!important}
+.adminSectionHeader{min-height:67px!important;padding:14px 16px!important;border-bottom:1px solid #eceef1!important;display:flex!important;align-items:center!important;gap:11px!important}
+.adminSectionHeader>span{width:37px!important;height:37px!important;flex:0 0 37px!important;border-radius:10px!important;background:var(--admin-gold-soft)!important;color:#8a6a00!important;display:grid!important;place-items:center!important;border:1px solid #f1e1a4!important}
+.adminSectionHeader>span svg{width:18px!important;height:18px!important;fill:none!important;stroke:currentColor!important}
+.adminSectionHeader h2{margin:0!important;color:#17191e!important;font-size:14px!important}
+.adminSectionHeader p{margin:3px 0 0!important;color:#9399a2!important;font-size:8px!important}
+.adminForm{padding:15px!important}
+.field{display:grid!important;gap:6px!important;margin-bottom:11px!important;min-width:0!important}
+.field label{color:#555d68!important;font-size:8px!important;font-weight:800!important;letter-spacing:.03em!important}
+.field input,.field select,.field textarea{
+  width:100%!important;min-width:0!important;border:1px solid #dde1e5!important;border-radius:9px!important;background:#fff!important;color:#24272d!important;
+  font:650 10.5px/1.35 var(--font-poppins),Poppins,Arial,sans-serif!important;outline:0!important
+}
+.field input,.field select{height:40px!important;padding:0 10px!important}.field textarea{min-height:72px!important;padding:10px!important;resize:vertical!important}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#d4b022!important;box-shadow:0 0 0 3px rgba(243,195,22,.12)!important}
+.twoFields{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important}
+.dropZone{
+  min-height:90px!important;margin:2px 0 11px!important;padding:13px!important;border:1px dashed #d3d7dc!important;border-radius:11px!important;background:#fafbfc!important;
+  display:flex!important;align-items:center!important;gap:12px!important;cursor:pointer!important
+}
+.dropZone input{position:absolute!important;opacity:0!important;pointer-events:none!important}
+.dropZone>span{width:38px!important;height:38px!important;flex:0 0 38px!important;border-radius:10px!important;background:#f0f1f3!important;color:#6c737d!important;display:grid!important;place-items:center!important}
+.dropZone>span svg{width:18px!important;height:18px!important;fill:none!important;stroke:currentColor!important}
+.dropZone b{display:block!important;color:#33373d!important;font-size:9.5px!important}.dropZone small{display:block!important;margin-top:3px!important;color:#979da6!important;font-size:7.5px!important}
+.formActions{display:flex!important;gap:8px!important;flex-wrap:wrap!important}
+.pButton{min-height:40px!important;padding:0 13px!important;border-radius:9px!important;font:800 9px/1 var(--font-poppins),Poppins,Arial,sans-serif!important;cursor:pointer!important}
+.pButtonPrimary{border:1px solid #d9b000!important;background:var(--admin-gold)!important;color:#17191e!important}.pButtonGhost{border:1px solid var(--admin-line)!important;background:#fff!important;color:#555e69!important}
+.pButton:disabled{opacity:.5!important;cursor:not-allowed!important}
+
+.adminLibraryHeader{min-height:67px!important;padding-right:14px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;border-bottom:1px solid #eceef1!important}
+.adminLibraryHeader>.adminSectionHeader{border-bottom:0!important;min-width:0!important;flex:1!important}
+.adminSearch{height:36px!important;min-width:190px!important;padding:0 10px!important;border:1px solid #e0e3e7!important;border-radius:9px!important;background:#fff!important;display:flex!important;align-items:center!important;gap:7px!important}
+.adminSearch svg{width:15px!important;height:15px!important;color:#8d939d!important;fill:none!important;stroke:currentColor!important}
+.adminSearch input{width:100%!important;min-width:0!important;border:0!important;outline:0!important;background:transparent!important;color:#2c3036!important;font:600 9px/1 var(--font-poppins),Poppins,Arial,sans-serif!important}
+.adminTestList{padding:6px 11px 11px!important}
+.adminTestRow{
+  min-width:0!important;min-height:72px!important;padding:9px 5px!important;border-bottom:1px solid #eef0f2!important;
+  display:grid!important;grid-template-columns:38px minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important
+}
+.adminTestRow:last-child{border-bottom:0!important}
+.adminTestFile{width:38px!important;height:38px!important;border-radius:10px!important;background:#f2f3f5!important;color:#717984!important;display:grid!important;place-items:center!important}
+.adminTestFile svg{width:18px!important;height:18px!important;fill:none!important;stroke:currentColor!important}
+.adminTestCopy{min-width:0!important}.adminTestCopy>div{display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:wrap!important}
+.adminTestCopy>div>span{color:#959ba4!important;font-size:7px!important;font-weight:800!important;letter-spacing:.06em!important}
+.adminTestCopy>div>i{padding:4px 6px!important;border-radius:999px!important;font-size:6.5px!important;font-style:normal!important;font-weight:850!important}
+.adminTestCopy>div>i.isPublished{background:#e9f7ef!important;color:#23764e!important}.adminTestCopy>div>i.isDraft{background:#f0f1f3!important;color:#747b84!important}
+.adminTestCopy h3{margin:4px 0 2px!important;color:#202329!important;font-size:10.5px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.adminTestCopy small{display:block!important;color:#9aa0aa!important;font-size:7.5px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.adminRowActions{display:flex!important;align-items:center!important;gap:5px!important;flex-wrap:wrap!important}
+.adminRowActions a,.adminRowActions button{
+  min-width:31px!important;height:31px!important;padding:0 8px!important;border:1px solid #e1e4e8!important;border-radius:8px!important;background:#fff!important;color:#626a74!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:8px!important;font-weight:800!important;cursor:pointer!important
+}
+.adminRowActions svg{width:14px!important;height:14px!important;fill:none!important;stroke:currentColor!important}
+.adminRowActions .startTest{background:#eaf7ef!important;border-color:#c9e5d4!important;color:#24764f!important}.adminRowActions .stopTest{background:#fff4db!important;border-color:#ead39a!important;color:#7d6120!important}.adminRowActions .danger{background:#fff0ef!important;border-color:#efc9c5!important;color:#b34743!important}
+
+/* Students */
+.adminStudentsLayout{display:grid!important;grid-template-columns:minmax(300px,.7fr) minmax(0,1.3fr)!important;gap:14px!important;align-items:start!important}
+.adminStudentList{height:640px!important;display:flex!important;flex-direction:column!important}
+.adminStudentDetail{min-height:640px!important}
+.adminStudentListHead{padding:13px 14px 11px!important;border-bottom:1px solid #eceef1!important;display:grid!important;gap:10px!important}
+.adminStudentRows{padding:6px!important;overflow:auto!important;min-height:0!important}
+.adminStudentRows>button{
+  width:100%!important;min-width:0!important;min-height:58px!important;padding:7px!important;border:0!important;border-bottom:1px solid #eff1f2!important;border-radius:9px!important;background:transparent!important;
+  display:grid!important;grid-template-columns:36px minmax(0,1fr) auto!important;align-items:center!important;gap:9px!important;text-align:left!important;cursor:pointer!important
+}
+.adminStudentRows>button:hover{background:#f8f9fa!important}.adminStudentRows>button.active{background:#fff9df!important}
+.adminStudentRows>button>span{width:36px!important;height:36px!important;border-radius:10px!important;background:#f0f2f4!important;color:#5d646d!important;display:grid!important;place-items:center!important;font-size:9px!important;font-weight:800!important}
+.adminStudentRows>button>div{min-width:0!important}.adminStudentRows b{display:block!important;color:#282c31!important;font-size:9.5px!important}.adminStudentRows small{display:block!important;margin-top:3px!important;color:#999fa8!important;font-size:7.5px!important}
+.adminStudentRows i{padding:4px 6px!important;border-radius:999px!important;font-size:6px!important;font-style:normal!important;font-weight:850!important}.adminStudentRows i.active{background:#eaf7ef!important;color:#24764f!important}.adminStudentRows i.blocked{background:#fff0ef!important;color:#b34743!important}
+.adminStudentProfile{min-height:92px!important;padding:15px 17px!important;border-bottom:1px solid #eceef1!important;display:grid!important;grid-template-columns:52px minmax(0,1fr) auto!important;align-items:center!important;gap:12px!important}
+.adminStudentProfile>span{width:52px!important;height:52px!important;border-radius:13px!important;background:#f1f2f4!important;color:#555c66!important;display:grid!important;place-items:center!important;font-size:13px!important;font-weight:800!important}
+.adminStudentProfile h2{margin:4px 0 3px!important;color:#17191e!important;font-size:18px!important}.adminStudentProfile p{margin:0!important;color:#9298a2!important;font-size:8px!important}
+.adminStudentProfile button{min-height:36px!important;padding:0 11px!important;border-radius:9px!important;font-size:8px!important;font-weight:800!important;cursor:pointer!important}
+.banStudent{border:1px solid #efc9c5!important;background:#fff0ef!important;color:#ad433f!important}.unbanStudent{border:1px solid #cce6d7!important;background:#eaf7ef!important;color:#26734f!important}
+.adminStudentSummary{padding:15px!important;display:grid!important;grid-template-columns:100px repeat(3,minmax(0,1fr))!important;gap:9px!important}
+.adminStudentSummary>div:not(.adminAccuracyRing){min-height:88px!important;padding:12px!important;border:1px solid #e8eaed!important;border-radius:10px!important;background:#fafbfc!important}
+.adminStudentSummary small{display:block!important;color:#989ea8!important;font-size:7px!important;font-weight:800!important}.adminStudentSummary strong{display:block!important;margin-top:7px!important;color:#17191e!important;font-size:19px!important}.adminStudentSummary span{display:block!important;margin-top:2px!important;color:#9ba1aa!important;font-size:7px!important}
+.adminAccuracyRing{width:90px!important;height:90px!important;border-radius:50%!important;display:grid!important;place-items:center!important}.adminAccuracyRing>span{width:68px!important;height:68px!important;border-radius:50%!important;background:#fff!important;display:grid!important;place-content:center!important;text-align:center!important}.adminAccuracyRing>span strong{font-size:15px!important;margin:0!important}
+.adminStudentTrend{margin:0 15px 8px!important;padding:13px 14px!important;border:1px solid #e8eaed!important;border-radius:11px!important;background:#fafbfc!important}
+.adminStudentTrend h3{margin:4px 0 0!important;font-size:12px!important}.adminStudentTrendBars{height:90px!important;margin-top:10px!important;display:flex!important;align-items:flex-end!important;gap:8px!important}.adminStudentTrendBars>span{height:100%!important;flex:1!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;align-items:center!important;gap:5px!important}.adminStudentTrendBars i{width:min(24px,70%)!important;min-height:4px!important;border-radius:5px 5px 2px 2px!important;background:var(--admin-gold)!important}.adminStudentTrendBars small{font-size:6.5px!important}
+.adminStudentResultsHead{padding:13px 16px 10px!important;border-top:1px solid #eceef1!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}.adminStudentResultsHead h3{margin:4px 0 0!important;font-size:12px!important}.adminStudentResultsHead>span{color:#9298a2!important;font-size:8px!important}
+.adminStudentResults{padding:0 12px 12px!important}.adminStudentResults article{min-width:0!important;min-height:76px!important;padding:10px 5px!important;border-bottom:1px solid #eef0f2!important;display:grid!important;grid-template-columns:minmax(190px,1fr) minmax(340px,1.3fr)!important;align-items:center!important;gap:12px!important}
+.adminStudentResults article>div:first-child{min-width:0!important}.adminStudentResults article>div:first-child>span{color:#8e949d!important;font-size:6.5px!important;font-weight:800!important}.adminStudentResults h4{margin:4px 0 2px!important;color:#262a30!important;font-size:9.5px!important}.adminStudentResults article small{color:#9aa0a8!important;font-size:7px!important}
+.adminResultNumbers{display:grid!important;grid-template-columns:repeat(7,minmax(44px,1fr))!important;gap:5px!important}.adminResultNumbers>span{min-width:0!important;padding:7px!important;border-radius:8px!important;background:#f7f8f9!important}.adminResultNumbers small{display:block!important;font-size:6px!important}.adminResultNumbers b{display:block!important;margin-top:3px!important;font-size:8px!important;white-space:nowrap!important}
+.adminNoResults,.emptyState,.adminLoading,.adminAnalyticsSetup{min-height:120px!important;padding:24px!important;display:grid!important;place-items:center!important;text-align:center!important;color:#8e949d!important}.adminNoResults svg,.emptyIcon svg,.adminAnalyticsSetup svg{width:24px!important;height:24px!important;fill:none!important;stroke:currentColor!important}.emptyState h3,.adminAnalyticsSetup h2{margin:8px 0 4px!important;color:#3b4149!important;font-size:12px!important}.emptyState p,.adminAnalyticsSetup p,.adminLoading p{margin:0!important;font-size:8.5px!important}
+.adminLoading>span{width:24px!important;height:24px!important;border:2px solid #e1e4e8!important;border-top-color:#c59b00!important;border-radius:50%!important;animation:adminSpin .8s linear infinite!important}@keyframes adminSpin{to{transform:rotate(360deg)}}
+
+/* Dropdown injected by helper */
+.adminTestCollapseToggle{
+  min-height:42px;padding:0 11px;border:1px solid #e2e5e9;border-radius:10px;background:#f8f9fa;color:#343a42;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:inherit;cursor:pointer
 }
 
-/* Tests workspace */
-.adminRoot .adminLayout{grid-template-columns:minmax(315px,.62fr) minmax(0,1.38fr)!important;gap:14px!important;align-items:start}
-.adminRoot .adminFormCard{position:sticky;top:14px;overflow:hidden}
-.adminRoot .adminFormCard .adminSectionHeader{min-height:68px!important;padding:13px 15px!important}
-.adminRoot .adminFormCard .adminSectionHeader>span,
-.adminRoot .adminLibrary .adminSectionHeader>span{width:36px!important;height:36px!important;padding:9px!important;border-radius:11px!important;background:#edf2f1!important;color:#315d63!important}
-.adminRoot .adminSectionHeader h2{font-size:14px!important}
-.adminRoot .adminSectionHeader p{margin-top:4px!important;font-size:9.5px!important;line-height:1.4!important}
-.adminRoot .adminForm{padding:15px!important}
-.adminRoot .field{gap:6px!important;margin-bottom:10px!important}
-.adminRoot .field label{color:#47586d!important;font-size:9.5px!important;font-weight:800!important;letter-spacing:.01em}
-.adminRoot .field input,
-.adminRoot .field select,
-.adminRoot .field textarea{
-  border-color:rgba(16,35,63,.11)!important;
-  border-radius:11px!important;
-  background:#fff!important;
-  color:#19314d!important;
-  font-size:11px!important;
-  font-weight:620!important;
-  box-shadow:inset 0 1px 0 rgba(16,35,63,.015);
+/* Focus + scrollbars */
+.adminRoot :where(button,a,input,select,textarea):focus-visible{outline:2px solid rgba(243,195,22,.7)!important;outline-offset:2px!important}
+.adminRoot ::-webkit-scrollbar{width:8px;height:8px}.adminRoot ::-webkit-scrollbar-thumb{background:#cfd3d8;border-radius:999px;border:2px solid transparent;background-clip:padding-box}.adminRoot ::-webkit-scrollbar-track{background:transparent}
+
+/* Tablet */
+@media(max-width:1120px){
+  .adminTopbar{width:190px!important;padding-left:10px!important;padding-right:10px!important}
+  .adminMain{margin-left:190px!important;padding-left:20px!important;padding-right:20px!important}
+  .adminMetricsFour{grid-template-columns:repeat(2,minmax(120px,1fr))!important}
+  .adminChartGrid,.adminOverviewGrid,.adminLayout,.adminStudentsLayout{grid-template-columns:1fr!important}
+  .adminStudentList{height:430px!important}.adminStudentDetail{min-height:0!important}
 }
-.adminRoot .field input,.adminRoot .field select{height:40px!important;padding:0 11px!important}
-.adminRoot .field textarea{min-height:70px!important;padding:10px 11px!important;line-height:1.5!important}
-.adminRoot .field input:focus,
-.adminRoot .field select:focus,
-.adminRoot .field textarea:focus{
-  border-color:rgba(49,93,99,.38)!important;
-  box-shadow:0 0 0 3px rgba(49,93,99,.065)!important;
-}
-.adminRoot .twoFields{gap:9px!important}
-.adminRoot .dropZone{min-height:80px!important;margin:3px 0 11px!important;padding:11px 12px!important;border-color:rgba(16,35,63,.15)!important;border-radius:14px!important;background:linear-gradient(145deg,#faf7f1,#f7f2e9)!important}
-.adminRoot .dropZone>span{width:38px!important;height:38px!important;padding:10px!important;border-radius:11px!important;background:#173653!important}
-.adminRoot .dropZone b{font-size:10.5px!important;font-weight:800!important}
-.adminRoot .dropZone small{font-size:9px!important;line-height:1.35!important}
-.adminRoot .formActions{gap:7px!important}
-.adminRoot .formActions .pButton{min-height:40px!important;border-radius:11px!important;padding:0 13px!important;font-size:9.5px!important;font-weight:820!important;box-shadow:none!important}
-.adminRoot .formActions .pButtonPrimary{background:linear-gradient(135deg,#10233f,#183d61)!important}
-
-.adminRoot .adminLibrary{overflow:hidden}
-.adminRoot .adminLibraryHeader{min-height:67px!important;background:rgba(255,253,248,.82)!important}
-.adminRoot .adminLibraryHeader .adminSectionHeader{min-height:67px!important;padding:12px 15px!important}
-.adminRoot .adminSearch{height:38px!important;border-radius:11px!important;border-color:rgba(16,35,63,.10)!important;background:#fbf8f2!important}
-.adminRoot .adminSearch input{font-size:10px!important;font-weight:620!important}
-.adminRoot .adminTestList{padding:4px 10px 10px!important}
-.adminRoot .adminTestRow{min-height:65px!important;padding:8px 5px!important;grid-template-columns:39px minmax(0,1fr) auto!important;gap:10px!important;border-color:rgba(16,35,63,.065)!important;transition:background .15s ease}
-.adminRoot .adminTestRow:hover{background:#faf7f1}
-.adminRoot .adminTestFile{width:38px!important;height:38px!important;padding:10px!important;border-radius:11px!important;background:#edf2f1!important}
-.adminRoot .adminTestCopy>div{gap:6px!important}
-.adminRoot .adminTestCopy>div>span{font-size:8px!important;letter-spacing:.08em!important;font-weight:850!important}
-.adminRoot .adminTestCopy h3{margin:4px 0 3px!important;font-size:12px!important;line-height:1.25!important;font-weight:790!important;letter-spacing:-.01em}
-.adminRoot .adminTestCopy small{font-size:8.7px!important;line-height:1.3!important}
-.adminRoot .adminTestCopy i{padding:3px 6px!important;font-size:6.5px!important;letter-spacing:.04em}
-.adminRoot .adminRowActions{gap:5px!important}
-.adminRoot .adminRowActions a,
-.adminRoot .adminRowActions button{width:32px!important;height:32px!important;padding:8px!important;border-radius:9px!important;background:#fff!important}
-.adminRoot .adminRowActionsWide>button:first-child{width:auto!important;min-width:58px!important;padding:0 10px!important;font-size:8.5px!important;font-weight:850!important}
-.adminRoot .adminRowActionsWide .startTest{background:#eaf7f0!important;color:#1c7654!important;border-color:rgba(28,118,84,.13)!important}
-.adminRoot .adminRowActionsWide .stopTest{background:#fff1ed!important;color:#a64a40!important;border-color:rgba(166,74,64,.12)!important}
-
-/* Students workspace */
-.adminRoot .adminStudentsLayout{grid-template-columns:minmax(285px,330px) minmax(0,1fr)!important;gap:14px!important;align-items:start}
-.adminRoot .adminStudentList{height:620px!important;overflow:hidden}
-.adminRoot .adminStudentListHead{min-height:72px!important;padding:12px 13px 10px!important;gap:8px!important;background:rgba(255,253,248,.86)}
-.adminRoot .adminStudentListHead h2{font-size:14px!important}
-.adminRoot .adminStudentListHead .adminSearch{width:100%!important;max-width:160px!important;margin:0!important}
-.adminRoot .adminStudentRows{padding:5px!important;overflow:auto;scrollbar-width:thin;scrollbar-color:#d5cdc1 transparent}
-.adminRoot .adminStudentRows>button{min-height:58px!important;padding:7px 8px!important;border-radius:12px!important;gap:9px!important;transition:background .15s ease,border-color .15s ease,transform .15s ease}
-.adminRoot .adminStudentRows>button:hover{transform:translateX(1px)}
-.adminRoot .adminStudentRows>button.active{background:#edf2f1!important;border-color:rgba(49,93,99,.12)!important;box-shadow:inset 3px 0 0 #315d63!important}
-.adminRoot .adminStudentRows>button>span{width:38px!important;height:38px!important;border-radius:11px!important;font-size:10px!important}
-.adminRoot .adminStudentRows b{font-size:11px!important;line-height:1.25!important;font-weight:790!important}
-.adminRoot .adminStudentRows small{margin-top:3px!important;font-size:8.5px!important;line-height:1.3!important}
-.adminRoot .adminStudentRows i{padding:4px 6px!important;border-radius:999px!important;font-size:6.5px!important;letter-spacing:.04em!important}
-
-.adminRoot .adminStudentDetail{min-height:620px!important;overflow:hidden}
-.adminRoot .adminStudentProfile{min-height:90px!important;padding:14px 16px!important;grid-template-columns:50px minmax(0,1fr) auto!important;gap:12px!important;background:linear-gradient(135deg,#fffdf8,#fbf7f0)}
-.adminRoot .adminStudentProfile>span{width:50px!important;height:50px!important;border-radius:15px!important;background:#e8efee!important;color:#315d63!important;font-size:13px!important}
-.adminRoot .adminStudentProfile small{font-size:8px!important;letter-spacing:.12em!important}
-.adminRoot .adminStudentProfile h2{margin:4px 0 3px!important;font-size:19px!important;letter-spacing:-.035em!important}
-.adminRoot .adminStudentProfile p{font-size:9.5px!important;line-height:1.4!important}
-.adminRoot .adminStudentProfile>button{min-height:36px!important;padding:0 11px!important;border-radius:10px!important;font-size:9px!important;font-weight:820!important}
-.adminRoot .adminStudentSummary{padding:13px 15px!important;grid-template-columns:86px repeat(3,1fr)!important;gap:8px!important}
-.adminRoot .adminStudentSummary>div:not(.adminAccuracyRing){min-height:78px!important;padding:11px!important;border-radius:14px!important;background:#faf6ef!important;border:1px solid rgba(16,35,63,.07)!important}
-.adminRoot .adminStudentSummary small{font-size:7.5px!important;letter-spacing:.08em!important}
-.adminRoot .adminStudentSummary strong{font-size:20px!important;letter-spacing:-.035em!important}
-.adminRoot .adminStudentSummary span{font-size:8px!important}
-.adminRoot .adminAccuracyRing{width:82px!important;height:82px!important}
-.adminRoot .adminAccuracyRing>span{width:62px!important;height:62px!important}
-.adminRoot .adminStudentTrend{margin:0 15px 7px!important;padding:11px 13px!important;border-radius:14px!important;grid-template-columns:125px minmax(0,1fr)!important;gap:14px!important;background:#faf6ef!important}
-.adminRoot .adminStudentTrend h3{margin-top:4px!important;font-size:14px!important}
-.adminRoot .adminStudentTrendBars{height:70px!important;gap:7px!important}
-.adminRoot .adminStudentTrendBars>span{min-width:21px!important}
-.adminRoot .adminStudentResultsHead{padding:12px 15px 9px!important}
-.adminRoot .adminStudentResultsHead h3{margin-top:4px!important;font-size:15px!important}
-.adminRoot .adminStudentResults{padding:0 12px 12px!important}
-.adminRoot .adminStudentResults article{min-height:67px!important;padding:8px 5px!important;gap:10px!important;border-color:rgba(16,35,63,.065)!important}
-.adminRoot .adminStudentResults h4{font-size:11px!important;line-height:1.25!important;font-weight:780!important}
-.adminRoot .adminStudentResults article small{font-size:8.3px!important}
-.adminRoot .adminResultNumbers{gap:5px!important}
-.adminRoot .adminResultNumbers>span{min-width:58px!important;padding:7px 8px!important;border-radius:10px!important;background:#faf6ef!important}
-.adminRoot .adminResultNumbers small{font-size:6.5px!important}
-.adminRoot .adminResultNumbers b{font-size:10px!important}
-
-/* Feedback / empty / loading */
-.adminRoot .adminAlert{border-radius:12px!important;font-size:10px!important;line-height:1.45!important;box-shadow:0 8px 20px rgba(20,35,48,.04)}
-.adminRoot .adminLoading,.adminRoot .emptyState,.adminRoot .adminNoResults{color:#7d8895}
-.adminRoot .adminLoading p,.adminRoot .emptyState p,.adminRoot .adminNoResults p{font-size:10px!important;line-height:1.5!important}
-.adminRoot .emptyState h3{font-size:14px!important;letter-spacing:-.02em}
-
-/* Scroll / overflow hardening */
-.adminRoot .adminLibrary,
-.adminRoot .adminFormCard,
-.adminRoot .adminStudentList,
-.adminRoot .adminStudentDetail,
-.adminRoot .adminTestCopy,
-.adminRoot .adminStudentProfile>div,
-.adminRoot .adminStudentRows>button>div,
-.adminRoot .adminResultNumbers{min-width:0}
-.adminRoot .adminTestCopy h3,
-.adminRoot .adminTestCopy small,
-.adminRoot .adminStudentRows b,
-.adminRoot .adminStudentRows small,
-.adminRoot .adminStudentProfile h2,
-.adminRoot .adminStudentProfile p{overflow:hidden;text-overflow:ellipsis}
-.adminRoot .adminTestCopy h3,
-.adminRoot .adminTestCopy small,
-.adminRoot .adminStudentRows b,
-.adminRoot .adminStudentRows small{white-space:nowrap}
-.adminRoot :where(input,select,textarea,button,a):focus-visible{outline:2px solid rgba(49,93,99,.36)!important;outline-offset:2px!important}
-
-@media(max-width:1180px){
-  .adminRoot .adminLayout{grid-template-columns:minmax(290px,.65fr) minmax(0,1.35fr)!important}
-  .adminRoot .adminStudentsLayout{grid-template-columns:300px minmax(0,1fr)!important}
-  .adminRoot .adminStudentSummary{grid-template-columns:82px repeat(3,1fr)!important}
-}
-@media(max-width:980px){
-  .adminRoot .adminBrand{min-width:auto}
-  .adminRoot .adminLayout,.adminRoot .adminStudentsLayout{grid-template-columns:1fr!important}
-  .adminRoot .adminFormCard{position:static}
-  .adminRoot .adminStudentList{height:410px!important}
-  .adminRoot .adminStudentDetail{min-height:0!important}
-  .adminRoot .adminStudentListHead .adminSearch{max-width:240px!important}
-}
-@media(max-width:700px){
-  .adminRoot .adminTopbar{gap:10px!important}
-  .adminRoot .adminNav button{min-width:0;flex:1;padding:0 8px!important;font-size:9.5px!important}
-  .adminRoot .adminStudentProfile{grid-template-columns:46px minmax(0,1fr)!important}
-  .adminRoot .adminStudentProfile>span{width:46px!important;height:46px!important}
-  .adminRoot .adminStudentProfile>button{grid-column:1/-1;width:100%}
-  .adminRoot .adminStudentSummary{grid-template-columns:1fr 1fr!important}
-  .adminRoot .adminAccuracyRing{margin:auto}
-  .adminRoot .adminStudentTrend{grid-template-columns:1fr!important}
-  .adminRoot .adminStudentResults article{grid-template-columns:1fr!important}
-  .adminRoot .adminResultNumbers{width:100%;display:grid!important;grid-template-columns:repeat(4,1fr)!important}
-  .adminRoot .adminResultNumbers>span{min-width:0!important}
-}
-@media(max-width:480px){
-  .adminRoot .adminLibraryHeader{display:block}
-  .adminRoot .adminLibraryHeader .adminSearch{width:calc(100% - 24px)!important;margin:0 12px 12px!important}
-  .adminRoot .adminTestRow{grid-template-columns:37px minmax(0,1fr)!important}
-  .adminRoot .adminRowActionsWide{grid-column:2;flex-wrap:wrap}
-  .adminRoot .adminResultNumbers{grid-template-columns:repeat(2,1fr)!important}
-}
-@media(prefers-reduced-motion:reduce){
-  .adminRoot *{scroll-behavior:auto!important;transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}
-}
-
-
-/* 2026-09 admin shell hardening — visual safety only. */
-.adminRoot .adminWorkspace,
-.adminRoot .adminMain,
-.adminRoot .adminHero,
-.adminRoot .adminOverview,
-.adminRoot .adminChartGrid,
-.adminRoot .adminOverviewGrid,
-.adminRoot .adminLayout,
-.adminRoot .adminStudentsLayout,
-.adminRoot .adminTopbar,
-.adminRoot .adminTopActions,
-.adminRoot .adminNav{min-width:0}
-.adminRoot .adminWorkspace{overflow-x:clip}
-.adminRoot .adminMain{width:min(1440px,calc(100% - 32px));margin-inline:auto}
-.adminRoot .adminTopbar{width:min(1440px,calc(100% - 32px));margin-inline:auto}
-.adminRoot .adminTopActions{margin-left:auto}
-.adminRoot .adminTopActions button,
-.adminRoot .adminSecureChip{white-space:nowrap}
-.adminRoot .adminNav svg,
-.adminRoot .adminTopActions svg,
-.adminRoot .adminSectionHeader svg,
-.adminRoot .adminTestFile svg,
-.adminRoot .dropZone svg{
-  fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;
-  stroke-linecap:round!important;stroke-linejoin:round!important
-}
-.adminRoot .adminHero{align-items:center}
-.adminRoot .adminHero>div:first-child{min-width:0}
-.adminRoot .adminMetrics{min-width:0}
-.adminRoot .adminMetrics>div{min-width:0}
-.adminRoot .adminPanel,
-.adminRoot .adminFormCard,
-.adminRoot .adminLibrary,
-.adminRoot .adminStudentList,
-.adminRoot .adminStudentDetail{isolation:isolate}
-.adminRoot .adminSearch,
-.adminRoot .adminSearch input,
-.adminRoot .adminRowActions,
-.adminRoot .adminRowActionsWide{min-width:0}
-.adminRoot .adminRowActions,
-.adminRoot .adminRowActionsWide{flex-wrap:wrap}
-.adminRoot img,.adminRoot video,.adminRoot audio{max-width:100%}
-.adminRoot :where(button,a,input,select,textarea){-webkit-tap-highlight-color:transparent}
-.adminRoot :where(button,a){touch-action:manipulation}
-
-@media(max-width:900px){
-  .adminRoot .adminTopbar{flex-wrap:wrap!important}
-  .adminRoot .adminNav{order:3;width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
-  .adminRoot .adminNav::-webkit-scrollbar{display:none}
-  .adminRoot .adminNav button{flex:1 0 112px!important}
-  .adminRoot .adminTopActions{margin-left:auto}
+/* Compact sidebar */
+@media(max-width:820px){
+  .adminTopbar{width:72px!important;padding:14px 9px!important;align-items:center!important}
+  .adminBrand{padding:0 0 16px!important;margin-bottom:12px!important;justify-content:center!important}
+  .adminBrand>span{width:42px!important;height:42px!important;flex-basis:42px!important}.adminBrand>div{display:none!important}
+  .adminNav{gap:6px!important}.adminNav button{width:52px!important;min-height:48px!important;padding:0!important;justify-content:center!important;font-size:0!important}
+  .adminNav button svg{width:21px!important;height:21px!important}.adminNav button.active:before{left:-9px!important}
+  .adminTopActions{align-items:center!important}.adminTopActions>span,.adminTopActions>button{width:52px!important;min-width:52px!important;padding:0!important;justify-content:center!important;font-size:0!important}
+  .adminTopActions svg{width:18px!important;height:18px!important}
+  .adminMain{margin-left:72px!important;padding:20px 16px 40px!important}
+  .adminHero{align-items:flex-start!important;flex-direction:column!important}.adminMetricsFour{width:100%!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .adminLibraryHeader{flex-wrap:wrap!important;padding-bottom:10px!important}.adminLibraryHeader>.adminSectionHeader{width:100%!important}.adminSearch{width:100%!important}
 }
 @media(max-width:620px){
-  .adminRoot .adminMain,.adminRoot .adminTopbar{width:calc(100% - 20px)}
-  .adminRoot .adminBrand strong{font-size:14px!important}
-  .adminRoot .adminSecureChip{display:none!important}
-  .adminRoot .adminHero{display:block!important}
-  .adminRoot .adminMetrics{margin-top:14px}
-  .adminRoot .adminMetricsFour{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .adminTopbar{position:static!important;width:100%!important;height:auto!important;min-height:0!important;display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center!important;padding:9px 10px!important;border-right:0!important;border-bottom:1px solid #25282f!important;overflow:visible!important}
+  .adminBrand{margin:0!important;padding:0!important;border:0!important}.adminBrand>span{width:38px!important;height:38px!important;flex-basis:38px!important}
+  .adminNav{min-width:0!important;display:flex!important;flex-direction:row!important;overflow-x:auto!important;padding:0 8px!important}.adminNav button{flex:0 0 44px!important;width:44px!important;min-height:42px!important}.adminNav button.active:before{display:none!important}.adminNav button.active{box-shadow:inset 0 -3px var(--admin-gold)!important}
+  .adminTopActions{width:auto!important;margin:0!important;padding:0!important;border:0!important;flex-direction:row!important}.adminTopActions>span{display:none!important}.adminTopActions>button{width:42px!important;min-width:42px!important;height:40px!important}
+  .adminMain{margin-left:0!important;padding:18px 11px 34px!important}
+  .adminHero h1{font-size:27px!important}.adminHero p{font-size:9.5px!important}.adminMetricsFour{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .twoFields{grid-template-columns:1fr!important}.adminTestRow{grid-template-columns:34px minmax(0,1fr)!important}.adminRowActions{grid-column:2!important;justify-content:flex-start!important}
+  .adminStudentProfile{grid-template-columns:46px minmax(0,1fr)!important}.adminStudentProfile>span{width:46px!important;height:46px!important}.adminStudentProfile button{grid-column:1/-1!important;width:100%!important}
+  .adminStudentSummary{grid-template-columns:1fr 1fr!important}.adminAccuracyRing{margin:auto!important}.adminStudentResults article{grid-template-columns:1fr!important}.adminResultNumbers{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }
+@media(max-width:420px){
+  .adminMetricsFour{grid-template-columns:1fr 1fr!important}.adminMetrics>div{min-height:72px!important}
+  .adminMetrics strong{font-size:19px!important}.adminStudentSummary{grid-template-columns:1fr!important}.adminResultNumbers{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(prefers-reduced-motion:reduce){.adminRoot *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
