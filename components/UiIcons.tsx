@@ -13,6 +13,7 @@ function IconBase({ children, ...props }: IconProps & { children: ReactNode }) {
 export function ArrowRightIcon(props: IconProps) { return <IconBase {...props}><path d="M5 12h14M14 7l5 5-5 5" /></IconBase>; }
 export function ArrowLeftIcon(props: IconProps) { return <IconBase {...props}><path d="m10 6-6 6 6 6M4 12h16" /></IconBase>; }
 export function ArrowUpRightIcon(props: IconProps) { return <IconBase {...props}><path d="M7 17 17 7M8 7h9v9" /></IconBase>; }
+export function TelegramIcon(props: IconProps) { return <IconBase {...props}><path d="m3.7 11.3 15.5-6.2c.8-.3 1.5.4 1.2 1.2l-4.6 13.1c-.3.9-1.4 1-1.9.3l-3.1-4.1-2.3 2.1c-.5.5-1.3.1-1.2-.6l.8-4.8-4.4-1.7c-.7-.3-.7-1.1 0-1.3Z" /><path d="m8.2 12.5 7.8-4.8-5.2 7.9" /></IconBase>; }
 export function BotIcon(props: IconProps) { return <IconBase {...props}><rect x="4" y="7" width="16" height="12" rx="4" /><path d="M12 3v4M8 12h.01M16 12h.01M8 16h8" /></IconBase>; }
 export function KeyRoundIcon(props: IconProps) { return <IconBase {...props}><circle cx="8" cy="15" r="4" /><path d="m11 12 8-8M16 7l2 2M14 9l2 2" /></IconBase>; }
 export function LogInIcon(props: IconProps) { return <IconBase {...props}><path d="M14 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-3" /><path d="M10 12h11M17 8l4 4-4 4" /></IconBase>; }
