@@ -42,6 +42,7 @@ body{font-size:16px}
   var candidateKey = '';
   var candidateSeen = 0;
   var candidateFirstAt = 0;
+  var submissionShield = null;
 
   var resultSelectors = [
     '#resultOverlay','#resultsOverlay','#resultModal','#resultsModal','#resultScreen','#resultsScreen',
@@ -58,8 +59,40 @@ body{font-size:16px}
     '.answered-value','.answered-pill','.answered-top','.answered-text','[data-ark-answered]','[data-answered]'
   ];
 
+  function showSubmissionShield(label) {
+    if (context.mode !== 'mock' || context.preview) return;
+    try {
+      if (!submissionShield) {
+        submissionShield = document.createElement('div');
+        submissionShield.id = 'ark-mock-submit-shield';
+        submissionShield.setAttribute('aria-live', 'polite');
+        submissionShield.innerHTML =
+          '<div style="width:min(420px,calc(100vw - 32px));padding:28px 24px;border-radius:18px;background:#fff;border:1px solid #e8e2d8;box-shadow:0 18px 60px rgba(10,18,31,.16);text-align:center;font-family:Arial,sans-serif">' +
+          '<div style="width:46px;height:46px;margin:0 auto 14px;border-radius:14px;background:#0f2747;color:#fff;display:grid;place-items:center;font-weight:800">ARK</div>' +
+          '<strong style="display:block;font-size:20px;color:#0f2747">Section submitted</strong>' +
+          '<p id="ark-mock-submit-text" style="margin:9px 0 0;color:#667085;font-size:14px;line-height:1.5">Natija xavfsiz saqlanmoqda...</p>' +
+          '</div>';
+        submissionShield.style.cssText =
+          'position:fixed;inset:0;z-index:2147483647;background:#f7f4ee;display:grid;place-items:center;padding:16px';
+        document.documentElement.appendChild(submissionShield);
+      }
+      var text = submissionShield.querySelector('#ark-mock-submit-text');
+      if (text) text.textContent = label || 'Natija xavfsiz saqlanmoqda...';
+    } catch (e) {}
+  }
+
+  function hideSubmissionShield() {
+    try {
+      if (submissionShield && submissionShield.parentNode) submissionShield.parentNode.removeChild(submissionShield);
+    } catch (e) {}
+    submissionShield = null;
+  }
+
   function sendResult(payload) {
     if (!payload || typeof payload !== 'object' || context.preview || resultSaved) return;
+    showSubmissionShield(context.section === 'listening'
+      ? 'Listening saqlandi. Reading instructions ochilmoqda...'
+      : 'Reading saqlandi. Yakuniy natija tayyorlanmoqda...');
     var fingerprint = '';
     try { fingerprint = JSON.stringify(payload); } catch (e) { fingerprint = String(Date.now()); }
     if (fingerprint && fingerprint === lastPayload) return;
@@ -352,6 +385,9 @@ body{font-size:16px}
     if (expired || context.preview || resultSaved) return;
     expired = true;
     submitIntentAt = Date.now();
+    showSubmissionShield(context.section === 'listening'
+      ? 'Listening vaqti tugadi. Reading instructions ochilmoqda...'
+      : 'Reading vaqti tugadi. Yakuniy natija tayyorlanmoqda...');
     try {
       if (typeof finalizeSubmission === 'function') { finalizeSubmission(true); scheduleLegacyCapture('time-expired'); return; }
     } catch (e) {}
@@ -403,6 +439,9 @@ body{font-size:16px}
     ) : null;
     if (!target) return;
     submitIntentAt = Date.now();
+    showSubmissionShield(context.section === 'listening'
+      ? 'Listening saqlandi. Reading instructions ochilmoqda...'
+      : 'Reading saqlandi. Yakuniy natija tayyorlanmoqda...');
     candidateKey = '';
     candidateSeen = 0;
     candidateFirstAt = 0;
@@ -417,6 +456,7 @@ body{font-size:16px}
       return;
     }
     if (event.data && event.data.type === 'ARK_RESULT_ERROR') {
+      hideSubmissionShield();
       lastPayload = '';
       candidateKey = '';
       candidateSeen = 0;
@@ -430,6 +470,9 @@ body{font-size:16px}
   if (typeof MutationObserver !== 'undefined' && document.body) {
     var observer = new MutationObserver(function () {
       if (resultSaved || !visibleResultSurface()) return;
+      showSubmissionShield(context.section === 'listening'
+        ? 'Listening saqlandi. Reading instructions ochilmoqda...'
+        : 'Reading saqlandi. Yakuniy natija tayyorlanmoqda...');
       if (mutationTimer) window.clearTimeout(mutationTimer);
       mutationTimer = window.setTimeout(function () {
         captureLegacyResult('result-dom-changed');
