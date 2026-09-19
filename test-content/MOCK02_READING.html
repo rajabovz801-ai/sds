@@ -834,5 +834,9 @@ renderNav();
 </script>
 
 <script type="application/json" id="ark-mock-integrity">{"passages":3,"questions":40,"ranges":{"1":[1,13],"2":[14,26],"3":[27,40]},"passage2":"Australia's Camouflaged Creatures","review":"user-vs-correct","standaloneWarning":false}</script>
+
+<!-- ARK_MOCK02_READING_GUIDED -->
+<style>html[data-ark-guided-mock="1"] #resultScreen{display:none!important}</style>
+<script>(function(){if(new URLSearchParams(location.search).get('mode')==='mock')document.documentElement.setAttribute('data-ark-guided-mock','1');})();</script>
 </body>
 </html>
