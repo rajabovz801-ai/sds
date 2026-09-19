@@ -128,7 +128,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
           {avatarUrl ? <img src={avatarUrl} alt="" /> : initials}
         </span>
         <span className={styles.triggerCopy}>
-          <small>{previewMode ? 'ADMIN PREVIEW' : 'STUDENT'}</small>
+          <small>{previewMode ? 'ADMIN' : 'STUDENT'}</small>
           <strong>{student.firstName} {student.lastName}</strong>
         </span>
         <span className={styles.triggerIcon}><UserIcon /></span>
@@ -141,7 +141,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
               {avatarUrl ? <img src={avatarUrl} alt="Profil rasmi" /> : initials}
             </span>
             <div>
-              <small>{previewMode ? 'ADMIN PREVIEW' : 'ARK STUDENT'}</small>
+              <small>{previewMode ? 'ARK ADMIN' : 'ARK STUDENT'}</small>
               <strong>{student.firstName} {student.lastName}</strong>
               <span>Shaxsiy profil</span>
             </div>
@@ -182,7 +182,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
               <LogOutIcon /><span>{loggingOut ? 'Chiqilmoqda...' : 'Log out'}</span>
             </button>
           ) : (
-            <div className={styles.previewNote}><UserIcon /> Profil o‘zgarishlari preview rejimida o‘chiq.</div>
+            <div className={styles.previewNote}><UserIcon /> Admin user preview · profil o‘zgarishlari o‘chiq.</div>
           )}
         </div>
       )}
