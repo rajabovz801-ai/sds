@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     const [testQuery, studentQuery, sessionQuery, attemptQuery, mockQuery] = await Promise.all([
       supabase.from('tests').select('id,title,track,skill,status,duration_minutes,updated_at').order('updated_at', { ascending: false }),
-      supabase.from('students').select('*').order('first_name', { ascending: true }).limit(1000),
+      supabase.from('students').select('*').eq('exam_platform_enabled', true).order('first_name', { ascending: true }).limit(1000),
       supabase.from('test_sessions').select('id,student_id,test_id,mock_attempt_id,mode,section,status,started_at,expires_at,submitted_at,last_seen_at,raw_score,max_score,band,correct_count,wrong_count,unanswered_count,duration_seconds,violation_count,delivery').order('started_at', { ascending: false }).limit(2000),
       supabase.from('attempts').select('id,student_id,mock_id,status,started_at,completed_at,overall_score,overall_band,attempt_type').eq('attempt_type', 'mock').order('started_at', { ascending: false }).limit(1000),
       supabase.from('mocks').select('id,title,track,status'),
@@ -53,8 +53,9 @@ export async function GET(request: NextRequest) {
 
     const tests = (testQuery.data || []) as Row[];
     const students = (studentQuery.data || []) as Row[];
-    const sessions = (sessionQuery.data || []) as Row[];
-    const attempts = (attemptQuery.data || []) as Row[];
+    const examStudentIds = new Set(students.map((student) => String(student.id)));
+    const sessions = ((sessionQuery.data || []) as Row[]).filter((session) => examStudentIds.has(String(session.student_id)));
+    const attempts = ((attemptQuery.data || []) as Row[]).filter((attempt) => examStudentIds.has(String(attempt.student_id)));
     const mocks = (mockQuery.data || []) as Row[];
     const testById = new Map(tests.map((test) => [String(test.id), test]));
     const mockById = new Map(mocks.map((mock) => [String(mock.id), mock]));
