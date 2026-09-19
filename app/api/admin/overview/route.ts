@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     const [testQuery, studentQuery, sessionQuery, attemptQuery, mockQuery] = await Promise.all([
       supabase.from('tests').select('id,title,track,skill,status,duration_minutes,updated_at').order('updated_at', { ascending: false }),
       supabase.from('students').select('*').order('first_name', { ascending: true }).limit(1000),
-      supabase.from('test_sessions').select('id,student_id,test_id,mock_attempt_id,mode,section,status,started_at,expires_at,submitted_at,raw_score,max_score,band,correct_count,wrong_count,unanswered_count,duration_seconds,violation_count,delivery').order('started_at', { ascending: false }).limit(2000),
+      supabase.from('test_sessions').select('id,student_id,test_id,mock_attempt_id,mode,section,status,started_at,expires_at,submitted_at,last_seen_at,raw_score,max_score,band,correct_count,wrong_count,unanswered_count,duration_seconds,violation_count,delivery').order('started_at', { ascending: false }).limit(2000),
       supabase.from('attempts').select('id,student_id,mock_id,status,started_at,completed_at,overall_score,overall_band,attempt_type').eq('attempt_type', 'mock').order('started_at', { ascending: false }).limit(1000),
       supabase.from('mocks').select('id,title,track,status'),
     ]);
@@ -58,13 +58,16 @@ export async function GET(request: NextRequest) {
     const mocks = (mockQuery.data || []) as Row[];
     const testById = new Map(tests.map((test) => [String(test.id), test]));
     const mockById = new Map(mocks.map((mock) => [String(mock.id), mock]));
+    const liveCutoff = Date.now() - 90_000;
+    const isLiveSession = (session: Row) =>
+      session.status === 'in_progress'
+      && (!session.expires_at || new Date(session.expires_at).getTime() > Date.now())
+      && Boolean(session.last_seen_at)
+      && new Date(session.last_seen_at).getTime() >= liveCutoff;
+
     const activeMockAttemptIds = new Set(
       sessions
-        .filter((session) =>
-          session.mode === 'mock'
-          && session.status === 'in_progress'
-          && Boolean(session.mock_attempt_id)
-          && (!session.expires_at || new Date(session.expires_at).getTime() > Date.now()))
+        .filter((session) => session.mode === 'mock' && Boolean(session.mock_attempt_id) && isLiveSession(session))
         .map((session) => String(session.mock_attempt_id)),
     );
 
@@ -80,7 +83,7 @@ export async function GET(request: NextRequest) {
         track: test?.track || '',
         skill: session.section || test?.skill || '',
         mode: session.mode,
-        status: session.status,
+        status: session.status === 'in_progress' && !isLiveSession(session) ? 'incomplete' : session.status,
         score: numberOrNull(session.raw_score),
         maxScore: numberOrNull(session.max_score),
         accuracy,
