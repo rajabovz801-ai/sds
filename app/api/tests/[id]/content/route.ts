@@ -254,6 +254,41 @@ body{font-size:16px}
     return output;
   }
 
+  function countGenericAnswered() {
+    var count = 0;
+    var seenRadioGroups = {};
+    var controls = document.querySelectorAll('input,select,textarea');
+    for (var i = 0; i < controls.length; i += 1) {
+      var control = controls[i];
+      var type = String(control.type || '').toLowerCase();
+      if (['button','submit','reset','hidden','file','range','color'].indexOf(type) >= 0) continue;
+      if (type === 'radio' || type === 'checkbox') {
+        var group = String(control.name || control.id || 'group-' + i);
+        if (seenRadioGroups[group]) continue;
+        seenRadioGroups[group] = true;
+        var groupNodes = control.name ? document.getElementsByName(control.name) : [control];
+        var selected = false;
+        for (var g = 0; g < groupNodes.length; g += 1) {
+          if (groupNodes[g].checked) { selected = true; break; }
+        }
+        if (selected) count += 1;
+        continue;
+      }
+      var value = String(control.value || '').trim();
+      if (!value) continue;
+      if (control.tagName === 'SELECT') {
+        var option = control.options && control.selectedIndex >= 0 ? control.options[control.selectedIndex] : null;
+        var label = String(option?.textContent || '').trim().toLowerCase();
+        if (!value || /^(select|choose|--|—|please select)/i.test(label)) continue;
+      }
+      count += 1;
+    }
+
+    var selectedCells = document.querySelectorAll('.clickable-cell.selected,[data-q].selected,[data-question].selected,.mcq-option.selected,.option.selected');
+    count += selectedCells.length;
+    return Math.max(0, Math.min(200, count));
+  }
+
   function captureReviewAnswers() {
     var output = {};
     var rows = document.querySelectorAll('#reviewTable .review-row,#reviewList .review-row,.review-table .review-row,.review-list .review-row');
@@ -326,6 +361,7 @@ body{font-size:16px}
     if (unanswered === null) unanswered = labeledNumber(surface, ['unanswered','empty']);
     if (wrong === null) wrong = labeledNumber(surface, ['incorrect','wrong']);
     if (answered === null && unanswered !== null) answered = Math.max(0, maxScore - unanswered);
+    if (answered === null) answered = countGenericAnswered();
     if (unanswered === null && answered !== null) unanswered = Math.max(0, maxScore - answered);
     if (wrong === null && answered !== null) wrong = Math.max(0, answered - rawScore);
     if (unanswered === null && wrong !== null) unanswered = Math.max(0, maxScore - rawScore - wrong);
@@ -354,6 +390,7 @@ body{font-size:16px}
       maxScore: maxScore,
       total: maxScore,
       correct: rawScore,
+      answered: answered,
       submittedAt: new Date().toISOString(),
       submissionId: legacySubmissionId,
       details: details
