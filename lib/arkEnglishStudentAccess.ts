@@ -166,6 +166,7 @@ export async function performStudentAccess(body: any): Promise<StudentAccessResu
           first_name: firstName,
           last_name: lastName,
           status: 'active',
+          exam_platform_enabled: false,
         })
         .eq('id', student.id)
         .select(STUDENT_SELECT)
