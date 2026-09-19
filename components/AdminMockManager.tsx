@@ -11,7 +11,7 @@ type FileState = Record<UploadKind, File | null>;
 
 const emptyFiles: FileState = { listeningHtml: null, readingHtml: null, listeningVideo: null, readingVideo: null };
 
-export function AdminMockManager() {
+export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?: boolean; onAutoOpened?: () => void } = {}) {
   const [open, setOpen] = useState(false);
   const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
   const [tab, setTab] = useState<'results' | 'setup'>('results');
@@ -41,6 +41,11 @@ export function AdminMockManager() {
   }, []);
 
   useEffect(() => { setPortalHost(document.body); }, []);
+  useEffect(() => {
+    if (!autoOpen) return;
+    setOpen(true);
+    onAutoOpened?.();
+  }, [autoOpen, onAutoOpened]);
   useEffect(() => { if (open) void load(); }, [load, open]);
 
   useEffect(() => {
