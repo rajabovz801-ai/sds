@@ -23,6 +23,8 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
   const [title, setTitle] = useState('IELTS FULL MOCK 01');
   const [prefix, setPrefix] = useState('ARK-M01');
   const [files, setFiles] = useState<FileState>(emptyFiles);
+  const [replaceMockId, setReplaceMockId] = useState<string | null>(null);
+  const [replaceFiles, setReplaceFiles] = useState<{ listeningHtml: File | null; readingHtml: File | null }>({ listeningHtml: null, readingHtml: null });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -123,6 +125,41 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
     }
   }
 
+  async function replaceHtml(id: string) {
+    if (busy) return;
+    if (!replaceFiles.listeningHtml && !replaceFiles.readingHtml) {
+      setMessage('Kamida bitta HTML fayl tanlang.');
+      setIsError(true);
+      return;
+    }
+
+    setBusy(true);
+    setIsError(false);
+    try {
+      const uploaded: Record<string, any> = {};
+      if (replaceFiles.listeningHtml) uploaded.listeningHtml = await upload('listeningHtml', replaceFiles.listeningHtml);
+      if (replaceFiles.readingHtml) uploaded.readingHtml = await upload('readingHtml', replaceFiles.readingHtml);
+
+      const response = await fetch(`/api/admin/mocks/${id}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action: 'replace-html', ...uploaded }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || 'Mock HTML fayllari almashtirilmadi.');
+
+      setMessage(`${body.replaced || 0} ta HTML yangilandi. Instruction videolar va Candidate kodlar o‘zgarmadi.`);
+      setReplaceFiles({ listeningHtml: null, readingHtml: null });
+      setReplaceMockId(null);
+      await load();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Mock HTML fayllari almashtirilmadi.');
+      setIsError(true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function updateMock(id: string, action: 'publish' | 'close' | 'generate-codes') {
     if (busy) return;
     setBusy(true);
@@ -137,7 +174,9 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
       if (!response.ok) throw new Error(body.error || 'Mock holati o‘zgarmadi.');
       setMessage(action === 'publish'
         ? 'Mock ochildi. Dashboard banner, Candidate ID va kirish kodlari faol.'
-        : 'Mock yopildi. Yangi kirishlar to‘xtatildi, eski natijalar va kodlar saqlanadi.');
+        : action === 'generate-codes'
+          ? `${body.created || 0} ta yangi Candidate ID va Mock Code yaratildi. Jami: ${body.total || 0}.`
+          : 'Mock yopildi. Yangi kirishlar to‘xtatildi, faol urinishlar yakunlandi, natijalar va kodlar saqlandi.');
       await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Mock holati o‘zgarmadi.');
@@ -290,10 +329,57 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
                           {rows.length
                             ? <button className={styles.secondary} onClick={() => void copyCodes(mock.id)}>Copy codes</button>
                             : <button className={styles.secondary} disabled={busy} onClick={() => void updateMock(mock.id, 'generate-codes')}>Generate codes</button>}
+                          {mock.status !== 'published' && (
+                            <button
+                              className={styles.secondary}
+                              disabled={busy}
+                              onClick={() => {
+                                setReplaceMockId((current) => current === mock.id ? null : mock.id);
+                                setReplaceFiles({ listeningHtml: null, readingHtml: null });
+                              }}
+                            >
+                              {replaceMockId === mock.id ? 'Cancel replace' : 'Replace HTML'}
+                            </button>
+                          )}
                           {mock.status !== 'published'
                             ? <button className={styles.primary} disabled={busy || !rows.length} onClick={() => void updateMock(mock.id, 'publish')}>Open Mock</button>
                             : <button className={styles.danger} disabled={busy} onClick={() => void updateMock(mock.id, 'close')}>Close Mock</button>}
                         </div>
+
+                        {replaceMockId === mock.id && mock.status !== 'published' && (
+                          <div className={styles.replacePanel}>
+                            <div className={styles.replaceHead}>
+                              <div>
+                                <strong>Replace test HTML</strong>
+                                <small>Videolar va Candidate ID / Mock Code lar o‘zgarmaydi.</small>
+                              </div>
+                              <span>SAFE REPLACE</span>
+                            </div>
+                            <div className={styles.fileGrid}>
+                              <div className={styles.file}>
+                                <label>Listening HTML</label>
+                                <input
+                                  type="file"
+                                  accept=".html,.htm,text/html"
+                                  onChange={(event) => setReplaceFiles((value) => ({ ...value, listeningHtml: event.target.files?.[0] || null }))}
+                                />
+                                <small>{replaceFiles.listeningHtml?.name || 'O‘zgarmasa bo‘sh qoldiring'}</small>
+                              </div>
+                              <div className={styles.file}>
+                                <label>Reading HTML</label>
+                                <input
+                                  type="file"
+                                  accept=".html,.htm,text/html"
+                                  onChange={(event) => setReplaceFiles((value) => ({ ...value, readingHtml: event.target.files?.[0] || null }))}
+                                />
+                                <small>{replaceFiles.readingHtml?.name || 'O‘zgarmasa bo‘sh qoldiring'}</small>
+                              </div>
+                            </div>
+                            <button className={styles.primary} type="button" disabled={busy} onClick={() => void replaceHtml(mock.id)}>
+                              {busy ? 'Replacing…' : 'Replace selected HTML'}
+                            </button>
+                          </div>
+                        )}
 
                         <div className={styles.tableWrap}>
                           <table className={styles.table}>
