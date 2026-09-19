@@ -161,6 +161,7 @@ export async function POST(request: NextRequest) {
       .from('students')
       .select('id,first_name,last_name')
       .eq('status', 'active')
+      .eq('exam_platform_enabled', true)
       .order('first_name')
       .order('last_name')
       .order('id');
