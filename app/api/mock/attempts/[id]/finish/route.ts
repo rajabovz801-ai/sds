@@ -91,7 +91,29 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .maybeSingle();
 
     if (updateError) throw updateError;
-    if (!completed) return NextResponse.json({ error: 'Mock holati o‘zgargan. Sahifani yangilang.' }, { status: 409 });
+    if (!completed) {
+      const { data: current, error: currentError } = await supabase
+        .from('attempts')
+        .select('id,status,overall_score,overall_band,completed_at')
+        .eq('id', attempt.id)
+        .eq('student_id', session.studentId)
+        .maybeSingle();
+      if (currentError) throw currentError;
+      if (current?.status === 'completed') {
+        return NextResponse.json({
+          ok: true,
+          alreadyCompleted: true,
+          attempt: {
+            id: current.id,
+            status: current.status,
+            overallScore: current.overall_score,
+            overallBand: current.overall_band,
+            completedAt: current.completed_at,
+          },
+        });
+      }
+      return NextResponse.json({ error: 'Mock holati o‘zgargan. Sahifani yangilang.' }, { status: 409 });
+    }
 
     let queued = 0;
     if (!adminPreview) try {
