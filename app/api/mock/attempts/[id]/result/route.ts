@@ -203,6 +203,30 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         : {};
       const previousTelegram = storedDelivery(previousDetails);
       const sameSubmission = Boolean(submissionId && previousDetails.submissionId === submissionId);
+
+      if (exam.status !== 'completed') {
+        const { error: reconcileError } = await supabase
+          .from('test_sessions')
+          .update({
+            status: 'completed',
+            submitted_at: savedAt,
+            raw_score: previous.raw_score ?? rawScore,
+            max_score: previous.max_score ?? maxScore,
+            band: previous.band ?? band,
+            correct_count: correct,
+            wrong_count: wrong,
+            unanswered_count: unanswered,
+            duration_seconds: durationSeconds,
+            client_submission_id: submissionId || exam.client_submission_id || null,
+            details: previousDetails,
+            updated_at: savedAt,
+          })
+          .eq('id', exam.id)
+          .eq('student_id', student.studentId)
+          .eq('superseded', false);
+        if (reconcileError) throw reconcileError;
+      }
+
       if (!adminPreview && sameSubmission && Number(previousTelegram.sent || 0) <= 0) {
         waitUntil(deliverTelegram());
       }
