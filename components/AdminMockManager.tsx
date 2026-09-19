@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase/client';
 import styles from './AdminMockManager.module.css';
 
@@ -11,6 +12,7 @@ const emptyFiles: FileState = { listeningHtml: null, readingHtml: null, listenin
 
 export function AdminMockManager() {
   const [open, setOpen] = useState(false);
+  const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
   const [tab, setTab] = useState<'results' | 'setup'>('results');
   const [data, setData] = useState<any>({ mocks: [], tests: [], codes: [], attempts: [], results: [], students: [] });
   const [loading, setLoading] = useState(false);
@@ -36,6 +38,7 @@ export function AdminMockManager() {
     }
   }, []);
 
+  useEffect(() => { setPortalHost(document.body); }, []);
   useEffect(() => { if (open) void load(); }, [load, open]);
 
   const studentById = useMemo(() => new Map((data.students || []).map((row: any) => [row.id, row])), [data.students]);
@@ -135,7 +138,7 @@ export function AdminMockManager() {
   return (
     <>
       <button className={styles.launcher} type="button" onClick={() => setOpen(true)}>MOCK CONTROL</button>
-      {open && (
+      {open && portalHost && createPortal(
         <div className={styles.backdrop} role="dialog" aria-modal="true">
           <aside className={styles.drawer}>
             <div className={styles.head}>
@@ -213,7 +216,8 @@ export function AdminMockManager() {
               </div>
             )}
           </aside>
-        </div>
+        </div>,
+        portalHost,
       )}
     </>
   );
