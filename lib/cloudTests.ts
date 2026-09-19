@@ -119,3 +119,14 @@ export async function getPublishedTest(id: string): Promise<CloudTest | null> {
   if (error) throw error;
   return data ? mapTest(data as TestRow) : null;
 }
+
+export async function getTestForAdminPreview(id: string): Promise<CloudTest | null> {
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase
+    .from('tests')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapTest(data as TestRow) : null;
+}
