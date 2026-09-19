@@ -123,7 +123,7 @@ export function AdminProfessionalLayer() {
   const [track, setTrack] = useState('all');
   const [skill, setSkill] = useState('all');
   const [health, setHealth] = useState<Health>('all');
-  const [dateRange, setDateRange] = useState<DateRange>('7d');
+  const [dateRange, setDateRange] = useState<DateRange>('all');
   const [testTrack, setTestTrack] = useState('all');
   const [testSkill, setTestSkill] = useState('all');
   const [testStatus, setTestStatus] = useState('all');
