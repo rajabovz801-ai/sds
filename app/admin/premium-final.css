@@ -548,12 +548,6 @@
 .adminStudentResults .adminNoResults p,
 .adminStudentDetail>.adminNoResults p{margin:0!important;font-size:8.8px!important}
 
-/* Dropdown injected by helper */
-.adminTestCollapseToggle{
-  min-height:42px;padding:0 11px;border:1px solid #e2e5e9;border-radius:10px;background:#f8f9fa;color:#343a42;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:inherit;cursor:pointer
-}
-
 /* Focus + scrollbars */
 .adminRoot :where(button,a,input,select,textarea):focus-visible{outline:2px solid rgba(243,195,22,.7)!important;outline-offset:2px!important}
 .adminRoot ::-webkit-scrollbar{width:8px;height:8px}.adminRoot ::-webkit-scrollbar-thumb{background:#cfd3d8;border-radius:999px;border:2px solid transparent;background-clip:padding-box}.adminRoot ::-webkit-scrollbar-track{background:transparent}
