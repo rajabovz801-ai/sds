@@ -23,6 +23,7 @@ async function loadLeaderboardRows() {
         .from('students')
         .select('id,first_name,last_name,last_login_at,avatar_url')
         .eq('status', 'active')
+        .eq('exam_platform_enabled', true)
         .order('first_name', { ascending: true })
         .limit(1000),
       supabase
