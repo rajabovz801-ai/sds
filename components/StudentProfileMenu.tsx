@@ -26,6 +26,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
   const [busy, setBusy] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState('');
+  const isAdminPreview = previewMode || Boolean(student.adminPreview);
   const initials = getInitials(student);
 
   useEffect(() => setAvatarUrl(student.avatarUrl || null), [student.avatarUrl]);
@@ -56,7 +57,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
   }, [open]);
 
   async function uploadAvatar(file: File) {
-    if (previewMode || busy) return;
+    if (isAdminPreview || busy) return;
     setError('');
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       setError('Faqat JPG, PNG yoki WEBP rasm tanlang.');
@@ -86,7 +87,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
   }
 
   async function removeAvatar() {
-    if (previewMode || busy || !avatarUrl) return;
+    if (isAdminPreview || busy || !avatarUrl) return;
     setBusy(true);
     setError('');
     try {
@@ -104,7 +105,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
   }
 
   async function logout() {
-    if (previewMode || loggingOut) return;
+    if (isAdminPreview || loggingOut) return;
     setLoggingOut(true);
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
@@ -128,7 +129,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
           {avatarUrl ? <img src={avatarUrl} alt="" /> : initials}
         </span>
         <span className={styles.triggerCopy}>
-          <small>{previewMode ? 'ADMIN' : 'STUDENT'}</small>
+          <small>{isAdminPreview ? 'ADMIN' : 'STUDENT'}</small>
           <strong>{student.firstName} {student.lastName}</strong>
         </span>
         <span className={styles.triggerIcon}><UserIcon /></span>
@@ -141,7 +142,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
               {avatarUrl ? <img src={avatarUrl} alt="Profil rasmi" /> : initials}
             </span>
             <div>
-              <small>{previewMode ? 'ARK ADMIN' : 'ARK STUDENT'}</small>
+              <small>{isAdminPreview ? 'ARK ADMIN' : 'ARK STUDENT'}</small>
               <strong>{student.firstName} {student.lastName}</strong>
               <span>Shaxsiy profil</span>
             </div>
@@ -152,7 +153,7 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
             <div><span><FlameIcon /></span><small>Streak</small><strong>{streakDays} kun</strong></div>
           </div>
 
-          {!previewMode && (
+          {!isAdminPreview && (
             <div className={styles.avatarActions}>
               <input
                 ref={fileRef}
@@ -177,12 +178,27 @@ export function StudentProfileMenu({ student, totalPts, streakDays, previewMode 
 
           {error && <p className={styles.error}>{error}</p>}
           <div className={styles.rule} />
-          {!previewMode ? (
+          {!isAdminPreview ? (
             <button type="button" className={styles.logout} onClick={logout} disabled={loggingOut}>
               <LogOutIcon /><span>{loggingOut ? 'Chiqilmoqda...' : 'Log out'}</span>
             </button>
           ) : (
-            <div className={styles.previewNote}><UserIcon /> Admin user preview · profil o‘zgarishlari o‘chiq.</div>
+            <button
+              type="button"
+              className={styles.logout}
+              onClick={async () => {
+                setLoggingOut(true);
+                try {
+                  await fetch('/api/admin/student-view', { method: 'DELETE', cache: 'no-store' });
+                } finally {
+                  router.replace('/admin');
+                  router.refresh();
+                }
+              }}
+              disabled={loggingOut}
+            >
+              <LogOutIcon /><span>{loggingOut ? 'Qaytilmoqda...' : 'Admin panelga qaytish'}</span>
+            </button>
           )}
         </div>
       )}
