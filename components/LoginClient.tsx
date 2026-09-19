@@ -7,6 +7,7 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   ArrowUpRightIcon,
+  BotIcon,
   KeyRoundIcon,
   ShieldCheckIcon,
 } from '@/components/UiIcons';
@@ -120,7 +121,7 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
 
   return (
     <form className="authForm" onSubmit={submitStudent}>
-      <span className="authEyebrow">SECURE STUDENT ACCESS</span>
+      <span className="authEyebrow authAccessEyebrow"><ShieldCheckIcon /> SECURE STUDENT ACCESS</span>
       <h1>Qaytganingizdan xursandmiz.</h1>
       <p>Telegram bot bergan bir martalik kodingizni kiriting. Sessiya keyingi tashriflarda avtomatik taniladi.</p>
 
@@ -168,7 +169,9 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
 
       <div className="authDivider"><span>Kod hali yo‘qmi?</span></div>
       <Link className="authTelegram" href="https://t.me/arkedu_bot?start=login" target="_blank" rel="noopener noreferrer">
-        Telegram botdan kod olish <span><ArrowUpRightIcon /></span>
+        <span className="authTelegramIcon"><BotIcon /></span>
+        <b>Telegram botdan kod olish</b>
+        <span className="authTelegramArrow"><ArrowUpRightIcon /></span>
       </Link>
     </form>
   );
