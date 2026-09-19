@@ -40,7 +40,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { id } = await params;
     const body = await request.json();
     const action = String(body?.action || '');
-    if (!['publish', 'close', 'generate-codes'].includes(action)) {
+    if (!['publish', 'close', 'generate-codes', 'replace-html'].includes(action)) {
       return NextResponse.json({ error: 'Mock action noto‘g‘ri.' }, { status: 400 });
     }
 
@@ -52,6 +52,70 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       .maybeSingle();
     if (error) throw error;
     if (!mock) return NextResponse.json({ error: 'Mock topilmadi.' }, { status: 404 });
+
+    if (action === 'replace-html') {
+      if (mock.status === 'published') {
+        return NextResponse.json({ error: 'LIVE mock fayllarini almashtirishdan oldin mockni yoping.' }, { status: 409 });
+      }
+
+      const listeningHtml = body?.listeningHtml && typeof body.listeningHtml === 'object' ? body.listeningHtml : null;
+      const readingHtml = body?.readingHtml && typeof body.readingHtml === 'object' ? body.readingHtml : null;
+      if (!listeningHtml && !readingHtml) {
+        return NextResponse.json({ error: 'Kamida bitta HTML fayl tanlang.' }, { status: 400 });
+      }
+
+      const updates: Array<{ id: string; filePath: string; fileName: string }> = [];
+      if (listeningHtml) {
+        const filePath = String(listeningHtml.path || '');
+        const fileName = String(listeningHtml.name || '');
+        if (!mock.listening_test_id || !filePath.startsWith('ielts/listening/mock-') || !/\.html?$/i.test(fileName)) {
+          return NextResponse.json({ error: 'Listening HTML fayli noto‘g‘ri.' }, { status: 400 });
+        }
+        updates.push({ id: String(mock.listening_test_id), filePath, fileName });
+      }
+      if (readingHtml) {
+        const filePath = String(readingHtml.path || '');
+        const fileName = String(readingHtml.name || '');
+        if (!mock.reading_test_id || !filePath.startsWith('ielts/reading/mock-') || !/\.html?$/i.test(fileName)) {
+          return NextResponse.json({ error: 'Reading HTML fayli noto‘g‘ri.' }, { status: 400 });
+        }
+        updates.push({ id: String(mock.reading_test_id), filePath, fileName });
+      }
+
+      const changedAt = new Date().toISOString();
+      for (const item of updates) {
+        const { error: testUpdateError } = await supabase
+          .from('tests')
+          .update({
+            file_path: item.filePath,
+            file_name: item.fileName,
+            status: 'draft',
+            updated_at: changedAt,
+          })
+          .eq('id', item.id)
+          .eq('mock_only', true);
+        if (testUpdateError) throw testUpdateError;
+      }
+
+      const { error: mockUpdateError } = await supabase
+        .from('mocks')
+        .update({
+          status: mock.status === 'closed' ? 'draft' : mock.status,
+          dashboard_enabled: false,
+          starts_at: null,
+          ends_at: null,
+          updated_at: changedAt,
+        })
+        .eq('id', id);
+      if (mockUpdateError) throw mockUpdateError;
+
+      return NextResponse.json({
+        ok: true,
+        replaced: updates.length,
+        videosPreserved: true,
+        codesPreserved: true,
+      });
+    }
 
     if (action === 'generate-codes') {
       const [{ data: students, error: studentsError }, { data: existingCodes, error: existingError }] = await Promise.all([
