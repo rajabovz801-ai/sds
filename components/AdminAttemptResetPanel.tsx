@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './AdminAttemptResetPanel.module.css';
 
 type Attempt = {
@@ -20,6 +21,7 @@ type Attempt = {
 
 export function AdminAttemptResetPanel() {
   const [open, setOpen] = useState(false);
+  const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [studentId, setStudentId] = useState('');
   const [sessionId, setSessionId] = useState('');
@@ -41,6 +43,8 @@ export function AdminAttemptResetPanel() {
       setLoading(false);
     }
   }
+
+  useEffect(() => { setPortalHost(document.body); }, []);
 
   useEffect(() => {
     if (open) void loadAttempts();
@@ -106,7 +110,7 @@ export function AdminAttemptResetPanel() {
         <div><strong>Qayta ruxsat</strong><small>Studentga testni yana ochish</small></div>
       </button>
 
-      {open && (
+      {open && portalHost && createPortal(
         <div className={styles.backdrop} onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
           <section className={styles.modal} role="dialog" aria-modal="true" aria-label="Testni qayta ochish">
             <header>
@@ -146,7 +150,8 @@ export function AdminAttemptResetPanel() {
               </div>
             )}
           </section>
-        </div>
+        </div>,
+        portalHost,
       )}
     </>
   );
