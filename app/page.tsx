@@ -39,10 +39,10 @@ export default async function HomePage() {
               <Link href="/login?next=/mock" className="arkIeltsPrimary">IELTS Mock boshlash <ArrowRight /></Link>
             </div>
 
-            <div className="arkHeroBenefits">
-              <span><i><TargetIcon /></i><b>Real exam format</b></span>
-              <span><i><ShieldCheckIcon /></i><b>Secure &amp; autosaved</b></span>
-              <span><i><AwardIcon /></i><b>Clear results</b></span>
+            <div className="arkHeroBenefits" aria-label="Platforma afzalliklari">
+              <article><i><TargetIcon /></i><div><small>EXAM FLOW</small><b>Real exam format</b></div></article>
+              <article><i><ShieldCheckIcon /></i><div><small>SECURE</small><b>Autosaved session</b></div></article>
+              <article><i><AwardIcon /></i><div><small>RESULTS</small><b>Clear progress</b></div></article>
             </div>
           </div>
 
@@ -78,10 +78,6 @@ export default async function HomePage() {
 
       </main>
 
-      <footer className="arkMinimalFooter">
-        <span>ARK Education · IELTS &amp; CEFR Exam Platform</span>
-        <Link href="/login">Kirish</Link>
-      </footer>
     </div>
   );
 }
