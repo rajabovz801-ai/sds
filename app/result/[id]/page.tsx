@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation';
 export default async function ResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const student = await requireStudent(`/result/${id}`);
-  const initialData = await getMockAttempt(student.id, id);
+  const initialData = await getMockAttempt(student.id, id, Boolean(student.adminPreview));
   if (!initialData) notFound();
   return <div className="platformRoot"><PlatformNav student={student} /><main className="platformMain"><MockResultClient id={id} data={initialData} /></main></div>;
 }
