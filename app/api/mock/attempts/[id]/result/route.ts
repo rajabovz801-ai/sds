@@ -97,7 +97,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (correct !== null && wrong !== null && unanswered !== null && maxScore !== null && correct + wrong + unanswered !== Math.round(maxScore)) {
       return NextResponse.json({ error: 'Javoblar soni umumiy savollar soniga mos emas.' }, { status: 400 });
     }
-    if (mock.track === 'ielts' && rawScore !== null && maxScore !== null) {
+    if (mock.track === 'ielts' && ['reading', 'listening'].includes(section)) {
+      if (rawScore === null || maxScore === null) {
+        return NextResponse.json({ error: 'IELTS section natijasi to‘liq emas.' }, { status: 400 });
+      }
+      if (Math.round(maxScore) !== 40) {
+        return NextResponse.json({ error: 'IELTS Reading/Listening section 40 savoldan iborat bo‘lishi kerak.' }, { status: 400 });
+      }
       const serverBand = ieltsBand(section, rawScore, maxScore);
       if (serverBand !== null) band = serverBand;
     }
