@@ -45,17 +45,78 @@ export function AdminTestManagerDropdown() {
     <style>{`
       .adminLibrary{overflow:hidden!important}
       .adminLibraryHeader{gap:12px!important;align-items:center!important}
-      .adminTestCollapseToggle{height:50px;min-width:176px;padding:0 14px;border:1px solid rgba(16,43,82,.1);border-radius:14px;background:#fff;color:#102b52;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;box-shadow:0 7px 18px rgba(17,41,70,.035);transition:.18s ease;font-family:inherit}
-      .adminTestCollapseToggle:hover{background:#f9fafb;border-color:rgba(16,43,82,.16)}
-      .adminTestCollapseToggle span{display:block;text-align:left;line-height:1.1}.adminTestCollapseToggle b{display:block;font-size:11px;font-weight:900}.adminTestCollapseToggle small{display:block;margin-top:4px;color:#8b97a7;font-size:8px;font-weight:800;letter-spacing:.02em}
-      .adminTestCollapseToggle i{position:relative;width:28px;height:28px;flex:0 0 28px;border-radius:9px;background:#f3f6f8}.adminTestCollapseToggle i:before,.adminTestCollapseToggle i:after{content:"";position:absolute;top:13px;width:7px;height:2px;border-radius:2px;background:#173c6c;transition:transform .18s ease}.adminTestCollapseToggle i:before{left:7px;transform:rotate(45deg)}.adminTestCollapseToggle i:after{right:7px;transform:rotate(-45deg)}
-      .adminLibrary[data-collapsed="false"] .adminTestCollapseToggle i:before{transform:rotate(-45deg)}.adminLibrary[data-collapsed="false"] .adminTestCollapseToggle i:after{transform:rotate(45deg)}
-      .adminLibrary[data-collapsed="true"]>.adminTestList,.adminLibrary[data-collapsed="true"]>.adminLoading,.adminLibrary[data-collapsed="true"]>.emptyState,.adminLibrary[data-collapsed="true"]>#admin-professional-test-filters{display:none!important}
+      .adminTestCollapseToggle{
+        min-width:196px!important;
+        height:52px!important;
+        padding:0 11px 0 15px!important;
+        border:1px solid #e1e4e8!important;
+        border-radius:12px!important;
+        background:#fff!important;
+        color:#202329!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:space-between!important;
+        gap:14px!important;
+        box-shadow:0 1px 2px rgba(17,19,24,.03)!important;
+        font-family:var(--font-poppins),Poppins,Arial,sans-serif!important;
+        cursor:pointer!important;
+        transition:background .15s ease,border-color .15s ease,box-shadow .15s ease!important
+      }
+      .adminTestCollapseToggle:hover{
+        background:#fafbfc!important;
+        border-color:#d7dbe0!important;
+        box-shadow:0 4px 14px rgba(17,19,24,.05)!important
+      }
+      .adminTestCollapseToggle span{display:block!important;min-width:0!important;text-align:left!important;line-height:1.12!important}
+      .adminTestCollapseToggle b{display:block!important;color:#202329!important;font-size:10.5px!important;font-weight:800!important;white-space:nowrap!important}
+      .adminTestCollapseToggle small{display:block!important;margin-top:4px!important;color:#9298a2!important;font-size:7.5px!important;font-weight:750!important;letter-spacing:.015em!important;white-space:nowrap!important}
+      .adminTestCollapseToggle i{
+        position:relative!important;
+        width:32px!important;
+        height:32px!important;
+        flex:0 0 32px!important;
+        border:1px solid #eceef1!important;
+        border-radius:9px!important;
+        background:#f5f6f8!important
+      }
+      .adminTestCollapseToggle i:before{
+        content:""!important;
+        position:absolute!important;
+        left:50%!important;
+        top:50%!important;
+        width:8px!important;
+        height:8px!important;
+        border-right:2px solid #34404d!important;
+        border-bottom:2px solid #34404d!important;
+        transform:translate(-50%,-62%) rotate(45deg)!important;
+        transform-origin:center!important;
+        transition:transform .16s ease!important
+      }
+      .adminTestCollapseToggle i:after{content:none!important}
+      .adminLibrary[data-collapsed="false"] .adminTestCollapseToggle i:before{
+        transform:translate(-50%,-38%) rotate(225deg)!important
+      }
+      .adminLibrary[data-collapsed="true"]>.adminTestList,
+      .adminLibrary[data-collapsed="true"]>.adminLoading,
+      .adminLibrary[data-collapsed="true"]>.emptyState,
+      .adminLibrary[data-collapsed="true"]>#admin-professional-test-filters{display:none!important}
       .adminLibrary[data-collapsed="true"] .adminLibraryHeader .adminSearch{display:none!important}
       .adminLibrary[data-collapsed="true"]{min-height:0!important}
-      .adminLibrary[data-collapsed="false"]>.adminTestList{max-height:570px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
-      .adminLibrary[data-collapsed="false"]>.adminTestList .adminTestRow{content-visibility:auto;contain-intrinsic-size:96px}
-      @media(max-width:900px){.adminLibraryHeader{flex-wrap:wrap!important}.adminTestCollapseToggle{width:100%;min-width:0}.adminLibrary[data-collapsed="false"]>.adminTestList{max-height:520px}}
+      .adminLibrary[data-collapsed="false"]>.adminTestList{
+        max-height:min(570px,calc(100vh - 250px))!important;
+        overflow:auto!important;
+        overscroll-behavior:contain!important;
+        scrollbar-width:thin!important
+      }
+      .adminLibrary[data-collapsed="false"]>.adminTestList .adminTestRow{
+        content-visibility:auto;
+        contain-intrinsic-size:76px
+      }
+      @media(max-width:900px){
+        .adminLibraryHeader{flex-wrap:wrap!important}
+        .adminTestCollapseToggle{width:100%!important;min-width:0!important}
+        .adminLibrary[data-collapsed="false"]>.adminTestList{max-height:520px!important}
+      }
     `}</style>
   );
 }
