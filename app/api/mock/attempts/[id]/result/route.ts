@@ -81,14 +81,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const correct = integerOrNull(body?.correct ?? body?.result?.correct);
-    const wrong = integerOrNull(body?.wrong ?? body?.result?.wrong);
-    const unanswered = integerOrNull(body?.unanswered ?? body?.result?.unanswered);
+    let wrong = integerOrNull(body?.wrong ?? body?.result?.wrong);
+    let unanswered = integerOrNull(body?.unanswered ?? body?.result?.unanswered);
+    const answered = integerOrNull(body?.answered ?? body?.result?.answered);
     let rawScore = numberOrNull(body?.rawScore ?? body?.score ?? body?.result?.rawScore ?? body?.result?.score);
     let maxScore = numberOrNull(body?.maxScore ?? body?.total ?? body?.result?.maxScore ?? body?.result?.total);
     let band = numberOrNull(body?.band ?? body?.result?.band);
 
     if (rawScore === null && correct !== null) rawScore = correct;
     if (maxScore === null && correct !== null && wrong !== null) maxScore = correct + wrong + (unanswered || 0);
+    if (maxScore !== null && answered !== null) {
+      if (unanswered === null) unanswered = Math.max(0, Math.round(maxScore) - answered);
+      if (wrong === null && correct !== null) wrong = Math.max(0, answered - correct);
+    }
+    if (maxScore !== null && wrong === null && unanswered !== null && correct !== null) {
+      wrong = Math.max(0, Math.round(maxScore) - correct - unanswered);
+    }
+    if (maxScore !== null && unanswered === null && wrong !== null && correct !== null) {
+      unanswered = Math.max(0, Math.round(maxScore) - correct - wrong);
+    }
     if (correct !== null && rawScore !== null && rawScore !== correct) return NextResponse.json({ error: 'Score va correct soni mos emas.' }, { status: 400 });
     if (rawScore !== null && rawScore < 0) return NextResponse.json({ error: 'Score noto‘g‘ri.' }, { status: 400 });
     if (maxScore !== null && maxScore <= 0) return NextResponse.json({ error: 'Max score noto‘g‘ri.' }, { status: 400 });
@@ -121,6 +132,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       correct,
       wrong,
       unanswered,
+      answered,
       source: 'html-bridge',
       savedAt,
     };
