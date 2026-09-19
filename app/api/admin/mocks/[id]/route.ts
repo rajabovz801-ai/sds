@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (action === 'generate-codes') {
       const [{ data: students, error: studentsError }, { data: existingCodes, error: existingError }] = await Promise.all([
-        supabase.from('students').select('id,first_name,last_name').eq('status', 'active').order('first_name').order('last_name').order('id'),
+        supabase.from('students').select('id,first_name,last_name').eq('status', 'active').eq('exam_platform_enabled', true).order('first_name').order('last_name').order('id'),
         supabase.from('mock_access_codes').select('student_id,candidate_id').eq('mock_id', id),
       ]);
       if (studentsError) throw studentsError;
