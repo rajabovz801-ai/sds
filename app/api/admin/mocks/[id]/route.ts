@@ -14,6 +14,7 @@ async function ensureDraftBridge(testIds: string[]) {
   if ((tests || []).length !== testIds.length) throw new Error('Mock test fayllari topilmadi.');
 
   for (const test of tests || []) {
+    if (String(test.file_path || '').startsWith('repo://')) continue;
     const { data: file, error: downloadError } = await supabase.storage.from(HTML_TESTS_BUCKET).download(test.file_path);
     if (downloadError || !file) throw downloadError || new Error('Mock HTML yuklanmadi.');
     let html = await file.text();
