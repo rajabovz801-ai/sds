@@ -56,6 +56,7 @@ export function AdminToolsHub() {
   const [active, setActive] = useState<Tool>('exam');
   const [topbarHost, setTopbarHost] = useState<HTMLElement | null>(null);
   const [bodyHost, setBodyHost] = useState<HTMLElement | null>(null);
+  const [autoOpenMock, setAutoOpenMock] = useState(false);
 
   useEffect(() => {
     setBodyHost(document.body);
@@ -72,6 +73,19 @@ export function AdminToolsHub() {
     });
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const onOpenTool = (event: Event) => {
+      const detail = (event as CustomEvent<string>).detail;
+      if (detail === 'full-mock') {
+        setActive('exam');
+        setOpen(true);
+        setAutoOpenMock(true);
+      }
+    };
+    window.addEventListener('ark:admin-open-tool', onOpenTool as EventListener);
+    return () => window.removeEventListener('ark:admin-open-tool', onOpenTool as EventListener);
   }, []);
 
   useEffect(() => {
@@ -144,7 +158,7 @@ export function AdminToolsHub() {
                       <strong>Full Mock</strong>
                       <small>Listening + Reading, Candidate ID, Mock Code va natijalar</small>
                     </div>
-                    <div className={styles.launcherHost}><AdminMockManager /></div>
+                    <div className={styles.launcherHost}><AdminMockManager autoOpen={autoOpenMock} onAutoOpened={() => setAutoOpenMock(false)} /></div>
                   </article>
 
                   <article>
