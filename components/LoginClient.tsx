@@ -7,7 +7,7 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   ArrowUpRightIcon,
-  BotIcon,
+  TelegramIcon,
   KeyRoundIcon,
   ShieldCheckIcon,
 } from '@/components/UiIcons';
@@ -139,7 +139,7 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
         >
           <span className="authOtpKey"><KeyRoundIcon /></span>
           <span className="authOtpBoxes" aria-hidden="true">
-            {Array.from({ length: 8 }, (_, index) => (
+            {Array.from({ length: 6 }, (_, index) => (
               <i key={index} className={code[index] ? 'filled' : index === code.length ? 'current' : ''}>
                 {code[index] || ''}
               </i>
@@ -152,24 +152,24 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
           id="login-code"
           className="authOtpInput"
           value={code}
-          onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 8))}
+          onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
           inputMode="numeric"
           autoComplete="one-time-code"
           autoFocus
           aria-describedby="login-help"
         />
-        <span id="login-help">4–8 xonali kod · faqat bir marta ishlaydi</span>
+        <span id="login-help">6 xonali kod · faqat bir marta ishlaydi</span>
       </div>
 
       {error && <div className="authError" role="alert">{error}</div>}
 
-      <button className="authPrimary authSubmit" type="submit" disabled={busy || code.length < 4}>
+      <button className="authPrimary authSubmit" type="submit" disabled={busy || code.length !== 6}>
         {busy ? 'Tekshirilmoqda…' : 'Platformaga kirish'} <span><ArrowRightIcon /></span>
       </button>
 
       <div className="authDivider"><span>Kod hali yo‘qmi?</span></div>
       <Link className="authTelegram" href="https://t.me/arkedu_bot?start=login" target="_blank" rel="noopener noreferrer">
-        <span className="authTelegramIcon"><BotIcon /></span>
+        <span className="authTelegramIcon"><TelegramIcon /></span>
         <b>Telegram botdan kod olish</b>
         <span className="authTelegramArrow"><ArrowUpRightIcon /></span>
       </Link>
