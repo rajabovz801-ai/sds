@@ -57,12 +57,13 @@ type Overview = {
   skills: Array<{ skill: string; attempts: number; average: number }>;
 };
 
-type Health = 'all' | 'completed' | 'in_progress' | 'missing' | 'expired' | 'other';
+type Health = 'all' | 'completed' | 'in_progress' | 'incomplete' | 'missing' | 'expired' | 'other';
 type DateRange = 'all' | 'today' | '7d' | '30d';
 
 function resultHealth(result: ResultRow): Exclude<Health, 'all'> {
   if (result.status === 'completed') return 'completed';
   if (result.status === 'in_progress') return 'in_progress';
+  if (result.status === 'incomplete' || result.status === 'abandoned') return 'incomplete';
   if (result.status === 'expired' && result.score === null) return 'missing';
   if (result.status === 'expired') return 'expired';
   return 'other';
@@ -70,7 +71,8 @@ function resultHealth(result: ResultRow): Exclude<Health, 'all'> {
 
 function healthLabel(health: Exclude<Health, 'all'>) {
   if (health === 'completed') return 'COMPLETED';
-  if (health === 'in_progress') return 'IN PROGRESS';
+  if (health === 'in_progress') return 'LIVE';
+  if (health === 'incomplete') return 'INCOMPLETE';
   if (health === 'missing') return 'RESULT MISSING';
   if (health === 'expired') return 'EXPIRED';
   return 'OTHER';
@@ -79,6 +81,7 @@ function healthLabel(health: Exclude<Health, 'all'>) {
 function healthClass(health: Exclude<Health, 'all'>) {
   if (health === 'completed') return styles.completed;
   if (health === 'in_progress') return styles.inProgress;
+  if (health === 'incomplete') return styles.incomplete;
   if (health === 'missing') return styles.missing;
   if (health === 'expired') return styles.expired;
   return styles.other;
@@ -248,6 +251,7 @@ export function AdminProfessionalLayer() {
     return {
       completed: results.filter((result) => resultHealth(result) === 'completed').length,
       live: results.filter((result) => resultHealth(result) === 'in_progress').length,
+      incomplete: results.filter((result) => resultHealth(result) === 'incomplete').length,
       missing: results.filter((result) => resultHealth(result) === 'missing').length,
       expired: results.filter((result) => resultHealth(result) === 'expired').length,
       todayCompleted,
@@ -383,7 +387,7 @@ export function AdminProfessionalLayer() {
           <select value={dateRange} onChange={(event) => setDateRange(event.target.value as DateRange)}><option value="today">Bugun</option><option value="7d">7 kun</option><option value="30d">30 kun</option><option value="all">Barcha vaqt</option></select>
           <select value={track} onChange={(event) => setTrack(event.target.value)}><option value="all">IELTS + CEFR</option><option value="ielts">IELTS</option><option value="cefr">CEFR</option></select>
           <select value={skill} onChange={(event) => setSkill(event.target.value)}><option value="all">Barcha skill</option><option value="reading">Reading</option><option value="listening">Listening</option><option value="writing">Writing</option><option value="speaking">Speaking</option><option value="full-mock">Full mock</option></select>
-          <select value={health} onChange={(event) => setHealth(event.target.value as Health)}><option value="all">Barcha status</option><option value="completed">Completed</option><option value="in_progress">In progress</option><option value="missing">Result missing</option><option value="expired">Expired</option><option value="other">Other</option></select>
+          <select value={health} onChange={(event) => setHealth(event.target.value as Health)}><option value="all">Barcha status</option><option value="completed">Completed</option><option value="in_progress">Live</option><option value="incomplete">Incomplete mock</option><option value="missing">Result missing</option><option value="expired">Expired</option><option value="other">Other</option></select>
         </div>
 
         <div className={styles.tableShell}>
