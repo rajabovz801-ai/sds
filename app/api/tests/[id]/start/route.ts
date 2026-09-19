@@ -185,22 +185,26 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .single();
 
     if (createError) {
-      if ((createError as { code?: string }).code === '23505' && mode === 'practice') {
-        const { data: current, error: currentError } = await supabase
+      if ((createError as { code?: string }).code === '23505') {
+        let currentQuery = supabase
           .from('test_sessions')
           .select('id,status,started_at,expires_at,locked_until')
           .eq('student_id', student.studentId)
           .eq('test_id', testId)
-          .eq('mode', 'practice')
+          .eq('mode', mode)
           .eq('superseded', false)
-          .eq('status', 'in_progress')
-          .maybeSingle();
+          .eq('status', 'in_progress');
+
+        if (mode === 'mock') {
+          currentQuery = currentQuery.eq('mock_attempt_id', attemptId).eq('section', section);
+        }
+
+        const { data: current, error: currentError } = await currentQuery.maybeSingle();
         if (currentError) throw currentError;
         if (current && new Date(current.expires_at).getTime() > Date.now()) {
           return sessionResponse(current as SessionRow, true, durationSeconds);
         }
-      }
-      if ((createError as { code?: string }).code === '23505') {
+
         return NextResponse.json({ error: 'Bu test uchun faol urinish allaqachon mavjud.', code: 'ATTEMPT_ACTIVE' }, { status: 409 });
       }
       throw createError;
