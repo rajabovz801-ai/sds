@@ -226,6 +226,25 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
     });
   }
 
+  function adminPreviewRows(mockId: string) {
+    const codes = new Set((data.codes || []).filter((row: any) => row.mock_id === mockId).map((row: any) => row.student_id));
+    const attempts = (data.attempts || []).filter((row: any) => row.mock_id === mockId && !codes.has(row.student_id));
+    return attempts
+      .filter((attempt: any) => {
+        const student: any = studentById.get(attempt.student_id);
+        return student && student.exam_platform_enabled === false;
+      })
+      .map((attempt: any) => {
+        const sectionResults = (data.results || []).filter((row: any) => row.attempt_id === attempt.id);
+        return {
+          attempt,
+          listening: sectionResults.find((row: any) => row.section === 'listening') || null,
+          reading: sectionResults.find((row: any) => row.section === 'reading') || null,
+        };
+      })
+      .sort((a: any, b: any) => String(b.attempt.started_at || '').localeCompare(String(a.attempt.started_at || '')));
+  }
+
   async function copyCodes(mockId: string) {
     const rows = candidateRows(mockId);
     const lines = rows.map(({ code, student }: any) => {
@@ -333,6 +352,7 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
 
                   {(data.mocks || []).map((mock: any) => {
                     const rows = candidateRows(mock.id);
+                    const previewRows = adminPreviewRows(mock.id);
                     const completed = rows.filter((row: any) => row.attempt?.status === 'completed').length;
                     const inProgress = rows.filter((row: any) => row.attempt?.status === 'in_progress').length;
                     return (
@@ -419,6 +439,17 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
                               </tr>
                             </thead>
                             <tbody>
+                              {previewRows.slice(0, 1).map(({ attempt, listening, reading }: any) => (
+                                <tr key={`admin-preview-${attempt.id}`}>
+                                  <td>ADMIN-PREVIEW</td>
+                                  <td>Admin test</td>
+                                  <td className={styles.code}>—</td>
+                                  <td>{attempt?.status || 'not started'}</td>
+                                  <td>{listening ? `${listening.raw_score ?? '—'}/${listening.max_score ?? 40} · ${listening.band ?? '—'}` : '—'}</td>
+                                  <td>{reading ? `${reading.raw_score ?? '—'}/${reading.max_score ?? 40} · ${reading.band ?? '—'}` : '—'}</td>
+                                  <td>{attempt?.overall_band ?? '—'}</td>
+                                </tr>
+                              ))}
                               {rows.map(({ code, student, attempt, listening, reading }: any) => (
                                 <tr key={code.id}>
                                   <td>{code.candidate_id || '—'}</td>
