@@ -226,36 +226,327 @@
 .adminRowActions .startTest{background:#eaf7ef!important;border-color:#c9e5d4!important;color:#24764f!important}.adminRowActions .stopTest{background:#fff4db!important;border-color:#ead39a!important;color:#7d6120!important}.adminRowActions .danger{background:#fff0ef!important;border-color:#efc9c5!important;color:#b34743!important}
 
 /* Students */
-.adminStudentsLayout{display:grid!important;grid-template-columns:minmax(300px,.7fr) minmax(0,1.3fr)!important;gap:14px!important;align-items:start!important}
-.adminStudentList{height:640px!important;display:flex!important;flex-direction:column!important}
-.adminStudentDetail{min-height:640px!important}
-.adminStudentListHead{padding:13px 14px 11px!important;border-bottom:1px solid #eceef1!important;display:grid!important;gap:10px!important}
-.adminStudentRows{padding:6px!important;overflow:auto!important;min-height:0!important}
-.adminStudentRows>button{
-  width:100%!important;min-width:0!important;min-height:58px!important;padding:7px!important;border:0!important;border-bottom:1px solid #eff1f2!important;border-radius:9px!important;background:transparent!important;
-  display:grid!important;grid-template-columns:36px minmax(0,1fr) auto!important;align-items:center!important;gap:9px!important;text-align:left!important;cursor:pointer!important
+.adminStudentsLayout{
+  display:grid!important;
+  grid-template-columns:minmax(330px,380px) minmax(0,1fr)!important;
+  gap:18px!important;
+  align-items:start!important
 }
-.adminStudentRows>button:hover{background:#f8f9fa!important}.adminStudentRows>button.active{background:#fff9df!important}
-.adminStudentRows>button>span{width:36px!important;height:36px!important;border-radius:10px!important;background:#f0f2f4!important;color:#5d646d!important;display:grid!important;place-items:center!important;font-size:9px!important;font-weight:800!important}
-.adminStudentRows>button>div{min-width:0!important}.adminStudentRows b{display:block!important;color:#282c31!important;font-size:9.5px!important}.adminStudentRows small{display:block!important;margin-top:3px!important;color:#999fa8!important;font-size:7.5px!important}
-.adminStudentRows i{padding:4px 6px!important;border-radius:999px!important;font-size:6px!important;font-style:normal!important;font-weight:850!important}.adminStudentRows i.active{background:#eaf7ef!important;color:#24764f!important}.adminStudentRows i.blocked{background:#fff0ef!important;color:#b34743!important}
-.adminStudentProfile{min-height:92px!important;padding:15px 17px!important;border-bottom:1px solid #eceef1!important;display:grid!important;grid-template-columns:52px minmax(0,1fr) auto!important;align-items:center!important;gap:12px!important}
-.adminStudentProfile>span{width:52px!important;height:52px!important;border-radius:13px!important;background:#f1f2f4!important;color:#555c66!important;display:grid!important;place-items:center!important;font-size:13px!important;font-weight:800!important}
-.adminStudentProfile h2{margin:4px 0 3px!important;color:#17191e!important;font-size:18px!important}.adminStudentProfile p{margin:0!important;color:#9298a2!important;font-size:8px!important}
-.adminStudentProfile button{min-height:36px!important;padding:0 11px!important;border-radius:9px!important;font-size:8px!important;font-weight:800!important;cursor:pointer!important}
-.banStudent{border:1px solid #efc9c5!important;background:#fff0ef!important;color:#ad433f!important}.unbanStudent{border:1px solid #cce6d7!important;background:#eaf7ef!important;color:#26734f!important}
-.adminStudentSummary{padding:15px!important;display:grid!important;grid-template-columns:100px repeat(3,minmax(0,1fr))!important;gap:9px!important}
-.adminStudentSummary>div:not(.adminAccuracyRing){min-height:88px!important;padding:12px!important;border:1px solid #e8eaed!important;border-radius:10px!important;background:#fafbfc!important}
-.adminStudentSummary small{display:block!important;color:#989ea8!important;font-size:7px!important;font-weight:800!important}.adminStudentSummary strong{display:block!important;margin-top:7px!important;color:#17191e!important;font-size:19px!important}.adminStudentSummary span{display:block!important;margin-top:2px!important;color:#9ba1aa!important;font-size:7px!important}
-.adminAccuracyRing{width:90px!important;height:90px!important;border-radius:50%!important;display:grid!important;place-items:center!important}.adminAccuracyRing>span{width:68px!important;height:68px!important;border-radius:50%!important;background:#fff!important;display:grid!important;place-content:center!important;text-align:center!important}.adminAccuracyRing>span strong{font-size:15px!important;margin:0!important}
-.adminStudentTrend{margin:0 15px 8px!important;padding:13px 14px!important;border:1px solid #e8eaed!important;border-radius:11px!important;background:#fafbfc!important}
-.adminStudentTrend h3{margin:4px 0 0!important;font-size:12px!important}.adminStudentTrendBars{height:90px!important;margin-top:10px!important;display:flex!important;align-items:flex-end!important;gap:8px!important}.adminStudentTrendBars>span{height:100%!important;flex:1!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;align-items:center!important;gap:5px!important}.adminStudentTrendBars i{width:min(24px,70%)!important;min-height:4px!important;border-radius:5px 5px 2px 2px!important;background:var(--admin-gold)!important}.adminStudentTrendBars small{font-size:6.5px!important}
-.adminStudentResultsHead{padding:13px 16px 10px!important;border-top:1px solid #eceef1!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}.adminStudentResultsHead h3{margin:4px 0 0!important;font-size:12px!important}.adminStudentResultsHead>span{color:#9298a2!important;font-size:8px!important}
-.adminStudentResults{padding:0 12px 12px!important}.adminStudentResults article{min-width:0!important;min-height:76px!important;padding:10px 5px!important;border-bottom:1px solid #eef0f2!important;display:grid!important;grid-template-columns:minmax(190px,1fr) minmax(340px,1.3fr)!important;align-items:center!important;gap:12px!important}
-.adminStudentResults article>div:first-child{min-width:0!important}.adminStudentResults article>div:first-child>span{color:#8e949d!important;font-size:6.5px!important;font-weight:800!important}.adminStudentResults h4{margin:4px 0 2px!important;color:#262a30!important;font-size:9.5px!important}.adminStudentResults article small{color:#9aa0a8!important;font-size:7px!important}
-.adminResultNumbers{display:grid!important;grid-template-columns:repeat(7,minmax(44px,1fr))!important;gap:5px!important}.adminResultNumbers>span{min-width:0!important;padding:7px!important;border-radius:8px!important;background:#f7f8f9!important}.adminResultNumbers small{display:block!important;font-size:6px!important}.adminResultNumbers b{display:block!important;margin-top:3px!important;font-size:8px!important;white-space:nowrap!important}
-.adminNoResults,.emptyState,.adminLoading,.adminAnalyticsSetup{min-height:120px!important;padding:24px!important;display:grid!important;place-items:center!important;text-align:center!important;color:#8e949d!important}.adminNoResults svg,.emptyIcon svg,.adminAnalyticsSetup svg{width:24px!important;height:24px!important;fill:none!important;stroke:currentColor!important}.emptyState h3,.adminAnalyticsSetup h2{margin:8px 0 4px!important;color:#3b4149!important;font-size:12px!important}.emptyState p,.adminAnalyticsSetup p,.adminLoading p{margin:0!important;font-size:8.5px!important}
-.adminLoading>span{width:24px!important;height:24px!important;border:2px solid #e1e4e8!important;border-top-color:#c59b00!important;border-radius:50%!important;animation:adminSpin .8s linear infinite!important}@keyframes adminSpin{to{transform:rotate(360deg)}}
+.adminStudentList,
+.adminStudentDetail{
+  height:clamp(590px,calc(100vh - 205px),760px)!important;
+  min-height:590px!important
+}
+.adminStudentList{display:flex!important;flex-direction:column!important}
+.adminStudentDetail{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+
+.adminStudentListHead{
+  flex:0 0 auto!important;
+  padding:17px 17px 14px!important;
+  border-bottom:1px solid #eceef1!important;
+  display:grid!important;
+  gap:12px!important;
+  background:#fff!important
+}
+.adminStudentListHead>div{display:flex!important;align-items:end!important;justify-content:space-between!important;gap:12px!important}
+.adminStudentListHead small,
+.adminStudentProfile small,
+.adminStudentResultsHead small,
+.adminStudentTrend small{
+  color:#9298a2!important;
+  font-size:8px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  letter-spacing:.11em!important
+}
+.adminStudentListHead h2{
+  margin:4px 0 0!important;
+  color:#17191e!important;
+  font-size:16px!important;
+  line-height:1.15!important;
+  font-weight:800!important;
+  letter-spacing:-.02em!important
+}
+.adminStudentListHead .adminSearch{
+  width:100%!important;
+  min-width:0!important;
+  height:42px!important;
+  border-radius:11px!important;
+  background:#fbfcfd!important
+}
+.adminStudentListHead .adminSearch input{font-size:9.5px!important}
+
+.adminStudentRows{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  padding:8px!important;
+  overflow:auto!important;
+  overscroll-behavior:contain!important;
+  scrollbar-gutter:stable!important
+}
+.adminStudentRows>button{
+  width:100%!important;
+  min-width:0!important;
+  min-height:64px!important;
+  margin:0 0 4px!important;
+  padding:9px 9px!important;
+  border:1px solid transparent!important;
+  border-radius:11px!important;
+  background:transparent!important;
+  display:grid!important;
+  grid-template-columns:40px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:10px!important;
+  text-align:left!important;
+  cursor:pointer!important;
+  transition:background .14s ease,border-color .14s ease,transform .14s ease!important
+}
+.adminStudentRows>button:hover{
+  background:#f7f8f9!important;
+  border-color:#eceef1!important;
+  transform:translateX(1px)!important
+}
+.adminStudentRows>button.active{
+  background:#fff7cf!important;
+  border-color:#f1dc76!important;
+  box-shadow:inset 3px 0 #f3c316!important
+}
+.adminStudentRows>button>span{
+  width:40px!important;height:40px!important;
+  border-radius:11px!important;
+  background:#f0f2f4!important;
+  color:#59616b!important;
+  display:grid!important;place-items:center!important;
+  font-size:9.5px!important;font-weight:800!important;
+  letter-spacing:.02em!important
+}
+.adminStudentRows>button.active>span{background:#fff!important;color:#6f5700!important}
+.adminStudentRows>button>div{min-width:0!important}
+.adminStudentRows b{
+  display:block!important;
+  color:#25292f!important;
+  font-size:11px!important;
+  line-height:1.25!important;
+  font-weight:750!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important
+}
+.adminStudentRows small{
+  display:block!important;
+  margin-top:4px!important;
+  color:#989ea7!important;
+  font-size:8px!important;
+  line-height:1.25!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important
+}
+.adminStudentRows i{
+  padding:5px 7px!important;
+  border-radius:999px!important;
+  font-size:6.5px!important;
+  line-height:1!important;
+  font-style:normal!important;
+  font-weight:900!important;
+  letter-spacing:.05em!important
+}
+.adminStudentRows i.active{background:#eaf7ef!important;color:#23764e!important}
+.adminStudentRows i.blocked{background:#fff0ef!important;color:#b34743!important}
+
+.adminStudentProfile{
+  flex:0 0 auto!important;
+  min-height:92px!important;
+  padding:17px 18px!important;
+  border-bottom:1px solid #eceef1!important;
+  display:grid!important;
+  grid-template-columns:52px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:13px!important;
+  background:#fff!important
+}
+.adminStudentProfile>span{
+  width:52px!important;height:52px!important;
+  border-radius:14px!important;
+  background:#f0f2f4!important;
+  color:#545c66!important;
+  display:grid!important;place-items:center!important;
+  font-size:13px!important;font-weight:850!important
+}
+.adminStudentProfile>div{min-width:0!important}
+.adminStudentProfile h2{
+  margin:4px 0 3px!important;
+  color:#17191e!important;
+  font-size:18px!important;
+  line-height:1.15!important;
+  font-weight:800!important;
+  letter-spacing:-.025em!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important
+}
+.adminStudentProfile p{
+  margin:0!important;
+  color:#9298a2!important;
+  font-size:8.5px!important;
+  line-height:1.3!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important
+}
+.adminStudentProfile button{
+  min-height:38px!important;
+  padding:0 12px!important;
+  border-radius:10px!important;
+  font-size:8.5px!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+  white-space:nowrap!important
+}
+.banStudent{border:1px solid #efc9c5!important;background:#fff0ef!important;color:#ad433f!important}
+.unbanStudent{border:1px solid #cce6d7!important;background:#eaf7ef!important;color:#26734f!important}
+
+.adminStudentSummary{
+  flex:0 0 auto!important;
+  padding:16px 18px!important;
+  display:grid!important;
+  grid-template-columns:108px repeat(3,minmax(0,1fr))!important;
+  gap:10px!important
+}
+.adminStudentSummary>div:not(.adminAccuracyRing){
+  min-width:0!important;
+  min-height:92px!important;
+  padding:13px!important;
+  border:1px solid #e6e9ed!important;
+  border-radius:12px!important;
+  background:#fafbfc!important
+}
+.adminStudentSummary small{
+  display:block!important;
+  color:#989ea8!important;
+  font-size:7.2px!important;
+  line-height:1.2!important;
+  font-weight:850!important;
+  letter-spacing:.08em!important
+}
+.adminStudentSummary strong{
+  display:block!important;
+  margin-top:8px!important;
+  color:#17191e!important;
+  font-size:20px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  letter-spacing:-.02em!important
+}
+.adminStudentSummary span{
+  display:block!important;
+  margin-top:5px!important;
+  color:#9ba1aa!important;
+  font-size:7.5px!important
+}
+.adminAccuracyRing{
+  width:94px!important;height:94px!important;
+  margin:auto!important;
+  border-radius:50%!important;
+  display:grid!important;place-items:center!important
+}
+.adminAccuracyRing>span{
+  width:72px!important;height:72px!important;
+  border-radius:50%!important;background:#fff!important;
+  display:grid!important;place-content:center!important;text-align:center!important;
+  box-shadow:0 0 0 1px #eceef1!important
+}
+.adminAccuracyRing>span strong{font-size:16px!important;margin:0!important}
+.adminAccuracyRing>span small{margin-top:4px!important;font-size:6px!important}
+
+.adminStudentTrend{
+  flex:0 0 auto!important;
+  min-height:118px!important;
+  margin:0 18px 10px!important;
+  padding:14px 15px!important;
+  border:1px solid #e7eaee!important;
+  border-radius:12px!important;
+  background:#fafbfc!important
+}
+.adminStudentTrend>div:first-child{display:flex!important;align-items:end!important;justify-content:space-between!important;gap:12px!important}
+.adminStudentTrend h3{margin:4px 0 0!important;color:#23272d!important;font-size:12px!important;font-weight:780!important}
+.adminStudentTrend>p{
+  margin:20px 0 4px!important;
+  color:#9aa0a9!important;
+  font-size:8.5px!important;
+  text-align:center!important
+}
+.adminStudentTrendBars{height:72px!important;margin-top:10px!important;display:flex!important;align-items:flex-end!important;gap:8px!important}
+.adminStudentTrendBars>span{height:100%!important;flex:1!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;align-items:center!important;gap:5px!important}
+.adminStudentTrendBars i{width:min(24px,70%)!important;min-height:4px!important;border-radius:5px 5px 2px 2px!important;background:var(--admin-gold)!important}
+.adminStudentTrendBars small{font-size:6.5px!important}
+
+.adminStudentResultsHead{
+  flex:0 0 auto!important;
+  min-height:54px!important;
+  padding:11px 18px!important;
+  border-top:1px solid #eceef1!important;
+  border-bottom:1px solid #f0f1f3!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  background:#fff!important
+}
+.adminStudentResultsHead h3{margin:4px 0 0!important;color:#23272d!important;font-size:12px!important;font-weight:780!important}
+.adminStudentResultsHead>span{
+  padding:5px 8px!important;
+  border-radius:999px!important;
+  background:#f3f4f6!important;
+  color:#7f8791!important;
+  font-size:7.5px!important;
+  font-weight:800!important
+}
+.adminStudentResults{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  padding:6px 14px 14px!important;
+  overflow:auto!important;
+  overscroll-behavior:contain!important
+}
+.adminStudentResults article{
+  min-width:0!important;
+  min-height:76px!important;
+  padding:10px 4px!important;
+  border-bottom:1px solid #eef0f2!important;
+  display:grid!important;
+  grid-template-columns:minmax(190px,1fr) minmax(360px,1.35fr)!important;
+  align-items:center!important;
+  gap:14px!important
+}
+.adminStudentResults article>div:first-child{min-width:0!important}
+.adminStudentResults article>div:first-child>span{color:#8e949d!important;font-size:6.8px!important;font-weight:850!important;letter-spacing:.07em!important}
+.adminStudentResults h4{margin:4px 0 3px!important;color:#262a30!important;font-size:9.8px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.adminStudentResults article small{color:#9aa0a8!important;font-size:7.2px!important}
+.adminResultNumbers{display:grid!important;grid-template-columns:repeat(7,minmax(46px,1fr))!important;gap:5px!important}
+.adminResultNumbers>span{min-width:0!important;padding:7px!important;border-radius:8px!important;background:#f7f8f9!important}
+.adminResultNumbers small{display:block!important;font-size:6px!important}
+.adminResultNumbers b{display:block!important;margin-top:3px!important;font-size:8px!important;white-space:nowrap!important}
+
+.adminStudentResults .adminNoResults,
+.adminStudentDetail>.adminNoResults{
+  min-height:150px!important;
+  margin:14px!important;
+  padding:24px!important;
+  border:1px dashed #dfe3e7!important;
+  border-radius:13px!important;
+  background:#fafbfc!important;
+  display:grid!important;
+  place-items:center!important;
+  align-content:center!important;
+  gap:7px!important;
+  text-align:center!important;
+  color:#8e949d!important
+}
+.adminStudentResults .adminNoResults svg,
+.adminStudentDetail>.adminNoResults svg{width:23px!important;height:23px!important;fill:none!important;stroke:currentColor!important}
+.adminStudentResults .adminNoResults p,
+.adminStudentDetail>.adminNoResults p{margin:0!important;font-size:8.8px!important}
 
 /* Dropdown injected by helper */
 .adminTestCollapseToggle{
