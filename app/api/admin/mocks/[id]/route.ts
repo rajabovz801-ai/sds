@@ -1,5 +1,7 @@
+import { randomInt } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { checkAdminRequest } from '@/lib/adminAuth';
+import { hashAccessCode } from '@/lib/auth/codes';
 import { mockDraftBridgeScript } from '@/lib/mockDraftBridge';
 import { getServiceSupabase, HTML_TESTS_BUCKET } from '@/lib/supabase/server';
 
@@ -38,7 +40,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { id } = await params;
     const body = await request.json();
     const action = String(body?.action || '');
-    if (!['publish', 'close'].includes(action)) {
+    if (!['publish', 'close', 'generate-codes'].includes(action)) {
       return NextResponse.json({ error: 'Mock action noto‘g‘ri.' }, { status: 400 });
     }
 
@@ -51,9 +53,71 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (error) throw error;
     if (!mock) return NextResponse.json({ error: 'Mock topilmadi.' }, { status: 404 });
 
+    if (action === 'generate-codes') {
+      const [{ data: students, error: studentsError }, { data: existingCodes, error: existingError }] = await Promise.all([
+        supabase.from('students').select('id,first_name,last_name').eq('status', 'active').order('first_name').order('last_name').order('id'),
+        supabase.from('mock_access_codes').select('student_id,candidate_id').eq('mock_id', id),
+      ]);
+      if (studentsError) throw studentsError;
+      if (existingError) throw existingError;
+      if (!students?.length) return NextResponse.json({ error: 'Faol o‘quvchilar topilmadi.' }, { status: 409 });
+
+      const existingStudentIds = new Set((existingCodes || []).map((row) => String(row.student_id)));
+      const missing = students.filter((student) => !existingStudentIds.has(String(student.id)));
+      if (!missing.length) {
+        return NextResponse.json({ ok: true, created: 0, total: existingCodes?.length || 0 });
+      }
+
+      const usedCodes = new Set<string>();
+      const makeCode = () => {
+        let code = '';
+        do code = String(randomInt(100000, 1000000));
+        while (usedCodes.has(code));
+        usedCodes.add(code);
+        return code;
+      };
+
+      const maxCandidate = (existingCodes || []).reduce((max, row) => {
+        const match = String(row.candidate_id || '').match(/-(\d+)$/);
+        return match ? Math.max(max, Number(match[1]) || 0) : max;
+      }, 0);
+
+      const prefixResult = await supabase.from('mocks').select('candidate_prefix').eq('id', id).single();
+      if (prefixResult.error) throw prefixResult.error;
+      const prefix = String(prefixResult.data?.candidate_prefix || 'ARK-MOCK');
+
+      const rows = missing.map((student, index) => {
+        const code = makeCode();
+        return {
+          student_id: student.id,
+          mock_id: id,
+          candidate_id: `${prefix}-${String(maxCandidate + index + 1).padStart(3, '0')}`,
+          code_plain: code,
+          code_hash: hashAccessCode(code),
+          expires_at: null,
+          used_at: null,
+        };
+      });
+      const { error: insertError } = await supabase.from('mock_access_codes').insert(rows);
+      if (insertError) throw insertError;
+
+      return NextResponse.json({
+        ok: true,
+        created: rows.length,
+        total: (existingCodes?.length || 0) + rows.length,
+      });
+    }
+
     if (action === 'publish') {
       const testIds = [mock.listening_test_id, mock.reading_test_id].filter(Boolean) as string[];
       if (testIds.length !== 2) return NextResponse.json({ error: 'Listening va Reading testlari to‘liq biriktirilmagan.' }, { status: 409 });
+
+      const { count: codeCount, error: codeCountError } = await supabase
+        .from('mock_access_codes')
+        .select('id', { count: 'exact', head: true })
+        .eq('mock_id', id);
+      if (codeCountError) throw codeCountError;
+      if (!codeCount) return NextResponse.json({ error: 'Avval Candidate ID va Mock Code larni yarating.' }, { status: 409 });
 
       await ensureDraftBridge(testIds);
 
