@@ -235,3 +235,65 @@
 @media(prefers-reduced-motion:reduce){
   .adminRoot *{scroll-behavior:auto!important;transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}
 }
+
+
+/* 2026-09 admin shell hardening — visual safety only. */
+.adminRoot .adminWorkspace,
+.adminRoot .adminMain,
+.adminRoot .adminHero,
+.adminRoot .adminOverview,
+.adminRoot .adminChartGrid,
+.adminRoot .adminOverviewGrid,
+.adminRoot .adminLayout,
+.adminRoot .adminStudentsLayout,
+.adminRoot .adminTopbar,
+.adminRoot .adminTopActions,
+.adminRoot .adminNav{min-width:0}
+.adminRoot .adminWorkspace{overflow-x:clip}
+.adminRoot .adminMain{width:min(1440px,calc(100% - 32px));margin-inline:auto}
+.adminRoot .adminTopbar{width:min(1440px,calc(100% - 32px));margin-inline:auto}
+.adminRoot .adminTopActions{margin-left:auto}
+.adminRoot .adminTopActions button,
+.adminRoot .adminSecureChip{white-space:nowrap}
+.adminRoot .adminNav svg,
+.adminRoot .adminTopActions svg,
+.adminRoot .adminSectionHeader svg,
+.adminRoot .adminTestFile svg,
+.adminRoot .dropZone svg{
+  fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important
+}
+.adminRoot .adminHero{align-items:center}
+.adminRoot .adminHero>div:first-child{min-width:0}
+.adminRoot .adminMetrics{min-width:0}
+.adminRoot .adminMetrics>div{min-width:0}
+.adminRoot .adminPanel,
+.adminRoot .adminFormCard,
+.adminRoot .adminLibrary,
+.adminRoot .adminStudentList,
+.adminRoot .adminStudentDetail{isolation:isolate}
+.adminRoot .adminSearch,
+.adminRoot .adminSearch input,
+.adminRoot .adminRowActions,
+.adminRoot .adminRowActionsWide{min-width:0}
+.adminRoot .adminRowActions,
+.adminRoot .adminRowActionsWide{flex-wrap:wrap}
+.adminRoot img,.adminRoot video,.adminRoot audio{max-width:100%}
+.adminRoot :where(button,a,input,select,textarea){-webkit-tap-highlight-color:transparent}
+.adminRoot :where(button,a){touch-action:manipulation}
+
+@media(max-width:900px){
+  .adminRoot .adminTopbar{flex-wrap:wrap!important}
+  .adminRoot .adminNav{order:3;width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+  .adminRoot .adminNav::-webkit-scrollbar{display:none}
+  .adminRoot .adminNav button{flex:1 0 112px!important}
+  .adminRoot .adminTopActions{margin-left:auto}
+}
+@media(max-width:620px){
+  .adminRoot .adminMain,.adminRoot .adminTopbar{width:calc(100% - 20px)}
+  .adminRoot .adminBrand strong{font-size:14px!important}
+  .adminRoot .adminSecureChip{display:none!important}
+  .adminRoot .adminHero{display:block!important}
+  .adminRoot .adminMetrics{margin-top:14px}
+  .adminRoot .adminMetricsFour{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
