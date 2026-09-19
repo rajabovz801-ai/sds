@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { ShieldCheckIcon, UploadCloudIcon, UserIcon } from '@/components/UiIcons';
 import { supabase } from '@/lib/supabase/client';
 import styles from './AdminMockManager.module.css';
 
@@ -30,6 +31,7 @@ export function AdminMockManager() {
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Mock ma’lumotlari yuklanmadi.');
       setData(body);
+      setIsError(false);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Mock ma’lumotlari yuklanmadi.');
       setIsError(true);
@@ -40,6 +42,20 @@ export function AdminMockManager() {
 
   useEffect(() => { setPortalHost(document.body); }, []);
   useEffect(() => { if (open) void load(); }, [load, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [open]);
 
   const studentById = useMemo(() => new Map((data.students || []).map((row: any) => [row.id, row])), [data.students]);
 
@@ -79,7 +95,8 @@ export function AdminMockManager() {
       for (const kind of ['listeningHtml', 'readingHtml', 'listeningVideo', 'readingVideo'] as UploadKind[]) {
         uploaded[kind] = await upload(kind, files[kind]!);
       }
-      setMessage('Mock profili va Candidate ID lar yaratilmoqda…');
+
+      setMessage('Mock profili, Candidate ID va Mock Code lar yaratilmoqda…');
       const response = await fetch('/api/admin/mocks', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -87,7 +104,8 @@ export function AdminMockManager() {
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Mock yaratilmadi.');
-      setMessage(`${body.candidates} ta Candidate ID va Mock Code tayyorlandi. Mock hozir DRAFT holatda.`);
+
+      setMessage(`${body.candidates} ta Candidate ID va Mock Code tayyorlandi. Mock DRAFT holatda — kodlar shu panelda saqlanadi.`);
       setIsError(false);
       setFiles(emptyFiles);
       setTab('results');
@@ -112,7 +130,9 @@ export function AdminMockManager() {
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Mock holati o‘zgarmadi.');
-      setMessage(action === 'publish' ? 'Mock ochildi. Dashboard banner va kirish kodlari faol.' : 'Mock yopildi. Yangi kirishlar to‘xtatildi.');
+      setMessage(action === 'publish'
+        ? 'Mock ochildi. Dashboard banner, Candidate ID va kirish kodlari faol.'
+        : 'Mock yopildi. Yangi kirishlar to‘xtatildi, eski natijalar va kodlar saqlanadi.');
       await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Mock holati o‘zgarmadi.');
@@ -135,86 +155,167 @@ export function AdminMockManager() {
     });
   }
 
+  async function copyCodes(mockId: string) {
+    const rows = candidateRows(mockId);
+    const lines = rows.map(({ code, student }: any) => {
+      const name = student ? `${student.first_name} ${student.last_name || ''}`.trim() : 'Unknown';
+      return `${code.candidate_id || '—'} | ${name} | ${code.code_plain || '—'}`;
+    });
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'));
+      setMessage(`${rows.length} ta Candidate ID va Mock Code clipboardga nusxalandi.`);
+      setIsError(false);
+    } catch {
+      setMessage('Kodlarni avtomatik nusxalab bo‘lmadi. Jadvaldan ko‘chirishingiz mumkin.');
+      setIsError(true);
+    }
+  }
+
   return (
     <>
-      <button className={styles.launcher} type="button" onClick={() => setOpen(true)}>MOCK CONTROL</button>
+      <button className={styles.launcher} type="button" onClick={() => setOpen(true)}>
+        <ShieldCheckIcon />
+        <span>FULL MOCK CONTROL</span>
+      </button>
+
       {open && portalHost && createPortal(
-        <div className={styles.backdrop} role="dialog" aria-modal="true">
-          <aside className={styles.drawer}>
+        <div className={styles.backdrop} onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
+          <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label="Full Mock Control">
             <div className={styles.head}>
-              <div><small>ARK ADMIN · ISOLATED MODULE</small><h2>Full Mock Control</h2><p>Mock fayllari, kodlar va natijalar oddiy practice natijalaridan alohida boshqariladi.</p></div>
-              <button className={styles.close} type="button" onClick={() => setOpen(false)}>×</button>
+              <div>
+                <small>ARK ADMIN · SECURE EXAM MODULE</small>
+                <h2>Full Mock Control</h2>
+                <p>Listening → Reading flow, instruction videolar, Candidate ID, Mock Code va yakuniy natijalar.</p>
+              </div>
+              <button className={styles.close} type="button" onClick={() => setOpen(false)} aria-label="Yopish">×</button>
             </div>
 
             <div className={styles.tabs}>
-              <button className={tab === 'results' ? styles.active : ''} onClick={() => setTab('results')}>MOCK RESULTS</button>
-              <button className={tab === 'setup' ? styles.active : ''} onClick={() => setTab('setup')}>PREPARE MOCK</button>
+              <button className={tab === 'results' ? styles.active : ''} onClick={() => setTab('results')}>
+                <UserIcon /> CANDIDATES & RESULTS
+              </button>
+              <button className={tab === 'setup' ? styles.active : ''} onClick={() => setTab('setup')}>
+                <UploadCloudIcon /> PREPARE MOCK
+              </button>
               <button className={styles.reload} onClick={() => void load()} disabled={loading}>{loading ? 'Loading…' : 'Refresh'}</button>
             </div>
 
-            {message && <div className={`${styles.status} ${isError ? styles.error : ''}`}>{message}</div>}
+            <div className={styles.body}>
+              {message && <div className={`${styles.status} ${isError ? styles.error : ''}`}>{message}</div>}
 
-            {tab === 'setup' ? (
-              <section className={styles.panel} style={{ marginTop: 12 }}>
-                <div className={styles.form}>
-                  <div className={styles.two}>
-                    <div className={styles.field}><label>Mock title</label><input value={title} onChange={(event) => setTitle(event.target.value)} /></div>
-                    <div className={styles.field}><label>Candidate prefix</label><input value={prefix} onChange={(event) => setPrefix(event.target.value.toUpperCase())} /></div>
+              {tab === 'setup' ? (
+                <section className={styles.panel}>
+                  <div className={styles.setupHeading}>
+                    <div><small>STEP 01</small><h3>Yangi Full Mock tayyorlash</h3></div>
+                    <span>DRAFT FIRST</span>
                   </div>
-                  <div className={styles.fileGrid}>
-                    <div className={styles.file}><label>Listening HTML</label><input type="file" accept=".html,.htm,text/html" onChange={(event) => setFiles((value) => ({ ...value, listeningHtml: event.target.files?.[0] || null }))} /><small>40-question Listening test</small></div>
-                    <div className={styles.file}><label>Reading HTML</label><input type="file" accept=".html,.htm,text/html" onChange={(event) => setFiles((value) => ({ ...value, readingHtml: event.target.files?.[0] || null }))} /><small>40-question Reading test</small></div>
-                    <div className={styles.file}><label>Listening instruction video</label><input type="file" accept="video/mp4,.mp4" onChange={(event) => setFiles((value) => ({ ...value, listeningVideo: event.target.files?.[0] || null }))} /><small>MP4 · max 50 MB</small></div>
-                    <div className={styles.file}><label>Reading instruction video</label><input type="file" accept="video/mp4,.mp4" onChange={(event) => setFiles((value) => ({ ...value, readingVideo: event.target.files?.[0] || null }))} /><small>MP4 · max 50 MB</small></div>
+
+                  <div className={styles.form}>
+                    <div className={styles.two}>
+                      <div className={styles.field}>
+                        <label>Mock title</label>
+                        <input value={title} onChange={(event) => setTitle(event.target.value)} />
+                      </div>
+                      <div className={styles.field}>
+                        <label>Candidate prefix</label>
+                        <input value={prefix} onChange={(event) => setPrefix(event.target.value.toUpperCase())} />
+                      </div>
+                    </div>
+
+                    <div className={styles.fileGrid}>
+                      <div className={styles.file}>
+                        <label>Listening HTML</label>
+                        <input type="file" accept=".html,.htm,text/html" onChange={(event) => setFiles((value) => ({ ...value, listeningHtml: event.target.files?.[0] || null }))} />
+                        <small>{files.listeningHtml?.name || '40-question Listening test · HTML'}</small>
+                      </div>
+                      <div className={styles.file}>
+                        <label>Reading HTML</label>
+                        <input type="file" accept=".html,.htm,text/html" onChange={(event) => setFiles((value) => ({ ...value, readingHtml: event.target.files?.[0] || null }))} />
+                        <small>{files.readingHtml?.name || '40-question Reading test · HTML'}</small>
+                      </div>
+                      <div className={styles.file}>
+                        <label>Listening instruction video</label>
+                        <input type="file" accept="video/mp4,.mp4" onChange={(event) => setFiles((value) => ({ ...value, listeningVideo: event.target.files?.[0] || null }))} />
+                        <small>{files.listeningVideo?.name || 'MP4 · max 50 MB'}</small>
+                      </div>
+                      <div className={styles.file}>
+                        <label>Reading instruction video</label>
+                        <input type="file" accept="video/mp4,.mp4" onChange={(event) => setFiles((value) => ({ ...value, readingVideo: event.target.files?.[0] || null }))} />
+                        <small>{files.readingVideo?.name || 'MP4 · max 50 MB'}</small>
+                      </div>
+                    </div>
+
+                    <div className={styles.flowNote}>
+                      <b>Student flow:</b> Mock Code → Listening video → Listening → Reading video → Reading → Final result.
+                    </div>
+
+                    <button className={styles.primary} type="button" disabled={busy} onClick={() => void createMock()}>
+                      {busy ? 'Preparing Mock…' : 'Prepare Mock safely'}
+                    </button>
                   </div>
-                  <button className={styles.primary} type="button" disabled={busy} onClick={() => void createMock()}>{busy ? 'Preparing Mock…' : 'Prepare Mock 01 safely'}</button>
-                </div>
-              </section>
-            ) : (
-              <div className={styles.mockList} style={{ marginTop: 12 }}>
-                {(data.mocks || []).length === 0 && <div className={styles.panel}><div className={styles.empty}>Hali Full Mock yaratilmagan.</div></div>}
-                {(data.mocks || []).map((mock: any) => {
-                  const rows = candidateRows(mock.id);
-                  const completed = rows.filter((row: any) => row.attempt?.status === 'completed').length;
-                  const inProgress = rows.filter((row: any) => row.attempt?.status === 'in_progress').length;
-                  return (
-                    <section className={styles.mockCard} key={mock.id}>
-                      <div className={styles.mockTop}>
-                        <div><small>{mock.candidate_prefix || 'ARK-MOCK'} · {mock.track?.toUpperCase()}</small><h3>{mock.title}</h3></div>
-                        <span className={`${styles.pill} ${mock.status === 'published' ? styles.live : ''}`}>{mock.status}</span>
-                      </div>
-                      <div className={styles.mockStats}>
-                        <div><span>Candidates</span><b>{rows.length}</b></div>
-                        <div><span>In progress</span><b>{inProgress}</b></div>
-                        <div><span>Completed</span><b>{completed}</b></div>
-                        <div><span>Dashboard</span><b>{mock.dashboard_enabled ? 'LIVE' : 'OFF'}</b></div>
-                      </div>
-                      <div className={styles.actions}>
-                        {mock.status !== 'published' ? <button className={styles.primary} disabled={busy} onClick={() => void updateMock(mock.id, 'publish')}>Open Mock</button> : <button className={styles.danger} disabled={busy} onClick={() => void updateMock(mock.id, 'close')}>Close Mock</button>}
-                      </div>
-                      <div className={styles.tableWrap}>
-                        <table className={styles.table}>
-                          <thead><tr><th>Candidate</th><th>Name</th><th>Mock Code</th><th>Status</th><th>Listening</th><th>Reading</th><th>Overall</th></tr></thead>
-                          <tbody>
-                            {rows.map(({ code, student, attempt, listening, reading }: any) => (
-                              <tr key={code.id}>
-                                <td>{code.candidate_id || '—'}</td>
-                                <td>{student ? `${student.first_name} ${student.last_name || ''}` : 'Unknown'}</td>
-                                <td className={styles.code}>{code.code_plain || '—'}</td>
-                                <td>{attempt?.status || (code.used_at ? 'used' : 'not started')}</td>
-                                <td>{listening ? `${listening.raw_score ?? '—'}/${listening.max_score ?? 40} · ${listening.band ?? '—'}` : '—'}</td>
-                                <td>{reading ? `${reading.raw_score ?? '—'}/${reading.max_score ?? 40} · ${reading.band ?? '—'}` : '—'}</td>
-                                <td>{attempt?.overall_band ?? '—'}</td>
+                </section>
+              ) : (
+                <div className={styles.mockList}>
+                  {(data.mocks || []).length === 0 && (
+                    <div className={styles.panel}><div className={styles.empty}>Hali Full Mock yaratilmagan. “Prepare Mock” orqali boshlang.</div></div>
+                  )}
+
+                  {(data.mocks || []).map((mock: any) => {
+                    const rows = candidateRows(mock.id);
+                    const completed = rows.filter((row: any) => row.attempt?.status === 'completed').length;
+                    const inProgress = rows.filter((row: any) => row.attempt?.status === 'in_progress').length;
+                    return (
+                      <section className={styles.mockCard} key={mock.id}>
+                        <div className={styles.mockTop}>
+                          <div>
+                            <small>{mock.candidate_prefix || 'ARK-MOCK'} · {mock.track?.toUpperCase()}</small>
+                            <h3>{mock.title}</h3>
+                          </div>
+                          <span className={`${styles.pill} ${mock.status === 'published' ? styles.live : ''}`}>{mock.status}</span>
+                        </div>
+
+                        <div className={styles.mockStats}>
+                          <div><span>Candidates</span><b>{rows.length}</b></div>
+                          <div><span>In progress</span><b>{inProgress}</b></div>
+                          <div><span>Completed</span><b>{completed}</b></div>
+                          <div><span>Dashboard</span><b>{mock.dashboard_enabled ? 'LIVE' : 'OFF'}</b></div>
+                        </div>
+
+                        <div className={styles.actions}>
+                          <button className={styles.secondary} disabled={!rows.length} onClick={() => void copyCodes(mock.id)}>Copy codes</button>
+                          {mock.status !== 'published'
+                            ? <button className={styles.primary} disabled={busy} onClick={() => void updateMock(mock.id, 'publish')}>Open Mock</button>
+                            : <button className={styles.danger} disabled={busy} onClick={() => void updateMock(mock.id, 'close')}>Close Mock</button>}
+                        </div>
+
+                        <div className={styles.tableWrap}>
+                          <table className={styles.table}>
+                            <thead>
+                              <tr>
+                                <th>Candidate</th><th>Name</th><th>Mock Code</th><th>Status</th><th>Listening</th><th>Reading</th><th>Overall</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  );
-                })}
-              </div>
-            )}
+                            </thead>
+                            <tbody>
+                              {rows.map(({ code, student, attempt, listening, reading }: any) => (
+                                <tr key={code.id}>
+                                  <td>{code.candidate_id || '—'}</td>
+                                  <td>{student ? `${student.first_name} ${student.last_name || ''}` : 'Unknown'}</td>
+                                  <td className={styles.code}>{code.code_plain || '—'}</td>
+                                  <td>{attempt?.status || (code.used_at ? 'used' : 'not started')}</td>
+                                  <td>{listening ? `${listening.raw_score ?? '—'}/${listening.max_score ?? 40} · ${listening.band ?? '—'}` : '—'}</td>
+                                  <td>{reading ? `${reading.raw_score ?? '—'}/${reading.max_score ?? 40} · ${reading.band ?? '—'}` : '—'}</td>
+                                  <td>{attempt?.overall_band ?? '—'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </aside>
         </div>,
         portalHost,
