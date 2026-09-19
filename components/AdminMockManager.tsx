@@ -160,6 +160,33 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
     }
   }
 
+  async function previewMock(id: string) {
+    if (busy) return;
+    setBusy(true);
+    setIsError(false);
+    try {
+      const previewResponse = await fetch(`/api/admin/mocks/${id}/preview`, {
+        method: 'POST',
+        cache: 'no-store',
+      });
+      const previewBody = await previewResponse.json();
+      if (!previewResponse.ok) throw new Error(previewBody.error || 'Admin test attempt yaratilmadi.');
+
+      const sessionResponse = await fetch('/api/admin/student-view', {
+        method: 'POST',
+        cache: 'no-store',
+      });
+      const sessionBody = await sessionResponse.json();
+      if (!sessionResponse.ok) throw new Error(sessionBody.error || 'Admin student preview ochilmadi.');
+
+      window.location.assign(`/mock/${previewBody.attemptId}`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Admin test attempt ochilmadi.');
+      setIsError(true);
+      setBusy(false);
+    }
+  }
+
   async function updateMock(id: string, action: 'publish' | 'close' | 'generate-codes') {
     if (busy) return;
     setBusy(true);
@@ -341,6 +368,9 @@ export function AdminMockManager({ autoOpen = false, onAutoOpened }: { autoOpen?
                               {replaceMockId === mock.id ? 'Cancel replace' : 'Replace HTML'}
                             </button>
                           )}
+                          <button className={styles.secondary} disabled={busy} onClick={() => void previewMock(mock.id)}>
+                            Test as Admin
+                          </button>
                           {mock.status !== 'published'
                             ? <button className={styles.primary} disabled={busy || !rows.length} onClick={() => void updateMock(mock.id, 'publish')}>Open Mock</button>
                             : <button className={styles.danger} disabled={busy} onClick={() => void updateMock(mock.id, 'close')}>Close Mock</button>}
