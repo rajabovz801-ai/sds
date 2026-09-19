@@ -131,6 +131,7 @@ function normalizeResultPayload(input: any) {
   if (correct !== null) normalized.correct = Math.max(0, Math.round(correct));
   if (wrong !== null) normalized.wrong = Math.max(0, Math.round(wrong));
   if (unanswered !== null) normalized.unanswered = Math.max(0, Math.round(unanswered));
+  if (answered !== null) normalized.answered = Math.max(0, Math.round(answered));
 
   const band = finiteNumber(firstValue(merged, ['band', 'bandScore', 'overallBand']));
   if (band !== null) normalized.band = band;
