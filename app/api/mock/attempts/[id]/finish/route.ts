@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readActiveStudentSession } from '@/lib/auth/active-student';
+import { readAdminSession } from '@/lib/auth/admin-session';
 import { getServiceSupabase } from '@/lib/supabase/server';
 
 function roundHalf(value: number) {
@@ -10,6 +11,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const session = await readActiveStudentSession(request);
     if (!session) return NextResponse.json({ error: 'Student sessiyasi faol emas.' }, { status: 403 });
+    const adminPreview = request.cookies.get('ark_admin_student_preview')?.value === '1' && Boolean(readAdminSession(request));
 
     const { id } = await params;
     const supabase = getServiceSupabase();
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!completed) return NextResponse.json({ error: 'Mock holati o‘zgargan. Sahifani yangilang.' }, { status: 409 });
 
     let queued = 0;
-    try {
+    if (!adminPreview) try {
       const { data: student } = await supabase
         .from('students')
         .select('telegram_id')
