@@ -60,6 +60,20 @@ export function AdminSpeakingMockPanel() {
   useEffect(() => { setPortalHost(document.body); }, []);
   useEffect(() => { if (open) void load(); }, [open, load]);
 
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [open]);
+
   async function uploadVideo() {
     if (!video || busy) return;
     setBusy(true);
@@ -127,11 +141,11 @@ export function AdminSpeakingMockPanel() {
     <>
       <button className={styles.launcher} type="button" onClick={() => setOpen(true)}>SPEAKING MOCK</button>
       {open && portalHost && createPortal(
-        <div className={styles.backdrop} role="dialog" aria-modal="true">
-          <aside className={styles.drawer}>
+        <div className={styles.backdrop} onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
+          <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label="Speaking Mock Control">
             <header className={styles.head}>
               <div><small>ARK ADMIN · CEFR MODULE</small><h2>Speaking Mock Control</h2><p>Instruction video va o‘quvchilarning bitta to‘liq audio recordinglari.</p></div>
-              <button className={styles.close} onClick={() => setOpen(false)}>×</button>
+              <button className={styles.close} onClick={() => setOpen(false)} aria-label="Yopish">×</button>
             </header>
 
             {message && <div className={`${styles.message} ${isError ? styles.error : ''}`}>{message}</div>}
