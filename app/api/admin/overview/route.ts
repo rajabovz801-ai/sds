@@ -58,6 +58,15 @@ export async function GET(request: NextRequest) {
     const mocks = (mockQuery.data || []) as Row[];
     const testById = new Map(tests.map((test) => [String(test.id), test]));
     const mockById = new Map(mocks.map((mock) => [String(mock.id), mock]));
+    const activeMockAttemptIds = new Set(
+      sessions
+        .filter((session) =>
+          session.mode === 'mock'
+          && session.status === 'in_progress'
+          && Boolean(session.mock_attempt_id)
+          && (!session.expires_at || new Date(session.expires_at).getTime() > Date.now()))
+        .map((session) => String(session.mock_attempt_id)),
+    );
 
     const results = sessions.map((session) => {
       const test = testById.get(String(session.test_id));
@@ -89,6 +98,14 @@ export async function GET(request: NextRequest) {
 
     for (const attempt of attempts) {
       const mock = mockById.get(String(attempt.mock_id));
+      const liveSectionExists = activeMockAttemptIds.has(String(attempt.id));
+      const derivedStatus = attempt.status === 'completed'
+        ? 'completed'
+        : liveSectionExists
+          ? 'in_progress'
+          : attempt.status === 'abandoned'
+            ? 'abandoned'
+            : 'incomplete';
       results.push({
         id: `mock:${attempt.id}`,
         studentId: String(attempt.student_id),
@@ -97,7 +114,7 @@ export async function GET(request: NextRequest) {
         track: mock?.track || '',
         skill: 'full-mock',
         mode: 'mock-overall',
-        status: attempt.status,
+        status: derivedStatus,
         score: numberOrNull(attempt.overall_score),
         maxScore: attempt.overall_score == null ? null : 100,
         accuracy: numberOrNull(attempt.overall_score),
