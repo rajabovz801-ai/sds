@@ -127,7 +127,7 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
 
       <div className="authCodeField authStudentCodeField">
         <div className="authCodeLabel">
-          <label htmlFor="login-code">Bir martalik kirish kodi</label>
+          <label htmlFor="login-code"><KeyRoundIcon /> 6 xonali kirish kodi</label>
           <span><ShieldCheckIcon /> Xavfsiz kirish</span>
         </div>
 
@@ -137,7 +137,6 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
           onClick={() => codeRef.current?.focus()}
           aria-label="Kirish kodini yozish"
         >
-          <span className="authOtpKey"><KeyRoundIcon /></span>
           <span className="authOtpBoxes" aria-hidden="true">
             {Array.from({ length: 6 }, (_, index) => (
               <i key={index} className={code[index] ? 'filled' : index === code.length ? 'current' : ''}>
@@ -167,7 +166,7 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
         {busy ? 'Tekshirilmoqda…' : 'Platformaga kirish'} <span><ArrowRightIcon /></span>
       </button>
 
-      <div className="authDivider"><span>Kod hali yo‘qmi?</span></div>
+      <p className="authTelegramHint">Kirish kodi yo‘qmi?</p>
       <Link className="authTelegram" href="https://t.me/arkedu_bot?start=login" target="_blank" rel="noopener noreferrer">
         <span className="authTelegramIcon"><TelegramIcon /></span>
         <b>Telegram botdan kod olish</b>
