@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
 import { readActiveStudentSession } from '@/lib/auth/active-student';
+import { readAdminSession } from '@/lib/auth/admin-session';
 import { getServiceSupabase } from '@/lib/supabase/server';
 import { sendAdminTestResult } from '@/lib/telegram-server';
 
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const student = await readActiveStudentSession(request);
     if (!student) return NextResponse.json({ error: 'Student sessiyasi faol emas.' }, { status: 403 });
+    const adminPreview = request.cookies.get('ark_admin_student_preview')?.value === '1' && Boolean(readAdminSession(request));
 
     const { id } = await params;
     const body = await request.json();
@@ -201,7 +203,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         : {};
       const previousTelegram = storedDelivery(previousDetails);
       const sameSubmission = Boolean(submissionId && previousDetails.submissionId === submissionId);
-      if (sameSubmission && Number(previousTelegram.sent || 0) <= 0) {
+      if (!adminPreview && sameSubmission && Number(previousTelegram.sent || 0) <= 0) {
         waitUntil(deliverTelegram());
       }
       return NextResponse.json({ ok: true, duplicate: true, saved: true, result: previous });
@@ -255,12 +257,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .eq('superseded', false);
     if (examStateError) throw examStateError;
 
-    waitUntil(deliverTelegram());
+    if (!adminPreview) waitUntil(deliverTelegram());
 
     return NextResponse.json({
       ok: true,
       saved: true,
-      deliveryPending: true,
+      deliveryPending: !adminPreview,
       result: insertedResult,
     });
   } catch (error) {
