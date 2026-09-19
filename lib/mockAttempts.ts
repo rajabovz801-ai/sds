@@ -44,7 +44,7 @@ export type MockAttemptData = {
   }>;
 };
 
-export async function getMockAttempt(studentId: string, attemptId: string): Promise<MockAttemptData | null> {
+export async function getMockAttempt(studentId: string, attemptId: string, allowDraft = false): Promise<MockAttemptData | null> {
   const supabase = getServiceSupabase();
   const { data: attempt, error: attemptError } = await supabase
     .from('attempts')
@@ -76,7 +76,9 @@ export async function getMockAttempt(studentId: string, attemptId: string): Prom
   const [tests, results, accessResult, progressResult] = await Promise.all([
     (async () => {
       if (!ids.length) return [] as Array<{ id: string; title: string; skill: string; status: string; file_name: string }>;
-      const { data, error } = await supabase.from('tests').select('id,title,skill,status,file_name').in('id', ids).eq('status', 'published');
+      let query = supabase.from('tests').select('id,title,skill,status,file_name').in('id', ids);
+      if (!allowDraft) query = query.eq('status', 'published');
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     })(),
@@ -127,7 +129,7 @@ export async function getMockAttempt(studentId: string, attemptId: string): Prom
       hasListeningVideo: Boolean(mock.listening_video_path),
       hasReadingVideo: Boolean(mock.reading_video_path),
     },
-    candidate: { id: accessResult.data?.candidate_id || null },
+    candidate: { id: accessResult.data?.candidate_id || (allowDraft ? 'ADMIN-PREVIEW' : null) },
     progress: {
       stage,
       listeningVideoSeenAt: progress?.listening_video_seen_at || null,
