@@ -110,7 +110,7 @@
   background:#f3f5f6;color:#697789;display:grid;place-items:center
 }
 .authOtpKey svg{width:100%;height:100%}
-.authOtpBoxes{min-width:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
+.authOtpBoxes{min-width:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
 .authOtpBoxes i{
   height:50px;
   border:1px solid #e1e4e8;
@@ -197,4 +197,122 @@
   .authOtpShell{grid-template-columns:1fr}
   .authOtpKey{display:none}
   .authOtpBoxes i{height:44px}
+}
+
+
+/* Compact login: keep the whole access experience above the fold. */
+.authTopbar{
+  width:min(1220px,calc(100% - 48px));
+  height:78px
+}
+.authRoot .arkBrandMark{width:44px;height:44px;border-radius:14px}
+.authRoot .arkBrandText strong{font-size:14px}
+
+.authMain{
+  width:min(1120px,calc(100% - 56px));
+  min-height:calc(100svh - 78px);
+  padding:28px 0 34px;
+  grid-template-columns:minmax(430px,.95fr) minmax(390px,.75fr);
+  gap:58px
+}
+.authIntro{padding:0}
+.authIntro>.authEyebrow{padding:7px 10px}
+.authIntro h2{
+  max-width:610px;
+  margin:16px 0 13px;
+  font-size:clamp(43px,4.5vw,60px);
+  line-height:.97
+}
+.authIntro>p{
+  max-width:560px;
+  font-size:12.5px;
+  line-height:1.6
+}
+.authSteps{gap:8px;margin-top:20px}
+.authSteps>div{
+  min-width:0;
+  padding:9px 10px 9px 8px;
+  border-radius:14px;
+  grid-template-columns:31px 1fr;
+  column-gap:8px
+}
+.authSteps b{width:31px;height:31px;padding:8px;border-radius:9px}
+.authSteps span{font-size:8.5px}.authSteps small{font-size:6.8px}
+
+.authCard{
+  width:100%;
+  max-width:450px;
+  justify-self:end;
+  padding:30px 30px 22px;
+  border-radius:28px;
+  box-shadow:0 28px 68px rgba(74,60,43,.11),inset 0 1px 0 #fff
+}
+.authCard:before{width:190px;height:190px;right:-105px;top:-105px}
+.authForm h1{margin:10px 0 8px;font-size:31px}
+.authForm>p{margin-bottom:20px;font-size:10.5px;line-height:1.55}
+.authAccessEyebrow{padding:6px 9px;font-size:7px}
+.authStudentCodeField{gap:8px}
+.authOtpShell{
+  min-height:62px;
+  padding:7px 8px;
+  border-radius:15px;
+  grid-template-columns:36px minmax(0,1fr);
+  gap:7px
+}
+.authOtpKey{width:36px;height:46px;padding:11px;border-radius:11px}
+.authOtpBoxes{gap:5px}
+.authOtpBoxes i{height:46px;border-radius:9px;font-size:14px}
+.authOtpBoxes i.filled{font-size:15px}
+.authForm:not(.authAdminForm) .authSubmit{
+  min-height:49px;
+  margin-top:15px;
+  border-radius:13px
+}
+.authDivider{margin:15px 0}
+.authTelegram{
+  min-height:46px;
+  grid-template-columns:30px minmax(0,1fr) 17px!important
+}
+.authTelegramIcon{
+  width:30px!important;height:30px!important;padding:7px!important;
+  background:#e8f5fb;color:#229ed9
+}
+.authTelegram b{font-size:8px}
+.authPrivacy{
+  margin-top:17px;
+  padding-top:13px;
+  font-size:6.5px
+}
+
+@media(max-width:1050px){
+  .authMain{
+    width:min(720px,calc(100% - 40px));
+    min-height:0;
+    grid-template-columns:1fr;
+    gap:25px;
+    padding-top:26px
+  }
+  .authIntro h2{font-size:50px}
+  .authCard{max-width:520px;justify-self:center}
+}
+@media(max-width:620px){
+  .authMain{width:calc(100% - 28px);padding:22px 0 30px;gap:20px}
+  .authIntro h2{font-size:40px}
+  .authIntro>p{font-size:11.5px}
+  .authSteps{grid-template-columns:1fr 1fr 1fr}
+  .authSteps>div:last-child{display:grid}
+  .authCard{padding:26px 18px 19px;border-radius:23px}
+  .authForm h1{font-size:27px}
+  .authOtpShell{grid-template-columns:32px minmax(0,1fr);gap:5px}
+  .authOtpKey{width:32px;height:42px;padding:9px}
+  .authOtpBoxes{gap:3px}
+  .authOtpBoxes i{height:42px;font-size:12px}
+}
+@media(max-width:430px){
+  .authSteps{grid-template-columns:1fr 1fr}
+  .authSteps>div:last-child{display:none}
+  .authOtpShell{grid-template-columns:1fr}
+  .authOtpKey{display:none}
+  .authOtpBoxes{gap:4px}
+  .authOtpBoxes i{height:43px}
 }
