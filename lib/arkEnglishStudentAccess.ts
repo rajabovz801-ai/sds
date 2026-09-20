@@ -4,7 +4,7 @@ import { getServiceSupabase } from './supabase/server';
 
 const CODE_TTL_MINUTES = 15;
 const PLATFORM_TOKEN_TTL_MINUTES = 10;
-const STUDENT_SELECT = 'id,telegram_id,telegram_username,first_name,last_name,status';
+const STUDENT_SELECT = 'id,telegram_id,telegram_username,first_name,last_name,status,exam_platform_enabled';
 
 export type StudentAccessResult = {
   status: number;
@@ -166,7 +166,6 @@ export async function performStudentAccess(body: any): Promise<StudentAccessResu
           first_name: firstName,
           last_name: lastName,
           status: 'active',
-          exam_platform_enabled: false,
         })
         .eq('id', student.id)
         .select(STUDENT_SELECT)
@@ -182,6 +181,7 @@ export async function performStudentAccess(body: any): Promise<StudentAccessResu
           first_name: firstName,
           last_name: lastName,
           status: 'active',
+          exam_platform_enabled: false,
         })
         .select(STUDENT_SELECT)
         .single();
