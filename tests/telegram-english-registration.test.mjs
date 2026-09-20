@@ -79,3 +79,16 @@ test('English registration uses a dedicated enrollment marker', () => {
   assert.match(helper, /enrollEnglishStudent/);
   assert.match(helper, /isEnglishEnrolled/);
 });
+
+
+test('Teddy registration preserves exam access for existing students and disables it only for new Teddy profiles', () => {
+  const helper = fs.readFileSync(new URL('../lib/arkEnglishStudentAccess.ts', import.meta.url), 'utf8');
+  const existingStart = helper.indexOf('if (student) {');
+  const newStart = helper.indexOf('} else {', existingStart);
+  const enrollmentStart = helper.indexOf('await enrollEnglishStudent', newStart);
+  assert.ok(existingStart >= 0 && newStart > existingStart && enrollmentStart > newStart);
+  const existingBlock = helper.slice(existingStart, newStart);
+  const newBlock = helper.slice(newStart, enrollmentStart);
+  assert.doesNotMatch(existingBlock, /exam_platform_enabled\s*:\s*false/);
+  assert.match(newBlock, /exam_platform_enabled\s*:\s*false/);
+});
