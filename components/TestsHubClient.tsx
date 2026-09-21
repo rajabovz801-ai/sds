@@ -3,86 +3,156 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
+  AwardIcon,
   BookOpenIcon,
+  CheckCircleIcon,
   FileTextIcon,
   HeadphonesIcon,
-  LibraryIcon,
-  PenToolIcon,
+  MicIcon,
   SearchIcon,
 } from '@/components/UiIcons';
 import type { CloudTest, TestSkill } from '@/lib/cloudTests';
 
-type Filter = 'all' | 'reading' | 'listening' | 'writing' | 'speaking';
+type SkillTab = 'reading' | 'listening';
+type PartFilter = 'all' | 'full' | 'part-1' | 'part-2' | 'part-3';
 
-const tabs = [
-  { id: 'all', label: 'All', icon: LibraryIcon },
+const modeChips = [
+  { id: 'real-exam', label: 'Real-Exam', icon: CheckCircleIcon, active: true },
+  { id: 'cambridge', label: 'Cambridge', icon: BookOpenIcon },
+  { id: 'gold', label: 'Gold', icon: AwardIcon },
+  { id: 'mock', label: 'Mock', icon: FileTextIcon, badge: 'SOON' },
+  { id: 'speaking', label: 'Speaking', icon: MicIcon, badge: 'NEW' },
+] as const;
+
+const skillTabs = [
   { id: 'reading', label: 'Reading', icon: BookOpenIcon },
   { id: 'listening', label: 'Listening', icon: HeadphonesIcon },
-  { id: 'writing', label: 'Writing', icon: PenToolIcon },
 ] as const;
+
+const partFilters: Array<{ id: PartFilter; label: string }> = [
+  { id: 'all', label: 'Full Test' },
+  { id: 'part-1', label: 'Part 1' },
+  { id: 'part-2', label: 'Part 2' },
+  { id: 'part-3', label: 'Part 3' },
+];
 
 function skillLabel(skill: TestSkill) {
   return skill.replace('-', ' ').replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
 export function TestsHubClient({ tests }: { tests: CloudTest[] }) {
-  const [filter, setFilter] = useState<Filter>('all');
+  const [skill, setSkill] = useState<SkillTab>('reading');
+  const [part, setPart] = useState<PartFilter>('all');
   const [query, setQuery] = useState('');
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
+
     return tests.filter((test) => {
-      if (filter !== 'all' && test.skill !== filter) return false;
+      if (test.skill !== skill) return false;
+
+      if (part !== 'all') {
+        const scope = String(test.testScope || '').toLowerCase();
+        if (scope !== part) return false;
+      }
+
       if (!q) return true;
       return `${test.title} ${test.description} ${test.skill}`.toLowerCase().includes(q);
     });
-  }, [tests, filter, query]);
+  }, [tests, skill, part, query]);
 
   return (
-    <div className="testsHub">
-      <header className="testsHubHeader">
-        <div>
-          <span className="routeRedEyebrow">TEST LIBRARY</span>
-          <h1>Tests</h1>
-          <p>Choose a skill and start your next practice test.</p>
-        </div>
-      </header>
+    <div className="testsHub testsReferenceLayout">
+      <div className="testsModeBar" aria-label="Test collections">
+        {modeChips.map(({ id, label, icon: Icon, active, badge }) => (
+          <button key={id} type="button" className={active ? 'active' : ''}>
+            <Icon />
+            <span>{label}</span>
+            {badge && <small className={badge === 'NEW' ? 'new' : ''}>{badge}</small>}
+          </button>
+        ))}
+      </div>
 
-      <section className="testsToolbar">
-        <div className="testsTabs" role="tablist" aria-label="Test skill filters">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button key={id} type="button" className={filter === id ? 'active' : ''} onClick={() => setFilter(id)}>
-              <Icon /><span>{label}</span>
+      <section className="testsReferencePanel">
+        <div className="testsSkillTabs" role="tablist" aria-label="Test skill">
+          {skillTabs.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={skill === id}
+              className={skill === id ? 'active' : ''}
+              onClick={() => {
+                setSkill(id);
+                setPart('all');
+              }}
+            >
+              <Icon />
+              <span>{label}</span>
             </button>
           ))}
         </div>
-        <label className="testsSearch">
-          <SearchIcon />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tests" />
-        </label>
-      </section>
 
-      {visible.length ? (
-        <section className="testsGrid">
-          {visible.map((test) => (
-            <article className="testRouteCard" key={test.id}>
-              <span className="testRouteIcon"><FileTextIcon /></span>
-              <div className="testRouteCopy">
-                <small>{skillLabel(test.skill)}{test.testScope ? ` · ${test.testScope.replace('-', ' ')}` : ''}</small>
-                <strong>{test.title}</strong>
-                <p>{test.description || 'IELTS practice test'}</p>
-              </div>
-              <Link href={`/test/${test.id}`} prefetch>Start <span>→</span></Link>
-            </article>
-          ))}
-        </section>
-      ) : (
-        <section className="testsEmpty">
-          <span><LibraryIcon /></span>
-          <h2>No tests yet</h2>
-          <p>New tests will appear here as soon as they are published.</p>
-        </section>
-      )}
+        <div className="testsFilterArea">
+          <div className="testsFilterRow">
+            <label className="testsReferenceSearch">
+              <SearchIcon />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search questions by title and press Enter"
+              />
+            </label>
+
+            <select className="testsReferenceSelect" aria-label="Exam type" defaultValue="real-exam">
+              <option value="real-exam">Real Exam</option>
+            </select>
+
+            <select className="testsReferenceSelect" aria-label="Difficulty" defaultValue="difficulty">
+              <option value="difficulty">Difficulty</option>
+            </select>
+          </div>
+
+          <div className="testsPartFilters" aria-label="Test parts">
+            {partFilters.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={part === item.id ? 'active' : ''}
+                onClick={() => setPart(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="testsReferenceContent">
+          <h2>{skill === 'reading' ? 'Reading Question Sets' : 'Listening Question Sets'}</h2>
+
+          {visible.length ? (
+            <section className="testsReferenceGrid">
+              {visible.map((test) => (
+                <article className="testsReferenceCard" key={test.id}>
+                  <div>
+                    <strong>{test.title}</strong>
+                    <small>{test.testScope ? test.testScope.replace('-', ' ') : skillLabel(test.skill)}</small>
+                  </div>
+                  <Link href={`/test/${test.id}`} prefetch>
+                    Start
+                  </Link>
+                </article>
+              ))}
+            </section>
+          ) : (
+            <div className="testsReferenceBlank">
+              <span><FileTextIcon /></span>
+              <strong>No tests yet</strong>
+              <small>New tests will appear here when they are published.</small>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
