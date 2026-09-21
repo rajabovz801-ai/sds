@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
   LayoutGridIcon,
-  LibraryIcon,
+  ChecklistIcon,
   TargetIcon,
 } from '@/components/UiIcons';
 import { StudentProfileMenu } from '@/components/StudentProfileMenu';
@@ -72,7 +72,7 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
 
         <nav className="studentSideNav studentRedNav" aria-label="Student workspace navigation">
           <Link href="/mock"><LayoutGridIcon /><span>Home</span></Link>
-          <Link className={active === 'tests' ? 'active' : ''} href="/ielts"><LibraryIcon /><span>Tests</span></Link>
+          <Link className={active === 'tests' ? 'active' : ''} href="/ielts"><ChecklistIcon /><span>Tests</span></Link>
           <Link className={active === 'progress' ? 'active' : ''} href="/progress"><TargetIcon /><span>Progress</span></Link>
         </nav>
 
