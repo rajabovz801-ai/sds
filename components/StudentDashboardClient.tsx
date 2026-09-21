@@ -7,7 +7,7 @@ import {
   BookOpenIcon,
   FlameIcon,
   LayoutGridIcon,
-  LibraryIcon,
+  ChecklistIcon,
   TargetIcon,
   ZapIcon,
 } from '@/components/UiIcons';
@@ -85,7 +85,7 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
 
         <nav className="studentSideNav studentRedNav" aria-label="Student workspace navigation">
           <Link className="active" href="/mock"><LayoutGridIcon /><span>Home</span></Link>
-          <Link href="/ielts"><LibraryIcon /><span>Tests</span></Link>
+          <Link href="/ielts"><ChecklistIcon /><span>Tests</span></Link>
           <Link href="/progress"><TargetIcon /><span>Progress</span></Link>
         </nav>
 
@@ -136,7 +136,7 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
           </header>
           <Link href="/ielts" className="routePrepRow">
             <span className="routePrepIndex">01</span>
-            <span className="routePrepIcon"><LibraryIcon /></span>
+            <span className="routePrepIcon"><ChecklistIcon /></span>
             <span><strong>Tests</strong><small>Open your IELTS test library</small></span>
             <b>→</b>
           </Link>
