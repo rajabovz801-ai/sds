@@ -8,11 +8,9 @@ import { LogOutIcon } from '@/components/UiIcons';
 import type { StudentSummary } from '@/lib/auth/server-session';
 
 const items = [
-  { href: '/mock', label: 'Dashboard' },
-  { href: '/ielts', label: 'IELTS' },
-  { href: '/cefr', label: 'CEFR' },
-  { href: '/practice', label: 'Practice' },
-  { href: '/study-tools', label: 'Tools', soon: true },
+  { href: '/mock', label: 'Home' },
+  { href: '/ielts', label: 'Tests' },
+  { href: '/progress', label: 'Progress' },
 ];
 
 export function PlatformNav({ student }: { student: StudentSummary }) {
