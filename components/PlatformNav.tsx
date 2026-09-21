@@ -45,7 +45,6 @@ export function PlatformNav({ student }: { student: StudentSummary }) {
             return (
               <Link key={item.href} href={item.href} className={active ? 'active' : ''} prefetch>
                 {item.label}
-                {item.soon && <span className="soonDot">SOON</span>}
               </Link>
             );
           })}
