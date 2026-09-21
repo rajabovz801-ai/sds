@@ -10,8 +10,8 @@ import {
   ChecklistIcon,
   TargetIcon,
   ZapIcon,
+  UserIcon,
 } from '@/components/UiIcons';
-import { StudentProfileMenu } from '@/components/StudentProfileMenu';
 import type { StudentSummary } from '@/lib/auth/server-session';
 import type { DashboardData } from '@/lib/dashboard';
 
@@ -90,7 +90,11 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
         </nav>
 
         <div className="studentRedProfile">
-          <StudentProfileMenu student={student} totalPts={totalPts} streakDays={data.studyStreak} previewMode={previewMode} />
+          <Link className="studentRedProfileLink" href="/profile">
+            <span className="studentRedProfileAvatar">{student.firstName.charAt(0)}{student.lastName.charAt(0)}</span>
+            <span><small>ACCOUNT</small><strong>{student.firstName} {student.lastName}</strong></span>
+            <UserIcon />
+          </Link>
         </div>
       </aside>
 
