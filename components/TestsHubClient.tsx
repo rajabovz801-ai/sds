@@ -14,12 +14,12 @@ import type { CloudTest, TestSkill } from '@/lib/cloudTests';
 
 type Filter = 'all' | 'reading' | 'listening' | 'writing' | 'speaking';
 
-const tabs: Array<{ id: Filter; label: string; icon: () => JSX.Element }> = [
+const tabs = [
   { id: 'all', label: 'All', icon: LibraryIcon },
   { id: 'reading', label: 'Reading', icon: BookOpenIcon },
   { id: 'listening', label: 'Listening', icon: HeadphonesIcon },
   { id: 'writing', label: 'Writing', icon: PenToolIcon },
-];
+] as const;
 
 function skillLabel(skill: TestSkill) {
   return skill.replace('-', ' ').replace(/\b\w/g, (m) => m.toUpperCase());
