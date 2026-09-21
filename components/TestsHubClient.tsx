@@ -14,7 +14,7 @@ import type { CloudTest, TestSkill } from '@/lib/cloudTests';
 
 type Filter = 'all' | 'reading' | 'listening' | 'writing' | 'speaking';
 
-const tabs: Array<{ id: Filter; label: string; icon: typeof LibraryIcon }> = [
+const tabs: Array<{ id: Filter; label: string; icon: () => JSX.Element }> = [
   { id: 'all', label: 'All', icon: LibraryIcon },
   { id: 'reading', label: 'Reading', icon: BookOpenIcon },
   { id: 'listening', label: 'Listening', icon: HeadphonesIcon },
