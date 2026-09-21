@@ -17,11 +17,11 @@ type SkillTab = 'reading' | 'listening';
 type PartFilter = 'all' | 'full' | 'part-1' | 'part-2' | 'part-3';
 
 const modeChips = [
-  { id: 'real-exam', label: 'Real-Exam', icon: CheckCircleIcon, active: true },
-  { id: 'cambridge', label: 'Cambridge', icon: BookOpenIcon },
-  { id: 'gold', label: 'Gold', icon: AwardIcon },
-  { id: 'mock', label: 'Mock', icon: FileTextIcon, badge: 'SOON' },
-  { id: 'speaking', label: 'Speaking', icon: MicIcon, badge: 'NEW' },
+  { id: 'real-exam', label: 'Real-Exam', icon: CheckCircleIcon, active: true, badge: null },
+  { id: 'cambridge', label: 'Cambridge', icon: BookOpenIcon, active: false, badge: null },
+  { id: 'gold', label: 'Gold', icon: AwardIcon, active: false, badge: null },
+  { id: 'mock', label: 'Mock', icon: FileTextIcon, active: false, badge: 'SOON' },
+  { id: 'speaking', label: 'Speaking', icon: MicIcon, active: false, badge: 'NEW' },
 ] as const;
 
 const skillTabs = [
