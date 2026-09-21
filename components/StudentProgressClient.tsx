@@ -1,70 +1,121 @@
+'use client';
+
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
   BookOpenIcon,
-  FlameIcon,
+  FileTextIcon,
   HeadphonesIcon,
+  PenToolIcon,
   TargetIcon,
 } from '@/components/UiIcons';
-import type { DashboardData } from '@/lib/dashboard';
+import type { ProgressAttempt } from '@/lib/progressAttempts';
 
-function fmtBand(value: number | null) {
-  return value === null ? '—' : value.toFixed(1);
+type Tab = 'reading' | 'listening' | 'writing' | 'full-mock';
+
+const tabs = [
+  { id: 'reading', label: 'Reading', icon: BookOpenIcon },
+  { id: 'listening', label: 'Listening', icon: HeadphonesIcon },
+  { id: 'writing', label: 'Writing', icon: PenToolIcon },
+  { id: 'full-mock', label: 'Mock', icon: FileTextIcon },
+] as const;
+
+function durationLabel(seconds: number) {
+  if (!seconds) return '< 1 min';
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  return minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 }
 
-export function StudentProgressClient({ data }: { data: DashboardData }) {
+function dateLabel(value: string) {
+  return new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value));
+}
+
+export function StudentProgressClient({ attempts }: { attempts: ProgressAttempt[] }) {
+  const [tab, setTab] = useState<Tab>('reading');
+  const [page, setPage] = useState(1);
+  const perPage = 8;
+
+  const filtered = useMemo(
+    () => attempts.filter((item) => item.skill === tab || (tab === 'full-mock' && item.skill === 'full-mock')),
+    [attempts, tab],
+  );
+
+  const pages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const safePage = Math.min(page, pages);
+  const visible = filtered.slice((safePage - 1) * perPage, safePage * perPage);
+
   return (
-    <div className="progressHub">
-      <header className="progressHubHeader">
-        <span className="routeRedEyebrow">YOUR PROGRESS</span>
-        <h1>Progress</h1>
-        <p>Your latest IELTS results and overall improvement in one place.</p>
-      </header>
+    <div className="attemptProgress">
+      <div className="attemptTabs" role="tablist" aria-label="Progress skill">
+        {tabs.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            className={tab === id ? 'active' : ''}
+            onClick={() => {
+              setTab(id);
+              setPage(1);
+            }}
+          >
+            <Icon />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
 
-      <section className="progressMetricGrid">
-        <article>
-          <span className="progressMetricIcon"><TargetIcon /></span>
-          <small>Overall Band</small>
-          <strong>{fmtBand(data.overallBand)}</strong>
-        </article>
-        <article>
-          <span className="progressMetricIcon"><BookOpenIcon /></span>
-          <small>Reading</small>
-          <strong>{fmtBand(data.readingBand)}</strong>
-        </article>
-        <article>
-          <span className="progressMetricIcon"><HeadphonesIcon /></span>
-          <small>Listening</small>
-          <strong>{fmtBand(data.listeningBand)}</strong>
-        </article>
-        <article>
-          <span className="progressMetricIcon"><FlameIcon /></span>
-          <small>Streak</small>
-          <strong>{data.studyStreak}</strong>
-        </article>
-      </section>
-
-      <section className="progressRecentPanel">
-        <header>
+      <section className="attemptPanel">
+        <header className="attemptPanelHead">
           <div>
-            <span className="routeRedEyebrow">HISTORY</span>
-            <h2>Recent results</h2>
+            <h1><span><TargetIcon /></span>Your attempts</h1>
+            <p>You have completed <strong>{filtered.length}</strong> {tab === 'full-mock' ? 'mock' : tab} attempts in total.</p>
           </div>
-          <strong>{data.testsCompleted} tests</strong>
+          <div className="attemptPager">
+            <span>Page {safePage} of {pages}</span>
+            <button type="button" disabled={safePage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}><ArrowLeftIcon /></button>
+            <button type="button" disabled={safePage >= pages} onClick={() => setPage((value) => Math.min(pages, value + 1))}><ArrowRightIcon /></button>
+          </div>
         </header>
 
-        {data.recentResults.length ? (
-          <div className="progressResultList">
-            {data.recentResults.map((item) => (
-              <article key={item.id}>
-                <div>
-                  <strong>{item.title}</strong>
-                  <span>{item.skill} · {new Intl.DateTimeFormat('uz-UZ', { day: '2-digit', month: 'short' }).format(new Date(item.date))}</span>
+        {visible.length ? (
+          <div className="attemptList">
+            {visible.map((item) => (
+              <article className="attemptCard" key={item.id}>
+                <div className="attemptMain">
+                  <div className="attemptTitleRow">
+                    <strong>{item.title}</strong>
+                    <span className="attemptPart">{item.part}</span>
+                    <span className="attemptScore">{item.percentage === null ? '—' : `${item.percentage}%`}</span>
+                  </div>
+                  <small>Attempt ID: #{item.id.slice(0, 8)}</small>
+                  <div className="attemptMeta">
+                    <span>◫ {item.correctCount}/{item.maxScore ?? 0} correct</span>
+                    <i>•</i>
+                    <span>◷ Completed at {dateLabel(item.completedAt)}</span>
+                    <i>•</i>
+                    <span>◷ Time spent: {durationLabel(item.durationSeconds)}</span>
+                  </div>
                 </div>
-                <b>{item.band === null ? item.score : item.band.toFixed(1)}</b>
+
+                <Link className="attemptReview" href={`/progress/${item.id}`}>
+                  <span>▥</span> Review attempt
+                </Link>
               </article>
             ))}
           </div>
         ) : (
-          <div className="routeEmptyState">No completed tests yet.</div>
+          <div className="attemptEmpty">
+            <span><BookOpenIcon /></span>
+            <strong>No attempts yet</strong>
+            <small>Your completed {tab === 'full-mock' ? 'mock' : tab} tests will appear here.</small>
+          </div>
         )}
       </section>
     </div>
