@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
   LayoutGridIcon,
@@ -20,48 +19,7 @@ type Props = {
   children: ReactNode;
 };
 
-type GamificationPayload = {
-  totalPts?: number;
-  streakDays?: number;
-};
-
 export function StudentWorkspaceShellClient({ student, active, children }: Props) {
-  const [studyStreak, setStudyStreak] = useState(0);
-  const [totalPts, setTotalPts] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadSidebarSummary() {
-      if (document.visibilityState === 'hidden') return;
-      try {
-        const response = await fetch('/api/gamification', { cache: 'no-store' });
-        if (!response.ok) return;
-        const summary = await response.json() as GamificationPayload;
-        if (cancelled) return;
-        if (Number.isFinite(summary.totalPts)) setTotalPts(Math.max(0, Number(summary.totalPts)));
-        if (Number.isFinite(summary.streakDays)) setStudyStreak(Math.max(0, Number(summary.streakDays)));
-      } catch {
-        // Keep navigation available even when the compact summary cannot refresh.
-      }
-    }
-
-    loadSidebarSummary();
-    const interval = window.setInterval(loadSidebarSummary, 60000);
-    const onFocus = () => loadSidebarSummary();
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') loadSidebarSummary();
-    };
-    window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-      window.removeEventListener('focus', onFocus);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, []);
-
   return (
     <div className="studentDashboardShell studentWorkspaceShell studentRedShell">
       <aside className="studentSidebar studentRedSidebar">
