@@ -8,11 +8,11 @@ import {
   LayoutGridIcon,
   ChecklistIcon,
   TargetIcon,
+  UserIcon,
 } from '@/components/UiIcons';
-import { StudentProfileMenu } from '@/components/StudentProfileMenu';
 import type { StudentSummary } from '@/lib/auth/server-session';
 
-type WorkspaceTrack = 'tests' | 'progress' | 'ielts' | 'cefr' | 'practice' | 'tools' | 'daily-tasks' | 'leaderboard';
+type WorkspaceTrack = 'tests' | 'progress' | 'profile' | 'ielts' | 'cefr' | 'practice' | 'tools' | 'daily-tasks' | 'leaderboard';
 
 type Props = {
   student: StudentSummary;
@@ -77,7 +77,11 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
         </nav>
 
         <div className="studentRedProfile">
-          <StudentProfileMenu student={student} totalPts={totalPts} streakDays={studyStreak} />
+          <Link className={`studentRedProfileLink ${active === 'profile' ? 'active' : ''}`} href="/profile">
+            <span className="studentRedProfileAvatar">{student.firstName.charAt(0)}{student.lastName.charAt(0)}</span>
+            <span><small>ACCOUNT</small><strong>{student.firstName} {student.lastName}</strong></span>
+            <UserIcon />
+          </Link>
         </div>
       </aside>
 
