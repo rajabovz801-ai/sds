@@ -1,12 +1,5 @@
-import { ExamSectionsClient } from '@/components/ExamSectionsClient';
-import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
-import { requireStudent } from '@/lib/auth/server-session';
+import { redirect } from 'next/navigation';
 
-export default async function CefrPage() {
-  const student = await requireStudent('/cefr');
-  return (
-    <StudentWorkspaceShellClient student={student} active="cefr">
-      <ExamSectionsClient track="cefr" />
-    </StudentWorkspaceShellClient>
-  );
+export default function CefrPage() {
+  redirect('/ielts');
 }
