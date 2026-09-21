@@ -1230,3 +1230,801 @@
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== progress and profile reference layouts ===== */
+
+/* Sidebar account row */
+.studentDashboardShell.studentRedShell .studentRedProfileLink,
+.studentWorkspaceShell.studentRedShell .studentRedProfileLink{
+  min-height:58px;
+  padding:8px 10px;
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr) 28px;
+  align-items:center;
+  gap:9px;
+  border:1px solid #ebe5e1;
+  border-radius:15px;
+  background:#fff;
+  color:#4d4947;
+  text-decoration:none;
+  box-shadow:none;
+}
+.studentDashboardShell.studentRedShell .studentRedProfileLink.active,
+.studentWorkspaceShell.studentRedShell .studentRedProfileLink.active{
+  border-color:#ffb7ae;
+  background:#fff3f0;
+  color:#e34540;
+}
+.studentRedProfileAvatar{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:#eef4f3;
+  color:#49665f;
+  font-size:10px;
+  font-weight:600;
+  text-transform:uppercase;
+}
+.studentRedProfileLink>span:nth-child(2){
+  min-width:0;
+}
+.studentRedProfileLink small,
+.studentRedProfileLink strong{
+  display:block;
+}
+.studentRedProfileLink small{
+  color:#a09994;
+  font-size:7px;
+  font-weight:600;
+  letter-spacing:.11em;
+}
+.studentRedProfileLink strong{
+  margin-top:2px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:inherit;
+  font-size:10px;
+  font-weight:550;
+}
+.studentRedProfileLink>svg{
+  width:17px!important;
+  height:17px!important;
+  max-width:17px!important;
+  max-height:17px!important;
+  stroke-width:1.5!important;
+  justify-self:center;
+}
+
+/* Progress — attempt history like reference */
+.attemptProgress{
+  min-height:680px;
+  background:#fff;
+}
+.attemptTabs{
+  min-height:64px;
+  padding:0 22px;
+  display:flex;
+  align-items:flex-end;
+  gap:12px;
+  border-bottom:1px solid #e9e5e2;
+}
+.attemptTabs button{
+  position:relative;
+  min-height:64px;
+  padding:0 14px;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  border:0;
+  background:transparent;
+  color:#62605f;
+  font:inherit;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+}
+.attemptTabs button::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px;
+  height:2px;
+  background:transparent;
+}
+.attemptTabs button.active{
+  color:#ef4444;
+}
+.attemptTabs button.active::after{
+  background:#ef4444;
+}
+.attemptTabs svg{
+  width:17px!important;
+  height:17px!important;
+  max-width:17px!important;
+  max-height:17px!important;
+  stroke-width:1.55!important;
+}
+.attemptPanel{
+  padding:24px 22px 28px;
+}
+.attemptPanelHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  margin-bottom:20px;
+}
+.attemptPanelHead h1{
+  margin:0;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  color:#1e1e1f;
+  font-size:20px;
+  line-height:1.1;
+  font-weight:600;
+  letter-spacing:-.03em;
+}
+.attemptPanelHead h1>span{
+  color:#ef4444;
+  display:grid;
+  place-items:center;
+}
+.attemptPanelHead h1 svg{
+  width:20px!important;
+  height:20px!important;
+  max-width:20px!important;
+  max-height:20px!important;
+  stroke-width:1.6!important;
+}
+.attemptPanelHead p{
+  margin:5px 0 0;
+  color:#85817f;
+  font-size:11px;
+  font-weight:400;
+}
+.attemptPanelHead p strong{
+  color:#3d3937;
+  font-weight:600;
+}
+.attemptPager{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.attemptPager>span{
+  margin-right:4px;
+  color:#837e7b;
+  font-size:10px;
+}
+.attemptPager button{
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border:1px solid #e8e4e1;
+  border-radius:9px;
+  background:#fff;
+  color:#77716e;
+  cursor:pointer;
+}
+.attemptPager button:disabled{
+  opacity:.38;
+  cursor:not-allowed;
+}
+.attemptPager svg{
+  width:15px!important;
+  height:15px!important;
+  max-width:15px!important;
+  max-height:15px!important;
+  stroke-width:1.5!important;
+}
+.attemptList{
+  display:grid;
+  gap:12px;
+}
+.attemptCard{
+  min-height:118px;
+  padding:18px 18px;
+  border:1px solid #e7e5e3;
+  border-radius:11px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  box-shadow:0 1px 2px rgba(35,30,28,.02);
+}
+.attemptMain{
+  min-width:0;
+}
+.attemptTitleRow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.attemptTitleRow>strong{
+  color:#1f1f20;
+  font-size:13px;
+  font-weight:600;
+}
+.attemptPart,
+.attemptScore{
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid #ece8e5;
+  background:#fff;
+  color:#494442;
+  font-size:8px;
+  font-weight:600;
+}
+.attemptScore{
+  border-color:#ffc2c2;
+  background:#fff2f3;
+  color:#e3434d;
+}
+.attemptMain>small{
+  display:block;
+  margin-top:7px;
+  color:#8f8a87;
+  font-size:9px;
+}
+.attemptMeta{
+  margin-top:9px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  color:#8a8582;
+  font-size:9px;
+}
+.attemptMeta i{
+  color:#c7c1bd;
+  font-style:normal;
+}
+.attemptReview{
+  flex:0 0 auto;
+  min-height:40px;
+  padding:0 13px;
+  border-radius:8px;
+  background:#f7f6f5;
+  color:#2b2a2a;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  text-decoration:none;
+  font-size:10px;
+  font-weight:500;
+}
+.attemptReview>span{
+  color:#3e3d3c;
+}
+.attemptEmpty{
+  min-height:330px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#8c8885;
+}
+.attemptEmpty>span{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  background:#fff3f0;
+  color:#ef4444;
+}
+.attemptEmpty svg{
+  width:20px!important;
+  height:20px!important;
+  max-width:20px!important;
+  max-height:20px!important;
+  stroke-width:1.5!important;
+}
+.attemptEmpty strong{
+  margin-top:10px;
+  color:#575351;
+  font-size:12px;
+  font-weight:550;
+}
+.attemptEmpty small{
+  margin-top:4px;
+  font-size:9px;
+}
+
+/* Profile */
+.accountPage{
+  max-width:1180px;
+  margin:0 auto;
+}
+.accountPageHeader{
+  margin-bottom:26px;
+}
+.accountPageHeader h1{
+  margin:5px 0 2px;
+  color:#191919;
+  font-size:31px;
+  line-height:1.05;
+  font-weight:550;
+  letter-spacing:-.04em;
+}
+.accountPageHeader p{
+  margin:0;
+  color:#746d69;
+  font-size:12px;
+}
+.accountGrid{
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(300px,.7fr);
+  gap:20px;
+  align-items:start;
+}
+.accountMainColumn,
+.accountSideColumn{
+  display:grid;
+  gap:20px;
+}
+.accountCard{
+  border:1px solid #eadfd9;
+  border-radius:20px;
+  background:#fff;
+  overflow:hidden;
+}
+.accountCard>header{
+  min-height:72px;
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.accountCard>header>span{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:#fff0ed;
+  color:#ef4b45;
+}
+.accountCard>header svg{
+  width:17px!important;
+  height:17px!important;
+  max-width:17px!important;
+  max-height:17px!important;
+  stroke-width:1.55!important;
+}
+.accountCard>header h2{
+  margin:0;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:-.02em;
+}
+.accountRows{
+  padding:0 20px 20px;
+}
+.accountRows>div{
+  position:relative;
+  min-height:68px;
+  padding:13px 34px 12px 0;
+  border-top:1px solid #eee9e6;
+}
+.accountRows>div:first-child{
+  border-top:0;
+}
+.accountRows span,
+.accountRows strong,
+.accountRows small{
+  display:block;
+}
+.accountRows span{
+  color:#8a827e;
+  font-size:10px;
+}
+.accountRows strong{
+  margin-top:4px;
+  color:#1f1e1d;
+  font-size:12px;
+  font-weight:500;
+}
+.accountRows small{
+  margin-top:3px;
+  color:#a09995;
+  font-size:8px;
+}
+.accountRows b{
+  position:absolute;
+  right:4px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#77716e;
+  font-size:19px;
+  font-weight:400;
+}
+.accountActionRows{
+  padding:0 20px 18px;
+}
+.accountActionRows button{
+  width:100%;
+  min-height:68px;
+  padding:12px 4px;
+  border:0;
+  border-top:1px solid #eee9e6;
+  background:transparent;
+  color:#252323;
+  display:grid;
+  grid-template-columns:24px minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+}
+.accountActionRows button:first-child{
+  border-top:0;
+}
+.accountActionRows button>span{
+  color:#ef4b45;
+  display:grid;
+  place-items:center;
+}
+.accountActionRows button svg{
+  width:15px!important;
+  height:15px!important;
+  max-width:15px!important;
+  max-height:15px!important;
+  stroke-width:1.5!important;
+}
+.accountActionRows strong,
+.accountActionRows small{
+  display:block;
+}
+.accountActionRows strong{
+  font-size:12px;
+  font-weight:500;
+}
+.accountActionRows small{
+  margin-top:3px;
+  color:#98908c;
+  font-size:9px;
+}
+.accountActionRows b{
+  color:#7f7975;
+  font-size:18px;
+  font-weight:400;
+}
+.accountActionRows.legal button{
+  grid-template-columns:1fr auto;
+  min-height:54px;
+}
+.preferencesCard{
+  padding-bottom:6px;
+}
+.preferenceBlock{
+  padding:0 20px 16px;
+}
+.preferenceBlock+.preferenceBlock{
+  padding-top:16px;
+  border-top:1px solid #eee9e6;
+}
+.preferenceBlock>span{
+  display:block;
+  margin-bottom:10px;
+  color:#7f7773;
+  font-size:10px;
+}
+.segmentedControl{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  padding:4px;
+  border-radius:10px;
+  background:#f7f6f5;
+}
+.segmentedControl.three{
+  grid-template-columns:repeat(3,1fr);
+}
+.segmentedControl button{
+  min-height:34px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#69625e;
+  font:inherit;
+  font-size:10px;
+  cursor:pointer;
+}
+.segmentedControl button.active{
+  background:#fff;
+  color:#171717;
+  box-shadow:0 1px 4px rgba(40,34,31,.08);
+}
+.notificationRow{
+  min-height:68px;
+  margin:0 20px;
+  border-top:1px solid #eee9e6;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
+.notificationRow>strong{
+  font-size:11px;
+  font-weight:500;
+}
+.notificationRow>button{
+  width:48px;
+  height:28px;
+  padding:3px;
+  border:0;
+  border-radius:999px;
+  cursor:pointer;
+}
+.notificationRow>button.toggleOn{
+  background:#ef4444;
+}
+.notificationRow>button.toggleOff{
+  background:#ddd9d6;
+}
+.notificationRow i{
+  display:block;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#fff;
+  transition:.18s ease;
+}
+.notificationRow .toggleOn i{
+  margin-left:20px;
+}
+.profileLogout{
+  min-height:52px;
+  border:1px solid #e2dedb;
+  border-radius:14px;
+  background:#fff;
+  color:#1d1d1d;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  font:inherit;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+}
+.profileLogout:disabled{
+  opacity:.6;
+  cursor:wait;
+}
+.profileLogout svg{
+  width:16px!important;
+  height:16px!important;
+  max-width:16px!important;
+  max-height:16px!important;
+  stroke-width:1.55!important;
+}
+.accountCreated{
+  margin:0;
+  text-align:center;
+  color:#938b87;
+  font-size:9px;
+}
+
+/* Attempt review */
+.attemptReviewPage{
+  display:grid;
+  gap:18px;
+}
+.attemptReviewBack{
+  width:max-content;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:#5f5854;
+  text-decoration:none;
+  font-size:11px;
+}
+.attemptReviewBack svg{
+  width:15px!important;
+  height:15px!important;
+  max-width:15px!important;
+  max-height:15px!important;
+}
+.attemptReviewHero{
+  padding:22px;
+  border:1px solid #ebe5e1;
+  border-radius:18px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+}
+.attemptReviewHero h1{
+  margin:5px 0 4px;
+  font-size:25px;
+  font-weight:600;
+  letter-spacing:-.03em;
+}
+.attemptReviewHero p{
+  margin:0;
+  color:#817a76;
+  font-size:10px;
+  text-transform:capitalize;
+}
+.attemptReviewScore{
+  min-width:130px;
+  padding:13px;
+  border-radius:14px;
+  background:#fff3f0;
+  text-align:center;
+}
+.attemptReviewScore small,
+.attemptReviewScore strong,
+.attemptReviewScore span{
+  display:block;
+}
+.attemptReviewScore small{
+  color:#a07870;
+  font-size:8px;
+}
+.attemptReviewScore strong{
+  margin-top:3px;
+  color:#ef4444;
+  font-size:27px;
+  font-weight:600;
+}
+.attemptReviewScore span{
+  margin-top:3px;
+  color:#8a7772;
+  font-size:8px;
+}
+.attemptReviewList{
+  border:1px solid #ebe5e1;
+  border-radius:18px;
+  background:#fff;
+  overflow:hidden;
+}
+.attemptReviewList>header{
+  min-height:62px;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border-bottom:1px solid #eee9e6;
+}
+.attemptReviewList>header>span{
+  color:#ef4444;
+  display:grid;
+  place-items:center;
+}
+.attemptReviewList>header svg{
+  width:17px!important;
+  height:17px!important;
+  max-width:17px!important;
+  max-height:17px!important;
+}
+.attemptReviewList h2{
+  margin:0;
+  font-size:14px;
+  font-weight:600;
+}
+.attemptReviewList article{
+  min-height:72px;
+  padding:12px 18px;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) 24px;
+  align-items:center;
+  gap:12px;
+  border-top:1px solid #f0ece9;
+}
+.attemptReviewList article:first-of-type{
+  border-top:0;
+}
+.attemptQuestionId{
+  width:30px;
+  height:30px;
+  border-radius:9px;
+  display:grid;
+  place-items:center;
+  background:#f6f4f2;
+  color:#5e5956;
+  font-size:9px;
+  font-weight:600;
+}
+.attemptReviewList article div small,
+.attemptReviewList article div strong{
+  display:block;
+}
+.attemptReviewList article div small{
+  color:#9a928e;
+  font-size:8px;
+}
+.attemptReviewList article div strong{
+  margin-top:3px;
+  font-size:11px;
+  font-weight:500;
+}
+.attemptReviewList article div p{
+  margin:4px 0 0;
+  color:#8f817c;
+  font-size:8px;
+}
+.attemptReviewList article div p b{
+  color:#403b39;
+}
+.attemptAnswerStatus{
+  display:grid;
+  place-items:center;
+}
+.attemptAnswerStatus svg{
+  width:17px!important;
+  height:17px!important;
+  max-width:17px!important;
+  max-height:17px!important;
+  stroke-width:1.6!important;
+}
+.attemptReviewList article.correct .attemptAnswerStatus{
+  color:#22a06b;
+}
+.attemptReviewList article.wrong .attemptAnswerStatus{
+  color:#ef4444;
+}
+
+@media(max-width:900px){
+  .accountGrid{
+    grid-template-columns:1fr;
+  }
+  .accountSideColumn{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:700px){
+  .attemptTabs{
+    overflow-x:auto;
+    padding:0 10px;
+  }
+  .attemptTabs button{
+    flex:0 0 auto;
+    padding:0 10px;
+    font-size:11px;
+  }
+  .attemptPanel{
+    padding:18px 12px 22px;
+  }
+  .attemptPanelHead{
+    align-items:flex-start;
+  }
+  .attemptCard{
+    display:block;
+    padding:15px;
+  }
+  .attemptReview{
+    width:100%;
+    margin-top:13px;
+    justify-content:center;
+  }
+  .attemptMeta{
+    display:grid;
+    gap:5px;
+  }
+  .attemptMeta i{
+    display:none;
+  }
+  .accountPageHeader h1{
+    font-size:27px;
+  }
+  .attemptReviewHero{
+    display:block;
+  }
+  .attemptReviewScore{
+    margin-top:14px;
+  }
+}
