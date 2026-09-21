@@ -5,19 +5,14 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
-  AwardIcon,
-  BookOpenIcon,
-  CalendarCheckIcon,
-  FlameIcon,
-  GlobeIcon,
-  LayersIcon,
   LayoutGridIcon,
-  SparklesIcon,
+  LibraryIcon,
+  TargetIcon,
 } from '@/components/UiIcons';
 import { StudentProfileMenu } from '@/components/StudentProfileMenu';
 import type { StudentSummary } from '@/lib/auth/server-session';
 
-type WorkspaceTrack = 'ielts' | 'cefr' | 'practice' | 'tools' | 'daily-tasks' | 'leaderboard';
+type WorkspaceTrack = 'tests' | 'progress';
 
 type Props = {
   student: StudentSummary;
@@ -47,7 +42,7 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
         if (Number.isFinite(summary.totalPts)) setTotalPts(Math.max(0, Number(summary.totalPts)));
         if (Number.isFinite(summary.streakDays)) setStudyStreak(Math.max(0, Number(summary.streakDays)));
       } catch {
-        // Keep the workspace usable even if the compact summary cannot refresh.
+        // Keep navigation available even when the compact summary cannot refresh.
       }
     }
 
@@ -68,37 +63,25 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
   }, []);
 
   return (
-    <div className="studentDashboardShell studentWorkspaceShell">
-      <aside className="studentSidebar">
-        <Link href="/mock" className="studentBrand">
+    <div className="studentDashboardShell studentWorkspaceShell studentRedShell">
+      <aside className="studentSidebar studentRedSidebar">
+        <Link href="/mock" className="studentBrand studentRedBrand">
           <span className="studentBrandMark"><ArkLogoIcon /></span>
-          <span><strong>ARK Education</strong><small>EXAM WORKSPACE</small></span>
+          <span><strong>ARK Education</strong><small>IELTS WORKSPACE</small></span>
         </Link>
 
-        <nav className="studentSideNav" aria-label="Student workspace navigation">
-          <Link href="/mock"><LayoutGridIcon /><span>Dashboard</span></Link>
-          <Link className={active === 'ielts' ? 'active' : ''} href="/ielts"><GlobeIcon /><span>IELTS</span></Link>
-          <Link className={active === 'cefr' ? 'active' : ''} href="/cefr"><LayersIcon /><span>CEFR</span></Link>
-          <Link className={active === 'practice' ? 'active' : ''} href="/practice"><BookOpenIcon /><span>Practice</span></Link>
-          <Link className={active === 'tools' ? 'active' : ''} href="/study-tools"><SparklesIcon /><span>Tools</span></Link>
-          <Link className={active === 'daily-tasks' ? 'active' : ''} href="/daily-tasks"><CalendarCheckIcon /><span>Daily Tasks</span></Link>
-          <Link className={active === 'leaderboard' ? 'active' : ''} href="/leaderboard"><AwardIcon /><span>Leaderboard</span></Link>
+        <nav className="studentSideNav studentRedNav" aria-label="Student workspace navigation">
+          <Link href="/mock"><LayoutGridIcon /><span>Home</span></Link>
+          <Link className={active === 'tests' ? 'active' : ''} href="/ielts"><LibraryIcon /><span>Tests</span></Link>
+          <Link className={active === 'progress' ? 'active' : ''} href="/progress"><TargetIcon /><span>Progress</span></Link>
         </nav>
 
-        <Link className="studentSideDailySummary" href="/daily-tasks">
-          <span className="studentSideDailyIcon"><CalendarCheckIcon /></span>
-          <div>
-            <small>DAILY TASKS</small>
-            <strong>{totalPts} PTS</strong>
-            <em><FlameIcon /> {studyStreak} kun streak</em>
-          </div>
-          <b>→</b>
-        </Link>
-
-        <StudentProfileMenu student={student} totalPts={totalPts} streakDays={studyStreak} />
+        <div className="studentRedProfile">
+          <StudentProfileMenu student={student} totalPts={totalPts} streakDays={studyStreak} />
+        </div>
       </aside>
 
-      <main className="studentWorkspaceMain">{children}</main>
+      <main className="studentWorkspaceMain studentRedMain">{children}</main>
     </div>
   );
 }
