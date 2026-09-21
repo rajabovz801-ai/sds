@@ -12,7 +12,7 @@ import {
 import { StudentProfileMenu } from '@/components/StudentProfileMenu';
 import type { StudentSummary } from '@/lib/auth/server-session';
 
-type WorkspaceTrack = 'tests' | 'progress';
+type WorkspaceTrack = 'tests' | 'progress' | 'ielts' | 'cefr' | 'practice' | 'tools' | 'daily-tasks' | 'leaderboard';
 
 type Props = {
   student: StudentSummary;
