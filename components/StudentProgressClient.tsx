@@ -87,8 +87,8 @@ export function StudentProgressClient({ attempts }: { attempts: ProgressAttempt[
                 <div className="attemptMain">
                   <div className="attemptTitleRow">
                     <strong>{item.title}</strong>
-                    <span className="attemptPart">{item.part}</span>
-                    <span className="attemptScore">{item.percentage === null ? '—' : `${item.percentage}%`}</span>
+                    <span className="attemptPart">{item.collection === 'real-exam' ? 'Real Exam' : item.collection === 'cambridge' ? 'Cambridge' : 'Gold'} · {item.part}</span>
+                    <span className="attemptScore">{item.band !== null ? `Band ${item.band.toFixed(1)}` : item.percentage === null ? '—' : `${item.percentage}%`}</span>
                   </div>
                   <small>Attempt ID: #{item.id.slice(0, 8)}</small>
                   <div className="attemptMeta">
