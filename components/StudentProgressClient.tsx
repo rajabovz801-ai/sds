@@ -6,20 +6,16 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   BookOpenIcon,
-  FileTextIcon,
   HeadphonesIcon,
-  PenToolIcon,
   TargetIcon,
 } from '@/components/UiIcons';
 import type { ProgressAttempt } from '@/lib/progressAttempts';
 
-type Tab = 'reading' | 'listening' | 'writing' | 'full-mock';
+type Tab = 'reading' | 'listening';
 
 const tabs = [
   { id: 'reading', label: 'Reading', icon: BookOpenIcon },
   { id: 'listening', label: 'Listening', icon: HeadphonesIcon },
-  { id: 'writing', label: 'Writing', icon: PenToolIcon },
-  { id: 'full-mock', label: 'Mock', icon: FileTextIcon },
 ] as const;
 
 function durationLabel(seconds: number) {
@@ -44,7 +40,7 @@ export function StudentProgressClient({ attempts }: { attempts: ProgressAttempt[
   const perPage = 8;
 
   const filtered = useMemo(
-    () => attempts.filter((item) => item.skill === tab || (tab === 'full-mock' && item.skill === 'full-mock')),
+    () => attempts.filter((item) => item.skill === tab),
     [attempts, tab],
   );
 
@@ -75,7 +71,7 @@ export function StudentProgressClient({ attempts }: { attempts: ProgressAttempt[
         <header className="attemptPanelHead">
           <div>
             <h1><span><TargetIcon /></span>Your attempts</h1>
-            <p>You have completed <strong>{filtered.length}</strong> {tab === 'full-mock' ? 'mock' : tab} attempts in total.</p>
+            <p>You have completed <strong>{filtered.length}</strong> {tab} attempts in total.</p>
           </div>
           <div className="attemptPager">
             <span>Page {safePage} of {pages}</span>
@@ -112,9 +108,9 @@ export function StudentProgressClient({ attempts }: { attempts: ProgressAttempt[
           </div>
         ) : (
           <div className="attemptEmpty">
-            <span><BookOpenIcon /></span>
+            <span>{tab === 'reading' ? <BookOpenIcon /> : <HeadphonesIcon />}</span>
             <strong>No attempts yet</strong>
-            <small>Your completed {tab === 'full-mock' ? 'mock' : tab} tests will appear here.</small>
+            <small>Your completed {tab} tests will appear here.</small>
           </div>
         )}
       </section>
