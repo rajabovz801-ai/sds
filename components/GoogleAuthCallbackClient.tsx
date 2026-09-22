@@ -21,14 +21,16 @@ export function GoogleAuthCallbackClient() {
 
     async function finish() {
       try {
+        // The browser client may have exchanged the PKCE code during initialization.
+        // Reuse that session before attempting a second exchange.
         const code = searchParams.get('code');
-        if (code) {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) throw exchangeError;
-        }
-
-        const { data, error: sessionError } = await supabase.auth.getSession();
+        let { data, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) throw sessionError;
+        if (!data.session && code) {
+          const { data: exchanged, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) throw exchangeError;
+          data = exchanged;
+        }
         const accessToken = data.session?.access_token;
         if (!accessToken) throw new Error('Google sessiyasi topilmadi.');
 
