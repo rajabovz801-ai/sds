@@ -6,7 +6,6 @@ import {
   adminSessionCookieOptions,
   adminChallengeCookieOptions,
   createAdminSessionToken,
-  readAdminChallenge,
 } from '@/lib/auth/admin-session';
 import { constantTimeEqual } from '@/lib/auth/secrets';
 import { getServiceSupabase } from '@/lib/supabase/server';
@@ -108,10 +107,6 @@ export async function POST(request: NextRequest) {
 
     if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
       return json({ error: 'Admin login formati noto‘g‘ri.' }, { status: 415 });
-    }
-
-    if (!readAdminChallenge(request)) {
-      return json({ error: 'Admin tasdiqlash vaqti tugagan. Maxsus kodni qayta kiriting.' }, { status: 403 });
     }
 
     const ip = requestIp(request);
