@@ -23,6 +23,15 @@ export function validPasscode(value: unknown): value is string {
     && !/[\u0000-\u001f\u007f]/.test(value);
 }
 
+const RESERVED_USERNAMES = new Set(['admin', 'administrator', 'support', 'teacher', 'root', 'moderator', 'arkeducation', 'ark_education']);
+
+export function normalizeArkUsername(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const username = value.trim().toLowerCase();
+  if (!/^[a-z][a-z0-9_]{3,19}$/.test(username) || RESERVED_USERNAMES.has(username)) return null;
+  return username;
+}
+
 export function issueStudentLoginId() {
   const suffix = randomBytes(5).toString('hex').toUpperCase();
   return `ARK-${suffix.slice(0, 4)}-${suffix.slice(4)}`;
