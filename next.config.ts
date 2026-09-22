@@ -31,8 +31,6 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: '/mock/:path*', destination: '/ielts', permanent: false },
-      { source: '/progress/:path*', destination: '/ielts', permanent: false },
       { source: '/profile/:path*', destination: '/ielts', permanent: false },
       { source: '/leaderboard/:path*', destination: '/ielts', permanent: false },
       { source: '/practice/:path*', destination: '/ielts', permanent: false },
