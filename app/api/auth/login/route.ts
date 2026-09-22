@@ -134,7 +134,6 @@ export async function POST(request: NextRequest) {
       .select('id,telegram_id,telegram_username,first_name,last_name,status,exam_platform_enabled')
       .eq('id', access.student_id)
       .eq('status', 'active')
-      .eq('exam_platform_enabled', true)
       .maybeSingle();
 
     if (studentError) throw studentError;
@@ -174,7 +173,7 @@ export async function POST(request: NextRequest) {
 
     const { error: loginTimeError } = await supabase
       .from('students')
-      .update({ last_login_at: now, updated_at: now })
+      .update({ last_login_at: now, exam_platform_enabled: true, updated_at: now })
       .eq('id', student.id);
     if (loginTimeError) {
       console.error('Student last_login_at update failed after successful code consumption', loginTimeError);
@@ -188,7 +187,7 @@ export async function POST(request: NextRequest) {
         lastName: student.last_name,
         username: student.telegram_username,
       },
-      next: '/mock',
+      next: '/ielts',
     });
     response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
     return response;
