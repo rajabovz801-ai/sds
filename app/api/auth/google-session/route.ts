@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSessionToken, SESSION_COOKIE, sessionCookieOptions } from '@/lib/auth/session';
 import { getServiceSupabase } from '@/lib/supabase/server';
+import { isArkIeltsRequest } from '@/lib/auth/local-credentials';
 
 function names(user: { email?: string | null; user_metadata?: Record<string, unknown> }) {
   const meta = user.user_metadata || {};
@@ -15,6 +16,9 @@ function names(user: { email?: string | null; user_metadata?: Record<string, unk
 }
 
 export async function POST(request: NextRequest) {
+  if (isArkIeltsRequest(request)) {
+    return NextResponse.json({ error: 'Please register or sign in using your Student ID.' }, { status: 410, headers: { 'Cache-Control': 'no-store' } });
+  }
   try {
     const body = await request.json();
     const accessToken = String(body?.accessToken || '').trim();
