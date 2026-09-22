@@ -8,7 +8,7 @@ const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 export type SessionPayload = {
   studentId: string;
-  telegramId: number;
+  telegramId?: number | null;
   firstName?: string;
   lastName?: string;
   iat?: number;
@@ -19,10 +19,10 @@ function signature(body: string) {
   return createHmac('sha256', getSessionSecret()).update(body).digest('base64url');
 }
 
-export function createSessionToken(studentId: string, telegramId: number, firstName?: string, lastName?: string) {
+export function createSessionToken(studentId: string, telegramId?: number | null, firstName?: string, lastName?: string) {
   const payload: SessionPayload = {
     studentId,
-    telegramId,
+    telegramId: Number.isFinite(Number(telegramId)) ? Number(telegramId) : null,
     firstName: firstName?.trim() || undefined,
     lastName: lastName?.trim() || undefined,
     iat: Math.floor(Date.now() / 1000),
@@ -43,7 +43,7 @@ export function verifySessionToken(token?: string | null): SessionPayload | null
     if (expected.length !== received.length || !timingSafeEqual(expected, received)) return null;
 
     const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as SessionPayload;
-    if (!payload.studentId || !payload.telegramId || payload.exp <= Math.floor(Date.now() / 1000)) return null;
+    if (!payload.studentId || payload.exp <= Math.floor(Date.now() / 1000)) return null;
     if (!isStudentAllowedDuringMaintenance(payload.studentId)) return null;
     return payload;
   } catch {
