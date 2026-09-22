@@ -2,16 +2,13 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
   BookOpenIcon,
   FlameIcon,
-  LayoutGridIcon,
   ChecklistIcon,
   TargetIcon,
-  ZapIcon,
-  UserIcon,
 } from '@/components/UiIcons';
+import { StudentWorkspaceShellClient } from '@/components/StudentWorkspaceShellClient';
 import type { StudentSummary } from '@/lib/auth/server-session';
 import type { DashboardData } from '@/lib/dashboard';
 
@@ -36,7 +33,6 @@ type StudentDashboardClientProps = {
 
 export function StudentDashboardClient({ student, initialData, previewMode = false }: StudentDashboardClientProps) {
   const [data, setData] = useState(initialData);
-  const [totalPts, setTotalPts] = useState(0);
 
   useEffect(() => {
     if (previewMode) return;
@@ -45,17 +41,10 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
     async function refresh() {
       if (document.visibilityState === 'hidden') return;
       try {
-        const [dashRes, gameRes] = await Promise.all([
-          fetch('/api/dashboard', { cache: 'no-store' }),
-          fetch('/api/gamification', { cache: 'no-store' }),
-        ]);
-        if (dashRes.ok) {
-          const next = await dashRes.json() as DashboardData;
+        const response = await fetch('/api/dashboard', { cache: 'no-store' });
+        if (response.ok) {
+          const next = await response.json() as DashboardData;
           if (!cancelled) setData(next);
-        }
-        if (gameRes.ok) {
-          const summary = await gameRes.json() as { totalPts?: number };
-          if (!cancelled && Number.isFinite(summary.totalPts)) setTotalPts(Math.max(0, Number(summary.totalPts)));
         }
       } catch {
         // Keep the latest visible state if a refresh fails.
@@ -76,37 +65,15 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
   const recent = useMemo(() => data.recentResults.slice(0, 4), [data.recentResults]);
 
   return (
-    <div className="studentDashboardShell studentRedShell">
-      <aside className="studentSidebar studentRedSidebar">
-        <Link href="/mock" className="studentBrand studentRedBrand">
-          <span className="studentBrandMark"><ArkLogoIcon /></span>
-          <span><strong>ARK Education</strong><small>IELTS WORKSPACE</small></span>
-        </Link>
-
-        <nav className="studentSideNav studentRedNav" aria-label="Student workspace navigation">
-          <Link className="active" href="/mock"><LayoutGridIcon /><span>Home</span></Link>
-          <Link href="/ielts"><ChecklistIcon /><span>Tests</span></Link>
-          <Link href="/progress"><TargetIcon /><span>Progress</span></Link>
-        </nav>
-
-        <div className="studentRedProfile">
-          <Link className="studentRedProfileLink" href="/profile">
-            <span className="studentRedProfileAvatar">{student.firstName.charAt(0)}{student.lastName.charAt(0)}</span>
-            <span><small>ACCOUNT</small><strong>{student.firstName} {student.lastName}</strong></span>
-            <UserIcon />
-          </Link>
-        </div>
-      </aside>
-
-      <main className="studentDashMain studentRedMain routeDashboard">
+    <StudentWorkspaceShellClient student={student} active="dashboard">
+      <div className="studentDashMain routeDashboard">
         <header className="routeDashboardHeader">
           <div>
-            <span className="routeRedEyebrow">TODAY ROUTE</span>
-            <h1>{student.firstName}, here is today’s route.</h1>
-            <p>Target Band {fmtBand(data.nextTargetBand)} · Keep your preparation focused and consistent.</p>
+            <span className="routeRedEyebrow">IELTS DASHBOARD</span>
+            <h1>{student.firstName}, here is your progress.</h1>
+            <p>Target Band {fmtBand(data.nextTargetBand)} · Reading and Listening practice overview.</p>
           </div>
           <div className="routeHeaderStats">
-            <span><ZapIcon /><small>PTS</small><strong>{totalPts}</strong></span>
             <span><FlameIcon /><small>STREAK</small><strong>{data.studyStreak}</strong></span>
           </div>
         </header>
@@ -123,7 +90,7 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
           <article className="routeMetricCard">
             <span>TESTS COMPLETED</span>
             <strong>{data.testsCompleted}</strong>
-            <p>Completed practice tests</p>
+            <p>Completed IELTS tests</p>
             <div className="routeMiniLine"><i style={{ width: `${Math.min(100, data.testsCompleted * 8)}%` }} /></div>
           </article>
 
@@ -136,18 +103,18 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
 
         <section className="routeContinue">
           <header>
-            <div><span className="routeRedEyebrow">TODAY ROUTE</span><h2>Continue your prep</h2></div>
+            <div><span className="routeRedEyebrow">QUICK ACCESS</span><h2>Continue your prep</h2></div>
           </header>
           <Link href="/ielts" className="routePrepRow">
             <span className="routePrepIndex">01</span>
             <span className="routePrepIcon"><ChecklistIcon /></span>
-            <span><strong>Tests</strong><small>Open your IELTS test library</small></span>
+            <span><strong>Tests</strong><small>Open Real Exam, Cambridge and Gold tests</small></span>
             <b>→</b>
           </Link>
           <Link href="/progress" className="routePrepRow">
             <span className="routePrepIndex">02</span>
             <span className="routePrepIcon"><TargetIcon /></span>
-            <span><strong>Progress</strong><small>Track your scores and improvement</small></span>
+            <span><strong>Progress</strong><small>Track Reading and Listening results</small></span>
             <b>→</b>
           </Link>
         </section>
@@ -168,7 +135,7 @@ export function StudentDashboardClient({ student, initialData, previewMode = fal
             <div className="routeEmptyState">No results yet. Complete your first test to start tracking progress.</div>
           )}
         </section>
-      </main>
-    </div>
+      </div>
+    </StudentWorkspaceShellClient>
   );
 }
