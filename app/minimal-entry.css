@@ -27,3 +27,37 @@
 .adminHiddenLogin button{height:50px;border:0;border-radius:11px;background:#bf2f33;color:#fff;font-weight:800;cursor:pointer}
 .adminHiddenLogin p{margin:0;color:#b4232a;font-size:13px}
 @media(max-width:560px){.googleAuthCard{padding:34px 22px 28px;border-radius:20px}.googleAuthCard h1{font-size:34px}.arkEntryMark{width:68px;height:68px;border-radius:20px}}
+
+/* ARK IELTS account access: student-owned credentials; no third-party sign-in. */
+.googleAuthScreen{padding:24px 12px}
+.googleAuthCard{width:min(485px,100%);padding:32px 34px 30px}
+.googleAuthLogo{margin-bottom:14px}
+.googleAuthKicker{margin-bottom:16px}
+.arkAuthTabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;border:1px solid #f2d8d9;border-radius:12px;padding:5px;margin:0 0 22px;background:#fff7f7}
+.arkAuthTabs button{border:0;border-radius:9px;padding:11px 9px;background:transparent;color:#9a7175;font:700 13px var(--font-poppins),Arial,sans-serif;cursor:pointer}
+.arkAuthTabs button.active{background:#be3035;color:#fff;box-shadow:0 5px 12px rgba(153,40,43,.14)}
+.arkLocalForm{display:grid;gap:14px;text-align:left;margin-top:20px}
+.arkLocalForm label{display:grid;gap:7px;color:#3b2427;font-size:13px;font-weight:700}
+.arkLocalForm input{width:100%;min-width:0;height:50px;padding:0 14px;border:1px solid #e7bdbf;border-radius:12px;background:#fff;color:#34272a;font:500 14px var(--font-poppins),Arial,sans-serif;outline:none;transition:border-color .16s,box-shadow .16s}
+.arkLocalForm input::placeholder{color:#a49ca0}
+.arkLocalForm input:focus{border-color:#bf2f33;box-shadow:0 0 0 3px rgba(191,47,51,.10)}
+.arkLocalForm input:disabled{opacity:.65}
+.arkLocalNameGrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.arkLocalSecret{position:relative;display:block}
+.arkLocalSecret input{padding-right:67px}
+.arkLocalSecret>button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:10px 9px;color:#a34145;font:700 12px var(--font-poppins),Arial,sans-serif;cursor:pointer}
+.arkLocalHint{margin:0;color:#9b8184;font-size:11px;line-height:1.5;text-align:left}
+.arkLocalError{padding:10px 12px;border:1px solid #f0b4b7;border-radius:10px;background:#fff1f1;color:#a3252b;font-size:12px;text-align:left;margin:0}
+.arkLocalPrimary{width:100%;min-height:51px;padding:13px 16px;border:0;border-radius:12px;background:linear-gradient(110deg,#dc4244,#ad272e);color:#fff;font:800 15px var(--font-poppins),Arial,sans-serif;cursor:pointer;box-shadow:0 12px 24px rgba(167,38,45,.18);display:flex;align-items:center;justify-content:center;gap:8px}
+.arkLocalPrimary:hover:not(:disabled){filter:brightness(.97)}
+.arkLocalPrimary:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+.arkLocalSwitch{margin:19px 0 0;font-size:12px;color:#7d6669}
+.arkLocalSwitch button{border:0;background:transparent;padding:3px;color:#b53035;text-decoration:underline;text-underline-offset:3px;font:700 12px var(--font-poppins),Arial,sans-serif;cursor:pointer}
+.arkLocalComplete h2{font-size:25px;color:#702329;margin:12px 0 8px}
+.arkLocalComplete>p{font-size:13px;color:#76666a;line-height:1.7;margin:0 0 23px}
+.arkLocalSuccessIcon{display:grid;place-items:center;width:54px;height:54px;border-radius:17px;background:#ecf8f1;color:#24925b;font-size:29px;font-weight:800;margin:0 auto}
+.arkLocalIdCard{border:1px solid #e7babd;border-radius:15px;background:#fff9f9;padding:18px 12px;display:grid;gap:6px;margin:0 0 20px}
+.arkLocalIdCard span{font-size:10px;font-weight:800;letter-spacing:.12em;color:#a46c71}
+.arkLocalIdCard strong{font-size:24px;letter-spacing:.045em;color:#7c252b;user-select:all}
+.arkLocalIdCard button{justify-self:center;margin-top:7px;border:1px solid #e1b6ba;background:#fff;border-radius:9px;padding:8px 18px;color:#af3035;font-weight:700;cursor:pointer}
+@media(max-width:560px){.googleAuthCard{padding:26px 18px 24px;border-radius:19px}.arkLocalNameGrid{grid-template-columns:1fr}.arkLocalForm{gap:13px}.arkLocalIdCard strong{font-size:21px}}
