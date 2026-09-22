@@ -15,8 +15,8 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://arkielts.vercel.app'),
-  title: 'ARK EDUCATION — IELTS & CEFR Exam Platform',
-  description: 'Professional IELTS and CEFR practice platform with realistic exam interfaces, full mock exams, detailed results and progress tracking.',
+  title: 'ARK EDUCATION — IELTS Reading & Listening',
+  description: 'IELTS Reading and Listening practice with Real Exam, Cambridge and Gold test collections.',
   alternates: {
     canonical: '/',
   },
@@ -24,13 +24,13 @@ export const metadata: Metadata = {
     type: 'website',
     url: '/',
     siteName: 'ARK EDUCATION',
-    title: 'ARK EDUCATION — IELTS & CEFR Exam Platform',
-    description: 'IELTS and CEFR practice with realistic exam interfaces, full mock exams, results and review.',
+    title: 'ARK EDUCATION — IELTS Reading & Listening',
+    description: 'IELTS Reading and Listening tests in Real Exam, Cambridge and Gold collections.',
   },
   twitter: {
     card: 'summary',
-    title: 'ARK EDUCATION — IELTS & CEFR Exam Platform',
-    description: 'IELTS and CEFR practice with realistic exam interfaces, full mock exams, results and review.',
+    title: 'ARK EDUCATION — IELTS Reading & Listening',
+    description: 'IELTS Reading and Listening tests in Real Exam, Cambridge and Gold collections.',
   },
 };
 
