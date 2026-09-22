@@ -5,6 +5,7 @@ import './platform.css';
 import './landing-ielts-exam.css';
 import './auth.css';
 import './mobile-public-hardening.css';
+import './minimal-entry.css';
 
 const poppins = Poppins({
   subsets: ['latin'],
