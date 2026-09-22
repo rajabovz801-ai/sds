@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase/client';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
 import {
   LayoutGridIcon,
@@ -24,7 +25,10 @@ export function StudentWorkspaceShellClient({ student, active, children }: Props
   const router = useRouter();
 
   async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await Promise.allSettled([
+      supabase.auth.signOut({ scope: 'local' }),
+      fetch('/api/auth/logout', { method: 'POST' }),
+    ]);
     router.replace('/login');
     router.refresh();
   }
