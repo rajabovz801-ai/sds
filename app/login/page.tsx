@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { ArkLogoIcon } from '@/components/ArkLogoIcon';
-import { GoogleLoginClient } from '@/components/GoogleLoginClient';
+import { LocalAuthClient } from '@/components/LocalAuthClient';
 import { getActiveServerSession } from '@/lib/auth/server-session';
 
 function safeNext(value: string | string[] | undefined) {
@@ -18,10 +18,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <main className="googleAuthScreen">
       <section className="googleAuthCard">
         <span className="googleAuthLogo"><ArkLogoIcon /></span>
-        <p className="googleAuthKicker">ARK EDUCATION</p>
-        <h1>Sign in</h1>
-        <p className="googleAuthCopy">Continue to your IELTS Reading &amp; Listening workspace.</p>
-        <GoogleLoginClient nextPath={nextPath} />
+        <p className="googleAuthKicker">ARK EDUCATION · IELTS</p>
+        <LocalAuthClient nextPath={nextPath} />
       </section>
     </main>
   );
