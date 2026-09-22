@@ -230,8 +230,11 @@ export async function getDashboardData(studentId: string): Promise<DashboardData
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
     .from('test_sessions')
-    .select('id,raw_score,max_score,band,duration_seconds,submitted_at,created_at,tests!inner(title,skill,track,duration_minutes)')
+    .select('id,raw_score,max_score,band,duration_seconds,submitted_at,created_at,tests!inner(title,skill,track,duration_minutes,mock_only,test_collection)')
     .eq('student_id', studentId)
+    .eq('tests.track', 'ielts')
+    .eq('tests.mock_only', false)
+    .in('tests.skill', ['reading', 'listening'])
     .eq('status', 'completed')
     .eq('superseded', false)
     .order('submitted_at', { ascending: false, nullsFirst: false })
@@ -241,9 +244,7 @@ export async function getDashboardData(studentId: string): Promise<DashboardData
   const rows = (data || []) as unknown as SessionRow[];
   const readingBand = latestBand(rows, 'reading');
   const listeningBand = latestBand(rows, 'listening');
-  const speakingBand = latestBand(rows, 'speaking');
-  const writingBand = latestBand(rows, 'writing');
-  const overallBand = average([readingBand, listeningBand, speakingBand, writingBand].filter((v) => v !== null).length ? [readingBand, listeningBand, speakingBand, writingBand] : rows.slice(0, 1).map(displayBand));
+  const overallBand = average([readingBand, listeningBand]);
   const readingAverage = skillAverage(rows, 'reading');
   const listeningAverage = skillAverage(rows, 'listening');
   const streak = consecutiveStreak(rows);
