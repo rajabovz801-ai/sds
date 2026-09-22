@@ -8,6 +8,7 @@ export type ProgressAttempt = {
   title: string;
   skill: string;
   part: string;
+  collection: string;
   rawScore: number | null;
   maxScore: number | null;
   correctCount: number;
@@ -29,10 +30,12 @@ type SessionRow = {
     title: string;
     skill: string;
     test_scope: string | null;
+    test_collection: string | null;
   } | Array<{
     title: string;
     skill: string;
     test_scope: string | null;
+    test_collection: string | null;
   }> | null;
 };
 
@@ -56,8 +59,11 @@ export async function getProgressAttempts(studentId: string): Promise<ProgressAt
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
     .from('test_sessions')
-    .select('id,test_id,raw_score,max_score,correct_count,duration_seconds,submitted_at,created_at,tests!inner(title,skill,test_scope)')
+    .select('id,test_id,raw_score,max_score,correct_count,duration_seconds,submitted_at,created_at,tests!inner(title,skill,test_scope,test_collection,track,mock_only)')
     .eq('student_id', studentId)
+    .eq('tests.track', 'ielts')
+    .eq('tests.mock_only', false)
+    .in('tests.skill', ['reading', 'listening'])
     .eq('status', 'completed')
     .eq('superseded', false)
     .order('submitted_at', { ascending: false, nullsFirst: false })
@@ -77,6 +83,7 @@ export async function getProgressAttempts(studentId: string): Promise<ProgressAt
       title: test?.title || 'Test',
       skill: test?.skill || 'reading',
       part: partLabel(test?.test_scope),
+      collection: test?.test_collection || 'real-exam',
       rawScore: raw,
       maxScore: max,
       correctCount: Math.max(0, Number(row.correct_count) || 0),
@@ -101,9 +108,12 @@ export async function getProgressAttempt(studentId: string, attemptId: string): 
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
     .from('test_sessions')
-    .select('id,test_id,raw_score,max_score,correct_count,duration_seconds,submitted_at,created_at,details,tests!inner(title,skill,test_scope)')
+    .select('id,test_id,raw_score,max_score,correct_count,duration_seconds,submitted_at,created_at,details,tests!inner(title,skill,test_scope,test_collection,track,mock_only)')
     .eq('id', attemptId)
     .eq('student_id', studentId)
+    .eq('tests.track', 'ielts')
+    .eq('tests.mock_only', false)
+    .in('tests.skill', ['reading', 'listening'])
     .eq('status', 'completed')
     .eq('superseded', false)
     .maybeSingle();
@@ -135,6 +145,7 @@ export async function getProgressAttempt(studentId: string, attemptId: string): 
     title: test?.title || 'Test',
     skill: test?.skill || 'reading',
     part: partLabel(test?.test_scope),
+    collection: test?.test_collection || 'real-exam',
     rawScore: raw,
     maxScore: max,
     correctCount: Math.max(0, Number(row.correct_count) || 0),
