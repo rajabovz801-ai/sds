@@ -9,6 +9,7 @@ export type ProgressAttempt = {
   skill: string;
   part: string;
   collection: string;
+  band: number | null;
   rawScore: number | null;
   maxScore: number | null;
   correctCount: number;
@@ -21,6 +22,7 @@ type SessionRow = {
   id: string;
   test_id: string;
   raw_score: number | string | null;
+  band: number | string | null;
   max_score: number | string | null;
   correct_count: number | null;
   duration_seconds: number | null;
@@ -59,7 +61,7 @@ export async function getProgressAttempts(studentId: string): Promise<ProgressAt
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
     .from('test_sessions')
-    .select('id,test_id,raw_score,max_score,correct_count,duration_seconds,submitted_at,created_at,tests!inner(title,skill,test_scope,test_collection,track,mock_only)')
+    .select('id,test_id,raw_score,band,max_score,correct_count,duration_seconds,submitted_at,created_at,tests!inner(title,skill,test_scope,test_collection,track,mock_only)')
     .eq('student_id', studentId)
     .eq('tests.track', 'ielts')
     .eq('tests.mock_only', false)
@@ -84,6 +86,7 @@ export async function getProgressAttempts(studentId: string): Promise<ProgressAt
       skill: test?.skill || 'reading',
       part: partLabel(test?.test_scope),
       collection: test?.test_collection || 'real-exam',
+      band: n(row.band),
       rawScore: raw,
       maxScore: max,
       correctCount: Math.max(0, Number(row.correct_count) || 0),
@@ -108,7 +111,7 @@ export async function getProgressAttempt(studentId: string, attemptId: string): 
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
     .from('test_sessions')
-    .select('id,test_id,raw_score,max_score,correct_count,duration_seconds,submitted_at,created_at,details,tests!inner(title,skill,test_scope,test_collection,track,mock_only)')
+    .select('id,test_id,raw_score,band,max_score,correct_count,duration_seconds,submitted_at,created_at,details,tests!inner(title,skill,test_scope,test_collection,track,mock_only)')
     .eq('id', attemptId)
     .eq('student_id', studentId)
     .eq('tests.track', 'ielts')
@@ -146,6 +149,7 @@ export async function getProgressAttempt(studentId: string, attemptId: string): 
     skill: test?.skill || 'reading',
     part: partLabel(test?.test_scope),
     collection: test?.test_collection || 'real-exam',
+    band: n(row.band),
     rawScore: raw,
     maxScore: max,
     correctCount: Math.max(0, Number(row.correct_count) || 0),
