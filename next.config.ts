@@ -29,6 +29,20 @@ const nextConfig: NextConfig = {
     '/api/telegram': ['./node_modules/pdfkit/js/data/*.afm'],
     '/api/tests/[id]/content': ['./test-content/MOCK02_*.html'],
   },
+  async redirects() {
+    return [
+      { source: '/mock/:path*', destination: '/ielts', permanent: false },
+      { source: '/progress/:path*', destination: '/ielts', permanent: false },
+      { source: '/profile/:path*', destination: '/ielts', permanent: false },
+      { source: '/leaderboard/:path*', destination: '/ielts', permanent: false },
+      { source: '/practice/:path*', destination: '/ielts', permanent: false },
+      { source: '/daily-tasks/:path*', destination: '/ielts', permanent: false },
+      { source: '/cefr/:path*', destination: '/ielts', permanent: false },
+      { source: '/ielts/reading', destination: '/ielts', permanent: false },
+      { source: '/ielts/listening', destination: '/ielts', permanent: false },
+      { source: '/ielts/writing', destination: '/ielts', permanent: false },
+    ];
+  },
   async headers() {
     return [
       {
