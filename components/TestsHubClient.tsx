@@ -8,67 +8,70 @@ import {
   CheckCircleIcon,
   FileTextIcon,
   HeadphonesIcon,
-  MicIcon,
-  SearchIcon,
 } from '@/components/UiIcons';
-import type { CloudTest, TestSkill } from '@/lib/cloudTests';
+import type { CloudTest, TestCollection, TestScope } from '@/lib/cloudTests';
 
 type SkillTab = 'reading' | 'listening';
-type PartFilter = 'all' | 'full' | 'part-1' | 'part-2' | 'part-3';
+type PartFilter = Extract<TestScope, 'full-test' | 'passage-1' | 'passage-2' | 'passage-3' | 'part-1' | 'part-2' | 'part-3' | 'part-4'>;
 
-const modeChips = [
-  { id: 'real-exam', label: 'Real-Exam', icon: CheckCircleIcon, active: true, badge: null },
-  { id: 'cambridge', label: 'Cambridge', icon: BookOpenIcon, active: false, badge: null },
-  { id: 'gold', label: 'Gold', icon: AwardIcon, active: false, badge: null },
-  { id: 'mock', label: 'Mock', icon: FileTextIcon, active: false, badge: 'SOON' },
-  { id: 'speaking', label: 'Speaking', icon: MicIcon, active: false, badge: 'NEW' },
-] as const;
+const collections: Array<{ id: TestCollection; label: string; icon: typeof CheckCircleIcon }> = [
+  { id: 'real-exam', label: 'Real Exam', icon: CheckCircleIcon },
+  { id: 'cambridge', label: 'Cambridge', icon: BookOpenIcon },
+  { id: 'gold', label: 'Gold', icon: AwardIcon },
+];
 
 const skillTabs = [
   { id: 'reading', label: 'Reading', icon: BookOpenIcon },
   { id: 'listening', label: 'Listening', icon: HeadphonesIcon },
 ] as const;
 
-const partFilters: Array<{ id: PartFilter; label: string }> = [
-  { id: 'all', label: 'Full Test' },
-  { id: 'part-1', label: 'Part 1' },
-  { id: 'part-2', label: 'Part 2' },
-  { id: 'part-3', label: 'Part 3' },
+const readingParts: Array<{ id: PartFilter; label: string }> = [
+  { id: 'full-test', label: 'Full Test' },
+  { id: 'passage-1', label: '1' },
+  { id: 'passage-2', label: '2' },
+  { id: 'passage-3', label: '3' },
 ];
 
-function skillLabel(skill: TestSkill) {
-  return skill.replace('-', ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+const listeningParts: Array<{ id: PartFilter; label: string }> = [
+  { id: 'full-test', label: 'Full Test' },
+  { id: 'part-1', label: '1' },
+  { id: 'part-2', label: '2' },
+  { id: 'part-3', label: '3' },
+  { id: 'part-4', label: '4' },
+];
+
+function collectionLabel(collection: TestCollection) {
+  return collections.find((item) => item.id === collection)?.label || 'Real Exam';
 }
 
 export function TestsHubClient({ tests }: { tests: CloudTest[] }) {
+  const [collection, setCollection] = useState<TestCollection>('real-exam');
   const [skill, setSkill] = useState<SkillTab>('reading');
-  const [part, setPart] = useState<PartFilter>('all');
-  const [query, setQuery] = useState('');
+  const [part, setPart] = useState<PartFilter>('full-test');
 
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase();
+  const partFilters = skill === 'reading' ? readingParts : listeningParts;
 
-    return tests.filter((test) => {
-      if (test.skill !== skill) return false;
-
-      if (part !== 'all') {
-        const scope = String(test.testScope || '').toLowerCase();
-        if (scope !== part) return false;
-      }
-
-      if (!q) return true;
-      return `${test.title} ${test.description} ${test.skill}`.toLowerCase().includes(q);
-    });
-  }, [tests, skill, part, query]);
+  const visible = useMemo(() => tests.filter((test) => {
+    if (test.skill !== skill) return false;
+    if ((test.testCollection || 'real-exam') !== collection) return false;
+    return test.testScope === part;
+  }), [tests, skill, part, collection]);
 
   return (
     <div className="testsHub testsReferenceLayout">
       <div className="testsModeBar" aria-label="Test collections">
-        {modeChips.map(({ id, label, icon: Icon, active, badge }) => (
-          <button key={id} type="button" className={active ? 'active' : ''}>
+        {collections.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            className={collection === id ? 'active' : ''}
+            onClick={() => {
+              setCollection(id);
+              setPart('full-test');
+            }}
+          >
             <Icon />
             <span>{label}</span>
-            {badge && <small className={badge === 'NEW' ? 'new' : ''}>{badge}</small>}
           </button>
         ))}
       </div>
@@ -84,7 +87,7 @@ export function TestsHubClient({ tests }: { tests: CloudTest[] }) {
               className={skill === id ? 'active' : ''}
               onClick={() => {
                 setSkill(id);
-                setPart('all');
+                setPart('full-test');
               }}
             >
               <Icon />
@@ -94,26 +97,7 @@ export function TestsHubClient({ tests }: { tests: CloudTest[] }) {
         </div>
 
         <div className="testsFilterArea">
-          <div className="testsFilterRow">
-            <label className="testsReferenceSearch">
-              <SearchIcon />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search questions by title and press Enter"
-              />
-            </label>
-
-            <select className="testsReferenceSelect" aria-label="Exam type" defaultValue="real-exam">
-              <option value="real-exam">Real Exam</option>
-            </select>
-
-            <select className="testsReferenceSelect" aria-label="Difficulty" defaultValue="difficulty">
-              <option value="difficulty">Difficulty</option>
-            </select>
-          </div>
-
-          <div className="testsPartFilters" aria-label="Test parts">
+          <div className="testsPartFilters" aria-label={skill === 'reading' ? 'Reading sections' : 'Listening sections'}>
             {partFilters.map((item) => (
               <button
                 key={item.id}
@@ -128,7 +112,7 @@ export function TestsHubClient({ tests }: { tests: CloudTest[] }) {
         </div>
 
         <div className="testsReferenceContent">
-          <h2>{skill === 'reading' ? 'Reading Question Sets' : 'Listening Question Sets'}</h2>
+          <h2>{collectionLabel(collection)} · {skill === 'reading' ? 'Reading' : 'Listening'}</h2>
 
           {visible.length ? (
             <section className="testsReferenceGrid">
@@ -136,7 +120,7 @@ export function TestsHubClient({ tests }: { tests: CloudTest[] }) {
                 <article className="testsReferenceCard" key={test.id}>
                   <div>
                     <strong>{test.title}</strong>
-                    <small>{test.testScope ? test.testScope.replace('-', ' ') : skillLabel(test.skill)}</small>
+                    <small>{part === 'full-test' ? 'Full Test' : skill === 'reading' ? `Reading ${part.slice(-1)}` : `Listening ${part.slice(-1)}`}</small>
                   </div>
                   <Link href={`/test/${test.id}`} prefetch>
                     Start
@@ -148,7 +132,7 @@ export function TestsHubClient({ tests }: { tests: CloudTest[] }) {
             <div className="testsReferenceBlank">
               <span><FileTextIcon /></span>
               <strong>No tests yet</strong>
-              <small>New tests will appear here when they are published.</small>
+              <small>Admin paneldan shu bo‘limga test yuklang.</small>
             </div>
           )}
         </div>

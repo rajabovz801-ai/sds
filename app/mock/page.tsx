@@ -1,11 +1,5 @@
-import { StudentDashboardClient } from '@/components/StudentDashboardClient';
-import { requireStudent } from '@/lib/auth/server-session';
-import { getDashboardData } from '@/lib/dashboard';
+import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-
-export default async function MockPage() {
-  const student = await requireStudent('/mock');
-  const data = await getDashboardData(student.id);
-  return <StudentDashboardClient student={student} initialData={data} />;
+export default function MockPage() {
+  redirect('/ielts');
 }

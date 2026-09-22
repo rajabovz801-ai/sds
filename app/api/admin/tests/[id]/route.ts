@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase, HTML_TESTS_BUCKET } from '@/lib/supabase/server';
 import { checkAdminRequest } from '@/lib/adminAuth';
 
-const tracks = ['ielts', 'cefr'];
-const skills = ['reading', 'listening', 'writing', 'speaking', 'full-mock', 'vocabulary'];
+const skills = ['reading', 'listening'];
 const statuses = ['draft', 'published'];
+const collections = ['real-exam', 'cambridge', 'gold'];
 const listeningScopes = ['part-1', 'part-2', 'part-3', 'part-4', 'full-test'];
 const readingScopes = ['passage-1', 'passage-2', 'passage-3', 'full-test'];
 const MAX_HTML_BYTES = 10 * 1024 * 1024;
@@ -15,12 +15,15 @@ function authResponse(request: NextRequest) {
   return null;
 }
 
-function parseTestScope(track: string, skill: string, raw: unknown) {
-  if (track !== 'ielts' || (skill !== 'listening' && skill !== 'reading')) return { ok: true, value: null as string | null };
-  const value = String(raw || '').trim();
-  if (!value) return { ok: true, value: null as string | null };
+function parseTestScope(skill: string, raw: unknown) {
+  const value = String(raw || 'full-test').trim() || 'full-test';
   const allowed = skill === 'listening' ? listeningScopes : readingScopes;
-  return allowed.includes(value) ? { ok: true, value } : { ok: false, value: null as string | null };
+  return allowed.includes(value) ? { ok: true, value } : { ok: false, value: 'full-test' };
+}
+
+function parseCollection(raw: unknown) {
+  const value = String(raw || 'real-exam').trim() || 'real-exam';
+  return collections.includes(value) ? { ok: true, value } : { ok: false, value: 'real-exam' };
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -45,14 +48,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const title = typeof body.title === 'string' ? body.title.trim() : '';
     const description = typeof body.description === 'string' ? body.description.trim() : '';
-    const track = String(body.track || '');
+    const track = String(body.track || 'ielts');
     const skill = String(body.skill || '');
     const status = String(body.status || '');
     const durationMinutes = Number(body.durationMinutes || 60);
-    const hasTestScope = Object.prototype.hasOwnProperty.call(body, 'testScope');
-    const scope = hasTestScope ? parseTestScope(track, skill, body.testScope) : { ok: true, value: null as string | null };
+    const scope = parseTestScope(skill, body.testScope);
+    const collection = parseCollection(body.testCollection);
 
-    if (!title || title.length > 120 || description.length > 500 || !tracks.includes(track) || !skills.includes(skill) || !statuses.includes(status) || !Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 240 || !scope.ok) {
+    if (
+      !title || title.length > 120 || description.length > 500 || track !== 'ielts' || !skills.includes(skill) ||
+      !statuses.includes(status) || !Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 240 ||
+      !scope.ok || !collection.ok
+    ) {
       return NextResponse.json({ error: 'Test ma’lumotlari noto‘g‘ri.' }, { status: 400 });
     }
     if (file && (!/\.html?$/i.test(file.name) || !['text/html', 'application/octet-stream', ''].includes(file.type))) {
@@ -63,24 +70,26 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     const supabase = getServiceSupabase();
-    const { data: current, error: currentError } = await supabase.from('tests').select('file_path,test_scope').eq('id', id).maybeSingle();
+    const { data: current, error: currentError } = await supabase.from('tests').select('file_path').eq('id', id).maybeSingle();
     if (currentError) throw currentError;
     if (!current) return NextResponse.json({ error: 'Test topilmadi.' }, { status: 404 });
 
     const update: Record<string, unknown> = {
       title,
       description,
-      track,
+      track: 'ielts',
       skill,
       status,
+      test_scope: scope.value,
+      test_collection: collection.value,
       duration_minutes: durationMinutes,
+      mock_only: false,
       updated_at: new Date().toISOString(),
     };
-    if (hasTestScope) update.test_scope = scope.value;
 
     if (file) {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, '-').slice(-120);
-      uploadedPath = `${track}/${skill}/${crypto.randomUUID()}-${safeName}`;
+      uploadedPath = `ielts/${skill}/${crypto.randomUUID()}-${safeName}`;
       const { error: uploadError } = await supabase.storage.from(HTML_TESTS_BUCKET).upload(uploadedPath, await file.arrayBuffer(), {
         contentType: 'text/html;charset=utf-8',
         upsert: false,
@@ -128,9 +137,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (mockError) throw mockError;
 
     if ((sessionCount || 0) > 0 || (attemptCount || 0) > 0 || (mockCount || 0) > 0) {
-      return NextResponse.json({
-        error: 'Bu testda urinishlar yoki Full Mock bog‘lanishi mavjud. Natijalar yo‘qolmasligi uchun uni o‘chirib bo‘lmaydi. Kerak bo‘lsa test statusini Draft qiling.',
-      }, { status: 409 });
+      return NextResponse.json({ error: 'Bu test eski natija yoki mock bilan bog‘langan. Avval Yopiq holatga o‘tkazing.' }, { status: 409 });
     }
 
     const { error: deleteError } = await supabase.from('tests').delete().eq('id', id);

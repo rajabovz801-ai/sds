@@ -14,7 +14,7 @@ import {
 
 type LoginMode = 'student' | 'admin';
 
-export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
+export function LoginClient({ nextPath = '/ielts' }: { nextPath?: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<LoginMode>('student');
   const [code, setCode] = useState('');
@@ -52,7 +52,7 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
         setCode('');
         return;
       }
-      router.replace(nextPath || data.next || '/mock');
+      router.replace(nextPath || data.next || '/ielts');
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Kirish amalga oshmadi.');
@@ -85,17 +85,13 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
   if (mode === 'admin') {
     return (
       <form className="authForm authAdminForm" onSubmit={submitAdmin}>
-        <button
-          className="authModeBack"
-          type="button"
-          onClick={() => { setMode('student'); setPin(''); setError(''); }}
-        >
+        <button className="authModeBack" type="button" onClick={() => { setMode('student'); setPin(''); setError(''); }}>
           <ArrowLeftIcon /> Student kirishiga qaytish
         </button>
         <span className="authFormIcon"><ShieldCheckIcon /></span>
         <span className="authEyebrow">RESTRICTED WORKSPACE</span>
         <h1>Admin tasdiqlash</h1>
-        <p>Himoyalangan boshqaruv paneliga kirish uchun serverda belgilangan PIN’ni kiriting.</p>
+        <p>Test yuklash paneliga kirish uchun admin PIN’ni kiriting.</p>
 
         <div className="authCodeField authPinField">
           <label htmlFor="admin-pin">Admin PIN</label>
@@ -122,8 +118,8 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
   return (
     <form className="authForm" onSubmit={submitStudent}>
       <span className="authEyebrow authAccessEyebrow"><ShieldCheckIcon /> SECURE STUDENT ACCESS</span>
-      <h1>Qaytganingizdan xursandmiz.</h1>
-      <p>Telegram bot bergan bir martalik kodingizni kiriting. Sessiya keyingi tashriflarda avtomatik taniladi.</p>
+      <h1>IELTS testlarga kirish.</h1>
+      <p>Telegram bot bergan bir martalik 6 xonali kodni kiriting.</p>
 
       <div className="authCodeField authStudentCodeField">
         <div className="authCodeLabel">
@@ -131,17 +127,10 @@ export function LoginClient({ nextPath = '/mock' }: { nextPath?: string }) {
           <span><ShieldCheckIcon /> Xavfsiz kirish</span>
         </div>
 
-        <button
-          className="authOtpShell"
-          type="button"
-          onClick={() => codeRef.current?.focus()}
-          aria-label="Kirish kodini yozish"
-        >
+        <button className="authOtpShell" type="button" onClick={() => codeRef.current?.focus()} aria-label="Kirish kodini yozish">
           <span className="authOtpBoxes" aria-hidden="true">
             {Array.from({ length: 6 }, (_, index) => (
-              <i key={index} className={code[index] ? 'filled' : index === code.length ? 'current' : ''}>
-                {code[index] || ''}
-              </i>
+              <i key={index} className={code[index] ? 'filled' : index === code.length ? 'current' : ''}>{code[index] || ''}</i>
             ))}
           </span>
         </button>
