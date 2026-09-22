@@ -255,7 +255,7 @@ export async function getDashboardData(studentId: string): Promise<DashboardData
   const focusArea = readingAverage !== null && listeningAverage !== null
     ? (readingAverage <= listeningAverage ? 'Reading' : 'Listening')
     : readingAverage !== null ? 'Listening' : listeningAverage !== null ? 'Reading' : 'Reading';
-  const nextTargetBand = overallBand === null ? 6 : Math.min(9, roundHalf(overallBand + 0.5));
+  const nextTargetBand = overallBand === null ? null : Math.min(9, roundHalf(overallBand + 0.5));
   const achievements = achievementData(rows, overallBand, readingBand, listeningBand, streak);
 
   return {
