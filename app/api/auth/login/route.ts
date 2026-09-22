@@ -85,6 +85,16 @@ async function recordFailure(ip: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const hostname = request.nextUrl.hostname.toLowerCase();
+  // ARK IELTS uses verified Google OAuth only. Other apps sharing this
+  // repository retain their existing access-code flow on their own hosts.
+  if (hostname === 'arkielts.vercel.app' || hostname.startsWith('arkielts-')) {
+    return NextResponse.json(
+      { error: 'ARK IELTS now uses Google sign-in only.' },
+      { status: 410, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
   try {
     const ip = requestIp(request);
     const rateLimit = await consumeRateLimit(ip, false);
