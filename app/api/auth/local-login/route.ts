@@ -6,10 +6,13 @@ import { accountBucket, allowedLocalAuthOrigin, checkRateLimit, checkStudentPass
 export async function POST(request: NextRequest) {
   if (!isArkIeltsRequest(request)) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   if (!allowedLocalAuthOrigin(request)) return NextResponse.json({ error: 'Invalid request origin.' }, { status: 403 });
+  if (!request.headers.get('content-type')?.startsWith('application/json')) return NextResponse.json({ error: 'Invalid request.' }, { status: 415 });
   try {
-    const body = await request.json();
-    const loginId = normalizeStudentLoginId(body.loginId);
-    const passcode = body.passcode;
+    const text = await request.text();
+    if (text.length > 4096) return NextResponse.json({ error: 'Request too large.' }, { status: 413 });
+    const body = JSON.parse(text);
+    const loginId = normalizeStudentLoginId(body?.loginId);
+    const passcode = body?.passcode;
     const ipKey = loginBucket(request);
     const userKey = accountBucket(loginId || 'invalid');
     const ipLimit = await checkRateLimit(ipKey, 8, 900);
@@ -37,6 +40,7 @@ export async function POST(request: NextRequest) {
     response.cookies.set(SESSION_COOKIE, createSessionToken(student.id, null, student.first_name, student.last_name), sessionCookieOptions);
     return response;
   } catch (error) {
+    if (error instanceof SyntaxError) return NextResponse.json({ error: 'Invalid login form.' }, { status: 400 });
     console.error('ARK IELTS local login failed', error);
     return NextResponse.json({ error: 'Sign in is temporarily unavailable.' }, { status: 500 });
   }
