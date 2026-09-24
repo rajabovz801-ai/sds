@@ -279,3 +279,61 @@
   .mobile-close{display:grid;margin-left:auto;border:0;background:transparent;color:#171717}
   .sidebar-overlay{display:block;position:fixed;inset:0;background:#1118;z-index:14;border:0}
 }
+
+
+/* ARK IELTS v5 — premium navy, darker type, no yellow accent */
+:root{
+  --ark-navy:#203b5c;
+  --ark-navy-2:#172b43;
+  --ark-navy-soft:#edf2f7;
+  --ark-ink:#17202b;
+  --ark-text:#2d3540;
+  --ark-muted:#68717c;
+  --ark-paper:#f7f8fa;
+  --ark-line:#dde2e7;
+}
+html,body,.learning-shell,.auth-v2{background:#f7f8fa;color:var(--ark-ink)}
+.auth-v2{background:radial-gradient(circle at 50% 5%,rgba(32,59,92,.06),transparent 28%),#f7f8fa}
+.auth-v2-label,.topbar-status,.coins-chip,.date-badge,.kpi-card.kpi-highlight,.side-promo,.cal-cell.selected{
+  background:var(--ark-navy-soft)!important;
+  color:var(--ark-navy)!important;
+  border-color:#d7e1eb!important
+}
+.auth-v2-kicker,.auth-v2-logo em,.auth-v2-footer a,.section-eyebrow,.detail-overline{color:var(--ark-navy)!important}
+.auth-v2-submit,.detail-btn,.learning-nav button.active{background:var(--ark-navy-2)!important;color:#fff!important}
+.auth-v2-submit:hover,.detail-btn:hover:not(:disabled){background:#102236!important}
+.auth-v2-input:focus-within{border-color:#7189a1!important;box-shadow:0 0 0 3px rgba(32,59,92,.10)!important}
+.auth-v2-symbol,.auth-logo-mark,.brand-emblem{background:transparent!important}
+.learning-brand b,.learning-brand b span,.page-heading h1,.panel-title-row h2,.day-row h2,.task-copy strong,.cal-cell>b,.kpi-card b{color:var(--ark-ink)!important}
+.learning-brand small,.side-overline,.page-heading p,.panel-title-row p,.task-copy small,.task-copy>span,.day-details-top>p,.detail-subhead,.kpi-card small,.cal-upper,.calendar-legend>span,.auth-v2-intro p,.auth-v2-card-head p{
+  color:var(--ark-muted)!important
+}
+.learning-nav button{color:#525d69!important}
+.learning-nav button:hover{background:#eef2f6!important;color:var(--ark-navy-2)!important}
+.learning-nav button.active{color:#fff!important}
+.learning-nav button.active svg{color:#dce7f2!important}
+.learning-topbar,.learning-sidebar,.kpi-card,.calendar-panel,.detail-panel,.detail-item,.bottom-insights article,.auth-v2-card{border-color:var(--ark-line)!important}
+.kpi-card>svg,.date-badge svg,.calendar-legend svg,.side-promo svg,.insight-icon{color:var(--ark-navy)!important}
+.profile-chip span{background:var(--ark-navy-2)!important;color:#fff!important}
+.status-pulse{background:var(--ark-navy)!important}
+.cal-cell{background:#fbfcfd!important;border-color:#dfe4e9!important}
+.cal-cell:hover{border-color:#7b90a6!important}
+.cal-cell.selected{border-color:var(--ark-navy)!important;box-shadow:0 0 0 2px rgba(32,59,92,.12)!important}
+.cal-cell.sunday{background:var(--ark-navy-2)!important;border-color:var(--ark-navy-2)!important}
+.cal-cell.sunday.selected{border-color:#91a7bc!important;box-shadow:0 0 0 2px rgba(32,59,92,.18)!important}
+.cal-cell.sunday .mock-label{color:#dce7f2!important}
+.mock-label{color:var(--ark-navy)!important}
+.month-switch button.selected{color:var(--ark-navy-2)!important;border-color:#d6dde5!important}
+.detail-status.ready{background:#e8eff6!important;color:var(--ark-navy)!important}
+.detail-status.locked{background:#eef0f2!important;color:#69727c!important}
+.detail-btn:disabled{background:#e7eaed!important;color:#87909a!important}
+.mini-icon.purple,.task-icon.purple,.mini-icon.amber,.task-icon.amber{color:#314d69!important;background:#edf2f7!important;border-color:#dce5ee!important}
+.mini-icon.blue,.task-icon.blue{color:#35596d!important;background:#edf4f6!important;border-color:#dbe7ea!important}
+.mini-icon.green,.task-icon.green{color:#456453!important;background:#eef5f0!important;border-color:#dce8df!important}
+.mini-icon.orange,.task-icon.orange{color:#66513f!important;background:#f5f1ed!important;border-color:#e6ded6!important}
+.mini-icon.pink,.task-icon.pink{color:#65505f!important;background:#f4eff2!important;border-color:#e5dce2!important}
+.insight-icon{background:#edf2f7!important}
+.auth-v2-benefits span{background:#edf2f7!important;border-color:#dce5ee!important;color:var(--ark-navy)!important}
+.auth-v2-preview{color:var(--ark-navy)!important;border-color:#d9e0e7!important;background:#fff!important}
+.back-login,.user-tile small{color:#727b85!important}
+@media(min-width:711px) and (max-width:1000px){.menu-toggle{background:#edf2f7!important;color:var(--ark-navy)!important;border-color:#d7e0e9!important}}
