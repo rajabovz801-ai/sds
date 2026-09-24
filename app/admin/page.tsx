@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import {useEffect,useMemo,useState} from "react";
-import {LayoutDashboard,Users,CalendarDays,FileText,Mic,ChartNoAxesCombined,Trophy,Clock3,Settings,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Bell,Menu,X,ShieldCheck,ChevronRight,CheckCircle2,LockKeyhole,LogOut,UserPlus,UserCog,Eye,EyeOff} from "lucide-react";
+import {LayoutDashboard,Users,CalendarDays,FileText,Mic,ChartNoAxesCombined,Trophy,Clock3,Settings,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Bell,Menu,X,ShieldCheck,ChevronRight,CheckCircle2,LockKeyhole,LogOut,UserPlus,UserCog,Eye,EyeOff,Trash2} from "lucide-react";
 
 type Admin={id:string;display_name:string;username:string;role:"super_admin"|"admin";status?:string;created_at?:string};
 type DashboardData={admin:Admin;students:any[];total_students:number;active_today:number;today_seconds:number;pending_writing:number;pending_speaking:number;pending_requests:number};
@@ -34,6 +34,8 @@ export default function AdminPage(){
  const [newPassword,setNewPassword]=useState("");
  const [adminMessage,setAdminMessage]=useState("");
  const [adminBusy,setAdminBusy]=useState(false);
+ const [studentBusy,setStudentBusy]=useState("");
+ const [studentMessage,setStudentMessage]=useState("");
 
  useEffect(()=>{function tick(){setClock(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Tashkent",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date()))}tick();const id=setInterval(tick,1000);return()=>clearInterval(id)},[]);
  useEffect(()=>{let live=true;(async()=>{try{const res=await fetch("/api/ark60?action=admin_me",{credentials:"same-origin",cache:"no-store"});if(res.ok){const obj=await res.json();if(live){setAdmin(obj.admin);await loadDashboard(obj.admin)}}}catch{}finally{if(live)setChecked(true)}})();return()=>{live=false}},[]);
@@ -89,6 +91,18 @@ export default function AdminPage(){
    const obj=await res.json();if(!res.ok){setAdminMessage(obj.detail||"Unable to update admin.");return}await loadAdmins();
   }catch{setAdminMessage("Unable to contact the server.")}
  }
+ async function deleteStudent(item:any){
+  if(!window.confirm("Delete "+item.first_name+" "+item.last_name+"? Their login will be disabled immediately. Study history will be kept for records."))return;
+  setStudentBusy(item.id);setStudentMessage("");
+  try{
+   const res=await fetch("/api/ark60",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"delete_student",student_id:item.id})});
+   const obj=await res.json();
+   if(!res.ok){setStudentMessage(obj.detail||"Unable to delete student.");return}
+   setStudentMessage("Student deleted successfully.");await loadDashboard();
+  }catch{setStudentMessage("Unable to contact the server.")}
+  finally{setStudentBusy("")}
+ }
+
 
  const sections=useMemo(()=>[
   {name:"Overview",icon:LayoutDashboard},{name:"Requests",icon:UserPlus},{name:"Students",icon:Users},{name:"Content manager",icon:CalendarDays},{name:"Writing inbox",icon:FileText},{name:"Speaking inbox",icon:Mic},{name:"Results",icon:ChartNoAxesCombined},{name:"Leaderboard",icon:Trophy},{name:"Study time",icon:Clock3},
@@ -133,6 +147,19 @@ export default function AdminPage(){
        {item.status==="pending"?<div className="request-entry-review"><label>Optional review note<textarea value={requestNotes[item.id]||""} maxLength={400} onChange={e=>setRequestNotes(prev=>({...prev,[item.id]:e.target.value}))} placeholder="Feedback visible in admin review history"/></label><div className="request-entry-actions"><button type="button" className="request-approve" disabled={!!requestBusy} onClick={()=>reviewRequest(item,"approve")}><CheckCircle2 size={15}/>{requestBusy===item.id?"Processing…":"Approve student"}</button><button type="button" className="request-reject" disabled={!!requestBusy} onClick={()=>reviewRequest(item,"reject")}>Reject request</button></div></div>:<p className="request-entry-history">{item.review_note||"This request has already been reviewed."}</p>}
      </article>)}
      {requests.filter(item=>requestFilter==="all"||item.status==="pending").length===0&&<div className="request-empty"><CheckCircle2 size={25}/><h3>All caught up</h3><p>No {requestFilter==="pending"?"pending":"registration"} requests to display.</p></div>}</div>
+   </section>:view==="Students"?<section className="student-admin-panel">
+     <div className="student-admin-head"><div><div className="section-eyebrow">STUDENT MANAGEMENT</div><h2>Students</h2><p>View registered learners and remove accounts when needed.</p></div><span>{dashboard?.students?.length??0} students</span></div>
+     {studentMessage&&<p className="student-admin-message">{studentMessage}</p>}
+     <div className="student-admin-list">{(dashboard?.students||[]).map((item:any)=><article className="student-admin-row" key={item.id}>
+       <span className="student-admin-avatar">{(item.first_name?.[0]||"S")+(item.last_name?.[0]||"")}</span>
+       <div className="student-admin-name"><b>{item.first_name} {item.last_name}</b><small>@{item.username}</small></div>
+       <div className="student-admin-meta"><span>Target</span><b>{Number(item.target_band).toFixed(1)}</b></div>
+       <div className="student-admin-meta"><span>Today</span><b>{duration(item.today_seconds||0)}</b></div>
+       <div className="student-admin-meta"><span>Total</span><b>{duration(item.total_seconds||0)}</b></div>
+       <em className={"student-status "+item.status}>{item.status}</em>
+       <button className="student-delete-btn" type="button" disabled={studentBusy===item.id} onClick={()=>deleteStudent(item)}><Trash2 size={14}/>{studentBusy===item.id?"Deleting…":"Delete"}</button>
+     </article>)}
+     {(dashboard?.students||[]).length===0&&<div className="student-admin-empty"><Users size={24}/><h3>No students yet</h3><p>Approved students will appear here.</p></div>}
    </section>:view==="Admins"&&admin.role==="super_admin"?<section className="admin-role-layout">
       <article className="admin-role-card"><div className="admin-role-head"><span><UserPlus size={20}/></span><div><small>SUPER ADMIN ONLY</small><h2>Assign a new admin</h2><p>New accounts receive the Admin role. Only your Super Admin account can manage administrators.</p></div></div>
        <form onSubmit={createAdmin} className="admin-create-form"><label>Full name<input required value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Administrator name"/></label><label>Username<input required value={newUsername} onChange={e=>setNewUsername(e.target.value)} placeholder="username" pattern="[A-Za-z0-9._-]{3,32}"/></label><label>Temporary password<input required minLength={10} value={newPassword} onChange={e=>setNewPassword(e.target.value)} type="password" placeholder="At least 10 characters"/></label>{adminMessage&&<p>{adminMessage}</p>}<button disabled={adminBusy}>{adminBusy?"Creating…":"Create admin"}<UserPlus size={16}/></button></form>
