@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="194" viewBox="0 0 780 194" fill="none" aria-hidden="true">
+<defs>
+ <linearGradient id="mist" x1="0" y1="1" x2="1" y2="1"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".24" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff"/></linearGradient>
+ <linearGradient id="back" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#c8cfd7" stop-opacity=".7"/><stop offset="1" stop-color="#e9ecef" stop-opacity=".1"/></linearGradient>
+ <linearGradient id="front" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d2d8dd" stop-opacity=".65"/><stop offset="1" stop-color="#f5f5f2" stop-opacity="0"/></linearGradient>
+ <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset=".62" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+ <mask id="m"><rect width="780" height="194" fill="url(#mist)"/><rect width="780" height="194" fill="url(#fade)"/></mask>
+</defs>
+<circle cx="513" cy="51" r="27" fill="#f7e4b8" fill-opacity=".66"/>
+<g mask="url(#m)">
+ <path d="M0 168 88 151 137 139 187 132 226 115 273 91 310 84 355 104 395 88 439 103 478 70 501 80 547 52 596 94 626 85 678 111 718 107 780 135V194H0Z" fill="url(#back)"/>
+ <path d="M0 191 69 172 118 155 167 157 211 137 254 143 298 118 342 137 379 122 415 139 468 101 517 123 555 108 604 126 638 121 689 146 726 137 780 161V194H0Z" fill="url(#front)"/>
+ <path d="M0 185C99 170 149 174 228 159c70-13 143 11 212-9s129 5 179-1c54-6 112 18 161 7v38H0z" fill="#eef0ef" opacity=".62"/>
+</g>
+<g stroke="#9aa3aa" stroke-linecap="round" stroke-width="1.25" opacity=".68"><path d="m657 48 7-2 8 5 7-5 7 1"/><path d="m624 64 6-2 6 4 6-4 6 2"/></g>
+</svg>
