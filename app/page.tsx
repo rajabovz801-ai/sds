@@ -21,11 +21,7 @@ export default function Home(){
   if(!/^[a-z][a-z0-9._-]{3,23}$/.test(value)){setUsernameState("invalid");return}
   setUsernameState("checking");
   const timer=setTimeout(async()=>{
-   try{
-    const res=await fetch("/api/ark60?action=username_available&username="+encodeURIComponent(value),{cache:"no-store"});
-    const result=await res.json();
-    setUsernameState(result.available?"available":"taken");
-   }catch{setUsernameState("idle")}
+   try{const res=await fetch("/api/ark60?action=username_available&username="+encodeURIComponent(value),{cache:"no-store"});const result=await res.json();setUsernameState(result.available?"available":"taken")}catch{setUsernameState("idle")}
   },350);
   return()=>clearTimeout(timer);
  },[username,mode]);
