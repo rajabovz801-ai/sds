@@ -22,318 +22,304 @@
 @media(max-width:1230px){.admin-v2 .study-layout{grid-template-columns:1fr}.admin-day-strip{grid-template-columns:repeat(8,minmax(0,1fr))}}@media(max-width:710px){.admin-day-strip{grid-template-columns:repeat(4,minmax(0,1fr))}.admin-upload-grid,.admin-shortcuts{grid-template-columns:1fr 1fr}.admin-v2 .kpi-card{min-height:104px}}@media(max-width:400px){.admin-day-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.admin-upload-grid,.admin-shortcuts{grid-template-columns:1fr}}
 
 
-/* === ARK IELTS visual system v3 — white / ink / yellow, tracker typography === */
-:root{
-  --ark-ink:#161616;
-  --ark-ink-soft:#242424;
-  --ark-yellow:#f3d21f;
-  --ark-yellow-soft:#fff8cf;
-  --ark-paper:#fbfbf8;
-  --ark-line:#e8e8e2;
-  --ark-muted:#8a8a82;
-}
-.auth-v2,.learning-shell,.admin-shell{font-family:Manrope,Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-.auth-v2{
-  background:
-    radial-gradient(circle at 50% 8%,rgba(243,210,31,.11),transparent 29%),
-    #f8f8f5;
-}
-.auth-v2-top{padding-top:24px}
-.auth-v2-center{min-height:calc(100vh - 150px);justify-content:center}
-.auth-v2-intro{max-width:620px}
-.auth-v2-label{background:var(--ark-yellow-soft);border-color:#eee3a1;color:#6f6000}
-.auth-v2-intro h1{color:var(--ark-ink)}
-.auth-v2-intro h1 span{color:var(--ark-ink)}
-.auth-v2-intro p{color:#85857f}
-.auth-v2-card{
-  border:1px solid var(--ark-line);
-  box-shadow:0 18px 55px rgba(20,20,20,.08);
-  border-radius:16px;
-}
-.auth-v2-symbol{background:var(--ark-yellow-soft);color:#705f00}
-.auth-v2-kicker{color:#8c7600}
-.auth-v2-tabs{background:#f3f3ef}
-.auth-v2-tabs button.on{color:#111;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.auth-v2-input:focus-within{border-color:#c8ad13;box-shadow:0 0 0 3px rgba(243,210,31,.15)}
-.auth-v2-submit{background:var(--ark-ink);color:#fff;box-shadow:none}
-.auth-v2-submit:hover{background:#000}
-.auth-v2-preview{color:#171717;background:#fff;border-color:#deded8}
-.auth-v2-preview:hover{background:#f6f6f2}
-.auth-v2-benefits span{background:var(--ark-yellow-soft);border-color:#efe3a4;color:#7b6800}
-.auth-v2-logo em,.auth-v2-footer a{color:#806c00}
 
-.learning-shell{background:#f8f8f5;color:#202020}
-.learning-sidebar{background:#fff;border-right:1px solid var(--ark-line)}
-.brand-emblem{background:var(--ark-yellow);color:#111;border-radius:50%}
-.learning-brand b{color:#191919}
-.learning-brand b span{color:#191919}
-.learning-brand small,.side-overline{color:#a0a09a}
-.learning-nav button{color:#74746f;border-radius:8px}
-.learning-nav button:hover{background:#f5f5f1;color:#111}
-.learning-nav button.active{background:#191919;color:#fff;box-shadow:none}
-.learning-nav button.active svg{color:var(--ark-yellow)}
-.side-promo{background:#fffbea;border-color:#eee3a8}
-.side-promo svg{color:#8a7600}
-.user-avatar{background:var(--ark-yellow);color:#111;border-radius:50%}
-.learning-topbar{background:#fff;border-bottom:1px solid var(--ark-line)}
-.topbar-status{background:#fff9d8;color:#776500}
-.status-pulse{background:#c9aa00}
-.coins-chip{background:#fff8cf;color:#7b6900}
-.profile-chip span{background:#191919;color:var(--ark-yellow)}
-.learning-content{max-width:1540px}
-.section-eyebrow{color:#8d7a05}
-.eyebrow-line{background:#dbcf85}
-.rocket-mark{color:#c8aa00}
-.date-badge{border-color:var(--ark-line);color:#6f6f69}
-.date-badge svg{color:#8d7700}
-.kpi-card{border-color:var(--ark-line);border-radius:10px}
-.kpi-card b{color:#191919}
-.kpi-card>svg{color:#b7a22b}
-.kpi-card.kpi-highlight{background:#fff9d8}
-.kpi-highlight>svg{color:#9f8700}
-.calendar-panel,.detail-panel{border-color:var(--ark-line);border-radius:10px}
-.month-switch{background:#f3f3ee}
-.month-switch button.selected{color:#111;box-shadow:none;border:1px solid #deded7}
-.cal-cell{border-color:#e8e8e1;background:#fbfbf8;border-radius:7px}
-.cal-cell:hover{border-color:#b9a32b;transform:translateY(-1px)}
-.cal-cell.selected{border-color:#191919;background:#fff9d8;box-shadow:0 0 0 2px rgba(243,210,31,.22)}
-.cal-cell.sunday{background:#191919;border-color:#191919;color:#fff}
-.cal-cell.sunday .cal-upper,.cal-cell.sunday .cal-upper svg,.cal-cell.sunday>b{color:#fff}
-.cal-cell.sunday .mock-label{color:var(--ark-yellow)}
-.cal-cell.sunday.selected{background:#191919;border-color:var(--ark-yellow);box-shadow:0 0 0 2px rgba(243,210,31,.3)}
-.cal-cell.is-today:not(.selected){border-color:#bea500}
-.calendar-legend svg{color:#8b7700}
-.detail-panel{background:#fcfcf9}
-.detail-overline{color:#8b7700}
-.detail-status.locked{background:#f0f0eb;color:#8e8e88}
-.detail-status.ready{background:#fff4ad;color:#665600}
-.detail-btn{background:#191919;color:#fff;border-radius:8px}
-.detail-btn:hover:not(:disabled){background:#000}
-.detail-btn:disabled{background:#e9e9e3;color:#97978f}
-.task-icon{border-radius:8px}
-.task-icon.purple,.mini-icon.purple{color:#514800;background:#fff8cf;border-color:#efe3a5}
-.task-icon.blue,.mini-icon.blue{color:#3f555d;background:#eef5f6;border-color:#dce8ea}
-.task-icon.amber,.mini-icon.amber{color:#7b6600;background:#fff8cf;border-color:#efe3a5}
-.task-icon.green,.mini-icon.green{color:#47604d;background:#edf5ef;border-color:#dce8df}
-.task-icon.orange,.mini-icon.orange{color:#6f5436;background:#f7f1e8;border-color:#eadfce}
-.task-icon.pink,.mini-icon.pink{color:#674d5d;background:#f7eff4;border-color:#eadce5}
-.bottom-insights article{border-color:var(--ark-line)}
-.insight-icon{background:#fff8cf;color:#7d6900}
-.empty-view button{background:#191919!important;color:#fff!important}
-
-@media(max-width:720px){
-  .auth-v2-center{min-height:auto;padding-top:18px}
-  .auth-v2-card{width:min(100%,470px)}
-  .learning-topbar{padding:0 14px}
+/* ARK IELTS — approved reference design, September 2026.
+   All course logic, authentication, scoring and storage stay unchanged. */
+:root {
+  --ark-navy:#132943; --ark-navy-deep:#0c2443; --ark-navy-soft:#edf4fa;
+  --ark-gold:#b58832; --ark-gold-soft:#fff5e2; --ark-warm:#fffaf1;
+  --ark-bg:#fdfcf9; --ark-ink:#142338; --ark-sub:#5b6c83; --ark-border:#e3e8ed;
 }
+html,body{background:var(--ark-bg);color:var(--ark-ink);font-family:Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.auth-v2,.learning-shell,.admin-v2{font-family:Manrope,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ark-ink)}
 
+/* Wordmark — no square logo or icon. */
+.ark-wordmark{display:inline-flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;white-space:nowrap;line-height:1}
+.ark-wordmark-title{font-family:Georgia,"Times New Roman",serif;display:flex;gap:8px;align-items:baseline;font-size:32px;letter-spacing:-.045em;color:#142338}
+.ark-wordmark-title strong{font-weight:800}
+.ark-wordmark-title>span{font-weight:400;letter-spacing:.115em;font-size:.86em}
+.ark-wordmark-subtitle{font-size:9px;letter-spacing:.35em;font-weight:750;color:#738095;margin-left:2px}
+.ark-wordmark-subtitle i{display:inline-block;width:10px;height:2px;background:#d9ad63;vertical-align:middle;margin-left:2px}
 
-/* ARK IELTS v4: legible dashboard and signature brand mark */
-.auth-logo-mark,.brand-emblem,.auth-v2-symbol {
-  display:grid;place-items:center;background:transparent!important;border:0;overflow:visible;flex:none
+/* Sidebar and header */
+.learning-shell{grid-template-columns:266px minmax(0,1fr);font-size:13px;background:var(--ark-bg)}
+.learning-sidebar{background:#fff;border-right:1px solid #e4e8ef;padding:25px 18px 16px;box-shadow:none}
+.learning-brand{padding:1px 13px 24px;margin-bottom:22px;gap:0;align-items:center;min-height:77px;border-bottom:1px solid #edf0f4}
+.learning-brand .ark-wordmark-title{font-size:31px}
+.learning-brand .ark-wordmark-subtitle{font-size:9px}
+.learning-brand .mobile-close{margin-left:auto}
+.side-overline{color:#6c7a90;font-size:10px;letter-spacing:.13em;margin-bottom:11px;padding:0 13px}
+.learning-nav{gap:4px}
+.learning-nav button{border-radius:9px;padding:12px 13px;min-height:44px;font-size:13px;color:#293c55;font-weight:750}
+.learning-nav button:hover{background:#f0f4f9;color:var(--ark-navy-deep)}
+.learning-nav button.active{background:var(--ark-navy-deep);color:#fff;box-shadow:0 3px 9px rgba(13,35,66,.11)}
+.learning-nav button.active svg{color:#f1d394}
+.learning-nav.small button{font-size:12px;min-height:41px;padding:7px 12px}
+.mini-icon{width:30px;height:30px;border-radius:9px}
+.side-promo{background:linear-gradient(118deg,#fff9ed,#fff1d7);border:1px solid #f6ebd8;border-radius:12px;padding:15px}
+.side-promo svg{color:#b18a3e}
+.side-promo b{font-size:12px;color:#24354c}
+.side-promo p{font-size:11px;color:#52637a}
+.back-login{font-size:11px;cursor:pointer;background:none;border:0}
+.user-avatar{background:#132943;color:#fff;border-radius:50%}
+.user-tile b{font-size:12px;color:#24354c}
+.user-tile small{font-size:10px;color:#77859a}
+.learning-main{background:linear-gradient(180deg,#fff 0,#fffcf7 34%,#fcfbf8 100%);min-width:0}
+.learning-topbar{height:67px;background:#fff;border-bottom:1px solid #e8ecf1;padding:0 30px}
+.topbar-section{font-size:14px;color:#152741}
+.topbar-line{background:#e3e8ee}
+.topbar-status{background:#fff2de;color:#765b29;font-size:11px;padding:8px 13px;border-radius:19px}
+.status-pulse{background:#aa7c26;width:6px;height:6px}
+.topbar-right{gap:14px}
+.time-chip{color:#354f70;font-size:11px}
+.time-chip small{color:#7a8ca6}
+.coins-chip{background:transparent;border-left:1px solid #e7e9ed;border-radius:0;color:#755321;font-size:12px;padding:4px 11px}
+.top-icon{color:#385072;position:relative}
+.profile-chip{color:#263d59;border-color:#e5e9ee;font-size:11px;padding:5px 12px 5px 5px;background:#fff}
+.profile-chip span{background:#142740;color:#fff;border-radius:50%}
+
+/* Heading with subtle mountain landscape from the approved reference */
+.learning-content{padding:25px clamp(18px,2.4vw,34px) 70px;max-width:1650px;margin:0 auto}
+.page-heading{position:relative;isolation:isolate;min-height:124px;display:flex;align-items:center;gap:20px;justify-content:space-between;margin-bottom:14px;overflow:hidden}
+.hero-landscape{position:absolute;z-index:-1;pointer-events:none;right:154px;top:-16px;width:min(60%,710px);height:180px;background:url("/ark-hero-landscape.svg") right top/contain no-repeat}
+.hero-copy{position:relative;z-index:1}
+.section-eyebrow{font-size:10px;letter-spacing:.15em;color:#8b662a;font-weight:850}
+.eyebrow-line{background:#cfa45e}
+.rocket-mark{color:#cfa14c}
+.page-heading h1{font-family:Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:-.055em;font-size:clamp(33px,3.1vw,47px);line-height:1.12;margin:10px 0 8px;color:#13233a}
+.page-heading p{font-size:12px;line-height:1.6;color:#526784;margin:0}
+.date-badge{position:relative;z-index:2;background:#fff;border:1px solid #e3e8ef;border-radius:10px;font-size:11px;font-weight:800;color:#243d5f;padding:14px 17px;box-shadow:0 3px 11px rgba(30,49,77,.025)}
+.date-badge svg{color:#856224}
+
+/* The four reference KPI cards */
+.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.kpi-card{min-height:126px;padding:18px 18px;gap:13px;border-radius:11px;border:1px solid #e5e9f0;display:flex;flex-direction:row-reverse;justify-content:flex-end;align-items:flex-start;background:linear-gradient(125deg,#fff,#f8fbff)}
+.kpi-card:nth-child(2){background:linear-gradient(125deg,#fff,#fffaf3)}
+.kpi-card:nth-child(3){background:linear-gradient(125deg,#fff,#fbfcff)}
+.kpi-card.kpi-highlight{background:linear-gradient(125deg,#fff9ed,#fff1d7);border-color:#efe1c7}
+.kpi-card>div{display:flex;flex-direction:column;align-items:flex-start;min-width:0;flex:1}
+.kpi-card>svg{width:49px;height:49px;flex:none;padding:12px;border-radius:50%;color:#16365f;background:#edf4ff}
+.kpi-card:nth-child(2)>svg{color:#986b17;background:#fff2dc}
+.kpi-card:nth-child(3)>svg{color:#244a7c;background:#eef3fb}
+.kpi-card.kpi-highlight>svg{color:#966511;background:#fff0cf}
+.kpi-card span{font-size:10px;letter-spacing:.1em;color:#475975;font-weight:900}
+.kpi-card b{font-family:Georgia,"Times New Roman",serif;font-size:32px;color:#15233a;letter-spacing:-.045em;line-height:1.15;margin:6px 0 4px}
+.kpi-card b i{font-family:Manrope,sans-serif;font-style:normal;font-size:15px;color:#60718a}
+.kpi-card small{font-size:10px;color:#536783;line-height:1.6}
+.kpi-card.kpi-highlight b{font-family:Georgia,"Times New Roman",serif}
+
+/* Compact October / November calendar on the left, selected-day tasks on right. */
+.study-layout{display:grid;grid-template-columns:minmax(0,1.43fr) minmax(390px,1fr);gap:13px;align-items:start}
+.calendar-panel,.detail-panel{background:#fff;border:1px solid #e4e9ef;border-radius:12px;min-width:0;box-shadow:0 5px 20px rgba(29,47,69,.025)}
+.calendar-panel{padding:17px 17px 15px}
+.panel-title-row{gap:10px;margin-bottom:19px;align-items:center}
+.cal-title-stack{display:flex;align-items:flex-start;gap:12px;min-width:0}
+.calendar-heading-icon{display:grid;place-items:center;color:var(--ark-navy-deep);width:29px;height:29px;flex:none;margin-top:2px}
+.panel-title-row h2{font-family:Georgia,"Times New Roman",serif;font-weight:750;font-size:20px;letter-spacing:-.032em;color:#14243c;line-height:1.25;margin:0 0 4px}
+.panel-title-row p{font-size:10px;color:#5d708b;margin:0;line-height:1.6}
+.month-switch{background:#f5f6fa;padding:4px;border:1px solid #eef1f5;border-radius:9px;gap:3px;flex:none}
+.month-switch button{font-size:11px;padding:7px 10px;border-radius:7px;color:#51617c;font-weight:700}
+.month-switch button.selected{background:var(--ark-navy-deep);color:#fff;box-shadow:0 1px 4px #0d224017;border:0}
+.weekday-row{gap:6px;margin-bottom:10px}
+.weekday-row span{font-size:9px;color:#536788;padding:0;font-weight:800}
+.calendar-grid{gap:6px}
+.cal-cell{min-height:74px;background:#fff;border:1px solid #e3e8ef;border-radius:9px;padding:8px 8px;position:relative;color:#172b4c}
+.cal-cell:hover{border-color:#9badc4;background:#f9fbff;transform:none}
+.cal-cell.selected{border:2px solid #142b4b;background:#fffaf0;padding:7px 7px;box-shadow:0 1px 4px rgba(15,41,72,.14)}
+.cal-cell.sunday,.cal-cell.sunday.selected{background:linear-gradient(115deg,#fff9ee,#fff0d8);border-color:#f3e7cf}
+.cal-cell.sunday.selected{border:2px solid #142b4b}
+.cal-cell.is-today:not(.selected){border-color:#8fa5bd}
+.cal-cell>b{order:1;color:#1a2e4c;font-size:12px;line-height:1.2;margin:0 0 4px;letter-spacing:-.025em;font-weight:850}
+.cal-upper{order:2;font-size:8px;color:#657792;gap:3px;white-space:nowrap}
+.cal-upper svg{width:11px;height:11px;flex:none;position:absolute;right:7px;top:7px;color:#9ba9be}
+.cal-cell.selected .cal-upper,.cal-cell.selected .cal-upper svg{color:#415876}
+.cal-dots{order:4;gap:4px;margin-top:auto;flex-wrap:nowrap}
+.cal-dots i,.dot-small{width:6px;height:6px;flex:none;border-radius:50%}
+.cal-dots .purple,.dot-small.purple{background:#4b63ea}
+.cal-dots .blue,.dot-small.blue{background:#47afdc}
+.cal-dots .amber,.dot-small.amber{background:#f7b93a}
+.cal-dots .green,.dot-small.green{background:#40b786}
+.cal-dots .orange,.dot-small.orange{background:#ef9051}
+.cal-dots .pink,.dot-small.pink{background:#e858aa}
+.cal-cell.sunday .cal-upper>span{display:none}
+.cal-cell.sunday .cal-upper{min-height:6px}
+.mock-label{order:3;color:#61461f;font-size:8px;font-weight:850;letter-spacing:0;margin:0 0 3px}
+.calendar-legend{gap:8px 11px;margin-top:15px;padding-top:11px;border-top:1px solid #eef0f4}
+.calendar-legend>span{font-size:9px;color:#5b6b82}
+.calendar-legend svg{color:#6c849e}
+
+/* Six clear task rows with matching pastel icons and navy action buttons. */
+.detail-panel{background:#fff;padding:16px 17px 13px}
+.day-details-top{border:0;padding:0 1px 9px}
+.detail-overline{display:none}
+.day-row{justify-content:flex-start;gap:10px;margin:2px 0 0;flex-wrap:wrap}
+.day-row h2{font-family:Georgia,"Times New Roman",serif;font-size:28px;letter-spacing:-.055em;color:#13233b;margin:0 3px 0 0}
+.day-inline-date{font-size:10px;color:#526986;flex:1;white-space:normal}
+.detail-status{border-radius:19px;padding:7px 10px;font-size:9px;font-weight:750;white-space:nowrap}
+.detail-status.locked{background:#f1f3f7;color:#667791}
+.detail-status.ready{background:#eaf2ef;color:#315e52}
+.day-details-top>p{color:#536983;font-size:10px;margin:7px 0 5px}
+.detail-subhead{display:none}
+.detail-list{display:grid;gap:7px;margin:7px 0 0}
+.detail-item{border:1px solid #e3e7ef;border-radius:10px;background:#fff;min-height:62px;padding:7px 9px;gap:10px}
+.task-icon{width:40px;height:40px;border-radius:9px;flex:none}
+.task-icon svg{width:19px;height:19px}
+.task-icon.purple{color:#245a94;background:#eef6ff;border-color:#deecf7}
+.task-icon.blue{color:#16695d;background:#e8f7ed;border-color:#dcefe3}
+.task-icon.amber{color:#98701d;background:#fff2da;border-color:#fae8c9}
+.task-icon.green{color:#535fc2;background:#eeefff;border-color:#e4e3fd}
+.task-icon.orange{color:#945532;background:#fff0e8;border-color:#f5dfd6}
+.task-icon.pink{color:#9f4236;background:#ffebea;border-color:#f6dcd8}
+.mini-icon.purple{color:#245a94;background:#fff3d8}
+.mini-icon.blue{color:#16695d;background:#e8f7ed}
+.mini-icon.amber{color:#98701d;background:#fff2da}
+.mini-icon.green{color:#535fc2;background:#eeefff}
+.mini-icon.orange{color:#945532;background:#fff0e8}
+.mini-icon.pink{color:#9f4236;background:#ffebea}
+.task-copy{gap:2px}
+.task-copy strong{font-size:11px;color:#1b3050;font-weight:850}
+.task-copy small{font-size:9px;line-height:1.3;color:#667892}
+.task-copy>span{font-size:9px;color:#586d8a;gap:4px}
+.task-action{min-width:76px;min-height:33px;border:0;border-radius:8px;padding:7px 9px;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;font-size:10px;font-weight:850;flex:none}
+.task-action.can-open{background:var(--ark-navy-deep);color:#fff;cursor:pointer}
+.task-action.can-open:hover{background:#254b78}
+.task-action.future{background:#f1f3f7;color:#657791;cursor:not-allowed;border:1px solid #edf0f4}
+.day-detail-footer{border-top:1px solid #eef0f3;margin-top:12px;padding:10px 1px 0;gap:9px}
+.day-detail-footer span,.day-detail-footer b{font-size:9px;color:#62718a}
+.detail-btn{background:var(--ark-navy-deep);color:#fff;min-height:37px;border-radius:8px;font-size:10px}
+.detail-btn:disabled{background:#e9edf2;color:#74849a}
+.bottom-insights{gap:13px;margin-top:15px}
+.bottom-insights article{border-color:#e5eaf0;border-radius:10px}
+.insight-icon{background:#f2f6fa;color:#355579}
+.bottom-insights b{font-size:11px;color:#203754}
+.bottom-insights p{font-size:10px;color:#5a6f8a}
+.empty-view{border-color:#e2e8ef}
+.empty-view button{background:var(--ark-navy-deep)}
+.empty-icon{background:#edf3fa;color:#2a5687}
+
+/* Login stays centred; brand remains the same wordmark everywhere. */
+.auth-v2{background:radial-gradient(ellipse at 50% 10%,#fff6e9 0,transparent 40%),#fcfbf8}
+.auth-v2-logo{gap:0}
+.auth-v2-top{padding:22px 40px}
+.auth-v2-top-right{color:#657894}
+.auth-v2-center{min-height:calc(100vh - 142px);justify-content:center;padding:18px 20px 28px;gap:20px}
+.auth-v2-label{color:#785b2d;background:#fff4e0;border-color:#f4e8d4}
+.auth-v2-intro h1{font-family:Georgia,"Times New Roman",serif;font-weight:750;letter-spacing:-.04em;color:#15263f}
+.auth-v2-intro h1 span{color:#15263f}
+.auth-v2-intro p{color:#60718b;font-size:12px}
+.auth-v2-card{border-color:#e5e9ef;border-radius:14px;box-shadow:0 15px 43px rgba(22,42,65,.065);width:min(100%,505px);padding:24px 28px 22px}
+.auth-v2-symbol{width:45px;height:45px;display:grid;place-items:center;background:#edf3fa;border-radius:50%;color:#1b446e;flex:none}
+.auth-v2-kicker{color:#94733b}
+.auth-v2-card-head h2{color:#162943}
+.auth-v2-card-head p{color:#657791}
+.auth-v2-tabs{background:#f3f5f7}
+.auth-v2-tabs button.on{color:#162c48}
+.auth-v2-input{border-color:#dfe5ec}
+.auth-v2-input:focus-within{border-color:#7794b6;box-shadow:0 0 0 3px #6b8ca91f}
+.auth-v2-submit{background:#122c4c;color:#fff;box-shadow:none}
+.auth-v2-submit:hover{background:#244c7b}
+.auth-v2-preview{background:#fff;color:#193553;border-color:#dee5ec}
+.auth-v2-benefits span{background:#edf3fa;border-color:#e1e8f0;color:#27527b}
+.auth-v2-footer a{color:#244f7e}
+.auth-v2-disclaimer{color:#6a7c91}
+
+/* Admin uses the same style but retains all current management behaviour. */
+.admin-v2 .study-layout{grid-template-columns:minmax(0,1.43fr) minmax(360px,1fr)}
+.admin-v2 .kpi-card{min-height:126px}
+.admin-inline-btn{border-color:#dde7ef;color:#183858;background:#f1f5f9}
+.admin-day-strip button{background:#fff;border-color:#e3e9f0;color:#243b58}
+.admin-day-strip button:hover{border-color:#7e9ab6}
+.admin-day-strip button.picked{border-color:#1b3856;background:#fffaf0}
+.admin-day-strip button.mock{background:#fff5e6}
+.admin-day-strip button small{color:#97743d}
+.admin-shortcuts button{color:#30547a;border-color:#e2e8f0}
+.admin-shortcuts button:hover{background:#f5f8fc}
+.admin-upload-card{border-color:#e3e8ee}
+.admin-upload-card>svg{color:#32577e}
+.admin-upload-card p{color:#63768d}
+.admin-empty{color:#203b59}
+
+/* Responsive: desktop matches reference; narrow layouts stay usable. */
+@media(max-width:1380px){
+ .learning-shell{grid-template-columns:236px minmax(0,1fr)}
+ .learning-brand{padding-left:5px}
+ .learning-brand .ark-wordmark-title{font-size:28px}
+ .learning-content{padding:23px 21px 62px}
+ .study-layout,.admin-v2 .study-layout{grid-template-columns:minmax(0,1.2fr) minmax(330px,1fr)}
+ .calendar-panel{padding:15px 12px}
+ .cal-cell{min-height:70px;padding:7px 5px}
+ .cal-cell.selected{padding:6px 4px}
+ .cal-dots{gap:3px}
+ .cal-dots i{width:5px;height:5px}
 }
-.auth-v2-logo .auth-logo-mark {width:44px;height:44px;border-radius:14px}
-.auth-v2-logo .auth-logo-mark svg,.brand-emblem svg,.auth-v2-symbol svg{display:block;max-width:100%;max-height:100%}
-.auth-v2-symbol{width:49px;height:49px}
-.learning-shell{grid-template-columns:266px minmax(0,1fr);font-size:14px}
-.learning-sidebar{padding:27px 17px 17px}
-.learning-brand{padding:0 7px 25px;gap:13px;margin-bottom:25px}
-.brand-emblem{width:51px;height:51px;border-radius:14px}
-.learning-brand b{font-size:18px;letter-spacing:-.035em}
-.learning-brand small{font-size:10px;letter-spacing:.115em;margin-top:7px}
-.side-overline{font-size:10.5px;margin-bottom:14px}
-.learning-nav{gap:5px}
-.learning-nav button{min-height:50px;font-size:13.5px;padding:13px 14px}
-.learning-nav.small button{font-size:12.5px;min-height:44px;padding:10px 12px}
-.mini-icon{width:28px;height:28px;border-radius:7px}
-.sidebar-bottom .user-tile b{font-size:12px}
-.sidebar-bottom .user-tile small{font-size:11px}
-.side-promo b{font-size:12px}
-.side-promo p{font-size:11px}
-.learning-topbar{height:74px;padding:0 35px}
-.topbar-section{font-size:14px}
-.topbar-status{font-size:11px;padding:8px 13px}
-.time-chip,.coins-chip{font-size:12px}
-.profile-chip{font-size:11px;padding:5px 11px 5px 5px}
-.learning-content{max-width:1640px;padding:40px clamp(20px,3.1vw,56px) 85px}
-.page-heading{margin-bottom:28px}
-.section-eyebrow{font-size:10.5px;letter-spacing:.125em}
-.page-heading h1{font-size:clamp(32px,2.8vw,39px);margin:10px 0 10px}
-.page-heading p{font-size:13px}
-.date-badge{font-size:12px;padding:13px 16px}
-.kpi-row{gap:15px;margin-bottom:22px}
-.kpi-card{padding:24px 22px;min-height:145px;border-radius:11px}
-.kpi-card span{font-size:11px;letter-spacing:.085em}
-.kpi-card b{font-size:33px;margin:13px 0 9px}
-.kpi-card b i{font-size:16px}
-.kpi-card small{font-size:11px}
-.kpi-card>svg{width:25px;height:25px}
-.study-layout{grid-template-columns:minmax(0,1.5fr) minmax(360px,1fr);gap:19px}
-.calendar-panel{padding:25px 23px 21px}
-.panel-title-row{margin-bottom:24px}
-.panel-title-row h2{font-size:23px;margin:9px 0}
-.panel-title-row p{font-size:12px}
-.month-switch button{font-size:11.5px;padding:9px 11px}
-.weekday-row{margin-bottom:11px}
-.weekday-row span{font-size:10px}
-.calendar-grid,.weekday-row{gap:7px}
-.cal-cell{min-height:90px;border-radius:9px;padding:10px 8px}
-.cal-cell.selected{padding:9px 7px}
-.cal-upper{font-size:10px}
-.cal-upper svg{width:13px;height:13px}
-.cal-cell>b{font-size:14px;margin:7px 0 7px}
-.cal-dots{gap:4px}
-.cal-dots i,.dot-small{width:6px;height:6px}
-.mock-label{font-size:9px;margin-top:7px}
-.calendar-legend{gap:12px 16px;margin-top:20px;padding-top:18px}
-.calendar-legend>span{font-size:10.5px}
-.detail-panel{padding:20px}
-.day-details-top{padding:5px 6px 18px}
-.detail-overline{font-size:10px}
-.day-row h2{font-size:29px}
-.detail-status{font-size:11px;padding:7px 11px}
-.day-details-top>p{font-size:12px;margin:8px 0 21px}
-.detail-subhead{font-size:11px}
-.detail-list{gap:11px;margin:18px 0}
-.detail-item{min-height:90px;padding:15px 13px;gap:12px;border-radius:10px}
-.task-icon{width:45px;height:45px}
-.task-icon svg{width:22px;height:22px}
-.task-copy{gap:6px}
-.task-copy strong{font-size:13px}
-.task-copy small{font-size:11px}
-.task-copy>span{font-size:10px}
-.task-action{font-size:11px}
-.day-detail-footer{padding:19px 4px 5px}
-.day-detail-footer span,.day-detail-footer b{font-size:11px}
-.detail-btn{min-height:48px;font-size:12px}
-.bottom-insights{gap:15px;margin-top:20px}
-.bottom-insights article{padding:19px}
-.bottom-insights b{font-size:13px}
-.bottom-insights p{font-size:11.5px;line-height:1.7}
-.auth-v2-logo{font-size:16px;gap:10px}
-.auth-v2-logo small{font-size:10px}
-.auth-v2-intro p{font-size:14px}
-.auth-v2-card{width:min(100%,540px);padding:30px 33px 27px}
-.auth-v2-card-head h2{font-size:27px}
-.auth-v2-card-head p{font-size:12px}
-.auth-v2-form label{font-size:12px}
-.auth-v2-input{height:48px}
-.auth-v2-input input,.auth-v2-input select{font-size:13px}
-.auth-v2-submit{font-size:13px;padding:15px 18px}
-.auth-v2-preview{font-size:13px}
-.admin-v2 .kpi-card{min-height:145px}
-.admin-v2 .study-layout{grid-template-columns:minmax(0,1.45fr) minmax(360px,1fr)}
-.admin-inline-btn{font-size:11px;padding:12px}
-.admin-day-strip button{min-height:90px}
-.admin-day-strip button b{font-size:14px}
-.admin-upload-card h3{font-size:16px}
-.admin-upload-card p{font-size:12px}
-@media(max-width:1320px){
- .learning-shell{grid-template-columns:245px minmax(0,1fr)}
+@media(max-width:1180px){
  .study-layout,.admin-v2 .study-layout{grid-template-columns:1fr}
- .calendar-panel{padding:22px}
- .cal-cell{min-height:84px}
+ .calendar-panel{padding:20px}
+ .cal-cell{min-height:78px;padding:9px}
+ .cal-cell.selected{padding:8px}
  .detail-panel{max-width:none}
+ .detail-item{min-height:67px}
+ .kpi-row{gap:10px}
+ .kpi-card{padding:14px;gap:9px}
+ .kpi-card>svg{width:40px;height:40px;padding:10px}
+ .hero-landscape{right:90px}
 }
-@media(max-width:1000px){
+@media(max-width:970px){
  .learning-shell{grid-template-columns:1fr}
- .learning-sidebar{width:min(315px,87vw);position:fixed;left:0;top:0;height:100vh;transform:translateX(-110%)}
+ .learning-sidebar{position:fixed;left:0;top:0;z-index:15;width:min(300px,84vw);height:100vh;transform:translateX(-110%);transition:.2s}
  .learning-sidebar.open{transform:translateX(0)}
- .learning-content{padding:28px 20px 70px}
- .kpi-card{min-height:120px}
+ .menu-toggle{display:flex;background:#eff3f8;border:1px solid #e1e8ef;border-radius:8px;padding:8px;color:#183858}
+ .mobile-close{display:grid;margin-left:auto;border:0;background:none}
+ .sidebar-overlay{display:block;position:fixed;inset:0;background:#10254079;z-index:14;border:0}
+ .learning-content{padding:20px}
+ .hero-landscape{right:3%;width:65%}
+ .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .topbar-status{display:none}
 }
 @media(max-width:710px){
- .learning-content{padding:26px 14px 65px}
- .learning-topbar{height:62px;padding:0 14px}
- .page-heading h1{font-size:30px}
- .page-heading p{font-size:11.5px}
- .kpi-card{padding:17px;min-height:114px}
- .kpi-card span{font-size:9px}
+ .learning-topbar{height:60px;padding:0 13px}
+ .learning-content{padding:17px 12px 55px}
+ .page-heading{min-height:128px;align-items:flex-start;padding-top:10px}
+ .hero-landscape{right:-40px;top:17px;width:80%;opacity:.46}
+ .page-heading h1{font-size:32px}
+ .page-heading p{font-size:11px}
+ .date-badge{display:none}
+ .kpi-card{min-height:105px;padding:12px;gap:9px}
+ .kpi-card>svg{width:34px;height:34px;padding:8px}
+ .kpi-card span{font-size:8px}
  .kpi-card b{font-size:26px}
- .kpi-card small{font-size:9.5px}
- .calendar-panel{padding:18px 10px}
- .panel-title-row h2{font-size:19px}
- .panel-title-row p{font-size:10.5px}
- .weekday-row,.calendar-grid{gap:4px}
- .cal-cell{min-height:69px;padding:6px 4px}
+ .kpi-card small{font-size:9px}
+ .calendar-panel{padding:14px 9px}
+ .panel-title-row{align-items:flex-start;gap:7px}
+ .panel-title-row h2{font-size:18px}
+ .panel-title-row p{font-size:9px}
+ .calendar-heading-icon{width:21px;height:21px}
+ .calendar-heading-icon svg{width:21px;height:21px}
+ .cal-title-stack{gap:6px}
+ .month-switch button{padding:6px 7px;font-size:9px}
+ .weekday-row,.calendar-grid{gap:3px}
+ .weekday-row span{font-size:8px}
+ .cal-cell{min-height:66px;padding:6px 4px}
  .cal-cell.selected{padding:5px 3px}
- .cal-upper{font-size:8px}
- .cal-upper svg{width:10px;height:10px}
- .cal-cell>b{font-size:11px;margin:5px 0}
+ .cal-cell>b{font-size:10px}
+ .cal-upper{font-size:7px}
+ .cal-upper svg{width:9px;height:9px;right:4px;top:4px}
  .cal-dots{gap:2px}
  .cal-dots i{width:4px;height:4px}
  .mock-label{font-size:7px}
- .detail-panel{padding:14px}
- .detail-item{min-height:79px;padding:12px 10px}
- .task-copy strong{font-size:12px}
- .auth-v2-card{padding:23px 19px;width:min(100%,480px)}
+ .detail-panel{padding:12px}
+ .day-row h2{font-size:25px}
+ .day-inline-date{font-size:9px}
+ .task-copy strong{font-size:11px}
+ .auth-v2-top{padding:18px 18px}
+ .auth-v2-top-right{display:none}
+ .auth-v2-center{padding:20px 12px}
+ .auth-v2-card{padding:21px 16px}
 }
-@media(max-width:380px){
- .cal-cell{min-height:64px}
- .cal-upper{font-size:7px}
- .cal-cell>b{font-size:10px}
+@media(max-width:370px){
+ .cal-cell{min-height:61px}
+ .cal-cell>b{font-size:9px}
+ .cal-upper{font-size:6px}
+ .month-switch button{padding:5px}
+ .task-action{min-width:58px}
 }
-
-@media(min-width:711px) and (max-width:1000px){
-  .menu-toggle{display:flex;align-items:center;justify-content:center;border:1px solid #e4e4dc;background:#fff8cf;color:#171717;border-radius:8px;padding:10px;cursor:pointer}
-  .mobile-close{display:grid;margin-left:auto;border:0;background:transparent;color:#171717}
-  .sidebar-overlay{display:block;position:fixed;inset:0;background:#1118;z-index:14;border:0}
-}
-
-
-/* ARK IELTS v5 — premium navy, darker type, no yellow accent */
-:root{
-  --ark-navy:#203b5c;
-  --ark-navy-2:#172b43;
-  --ark-navy-soft:#edf2f7;
-  --ark-ink:#17202b;
-  --ark-text:#2d3540;
-  --ark-muted:#68717c;
-  --ark-paper:#f7f8fa;
-  --ark-line:#dde2e7;
-}
-html,body,.learning-shell,.auth-v2{background:#f7f8fa;color:var(--ark-ink)}
-.auth-v2{background:radial-gradient(circle at 50% 5%,rgba(32,59,92,.06),transparent 28%),#f7f8fa}
-.auth-v2-label,.topbar-status,.coins-chip,.date-badge,.kpi-card.kpi-highlight,.side-promo,.cal-cell.selected{
-  background:var(--ark-navy-soft)!important;
-  color:var(--ark-navy)!important;
-  border-color:#d7e1eb!important
-}
-.auth-v2-kicker,.auth-v2-logo em,.auth-v2-footer a,.section-eyebrow,.detail-overline{color:var(--ark-navy)!important}
-.auth-v2-submit,.detail-btn,.learning-nav button.active{background:var(--ark-navy-2)!important;color:#fff!important}
-.auth-v2-submit:hover,.detail-btn:hover:not(:disabled){background:#102236!important}
-.auth-v2-input:focus-within{border-color:#7189a1!important;box-shadow:0 0 0 3px rgba(32,59,92,.10)!important}
-.auth-v2-symbol,.auth-logo-mark,.brand-emblem{background:transparent!important}
-.learning-brand b,.learning-brand b span,.page-heading h1,.panel-title-row h2,.day-row h2,.task-copy strong,.cal-cell>b,.kpi-card b{color:var(--ark-ink)!important}
-.learning-brand small,.side-overline,.page-heading p,.panel-title-row p,.task-copy small,.task-copy>span,.day-details-top>p,.detail-subhead,.kpi-card small,.cal-upper,.calendar-legend>span,.auth-v2-intro p,.auth-v2-card-head p{
-  color:var(--ark-muted)!important
-}
-.learning-nav button{color:#525d69!important}
-.learning-nav button:hover{background:#eef2f6!important;color:var(--ark-navy-2)!important}
-.learning-nav button.active{color:#fff!important}
-.learning-nav button.active svg{color:#dce7f2!important}
-.learning-topbar,.learning-sidebar,.kpi-card,.calendar-panel,.detail-panel,.detail-item,.bottom-insights article,.auth-v2-card{border-color:var(--ark-line)!important}
-.kpi-card>svg,.date-badge svg,.calendar-legend svg,.side-promo svg,.insight-icon{color:var(--ark-navy)!important}
-.profile-chip span{background:var(--ark-navy-2)!important;color:#fff!important}
-.status-pulse{background:var(--ark-navy)!important}
-.cal-cell{background:#fbfcfd!important;border-color:#dfe4e9!important}
-.cal-cell:hover{border-color:#7b90a6!important}
-.cal-cell.selected{border-color:var(--ark-navy)!important;box-shadow:0 0 0 2px rgba(32,59,92,.12)!important}
-.cal-cell.sunday{background:var(--ark-navy-2)!important;border-color:var(--ark-navy-2)!important}
-.cal-cell.sunday.selected{border-color:#91a7bc!important;box-shadow:0 0 0 2px rgba(32,59,92,.18)!important}
-.cal-cell.sunday .mock-label{color:#dce7f2!important}
-.mock-label{color:var(--ark-navy)!important}
-.month-switch button.selected{color:var(--ark-navy-2)!important;border-color:#d6dde5!important}
-.detail-status.ready{background:#e8eff6!important;color:var(--ark-navy)!important}
-.detail-status.locked{background:#eef0f2!important;color:#69727c!important}
-.detail-btn:disabled{background:#e7eaed!important;color:#87909a!important}
-.mini-icon.purple,.task-icon.purple,.mini-icon.amber,.task-icon.amber{color:#314d69!important;background:#edf2f7!important;border-color:#dce5ee!important}
-.mini-icon.blue,.task-icon.blue{color:#35596d!important;background:#edf4f6!important;border-color:#dbe7ea!important}
-.mini-icon.green,.task-icon.green{color:#456453!important;background:#eef5f0!important;border-color:#dce8df!important}
-.mini-icon.orange,.task-icon.orange{color:#66513f!important;background:#f5f1ed!important;border-color:#e6ded6!important}
-.mini-icon.pink,.task-icon.pink{color:#65505f!important;background:#f4eff2!important;border-color:#e5dce2!important}
-.insight-icon{background:#edf2f7!important}
-.auth-v2-benefits span{background:#edf2f7!important;border-color:#dce5ee!important;color:var(--ark-navy)!important}
-.auth-v2-preview{color:var(--ark-navy)!important;border-color:#d9e0e7!important;background:#fff!important}
-.back-login,.user-tile small{color:#727b85!important}
-@media(min-width:711px) and (max-width:1000px){.menu-toggle{background:#edf2f7!important;color:var(--ark-navy)!important;border-color:#d7e0e9!important}}
