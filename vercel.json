@@ -1,1 +1,14 @@
-{"$schema":"https://openapi.vercel.sh/vercel.json","framework":"nextjs","regions":["hnd1"],"crons":[{"path":"/api/daily-homework-report","schedule":"0 1 * * *"}]}
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "regions": ["hnd1"],
+  "functions": {
+    "api/**/*.py": {
+      "maxDuration": 60,
+      "excludeFiles": "{ark-writing-bot/**,.github/**}"
+    }
+  },
+  "crons": [
+    {"path": "/api/daily-homework-report", "schedule": "0 1 * * *"}
+  ]
+}
