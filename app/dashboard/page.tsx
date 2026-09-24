@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import ArkWordmark from "../components/ark-wordmark";
 import {useEffect,useMemo,useState} from "react";
 import {LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,Medal,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,LockKeyhole,Clock3,Flame,ChevronRight,Menu,X,Bell,Settings,LogOut,CalendarCheck,Target,CircleHelp,ArrowUpRight,CheckCircle2,FileText,ChevronLeft,Sun,Moon,Coins,ShieldCheck} from "lucide-react";
 
@@ -54,7 +53,7 @@ export default function Dashboard(){
  const display=useMemo(()=>{const dayNumber=DAYS.filter(x=>x.n<chosen.n&&!x.mock).length;return chosen.mock?mockModules:regular.map(x=>x.name==="Writing"?{...x,detail:dayNumber%2===0?"IELTS Writing Task 1":"IELTS Writing Task 2"}:x)},[chosen]);
  return <div className="learning-shell">
   <aside className={"learning-sidebar "+(sidebar?"open":"")}>
-   <div className="learning-brand"><ArkWordmark/><button className="mobile-close" aria-label="Close menu" onClick={()=>setSidebar(false)}><X size={18}/></button></div>
+   <div className="learning-brand learning-brand-minimal"><button className="mobile-close" aria-label="Close menu" onClick={()=>setSidebar(false)}><X size={18}/></button></div>
    <div className="side-overline">WORKSPACE</div>
    <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="side-overline" style={{marginTop:30}}>MY MODULES</div>
