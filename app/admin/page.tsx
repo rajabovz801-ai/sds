@@ -50,6 +50,7 @@ export default function AdminPage(){
   try{const res=await fetch("/api/ark60?action=admin_requests",{credentials:"same-origin",cache:"no-store"});if(res.ok){const obj=await res.json();setRequests(obj.requests||[])}else setRequestMessage("Could not load requests.")}catch{setRequestMessage("Could not load requests.")}
  }
  useEffect(()=>{if(view==="Requests"&&admin)loadRequests()},[view,admin?.id]);
+ useEffect(()=>{if(!admin)return;const id=setInterval(()=>{loadDashboard(admin);if(view==="Requests")loadRequests()},30000);return()=>clearInterval(id)},[admin?.id,view]);
  async function reviewRequest(item:StudentRequest,decision:"approve"|"reject"){
   if(decision==="reject"&&!window.confirm("Reject "+item.first_name+" "+item.last_name+"?"))return;
   setRequestBusy(item.id);setRequestMessage("");
