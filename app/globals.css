@@ -449,3 +449,51 @@ html,body{background:var(--ark-bg);color:var(--ark-ink);font-family:Manrope,ui-s
 .request-empty h3{font-family:Georgia,"Times New Roman",serif;color:#213c58;margin:10px 0 5px}
 .request-empty p{margin:0;font-size:11px}
 @media(max-width:650px){.requests-summary{align-items:stretch;flex-direction:column}.requests-summary>button{align-self:flex-start}.student-request-panel{padding:16px 12px}.student-request-head{align-items:flex-start;flex-direction:column}.request-entry{padding:13px}.request-entry-identity strong{font-size:12px}.request-status{padding:5px 7px}}
+
+
+/* Username availability */
+.username-status{margin-left:auto;font-size:9px!important;font-weight:850!important;letter-spacing:.02em}
+.username-status.checking{color:#6b7b90}
+.username-status.available{color:#2f7a53}
+.username-status.taken,.username-status.invalid{color:#b34b42}
+.username-input.available{border-color:#8bc4a5!important;background:#f8fffb!important}
+.username-input.taken,.username-input.invalid{border-color:#e1aaa4!important;background:#fffafa!important}
+.username-check{color:#2f7a53;flex:none}
+
+/* Student management */
+.student-admin-panel{background:#fff;border:1px solid #e2e8ee;border-radius:12px;padding:20px;box-shadow:0 5px 20px rgba(29,47,69,.025)}
+.student-admin-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding-bottom:17px;border-bottom:1px solid #edf0f4}
+.student-admin-head h2{font-family:Georgia,"Times New Roman",serif;font-size:24px;letter-spacing:-.04em;color:#142943;margin:6px 0 3px}
+.student-admin-head p{margin:0;color:#687991;font-size:10px}
+.student-admin-head>span{font-size:10px;font-weight:850;color:#51647d;background:#f2f5f8;padding:8px 10px;border-radius:8px;white-space:nowrap}
+.student-admin-message{font-size:10px;color:#425a75;background:#f2f6fa;border:1px solid #e0e8f0;border-radius:8px;padding:10px 11px;margin:14px 0 0}
+.student-admin-list{display:grid}
+.student-admin-row{display:grid;grid-template-columns:40px minmax(180px,1.5fr) .55fr .7fr .7fr auto auto;gap:12px;align-items:center;padding:14px 4px;border-bottom:1px solid #eef1f4}
+.student-admin-row:last-child{border-bottom:0}
+.student-admin-avatar{width:38px;height:38px;border-radius:50%;background:#edf3f9;color:#173d65;display:grid;place-items:center;font-size:10px;font-weight:900;text-transform:uppercase}
+.student-admin-name b{display:block;font-size:11px;color:#213854}
+.student-admin-name small{display:block;margin-top:3px;font-size:9px;color:#77869a}
+.student-admin-meta span{display:block;font-size:8px;color:#8a97a8;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.student-admin-meta b{display:block;margin-top:4px;font-size:10px;color:#344b67}
+.student-status{font-style:normal;font-size:8px;text-transform:uppercase;letter-spacing:.07em;font-weight:900;padding:6px 8px;border-radius:12px;background:#f0f2f4;color:#697582}
+.student-status.active{background:#eaf5ee;color:#39744d}
+.student-status.pending{background:#fff5df;color:#8f6a25}
+.student-status.rejected{background:#f9ecea;color:#a34d44}
+.student-delete-btn{border:1px solid #edcfcb;background:#fff;color:#a5443b;border-radius:7px;padding:8px 10px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:9px;font-weight:850;cursor:pointer;white-space:nowrap}
+.student-delete-btn:hover:not(:disabled){background:#fff4f2;border-color:#dfaaa3}
+.student-delete-btn:disabled{opacity:.55;cursor:not-allowed}
+.student-admin-empty{text-align:center;padding:46px 20px;color:#718197}
+.student-admin-empty svg{color:#91a0b2}
+.student-admin-empty h3{font-size:14px;color:#314861;margin:10px 0 4px}
+.student-admin-empty p{font-size:10px;margin:0}
+
+@media(max-width:1100px){
+ .student-admin-row{grid-template-columns:40px minmax(160px,1fr) .6fr .7fr auto auto}
+ .student-admin-meta:nth-of-type(3){display:none}
+}
+@media(max-width:760px){
+ .student-admin-panel{padding:14px}
+ .student-admin-row{grid-template-columns:38px minmax(0,1fr) auto;gap:9px}
+ .student-admin-meta,.student-status{display:none}
+ .student-delete-btn{grid-column:2/4;justify-self:start}
+}
