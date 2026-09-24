@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import ArkMark from "./components/ark-mark";
+import ArkWordmark from "./components/ark-wordmark";
 import {useState} from "react";
 import {ArrowRight,BookOpen,CalendarDays,CheckCircle2,Eye,EyeOff,GraduationCap,LockKeyhole,LogIn,ShieldCheck,Sparkles,Target,UserRound,Users} from "lucide-react";
 
@@ -31,11 +31,11 @@ export default function Home(){
   finally{setBusy(false)}
  }
  return <main className="auth-v2">
-  <div className="auth-v2-top"><Link href="/" className="auth-v2-logo"><span className="auth-logo-mark"><ArkMark size={44}/></span><b>ARK <em>IELTS</em></b><small>60-DAY CHALLENGE</small></Link><span className="auth-v2-top-right"><ShieldCheck size={15}/> PRIVATE IELTS WORKSPACE</span></div>
+  <div className="auth-v2-top"><Link href="/" className="auth-v2-logo"><ArkWordmark/></Link><span className="auth-v2-top-right"><ShieldCheck size={15}/> PRIVATE IELTS WORKSPACE</span></div>
   <section className="auth-v2-center">
    <div className="auth-v2-intro"><span className="auth-v2-label"><Sparkles size={15}/> THE 60-DAY IELTS CHALLENGE</span><h1>Your IELTS journey<br/><span>starts here.</span></h1><p>Build consistency, track every hour of real study and follow your own 60-day pathway to a higher band.</p></div>
    <div className="auth-v2-card">
-    <div className="auth-v2-card-head"><div className="auth-v2-symbol"><ArkMark size={49}/></div><div><span className="auth-v2-kicker">ARK EDUCATION</span><h2>{mode==="register"?"Create your account":"Welcome back"}</h2><p>{mode==="register"?"Enter your details and choose your IELTS target.":"Sign in to continue your IELTS challenge."}</p></div></div>
+    <div className="auth-v2-card-head"><div className="auth-v2-symbol"><GraduationCap size={26}/></div><div><span className="auth-v2-kicker">ARK EDUCATION</span><h2>{mode==="register"?"Create your account":"Welcome back"}</h2><p>{mode==="register"?"Enter your details and choose your IELTS target.":"Sign in to continue your IELTS challenge."}</p></div></div>
     <div className="auth-v2-tabs"><button type="button" onClick={()=>{setMode("register");setMessage("");setRegisteredUsername("")}} className={mode==="register"?"on":""}><UserRound size={16}/> Register</button><button type="button" onClick={()=>{setMode("login");setMessage("");setRegisteredUsername("")}} className={mode==="login"?"on":""}><LogIn size={16}/> Log in</button></div>
     <form onSubmit={handleSubmit} className="auth-v2-form">
      {mode==="register"?<>
