@@ -187,9 +187,6 @@ def get_data(request:Request, action:str="health", day:int=1):
         admin=require_admin(request)
         rows=db("GET","ark60_students",{"select":"id,first_name,last_name,username,target_band,status,created_at,reviewed_at,review_note","status":"in.(pending,active,rejected)","order":"created_at.desc","limit":200})
         return {"admin":admin,"requests":rows}
-    if action=="admin_invites":
-        require_admin(request)
-        return {"invites":db("GET","ark60_invites",{"select":"id,label,used_count,max_uses,expires_at,created_at,revoked_at","order":"created_at.desc","limit":200})}
     raise HTTPException(status_code=404,detail="Unknown action")
 
 @app.post("/api/ark60")
@@ -327,16 +324,6 @@ async def actions(request:Request,response:Response):
         if status=="disabled":
             db("PATCH","ark60_admin_sessions",params={"admin_id":"eq."+admin_id,"revoked_at":"is.null"},payload={"revoked_at":now().isoformat()},prefer="return=minimal")
         return {"ok":True,"status":status}
-    if action=="create_invite":
-        require_admin(request)
-        label=str(data.get("label","Student invitation")).strip()[:60]
-        uses=data.get("max_uses",1)
-        days=data.get("expires_days",30)
-        if not (isinstance(uses,int) and 1<=uses<=100 and isinstance(days,int) and 1<=days<=90):
-            raise HTTPException(status_code=400,detail="Invalid invitation limits")
-        code=secrets.token_urlsafe(12)
-        db("POST","ark60_invites",payload={"code_hash":digest(code),"label":label,"max_uses":uses,"expires_at":(now()+timedelta(days=days)).isoformat()},prefer="return=minimal")
-        return {"ok":True,"invite_code":code,"max_uses":uses,"expires_days":days,"note":"Copy this invitation now. It will not be shown again."}
     if action=="heartbeat":
         user=require_student(request)
         day=data.get("day")
