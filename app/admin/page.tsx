@@ -92,13 +92,14 @@ export default function AdminPage(){
   }catch{setAdminMessage("Unable to contact the server.")}
  }
  async function deleteStudent(item:any){
-  if(!window.confirm("Delete "+item.first_name+" "+item.last_name+"? Their login will be disabled immediately. Study history will be kept for records."))return;
+  if(!window.confirm("Delete "+item.first_name+" "+item.last_name+"? Their access will be revoked immediately."))return;
   setStudentBusy(item.id);setStudentMessage("");
   try{
    const res=await fetch("/api/ark60",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"delete_student",student_id:item.id})});
    const obj=await res.json();
    if(!res.ok){setStudentMessage(obj.detail||"Unable to delete student.");return}
-   setStudentMessage("Student deleted successfully.");await loadDashboard();
+   setStudentMessage("Student deleted.");
+   await loadDashboard();
   }catch{setStudentMessage("Unable to contact the server.")}
   finally{setStudentBusy("")}
  }
@@ -148,17 +149,15 @@ export default function AdminPage(){
      </article>)}
      {requests.filter(item=>requestFilter==="all"||item.status==="pending").length===0&&<div className="request-empty"><CheckCircle2 size={25}/><h3>All caught up</h3><p>No {requestFilter==="pending"?"pending":"registration"} requests to display.</p></div>}</div>
    </section>:view==="Students"?<section className="student-admin-panel">
-     <div className="student-admin-head"><div><div className="section-eyebrow">STUDENT MANAGEMENT</div><h2>Students</h2><p>View registered learners and remove accounts when needed.</p></div><span>{dashboard?.students?.length??0} students</span></div>
+     <div className="student-admin-head"><div><div className="section-eyebrow">STUDENT MANAGEMENT</div><h2>Students</h2><p>Manage approved and pending student accounts.</p></div><span>{dashboard?.students?.length??0} students</span></div>
      {studentMessage&&<p className="student-admin-message">{studentMessage}</p>}
-     <div className="student-admin-list">{(dashboard?.students||[]).map((item:any)=><article className="student-admin-row" key={item.id}>
-       <span className="student-admin-avatar">{(item.first_name?.[0]||"S")+(item.last_name?.[0]||"")}</span>
-       <div className="student-admin-name"><b>{item.first_name} {item.last_name}</b><small>@{item.username}</small></div>
-       <div className="student-admin-meta"><span>Target</span><b>{Number(item.target_band).toFixed(1)}</b></div>
-       <div className="student-admin-meta"><span>Today</span><b>{duration(item.today_seconds||0)}</b></div>
-       <div className="student-admin-meta"><span>Total</span><b>{duration(item.total_seconds||0)}</b></div>
-       <em className={"student-status "+item.status}>{item.status}</em>
-       <button className="student-delete-btn" type="button" disabled={studentBusy===item.id} onClick={()=>deleteStudent(item)}><Trash2 size={14}/>{studentBusy===item.id?"Deleting…":"Delete"}</button>
-     </article>)}
+     <div className="student-admin-list">{(dashboard?.students||[]).map((item:any)=><div className="student-admin-row" key={item.id}>
+      <span className="student-admin-avatar">{(item.first_name?.[0]||"S")+(item.last_name?.[0]||"")}</span>
+      <div className="student-admin-name"><b>{item.first_name} {item.last_name}</b><small>@{item.username}</small></div>
+      <div className="student-admin-meta"><span>Target</span><b>{Number(item.target_band).toFixed(1)}</b></div>
+      <em className={"student-status "+item.status}>{item.status}</em>
+      <button type="button" className="student-delete-btn" disabled={studentBusy===item.id} onClick={()=>deleteStudent(item)}><Trash2 size={14}/>{studentBusy===item.id?"Deleting…":"Delete"}</button>
+     </div>)}</div>
      {(dashboard?.students||[]).length===0&&<div className="student-admin-empty"><Users size={24}/><h3>No students yet</h3><p>Approved students will appear here.</p></div>}
    </section>:view==="Admins"&&admin.role==="super_admin"?<section className="admin-role-layout">
       <article className="admin-role-card"><div className="admin-role-head"><span><UserPlus size={20}/></span><div><small>SUPER ADMIN ONLY</small><h2>Assign a new admin</h2><p>New accounts receive the Admin role. Only your Super Admin account can manage administrators.</p></div></div>
