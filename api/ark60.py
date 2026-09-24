@@ -114,9 +114,14 @@ def session_user(request):
 
 def admin_auth(request):
     token=request.cookies.get(ADMIN_COOKIE,"")
-    if not token:return False
-    rows=db("GET","ark60_admin_sessions",{"select":"expires_at,revoked_at","token_hash":"eq."+digest(token),"limit":1})
-    return bool(rows and rows[0]["revoked_at"] is None and datetime.fromisoformat(rows[0]["expires_at"].replace("Z","+00:00"))>now())
+    if not token:return None
+    rows=db("GET","ark60_admin_sessions",{"select":"admin_id,expires_at,revoked_at","token_hash":"eq."+digest(token),"limit":1})
+    if not rows or rows[0]["revoked_at"] is not None or datetime.fromisoformat(rows[0]["expires_at"].replace("Z","+00:00"))<=now():
+        return None
+    admin_id=rows[0].get("admin_id")
+    if not admin_id:return None
+    admins=db("GET","ark60_admins",{"select":"id,display_name,username,role,status,created_at","id":"eq."+admin_id,"limit":1})
+    return admins[0] if admins and admins[0]["status"]=="active" else None
 
 def require_student(request):
     student=session_user(request)
@@ -125,8 +130,16 @@ def require_student(request):
     return student
 
 def require_admin(request):
-    if not admin_auth(request):
+    admin=admin_auth(request)
+    if not admin:
         raise HTTPException(status_code=401,detail="Admin sign-in required.")
+    return admin
+
+def require_super_admin(request):
+    admin=require_admin(request)
+    if admin.get("role")!="super_admin":
+        raise HTTPException(status_code=403,detail="Super admin access required.")
+    return admin
 
 def day_status(day_num):
     if day_num<1 or day_num>60:
@@ -152,8 +165,10 @@ def get_data(request:Request, action:str="health", day:int=1):
         available=["listening","reading","writing","speaking"] if d.weekday()==6 else ["reading","listening","article","vocabulary","writing","speaking"]
         rows=db("GET","ark60_content",{"select":"module,title,payload","day_number":"eq."+str(day),"status":"eq.published","limit":6})
         return {"day":day,"date":str(d),"mock":d.weekday()==6,"modules":available,"published":rows}
+    if action=="admin_me":
+        return {"admin":require_admin(request)}
     if action=="admin_dashboard":
-        require_admin(request)
+        admin=require_admin(request)
         students=db("GET","ark60_students",{"select":"id,first_name,last_name,username,target_band,status,created_at","limit":2000})
         hours=db("GET","ark60_study_sessions",{"select":"student_id,active_seconds,study_date,module","limit":20000})
         pending=db("GET","ark60_submissions",{"select":"module,review_status","review_status":"eq.pending","limit":1000})
@@ -163,7 +178,11 @@ def get_data(request:Request, action:str="health", day:int=1):
             if item:
                 item["total_seconds"]+=int(h["active_seconds"])
                 if h["study_date"]==str(today()):item["today_seconds"]+=int(h["active_seconds"])
-        return {"students":list(by_student.values()),"total_students":len(students),"active_today":sum(1 for x in by_student.values() if x["today_seconds"]>0),"today_seconds":sum(x["today_seconds"] for x in by_student.values()),"pending_writing":sum(1 for x in pending if x["module"]=="writing"),"pending_speaking":sum(1 for x in pending if x["module"]=="speaking")}
+        return {"admin":admin,"students":list(by_student.values()),"total_students":len(students),"active_today":sum(1 for x in by_student.values() if x["today_seconds"]>0),"today_seconds":sum(x["today_seconds"] for x in by_student.values()),"pending_writing":sum(1 for x in pending if x["module"]=="writing"),"pending_speaking":sum(1 for x in pending if x["module"]=="speaking")}
+    if action=="admin_admins":
+        admin=require_super_admin(request)
+        rows=db("GET","ark60_admins",{"select":"id,display_name,username,role,status,created_at","order":"created_at.asc","limit":200})
+        return {"admin":admin,"admins":rows}
     if action=="admin_invites":
         require_admin(request)
         return {"invites":db("GET","ark60_invites",{"select":"id,label,used_count,max_uses,expires_at,created_at,revoked_at","order":"created_at.desc","limit":200})}
@@ -224,23 +243,50 @@ async def actions(request:Request,response:Response):
         return {"ok":True}
     if action=="admin_login":
         bucket=rate_limit(request,"admin_login")
-        expected=os.getenv("ADMIN_ACCESS_KEY")
-        if not expected:raise HTTPException(status_code=503,detail="Admin access is not configured")
-        supplied=str(data.get("pin",""))
-        if not (len(supplied)>=4 and hmac.compare_digest(supplied,expected)):
+        username=str(data.get("username","")).strip().lower()
+        pwd=str(data.get("password",""))
+        if not (3<=len(username)<=48 and 1<=len(pwd)<=128):
+            raise HTTPException(status_code=400,detail="Invalid admin username or password")
+        rows=db("GET","ark60_admins",{"select":"id,display_name,username,password_hash,role,status","username":"eq."+username,"limit":1})
+        if not rows or rows[0]["status"]!="active" or not verify_password(pwd,rows[0]["password_hash"]):
             rate_limit(request,"admin_login",True)
-            raise HTTPException(status_code=401,detail="Invalid admin credential")
+            raise HTTPException(status_code=401,detail="Invalid admin username or password")
         token=secrets.token_urlsafe(40)
-        db("POST","ark60_admin_sessions",payload={"token_hash":digest(token),"expires_at":(now()+timedelta(hours=12)).isoformat()},prefer="return=minimal")
+        db("POST","ark60_admin_sessions",payload={"token_hash":digest(token),"admin_id":rows[0]["id"],"expires_at":(now()+timedelta(hours=12)).isoformat()},prefer="return=minimal")
         cookie(response,ADMIN_COOKIE,token,days=1)
         clear_limit(bucket)
-        return {"ok":True}
+        return {"ok":True,"admin":{"id":rows[0]["id"],"display_name":rows[0]["display_name"],"username":rows[0]["username"],"role":rows[0]["role"]}}
     if action=="admin_logout":
         require_admin(request)
         token=request.cookies.get(ADMIN_COOKIE)
         db("PATCH","ark60_admin_sessions",params={"token_hash":"eq."+digest(token)},payload={"revoked_at":now().isoformat()},prefer="return=minimal")
         response.delete_cookie(ADMIN_COOKIE,path="/")
         return {"ok":True}
+    if action=="create_admin":
+        actor=require_super_admin(request)
+        name=str(data.get("display_name","")).strip()
+        username=str(data.get("username","")).strip().lower()
+        pwd=str(data.get("password",""))
+        if not (2<=len(name)<=60 and re.fullmatch(r"[a-z0-9._-]{3,32}",username) and 10<=len(pwd)<=128):
+            raise HTTPException(status_code=400,detail="Use a name, 3–32 character username and password with at least 10 characters.")
+        existing=db("GET","ark60_admins",{"select":"id","username":"eq."+username,"limit":1})
+        if existing:raise HTTPException(status_code=409,detail="That admin username already exists.")
+        rows=db("POST","ark60_admins",payload={"display_name":name,"username":username,"password_hash":hash_password(pwd),"role":"admin","status":"active","created_by":actor["id"]},prefer="return=representation")
+        item=rows[0] if rows else None
+        return {"ok":True,"admin":{"id":item["id"],"display_name":item["display_name"],"username":item["username"],"role":item["role"],"status":item["status"]}}
+    if action=="set_admin_status":
+        actor=require_super_admin(request)
+        admin_id=str(data.get("admin_id","")).strip()
+        status=str(data.get("status","")).strip()
+        if status not in {"active","disabled"}:raise HTTPException(status_code=400,detail="Invalid admin status")
+        if admin_id==actor["id"]:raise HTTPException(status_code=400,detail="You cannot disable your own super-admin account.")
+        target=db("GET","ark60_admins",{"select":"id,role","id":"eq."+admin_id,"limit":1})
+        if not target:raise HTTPException(status_code=404,detail="Admin not found")
+        if target[0]["role"]=="super_admin":raise HTTPException(status_code=403,detail="Another super-admin account cannot be changed here.")
+        db("PATCH","ark60_admins",params={"id":"eq."+admin_id},payload={"status":status,"updated_at":now().isoformat()},prefer="return=minimal")
+        if status=="disabled":
+            db("PATCH","ark60_admin_sessions",params={"admin_id":"eq."+admin_id,"revoked_at":"is.null"},payload={"revoked_at":now().isoformat()},prefer="return=minimal")
+        return {"ok":True,"status":status}
     if action=="create_invite":
         require_admin(request)
         label=str(data.get("label","Student invitation")).strip()[:60]
