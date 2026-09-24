@@ -393,3 +393,59 @@ html,body{background:var(--ark-bg);color:var(--ark-ink);font-family:Manrope,ui-s
 .learning-brand-minimal .mobile-close{margin-left:auto}
 .auth-v2-center{min-height:calc(100vh - 66px)}
 @media(max-width:970px){.learning-brand-minimal{min-height:30px;margin-bottom:6px}}
+
+
+/* Invitation-free admissions and administrator approval workflow */
+.registration-pending{display:flex;flex-direction:column;align-items:stretch;gap:13px;padding-top:12px;text-align:center}
+.registration-pending-icon{width:62px;height:62px;border-radius:50%;background:#e9f5ec;color:#3b8255;display:grid;place-items:center;margin:0 auto 3px}
+.registration-pending h3{font-family:Georgia,"Times New Roman",serif;color:#1a3049;font-size:22px;letter-spacing:-.035em;margin:0}
+.registration-pending>p{font-size:12px;color:#61728a;line-height:1.65;margin:0 0 8px}
+.registration-pending .registered-user{text-align:left;background:#f5f8fc;border:1px solid #e0e8f1;border-radius:10px;padding:15px}
+.registration-pending-login{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;color:#fff;background:#152f50;border:0;border-radius:9px;cursor:pointer;font-size:12px;font-weight:850}
+.registration-pending-login:hover{background:#244a74}
+.request-sidebar-count{margin-left:auto;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#ffedd0;color:#76521d;font-size:10px;font-weight:900;flex:none}
+.learning-nav button.active .request-sidebar-count{background:#f5e6c6;color:#553d14}
+.requests-summary{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:-2px 0 16px;border:1px solid #e7e2d6;border-radius:11px;padding:14px 18px;background:linear-gradient(100deg,#fffaf0,#fffdf9)}
+.requests-summary>div{display:flex;align-items:center;gap:12px;min-width:0}
+.requests-summary>div>span{height:40px;width:40px;border-radius:10px;background:#f7edda;color:#926f33;display:grid;place-items:center;flex:none}
+.requests-summary b{font-size:12px;font-weight:850;color:#263951}
+.requests-summary p{font-size:10px;color:#67778e;margin:4px 0 0}
+.requests-summary>button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:35px;padding:8px 13px;color:#fff;background:#152f50;border:0;border-radius:8px;font-size:10px;font-weight:850;cursor:pointer;white-space:nowrap}
+.requests-summary>button:hover{background:#28517d}
+.student-request-panel{background:#fff;border:1px solid #e1e7ef;border-radius:12px;padding:22px;box-shadow:0 5px 19px rgba(30,48,70,.025)}
+.student-request-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #e9edf2;padding-bottom:17px}
+.student-request-head h2{font-family:Georgia,"Times New Roman",serif;font-size:25px;letter-spacing:-.035em;margin:7px 0 4px;color:#182e49}
+.student-request-head p{font-size:11px;color:#647891;margin:0;line-height:1.6}
+.request-reload{background:#f3f6fa;border:1px solid #e1e7ee;color:#244364;border-radius:8px;min-height:35px;padding:0 13px;font-size:10px;font-weight:850;cursor:pointer;white-space:nowrap}
+.request-tabs{display:flex;gap:7px;background:#f4f6f9;border-radius:9px;margin:17px 0;padding:5px;width:max-content;max-width:100%}
+.request-tabs button{padding:9px 13px;background:transparent;color:#667993;font-size:11px;font-weight:800;border:0;border-radius:7px;cursor:pointer}
+.request-tabs button.selected{background:#173352;color:#fff}
+.request-message{background:#f5f8fc;border:1px solid #dce8f1;color:#2e5177;padding:11px 13px;border-radius:9px;font-size:11px;margin-bottom:14px}
+.request-list{display:grid;gap:11px}
+.request-entry{border:1px solid #e1e7ef;border-radius:10px;padding:16px;background:#fff}
+.request-entry-main{display:flex;align-items:center;gap:11px}
+.request-avatar{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:50%;background:#edf3f9;color:#22466d;font-size:11px;font-weight:900}
+.request-entry-identity{flex:1;min-width:0;display:grid;gap:4px}
+.request-entry-identity strong{font-size:13px;color:#1c334f}
+.request-entry-identity small{font-size:10px;color:#6d7e94;overflow-wrap:anywhere}
+.request-status{text-transform:capitalize;font-size:9px;font-weight:900;letter-spacing:.05em;padding:7px 10px;border-radius:30px}
+.request-status.pending{color:#88611d;background:#fff1d7}
+.request-status.active{color:#356f4d;background:#eaf5ed}
+.request-status.rejected{color:#a94b43;background:#ffefed}
+.request-entry-review{border-top:1px solid #eaf0f3;margin-top:15px;padding-top:14px;display:grid;gap:12px}
+.request-entry-review label{font-size:10px;font-weight:800;color:#3c526c;display:grid;gap:6px}
+.request-entry-review textarea{font:inherit;font-size:11px;border:1px solid #dde5ef;border-radius:8px;resize:vertical;min-height:66px;padding:11px;outline:none;color:#172d48}
+.request-entry-review textarea:focus{border-color:#86a0bd}
+.request-entry-actions{display:flex;gap:9px;flex-wrap:wrap}
+.request-entry-actions button{display:flex;align-items:center;gap:7px;justify-content:center;min-height:40px;border-radius:8px;padding:0 17px;font-size:11px;font-weight:850;cursor:pointer}
+.request-entry-actions button:disabled{opacity:.6;cursor:not-allowed}
+.request-approve{color:#fff;background:#193b5b;border:1px solid #193b5b}
+.request-approve:hover:not(:disabled){background:#295779}
+.request-reject{color:#a34a41;background:#fff7f5;border:1px solid #efd7d2}
+.request-reject:hover:not(:disabled){background:#ffefeb}
+.request-entry-history{font-size:11px;line-height:1.5;color:#637790;margin:12px 0 0}
+.request-empty{text-align:center;padding:47px 15px;color:#5f7390}
+.request-empty svg{color:#3c8b67}
+.request-empty h3{font-family:Georgia,"Times New Roman",serif;color:#213c58;margin:10px 0 5px}
+.request-empty p{margin:0;font-size:11px}
+@media(max-width:650px){.requests-summary{align-items:stretch;flex-direction:column}.requests-summary>button{align-self:flex-start}.student-request-panel{padding:16px 12px}.student-request-head{align-items:flex-start;flex-direction:column}.request-entry{padding:13px}.request-entry-identity strong{font-size:12px}.request-status{padding:5px 7px}}
