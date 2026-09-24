@@ -1,6 +1,4 @@
 "use client";
-import Link from "next/link";
-import ArkWordmark from "./components/ark-wordmark";
 import {useState} from "react";
 import {ArrowRight,BookOpen,CalendarDays,CheckCircle2,Eye,EyeOff,GraduationCap,LockKeyhole,LogIn,ShieldCheck,Sparkles,Target,UserRound,Users} from "lucide-react";
 
@@ -31,7 +29,6 @@ export default function Home(){
   finally{setBusy(false)}
  }
  return <main className="auth-v2">
-  <div className="auth-v2-top auth-v2-top-clean"><Link href="/" className="auth-v2-logo"><ArkWordmark/></Link></div>
   <section className="auth-v2-center">
    <div className="auth-v2-intro"><span className="auth-v2-label"><Sparkles size={15}/> THE 60-DAY IELTS CHALLENGE</span><h1>Your IELTS journey<br/><span>starts here.</span></h1><p>Build consistency, track every hour of real study and follow your own 60-day pathway to a higher band.</p></div>
    <div className="auth-v2-card">
