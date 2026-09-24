@@ -152,7 +152,7 @@ def day_status(day_num):
 @app.get("/api/ark60")
 def get_data(request:Request, action:str="health", day:int=1):
     if action=="health":
-        return {"ok":True,"backend":"python-fastapi","database_configured":bool(os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY"))}
+        return {"ok":True,"backend":"python-fastapi","database_configured":bool(os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY")),"database_host":SUPABASE_URL.split("/")[2],"admin_storage_ready":bool(db("GET","ark60_admins",{"select":"id","status":"eq.active","limit":1}))}
     if action=="me":
         user=require_student(request)
         totals=db("GET","ark60_study_sessions",{"select":"active_seconds,study_date,module,day_number","student_id":"eq."+user["id"],"limit":5000})
@@ -244,7 +244,7 @@ async def actions(request:Request,response:Response):
     if action=="admin_login":
         bucket=rate_limit(request,"admin_login")
         username=str(data.get("username","")).strip().lower()
-        pwd=str(data.get("password",""))
+        pwd=str(data.get("password","")).strip()
         if not (3<=len(username)<=48 and 1<=len(pwd)<=128):
             raise HTTPException(status_code=400,detail="Invalid admin username or password")
         rows=db("GET","ark60_admins",{"select":"id,display_name,username,password_hash,role,status","username":"eq."+username,"limit":1})
