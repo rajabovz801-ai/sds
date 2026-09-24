@@ -153,6 +153,16 @@ def day_status(day_num):
 def get_data(request:Request, action:str="health", day:int=1):
     if action=="health":
         return {"ok":True,"backend":"python-fastapi","database_configured":bool(os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY")),"database_host":SUPABASE_URL.split("/")[2],"admin_storage_ready":bool(db("GET","ark60_admins",{"select":"id","status":"eq.active","limit":1}))}
+    if action=="username_available":
+        candidate=str(request.query_params.get("username","")).strip().lower()
+        valid=bool(re.fullmatch(r"[a-z][a-z0-9._-]{3,23}",candidate))
+        if not valid:
+            return {"valid":False,"available":False,"message":"Use 4–24 characters, start with a letter; letters, digits, dots, underscores and hyphens only."}
+        # Reserve usernames already used by students (including archived ones) or admins.
+        students=db("GET","ark60_students",{"select":"id","username":"eq."+candidate,"limit":1})
+        admins=db("GET","ark60_admins",{"select":"id","username":"eq."+candidate,"limit":1})
+        free=not students and not admins
+        return {"valid":True,"available":free,"message":"Available" if free else "Username already taken"}
     if action=="me":
         user=require_student(request)
         totals=db("GET","ark60_study_sessions",{"select":"active_seconds,study_date,module,day_number","student_id":"eq."+user["id"],"limit":5000})
@@ -169,10 +179,10 @@ def get_data(request:Request, action:str="health", day:int=1):
         return {"admin":require_admin(request)}
     if action=="admin_dashboard":
         admin=require_admin(request)
-        students=db("GET","ark60_students",{"select":"id,first_name,last_name,username,target_band,status,created_at","limit":2000})
+        students=db("GET","ark60_students",{"select":"id,first_name,last_name,username,target_band,status,created_at","status":"neq.deleted","limit":2000})
         hours=db("GET","ark60_study_sessions",{"select":"student_id,active_seconds,study_date,module","limit":20000})
         pending=db("GET","ark60_submissions",{"select":"module,review_status","review_status":"eq.pending","limit":1000})
-        by_student={x["id"]:{"id":x["id"],"first_name":x["first_name"],"last_name":x["last_name"],"username":x["username"],"target_band":x["target_band"],"today_seconds":0,"total_seconds":0} for x in students}
+        by_student={x["id"]:{"id":x["id"],"first_name":x["first_name"],"last_name":x["last_name"],"username":x["username"],"target_band":x["target_band"],"status":x["status"],"created_at":x["created_at"],"today_seconds":0,"total_seconds":0} for x in students}
         for h in hours:
             item=by_student.get(h["student_id"])
             if item:
@@ -205,14 +215,19 @@ async def actions(request:Request,response:Response):
         first=str(data.get("first_name","")).strip()
         last=str(data.get("last_name","")).strip()
         pwd=str(data.get("password",""))
+        username=str(data.get("username","")).strip().lower()
         try: band=float(data.get("target_band",0))
         except (ValueError,TypeError): band=0
-        if not (1<=len(first)<=55 and 1<=len(last)<=55 and 10<=len(pwd)<=128 and band in TARGET_BANDS):
-            raise HTTPException(status_code=400,detail="Enter your name, IELTS target and a password with at least 10 characters.")
+        if not (1<=len(first)<=55 and 1<=len(last)<=55 and 8<=len(pwd)<=128 and band in TARGET_BANDS):
+            raise HTTPException(status_code=400,detail="Enter your name, IELTS target and a password with at least 8 characters.")
+        if not re.fullmatch(r"[a-z][a-z0-9._-]{3,23}",username):
+            raise HTTPException(status_code=400,detail="Choose a username of 4–24 characters that starts with a letter.")
         rate_limit(request,"register",True)
-        slug=unicodedata.normalize("NFKD",first+"_"+last).encode("ascii","ignore").decode().lower()
-        slug=re.sub(r"[^a-z0-9]+","_",slug).strip("_")[:29] or "student"
-        username=slug+"_"+secrets.token_hex(4)
+        # Recheck on submission; the live availability indicator is informative only.
+        reserved=db("GET","ark60_admins",{"select":"id","username":"eq."+username,"limit":1})
+        existing=db("GET","ark60_students",{"select":"id","username":"eq."+username,"limit":1})
+        if reserved or existing:
+            raise HTTPException(status_code=409,detail="Username is unavailable. Please choose another.")
         rows=db("POST","ark60_students",payload={"first_name":first,"last_name":last,"username":username,"password_hash":hash_password(pwd),"target_band":band,"status":"pending"},prefer="return=representation")
         if not rows:raise HTTPException(status_code=502,detail="Could not submit registration request")
         clear_limit(bucket)
@@ -299,6 +314,20 @@ async def actions(request:Request,response:Response):
         if not updated:
             raise HTTPException(status_code=409,detail="This request was already reviewed")
         return {"ok":True,"student_id":student_id,"status":final_status}
+    if action=="delete_student":
+        actor=require_admin(request)
+        student_id=str(data.get("student_id","")).strip()
+        if not re.fullmatch(r"[0-9a-fA-F-]{36}",student_id):
+            raise HTTPException(status_code=400,detail="Invalid student")
+        target=db("GET","ark60_students",{"select":"id,username,status","id":"eq."+student_id,"limit":1})
+        if not target or target[0]["status"]=="deleted":
+            raise HTTPException(status_code=404,detail="Student was not found")
+        # Archive the account and revoke active sessions. Keep results for audit.
+        changed=db("PATCH","ark60_students",params={"id":"eq."+student_id,"status":"neq.deleted"},payload={"status":"deleted","deleted_at":now().isoformat(),"deleted_by":actor["id"]},prefer="return=representation")
+        if not changed:
+            raise HTTPException(status_code=409,detail="Student was already removed")
+        db("PATCH","ark60_sessions",params={"student_id":"eq."+student_id,"revoked_at":"is.null"},payload={"revoked_at":now().isoformat()},prefer="return=minimal")
+        return {"ok":True,"student_id":student_id,"status":"deleted","message":"Student removed; access revoked and learning history retained."}
     if action=="create_admin":
         actor=require_super_admin(request)
         name=str(data.get("display_name","")).strip()
@@ -307,7 +336,8 @@ async def actions(request:Request,response:Response):
         if not (2<=len(name)<=60 and re.fullmatch(r"[a-z0-9._-]{3,32}",username) and 10<=len(pwd)<=128):
             raise HTTPException(status_code=400,detail="Use a name, 3–32 character username and password with at least 10 characters.")
         existing=db("GET","ark60_admins",{"select":"id","username":"eq."+username,"limit":1})
-        if existing:raise HTTPException(status_code=409,detail="That admin username already exists.")
+        student_name=db("GET","ark60_students",{"select":"id","username":"eq."+username,"limit":1})
+        if existing or student_name:raise HTTPException(status_code=409,detail="That username is already reserved.")
         rows=db("POST","ark60_admins",payload={"display_name":name,"username":username,"password_hash":hash_password(pwd),"role":"admin","status":"active","created_by":actor["id"]},prefer="return=representation")
         item=rows[0] if rows else None
         return {"ok":True,"admin":{"id":item["id"],"display_name":item["display_name"],"username":item["username"],"role":item["role"],"status":item["status"]}}
