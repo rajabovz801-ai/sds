@@ -1,0 +1,62 @@
+export const runtime = "nodejs";
+
+function required(name) {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} is missing`);
+  return value;
+}
+
+async function telegram(method, payload) {
+  const token = required("TELEGRAM_BOT_TOKEN");
+  const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json();
+  if (!data.ok) throw new Error(data.description || `Telegram ${method} failed`);
+  return data.result;
+}
+
+export async function GET(request) {
+  try {
+    const url = new URL(request.url);
+    const webhookUrl = `${url.origin}/api/telegram/english`;
+    const payload = {
+      url: webhookUrl,
+      allowed_updates: [
+        "message",
+        "callback_query",
+        "poll_answer",
+        "business_connection",
+        "business_message",
+        "edited_business_message",
+        "deleted_business_messages"
+      ],
+      drop_pending_updates: false
+    };
+
+    const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (secret && /^[A-Za-z0-9_-]{1,256}$/.test(secret)) payload.secret_token = secret;
+
+    await telegram("setWebhook", payload);
+
+    const info = await telegram("getWebhookInfo", {});
+    return Response.json({
+      ok: true,
+      webhook_url: webhookUrl,
+      ark_english_entry: true,
+      private_ai: false,
+      quiz_answers: true,
+      callback_queries: true,
+      telegram: {
+        url: info.url,
+        pending_update_count: info.pending_update_count,
+        last_error_message: info.last_error_message || null
+      }
+    });
+  } catch (error) {
+    console.error("Telegram setup error", error);
+    return Response.json({ ok: false, error: error.message }, { status: 500 });
+  }
+}

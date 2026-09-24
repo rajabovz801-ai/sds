@@ -1,0 +1,1 @@
+export default function NotFound(){return <main className="holding"><div className="brand">ARK EDUCATION</div><h1>404</h1><p>Bu sahifa mavjud emas.</p></main>}
