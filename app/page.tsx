@@ -1,5 +1,5 @@
 "use client";
-import {useState} from "react";
+import {useEffect,useState} from "react";
 import {ArrowRight,BookOpen,CalendarDays,CheckCircle2,Eye,EyeOff,GraduationCap,LockKeyhole,LogIn,ShieldCheck,Sparkles,Target,UserRound,Users} from "lucide-react";
 
 export default function Home(){
@@ -13,11 +13,28 @@ export default function Home(){
  const [password,setPassword]=useState("");
  const [busy,setBusy]=useState(false);
  const [registeredUsername,setRegisteredUsername]=useState("");
+ const [usernameState,setUsernameState]=useState<"idle"|"checking"|"available"|"taken"|"invalid">("idle");
+ useEffect(()=>{
+  if(mode!=="register"){setUsernameState("idle");return}
+  const value=username.trim().toLowerCase();
+  if(!value){setUsernameState("idle");return}
+  if(!/^[a-z][a-z0-9._-]{3,23}$/.test(value)){setUsernameState("invalid");return}
+  setUsernameState("checking");
+  const timer=setTimeout(async()=>{
+   try{
+    const res=await fetch("/api/ark60?action=username_available&username="+encodeURIComponent(value),{cache:"no-store"});
+    const result=await res.json();
+    setUsernameState(result.available?"available":"taken");
+   }catch{setUsernameState("idle")}
+  },350);
+  return()=>clearTimeout(timer);
+ },[username,mode]);
+
  async function handleSubmit(e:React.FormEvent){
   e.preventDefault();
   setBusy(true);setMessage("");
   try{
-   const payload=mode==="register"?{action:"register",first_name:first.trim(),last_name:last.trim(),target_band:Number(target),password}:{action:"login",username:username.trim().toLowerCase(),password};
+   const payload=mode==="register"?{action:"register",first_name:first.trim(),last_name:last.trim(),username:username.trim().toLowerCase(),target_band:Number(target),password}:{action:"login",username:username.trim().toLowerCase(),password};
    const res=await fetch("/api/ark60",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(payload)});
    const result=await res.json();
    if(!res.ok){setMessage(result.detail||"Unable to complete your request. Please try again.");return}
@@ -35,14 +52,15 @@ export default function Home(){
     {registeredUsername&&mode==="register"?<div className="registration-pending" role="status"><div className="registration-pending-icon"><CheckCircle2 size={26}/></div><h3>Request sent for approval</h3><p>Your details have been sent to the ARK IELTS admin panel. Save your username and wait for an administrator to approve your account.</p><div className="registered-user"><CheckCircle2 size={18}/><div><small>YOUR USERNAME — SAVE THIS</small><strong>{registeredUsername}</strong><p>You can log in with this username after approval.</p></div></div><button type="button" className="registration-pending-login" onClick={()=>{setMode("login");setUsername(registeredUsername);setRegisteredUsername("");setMessage("");}}>Go to Log in <ArrowRight size={17}/></button></div>:<form onSubmit={handleSubmit} className="auth-v2-form">
      {mode==="register"?<>
       <div className="auth-v2-two"><label>First name<div className="auth-v2-input"><UserRound size={16}/><input required value={first} onChange={e=>setFirst(e.target.value)} placeholder="First name" maxLength={55}/></div></label><label>Last name<div className="auth-v2-input"><UserRound size={16}/><input required value={last} onChange={e=>setLast(e.target.value)} placeholder="Last name" maxLength={55}/></div></label></div>
+      <label>Choose username <small className={"username-status "+usernameState}>{usernameState==="checking"?"Checking…":usernameState==="available"?"Available":usernameState==="taken"?"Already taken":usernameState==="invalid"?"Use 4–24 characters and start with a letter":""}</small><div className={"auth-v2-input username-input "+usernameState}><UserRound size={16}/><input required minLength={4} maxLength={24} pattern="[A-Za-z][A-Za-z0-9._-]{3,23}" value={username} onChange={e=>setUsername(e.target.value.toLowerCase())} placeholder="Choose a username" autoComplete="username" spellCheck={false}/>{usernameState==="available"&&<CheckCircle2 size={16} className="username-check"/>}</div></label>
             <label>Target IELTS band<div className="auth-v2-input"><Target size={16}/><select required value={target} onChange={e=>setTarget(e.target.value)}><option value="" disabled>Choose your target band</option>{["6.0","6.5","7.0","7.5","8.0","8.5","9.0"].map(b=><option key={b} value={b}>Band {b}</option>)}</select></div></label>
-      <label>Create password<div className="auth-v2-input"><LockKeyhole size={16}/><input required minLength={10} maxLength={128} type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 10 characters" autoComplete="new-password"/><button type="button" className="password-eye" aria-label={showPassword?"Hide password":"Show password"} onClick={()=>setShowPassword(x=>!x)}>{showPassword?<EyeOff size={16}/>:<Eye size={16}/>}</button></div></label>
+      <label>Create password<div className="auth-v2-input"><LockKeyhole size={16}/><input required minLength={8} maxLength={128} type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete="new-password"/><button type="button" className="password-eye" aria-label={showPassword?"Hide password":"Show password"} onClick={()=>setShowPassword(x=>!x)}>{showPassword?<EyeOff size={16}/>:<Eye size={16}/>}</button></div></label>
      </>:<>
       <label>Username<div className="auth-v2-input"><UserRound size={16}/><input required value={username} onChange={e=>setUsername(e.target.value)} placeholder="Your username" autoComplete="username"/></div></label>
       <label>Password<div className="auth-v2-input"><LockKeyhole size={16}/><input required type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password" autoComplete="current-password"/><button type="button" className="password-eye" aria-label={showPassword?"Hide password":"Show password"} onClick={()=>setShowPassword(x=>!x)}>{showPassword?<EyeOff size={16}/>:<Eye size={16}/>}</button></div></label>
      </>}
      {message&&<p role="status" className="auth-v2-notice">{message}</p>}
-     <button className={"auth-v2-submit "+(mode==="register"?"student-create-btn":"")} type="submit" disabled={busy}>{busy?"Please wait…":mode==="register"?"Send approval request":"Log in to your dashboard"}<ArrowRight size={18}/></button>
+     <button className={"auth-v2-submit "+(mode==="register"?"student-create-btn":"")} type="submit" disabled={busy||(mode==="register"&&usernameState!=="available")}>{busy?"Please wait…":mode==="register"?"Send approval request":"Log in to your dashboard"}<ArrowRight size={18}/></button>
     </form>}
    </div>
    <div className="auth-v2-benefits"><div><span><CalendarDays size={18}/></span><strong>60-day structured plan</strong><small>1 Oct – 29 Nov 2026</small></div><div><span><BookOpen size={18}/></span><strong>Six daily IELTS modules</strong><small>Sunday full mock exams</small></div><div><span><Target size={18}/></span><strong>Personal target band</strong><small>Track your own progress</small></div></div>
