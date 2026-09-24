@@ -24,7 +24,7 @@ export default function Home(){
    const result=await res.json();
    if(!res.ok){setMessage(result.detail||"Unable to complete your request. Please try again.");return}
    if(mode==="register"){setRegisteredUsername(result.username);setPassword("");setAccess("");setMessage("Your account is ready. Save your unique username below before continuing.")}
-   else window.location.assign("/dashboard");
+   else window.location.assign(result.redirect==="/admin"?"/admin":"/dashboard");
   }catch{setMessage("Unable to contact the server. Please try again.")}
   finally{setBusy(false)}
  }
