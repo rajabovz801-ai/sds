@@ -387,3 +387,9 @@ html,body{background:var(--ark-bg);color:var(--ark-ink);font-family:Manrope,ui-s
 
 @media(max-width:900px){.admin-role-layout{grid-template-columns:1fr}}
 @media(max-width:520px){.admin-login-card{padding:23px 17px}.admin-list-row{grid-template-columns:36px minmax(0,1fr) auto}.admin-list-row>button{grid-column:2/4;justify-self:start}}
+
+/* Remove the decorative ARK IELTS wordmark without leaving an empty header. */
+.learning-brand-minimal{min-height:0;padding:0;margin:0 0 11px;border:0;display:flex;justify-content:flex-end}
+.learning-brand-minimal .mobile-close{margin-left:auto}
+.auth-v2-center{min-height:calc(100vh - 66px)}
+@media(max-width:970px){.learning-brand-minimal{min-height:30px;margin-bottom:6px}}
