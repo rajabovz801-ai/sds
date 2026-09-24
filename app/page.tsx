@@ -31,7 +31,7 @@ export default function Home(){
   finally{setBusy(false)}
  }
  return <main className="auth-v2">
-  <div className="auth-v2-top"><Link href="/" className="auth-v2-logo"><ArkWordmark/></Link><span className="auth-v2-top-right"><ShieldCheck size={15}/> PRIVATE IELTS WORKSPACE</span></div>
+  <div className="auth-v2-top auth-v2-top-clean"><Link href="/" className="auth-v2-logo"><ArkWordmark/></Link></div>
   <section className="auth-v2-center">
    <div className="auth-v2-intro"><span className="auth-v2-label"><Sparkles size={15}/> THE 60-DAY IELTS CHALLENGE</span><h1>Your IELTS journey<br/><span>starts here.</span></h1><p>Build consistency, track every hour of real study and follow your own 60-day pathway to a higher band.</p></div>
    <div className="auth-v2-card">
@@ -49,13 +49,11 @@ export default function Home(){
      </>}
      {message&&<p role="status" className="auth-v2-notice">{message}</p>}
      {registeredUsername&&<div className="registered-user"><CheckCircle2 size={18}/><div><small>YOUR NEW USERNAME — SAVE THIS</small><strong>{registeredUsername}</strong><p>Use this username and your chosen password to log in later.</p></div></div>}
-     <button className="auth-v2-submit" type="submit" disabled={busy}>{busy?"Please wait…":registeredUsername?"Continue to dashboard":mode==="register"?"Create student profile":"Log in to your dashboard"}<ArrowRight size={18}/></button>
+     <button className={"auth-v2-submit "+(mode==="register"?"student-create-btn":"")} type="submit" disabled={busy}>{busy?"Please wait…":registeredUsername?"Continue to dashboard":mode==="register"?"Create student profile":"Log in to your dashboard"}<ArrowRight size={18}/></button>
     </form>
-    <div className="auth-v2-divider"><span/> PREVIEW PLATFORM <span/></div><Link href="/dashboard" className="auth-v2-preview">Explore student dashboard <ArrowRight size={16}/></Link>
-    <p className="auth-v2-disclaimer">Invitation codes are issued by your teacher. Preview is public and does not save results.</p>
    </div>
    <div className="auth-v2-benefits"><div><span><CalendarDays size={18}/></span><strong>60-day structured plan</strong><small>1 Oct – 29 Nov 2026</small></div><div><span><BookOpen size={18}/></span><strong>Six daily IELTS modules</strong><small>Sunday full mock exams</small></div><div><span><Target size={18}/></span><strong>Personal target band</strong><small>Track your own progress</small></div></div>
   </section>
-  <footer className="auth-v2-footer"><span>© ARK EDUCATION · IELTS ONLY</span><span>Learn consistently. Grow confidently.</span><Link href="/admin">Admin preview <ArrowRight size={12}/></Link></footer>
+  <footer className="auth-v2-footer"><span>© ARK EDUCATION · IELTS ONLY</span><span>Learn consistently. Grow confidently.</span></footer>
  </main>;
 }
