@@ -178,11 +178,15 @@ def get_data(request:Request, action:str="health", day:int=1):
             if item:
                 item["total_seconds"]+=int(h["active_seconds"])
                 if h["study_date"]==str(today()):item["today_seconds"]+=int(h["active_seconds"])
-        return {"admin":admin,"students":list(by_student.values()),"total_students":len(students),"active_today":sum(1 for x in by_student.values() if x["today_seconds"]>0),"today_seconds":sum(x["today_seconds"] for x in by_student.values()),"pending_writing":sum(1 for x in pending if x["module"]=="writing"),"pending_speaking":sum(1 for x in pending if x["module"]=="speaking")}
+        return {"admin":admin,"students":list(by_student.values()),"total_students":len(students),"active_today":sum(1 for x in by_student.values() if x["today_seconds"]>0),"today_seconds":sum(x["today_seconds"] for x in by_student.values()),"pending_writing":sum(1 for x in pending if x["module"]=="writing"),"pending_speaking":sum(1 for x in pending if x["module"]=="speaking"),"pending_requests":sum(1 for x in students if x["status"]=="pending")}
     if action=="admin_admins":
         admin=require_super_admin(request)
         rows=db("GET","ark60_admins",{"select":"id,display_name,username,role,status,created_at","order":"created_at.asc","limit":200})
         return {"admin":admin,"admins":rows}
+    if action=="admin_requests":
+        admin=require_admin(request)
+        rows=db("GET","ark60_students",{"select":"id,first_name,last_name,username,target_band,status,created_at,reviewed_at,review_note","status":"in.(pending,active,rejected)","order":"created_at.desc","limit":200})
+        return {"admin":admin,"requests":rows}
     if action=="admin_invites":
         require_admin(request)
         return {"invites":db("GET","ark60_invites",{"select":"id,label,used_count,max_uses,expires_at,created_at,revoked_at","order":"created_at.desc","limit":200})}
@@ -199,27 +203,23 @@ async def actions(request:Request,response:Response):
         raise HTTPException(status_code=400,detail="Invalid JSON")
     action=data.get("action","")
     if action=="register":
+        # Students request admission. An admin must approve before sign-in is allowed.
         bucket=rate_limit(request,"register")
         first=str(data.get("first_name","")).strip()
         last=str(data.get("last_name","")).strip()
-        code=str(data.get("invite","")).strip()
         pwd=str(data.get("password",""))
         try: band=float(data.get("target_band",0))
         except (ValueError,TypeError): band=0
-        if not (1<=len(first)<=55 and 1<=len(last)<=55 and len(code)>=9 and 10<=len(pwd)<=128 and band in TARGET_BANDS):
-            raise HTTPException(status_code=400,detail="Please check your name, invitation code, target band and password (10+ characters).")
+        if not (1<=len(first)<=55 and 1<=len(last)<=55 and 10<=len(pwd)<=128 and band in TARGET_BANDS):
+            raise HTTPException(status_code=400,detail="Enter your name, IELTS target and a password with at least 10 characters.")
         rate_limit(request,"register",True)
         slug=unicodedata.normalize("NFKD",first+"_"+last).encode("ascii","ignore").decode().lower()
         slug=re.sub(r"[^a-z0-9]+","_",slug).strip("_")[:29] or "student"
-        username=slug+"_"+secrets.token_hex(3)
-        rows=db("POST","rpc/ark60_register",payload={"p_code_hash":digest(code),"p_first_name":first,"p_last_name":last,"p_username":username,"p_password_hash":hash_password(pwd),"p_target_band":band})
-        if not rows: raise HTTPException(status_code=502,detail="Could not register student")
-        uid=rows[0]["student_id"]
-        token=secrets.token_urlsafe(40)
-        db("POST","ark60_sessions",payload={"token_hash":digest(token),"student_id":uid,"expires_at":(now()+timedelta(days=30)).isoformat()},prefer="return=minimal")
-        cookie(response,COOKIE,token)
+        username=slug+"_"+secrets.token_hex(4)
+        rows=db("POST","ark60_students",payload={"first_name":first,"last_name":last,"username":username,"password_hash":hash_password(pwd),"target_band":band,"status":"pending"},prefer="return=representation")
+        if not rows:raise HTTPException(status_code=502,detail="Could not submit registration request")
         clear_limit(bucket)
-        return {"ok":True,"username":username,"target_band":band}
+        return {"ok":True,"username":username,"target_band":band,"status":"pending","message":"Registration request sent. Save your username and wait for admin approval."}
     if action=="login":
         # One login form for students, admins and the single Super Admin.
         # Resolve the role using a protected database lookup, not client-supplied roles.
@@ -243,9 +243,15 @@ async def actions(request:Request,response:Response):
             return {"ok":True,"role":account["role"],"redirect":"/admin","admin":{"display_name":account["display_name"],"role":account["role"]}}
 
         rows=db("GET","ark60_students",{"select":"id,username,password_hash,status","username":"eq."+username,"limit":1})
-        if not rows or not verify_password(pwd,rows[0]["password_hash"]) or rows[0]["status"]!="active":
+        if not rows or not verify_password(pwd,rows[0]["password_hash"]):
             rate_limit(request,"login",True)
             raise HTTPException(status_code=401,detail="Invalid username or password")
+        if rows[0]["status"]=="pending":
+            raise HTTPException(status_code=403,detail="Your registration request is awaiting admin approval.")
+        if rows[0]["status"]=="rejected":
+            raise HTTPException(status_code=403,detail="Your registration request was declined. Please contact ARK Education.")
+        if rows[0]["status"]!="active":
+            raise HTTPException(status_code=403,detail="This account is not currently active.")
         token=secrets.token_urlsafe(40)
         db("POST","ark60_sessions",payload={"token_hash":digest(token),"student_id":rows[0]["id"],"expires_at":(now()+timedelta(days=30)).isoformat()},prefer="return=minimal")
         cookie(response,COOKIE,token)
@@ -279,6 +285,23 @@ async def actions(request:Request,response:Response):
         db("PATCH","ark60_admin_sessions",params={"token_hash":"eq."+digest(token)},payload={"revoked_at":now().isoformat()},prefer="return=minimal")
         response.delete_cookie(ADMIN_COOKIE,path="/")
         return {"ok":True}
+    if action=="review_request":
+        actor=require_admin(request)
+        student_id=str(data.get("student_id","")).strip()
+        decision=str(data.get("decision","")).strip()
+        note=str(data.get("note","")).strip()[:400]
+        if not re.fullmatch(r"[0-9a-fA-F-]{36}",student_id) or decision not in {"approve","reject"}:
+            raise HTTPException(status_code=400,detail="Invalid request or decision")
+        target=db("GET","ark60_students",{"select":"id,status","id":"eq."+student_id,"limit":1})
+        if not target:
+            raise HTTPException(status_code=404,detail="Registration request not found")
+        if target[0]["status"]!="pending":
+            raise HTTPException(status_code=409,detail="This request has already been reviewed")
+        final_status="active" if decision=="approve" else "rejected"
+        updated=db("PATCH","ark60_students",params={"id":"eq."+student_id,"status":"eq.pending"},payload={"status":final_status,"reviewed_by":actor["id"],"reviewed_at":now().isoformat(),"review_note":note or None},prefer="return=representation")
+        if not updated:
+            raise HTTPException(status_code=409,detail="This request was already reviewed")
+        return {"ok":True,"student_id":student_id,"status":final_status}
     if action=="create_admin":
         actor=require_super_admin(request)
         name=str(data.get("display_name","")).strip()
