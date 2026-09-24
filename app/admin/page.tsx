@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import ArkWordmark from "../components/ark-wordmark";
 import {useEffect,useMemo,useState} from "react";
 import {LayoutDashboard,Users,CalendarDays,FileText,Mic,ChartNoAxesCombined,Trophy,Clock3,Settings,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Bell,Menu,X,ShieldCheck,ChevronRight,CheckCircle2,LockKeyhole,LogOut,UserPlus,UserCog,Eye,EyeOff} from "lucide-react";
 
@@ -84,7 +83,6 @@ export default function AdminPage(){
  if(!checked)return <main className="admin-auth-shell"><div className="admin-auth-loading">ARK IELTS</div></main>;
  if(!admin)return <main className="admin-auth-shell">
    <section className="admin-login-card">
-    <ArkWordmark subtitle="ADMIN PANEL"/>
     <div className="admin-login-heading"><span><ShieldCheck size={21}/></span><div><small>SECURE ADMIN ACCESS</small><h1>Admin sign in</h1><p>Enter your administrator username and password.</p></div></div>
     <form onSubmit={login} className="admin-login-form">
       <label>Username<div><UserCog size={16}/><input autoFocus required value={username} onChange={e=>setUsername(e.target.value)} placeholder="Admin username" autoComplete="username"/></div></label>
@@ -97,7 +95,7 @@ export default function AdminPage(){
 
  return <div className="learning-shell admin-v2">
   <aside className={"learning-sidebar "+(mobile?"open":"")}>
-   <div className="learning-brand"><ArkWordmark subtitle="ADMIN WORKSPACE"/><button className="mobile-close" onClick={()=>setMobile(false)} aria-label="Close navigation"><X size={18}/></button></div>
+   <div className="learning-brand learning-brand-minimal"><button className="mobile-close" onClick={()=>setMobile(false)} aria-label="Close navigation"><X size={18}/></button></div>
    <div className="side-overline">MANAGEMENT</div>
    <nav className="learning-nav">{sections.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setMobile(false)}}><Icon size={18} strokeWidth={1.8}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom"><button className="back-login" onClick={logout}><LogOut size={15}/> Log out</button><div className="user-tile"><span className="user-avatar">{admin.display_name.slice(0,2).toUpperCase()}</span><div><b>{admin.display_name}</b><small>{admin.role==="super_admin"?"Super Admin":"Admin"}</small></div></div></div>
