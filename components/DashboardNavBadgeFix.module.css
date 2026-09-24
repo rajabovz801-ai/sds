@@ -1,3 +1,0 @@
-.anchor{display:none}
-:global(.studentSideNav a[href="/practice"] > small),
-:global(.studentSideNav a[href="/study-tools"] > small){display:none!important}

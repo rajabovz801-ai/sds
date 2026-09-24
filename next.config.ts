@@ -1,66 +1,7 @@
-import type { NextConfig } from 'next';
-
-const securityHeaders = [
-  { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'Permissions-Policy', value: 'geolocation=(), payment=(), usb=()' },
-  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-  { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
-  { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
-];
-
-const adminSecurityHeaders = [
-  { key: 'Cache-Control', value: 'private, no-store, max-age=0, must-revalidate' },
-  { key: 'X-Frame-Options', value: 'DENY' },
-  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-  { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
-  { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
-  // Deliberately avoid script-src/style-src here: the admin currently uses
-  // Next.js runtime scripts and inline admin-only style layers. These focused
-  // directives harden framing/forms/objects without risking exam behavior.
-  { key: 'Content-Security-Policy', value: "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" },
-];
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  poweredByHeader: false,
-  serverExternalPackages: ['pdfkit'],
-  outputFileTracingIncludes: {
-    '/api/telegram': ['./node_modules/pdfkit/js/data/*.afm'],
-    '/api/tests/[id]/content': ['./test-content/MOCK02_*.html'],
-  },
-  async redirects() {
-    return [
-      { source: '/profile/:path*', destination: '/ielts', permanent: false },
-      { source: '/leaderboard/:path*', destination: '/ielts', permanent: false },
-      { source: '/practice/:path*', destination: '/ielts', permanent: false },
-      { source: '/daily-tasks/:path*', destination: '/ielts', permanent: false },
-      { source: '/cefr/:path*', destination: '/ielts', permanent: false },
-      { source: '/ielts/reading', destination: '/ielts', permanent: false },
-      { source: '/ielts/listening', destination: '/ielts', permanent: false },
-      { source: '/ielts/writing', destination: '/ielts', permanent: false },
-    ];
-  },
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: securityHeaders,
-      },
-      {
-        source: '/admin/:path*',
-        headers: adminSecurityHeaders,
-      },
-      {
-        source: '/api/admin/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'private, no-store, max-age=0, must-revalidate' },
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
-        ],
-      },
-    ];
-  },
 };
 
 export default nextConfig;
