@@ -221,11 +221,27 @@ async def actions(request:Request,response:Response):
         clear_limit(bucket)
         return {"ok":True,"username":username,"target_band":band}
     if action=="login":
+        # One login form for students, admins and the single Super Admin.
+        # Resolve the role using a protected database lookup, not client-supplied roles.
         bucket=rate_limit(request,"login")
         username=str(data.get("username","")).strip().lower()
         pwd=str(data.get("password",""))
-        if not (4<=len(username)<=48 and 1<=len(pwd)<=128):
+        if not (3<=len(username)<=48 and 1<=len(pwd)<=128):
             raise HTTPException(status_code=400,detail="Invalid username or password")
+
+        admins=db("GET","ark60_admins",{"select":"id,display_name,username,password_hash,role,status","username":"eq."+username,"limit":1})
+        if admins:
+            account=admins[0]
+            if account["status"]!="active" or not verify_password(pwd.strip(),account["password_hash"]):
+                rate_limit(request,"login",True)
+                raise HTTPException(status_code=401,detail="Invalid username or password")
+            token=secrets.token_urlsafe(40)
+            db("POST","ark60_admin_sessions",payload={"token_hash":digest(token),"admin_id":account["id"],"expires_at":(now()+timedelta(hours=12)).isoformat()},prefer="return=minimal")
+            cookie(response,ADMIN_COOKIE,token,days=1)
+            response.delete_cookie(COOKIE,path="/")
+            clear_limit(bucket)
+            return {"ok":True,"role":account["role"],"redirect":"/admin","admin":{"display_name":account["display_name"],"role":account["role"]}}
+
         rows=db("GET","ark60_students",{"select":"id,username,password_hash,status","username":"eq."+username,"limit":1})
         if not rows or not verify_password(pwd,rows[0]["password_hash"]) or rows[0]["status"]!="active":
             rate_limit(request,"login",True)
@@ -233,8 +249,9 @@ async def actions(request:Request,response:Response):
         token=secrets.token_urlsafe(40)
         db("POST","ark60_sessions",payload={"token_hash":digest(token),"student_id":rows[0]["id"],"expires_at":(now()+timedelta(days=30)).isoformat()},prefer="return=minimal")
         cookie(response,COOKIE,token)
+        response.delete_cookie(ADMIN_COOKIE,path="/")
         clear_limit(bucket)
-        return {"ok":True,"username":rows[0]["username"]}
+        return {"ok":True,"role":"student","redirect":"/dashboard","username":rows[0]["username"]}
     if action=="logout":
         token=request.cookies.get(COOKIE)
         if token:
