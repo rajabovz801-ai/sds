@@ -1,5 +1,6 @@
 "use client";
 import AnimatedBackButton from "../../../components/animated-back-button";
+import ChallengeSidebar from "../../../components/challenge-sidebar";
 import {useParams} from "next/navigation";
 import {useEffect,useRef,useState} from "react";
 import {BookOpen,CheckCircle2,LockKeyhole,ChevronRight,Clock3,Highlighter,Send,Play,Pause,Maximize2,Minimize2,Eraser} from "lucide-react";
@@ -81,7 +82,8 @@ export default function ChallengeReading(){
  const left=1200-usedSeconds(timer,now);
  const rows=passage?.text.replace(/\\n\\n/g,"\n\n").split(/\n\s*\n/).filter(p=>p.trim().length>8)||[];
  async function continueAfterReview(){const next=items.find(p=>p.ordinal===2);if(passage?.ordinal===1&&next&&!next.locked){await openPassage(next)}else await goBack()}
- return <main className="cr-shell">
+ return <main className={"cr-shell "+(!passage?"cr-overview":"")}>
+  {!passage&&<ChallengeSidebar day={day} active="Reading"/>}
   <header className="cr-header">
    <div className="cr-head-start">{passage?<AnimatedBackButton onClick={goBack} ariaLabel="Back to passages"/>:<AnimatedBackButton href={"/day/"+day} ariaLabel="Back to study day"/>}</div>
    <div className="cr-head-center">{passage&&!result?<div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{elapsed(left)}</span><button className={timer.is_running?"cr-pause":"cr-play"} disabled={busy||left===0} onClick={()=>setRunning(timer.is_running?"pause":"start")}>{timer.is_running?<Pause size={14}/>:<Play size={14}/>} {timer.is_running?"Pause":timer.started_at?"Resume":"Start"}</button></div>:<strong>ARK EDUCATION <span>· READING CDI</span></strong>}</div>
@@ -220,6 +222,82 @@ export default function ChallengeReading(){
    .cr-pane{padding:15px 14px}.cr-footer{min-height:56px;padding:6px 8px;gap:6px}
    .cr-footer-label,.cr-answer-count{display:none}.cr-number-strip{justify-content:flex-start;max-width:calc(100vw - 101px)}.cr-number-strip button{width:29px;height:29px;flex-basis:29px}
    .cr-submit{min-height:35px;padding:8px 9px}
+  }
+
+  /* The Reading entry is a Dashboard workspace; the actual exam stays distraction-free CDI. */
+  .cr-shell{background:#fdfcf9;color:#142338}
+  .cr-shell.cr-overview{display:grid;grid-template-columns:250px minmax(0,1fr);grid-template-rows:67px minmax(0,1fr);min-height:100dvh;background:linear-gradient(180deg,#fff,#fffcf8 35%,#fdfcf9)}
+  .cr-overview>.ch-sidebar{grid-column:1;grid-row:1/3}
+  .cr-overview>.cr-header{grid-column:2;grid-row:1}
+  .cr-overview>.cr-picker{grid-column:2;grid-row:2;min-width:0;align-self:start}
+  .cr-header{height:67px;padding:0 clamp(13px,2vw,30px);background:#fff;border-bottom:1px solid #e4e9ef}
+  .cr-head-center strong{color:#142740}.cr-head-center strong span{color:#95723c}
+  .cr-head-day,.cr-head-practice{background:#fff9ed;border-color:#f0e3cf;color:#785a2b}
+  .cr-head-day b{color:#92774e}
+  .cr-picker{width:min(1110px,calc(100% - 42px));margin:30px auto 65px}
+  .cr-kicker,.cr-instructions small{color:#956e30;font-weight:900;letter-spacing:.12em}
+  .cr-picker h1{font:700 clamp(35px,3.2vw,48px)/1.13 Georgia,"Times New Roman",serif;color:#142740;letter-spacing:-.05em}
+  .cr-picker-copy>p{color:#5b7088;font-size:12px;max-width:700px}
+  .cr-picker-intro{grid-template-columns:minmax(0,1fr) 192px;min-height:142px;position:relative;isolation:isolate;align-items:center}
+  .cr-picker-intro:before{content:"";position:absolute;z-index:-1;pointer-events:none;right:155px;top:-12px;width:min(57%,530px);height:160px;background:url("/ark-hero-landscape.svg") right top/contain no-repeat;opacity:.55}
+  .cr-picker-chips>span{color:#546983;background:#fff;border-color:#e3e8ef}
+  .cr-picker-chips>span svg{color:#b08743}
+  .cr-picker-chips .cr-preview-chip{background:#eaf6ef;color:#34785a;border-color:#cee7d9}
+  .cr-picker-progress{background:linear-gradient(125deg,#fff,#fff9f0);border-color:#f0e4d2;box-shadow:0 5px 17px #1c2e4605}
+  .cr-picker-progress>span{color:#8f6e39}
+  .cr-picker-progress>strong{color:#142740;font:700 36px Georgia,"Times New Roman",serif}
+  .cr-picker-progress>strong small{font:750 13px Manrope,system-ui,sans-serif;color:#7589a2}
+  .cr-progress-rail{background:#e7eaf0}.cr-progress-rail i{background:linear-gradient(90deg,#142740,#b48a45)}
+  .cr-picker-progress>small{color:#677990}
+  .cr-tile{border:1px solid #e3e8ef;background:#fff;box-shadow:0 5px 19px #1c334b07}
+  .cr-tile.cr-ready:hover,.cr-tile.cr-complete:hover{border-color:#b8cad9;box-shadow:0 8px 22px #1c334b11}
+  .cr-tile-icon{background:#eaf2ff;color:#29517d}
+  .cr-tile.cr-complete .cr-tile-icon{background:#eaf7ef;color:#308057}
+  .cr-tile small{color:#70849b}
+  .cr-state{background:#fff2df;color:#8a6428}.cr-state.done{background:#eaf7ee;color:#29764d}.cr-state.locked{background:#f3f5f8;color:#8190a1}
+  .cr-tile h2{color:#142740;font:700 22px Georgia,"Times New Roman",serif}
+  .cr-tile p{color:#60758c!important}.cr-tile.cr-complete p{color:#328055!important}
+  .cr-tile button,.cr-submit{background:#142740;color:#fff;border:1px solid #142740}
+  .cr-tile button:not(:disabled):hover,.cr-submit:hover:not(:disabled){background:#29496a;border-color:#29496a}
+  .cr-tile.cr-locked button{background:#f5f7fa!important;color:#7e8b9e;border-color:#e3e8ef}
+  .cr-instructions{background:#fff;border-bottom-color:#e4e9ef}
+  .cr-instructions h1{color:#172d47}
+  .cr-instructions p{color:#5c718b}
+  .cr-highlight-guide{background:#fffaf0;border:1px solid #eee2cd;color:#8a6a37}
+  .cr-play{background:#142740;border-color:#142740}
+  .cr-play:not(:disabled):hover{background:#29496b}
+  .cr-pause{background:#fff5df;color:#825e23;border-color:#f1e0b9}
+  .cr-time{color:#142740}
+  .cr-fullscreen{color:#344f70;background:#f4f7fa;border-color:#e3e8ef}
+  .cr-split{background:#f8fafc}
+  .cr-pane{border-color:#dde5ed;background:#fff}
+  .cr-passage h2{color:#142740}
+  .cr-qgroup-head h3{color:#142740}
+  .cr-qgroup-head p{color:#536880}
+  .cr-question{border-bottom-color:#e7edf2}
+  .cr-question-head b{background:#edf3f9;color:#21486d;border-color:#dce6f0}
+  .cr-radio{border-color:#66809d}.cr-options input:checked+.cr-radio:after{background:#142740}
+  .cr-options input:focus-visible+.cr-radio{outline:3px solid #d8b67d}
+  .cr-gap:focus{outline:3px solid #e2d0ab;border-color:#b08c4d}
+  .cr-footer{border-top-color:#e1e8ee;background:#fff}
+  .cr-footer-label{color:#627996}
+  .cr-number-strip button.answered{border-color:#adc2d4;background:#eaf2fa;color:#234a73}
+  .cr-mobile-tabs{background:#f1f5f9}
+  .cr-mobile-tabs .active{color:#173858}
+  @media(min-width:851px) and (max-width:1150px){.cr-shell.cr-overview{grid-template-columns:210px minmax(0,1fr)}}
+  @media(max-width:850px){
+   .cr-shell.cr-overview{display:flex;flex-direction:column;min-height:100dvh}
+   .cr-overview>.ch-sidebar{display:none}
+   .cr-overview>.cr-header{width:100%;flex:none}
+   .cr-overview>.cr-picker{width:calc(100% - 22px);margin:20px auto 42px}
+   .cr-header{height:56px;padding:0 10px}
+   .cr-picker-intro{grid-template-columns:1fr;gap:12px;min-height:0}
+   .cr-picker-intro:before{right:-50px;width:85%;opacity:.25}
+   .cr-picker h1{font-size:32px}
+   .cr-picker-progress{display:none}
+   .cr-tile h2{font-size:17px}
+   .cr-instructions h1{font-size:15px}
+   .cr-split{height:calc(100dvh - 56px - 73px - 40px - 56px)}
   }
 `}</style>
  </main>;
