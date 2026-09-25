@@ -32,6 +32,14 @@ function normalize(s:unknown){return String(s??"").trim().normalize("NFKC").toLo
 async function catalogue(day:number){return await db("ark60_reading_passages","GET","select=id,day_number,ordinal,title,status&day_number=eq."+day+"&order=ordinal.asc");}
 async function completed(student:string,day:number){return await db("ark60_reading_attempts","GET","select=passage_id,ordinal,score,total,elapsed_seconds,submitted_at&student_id=eq."+student+"&day_number=eq."+day+"&order=ordinal.asc");}
 function safePassage(row:J){return {id:row.id,day_number:row.day_number,ordinal:row.ordinal,title:row.title,text:row.passage_text,question_source:row.question_source,questions:row.questions};}
+const LIMIT=1200;
+function timerState(row:J|null|undefined){
+ const accumulated=Math.max(0,Number(row?.active_seconds||0));
+ const is_running=row?.is_running===true;
+ const resumed_at=is_running&&row?.resumed_at?String(row.resumed_at):null;
+ const delta=resumed_at?Math.max(0,Math.floor((Date.now()-Date.parse(resumed_at))/1000)):0;
+ return {started_at:row?.started_at||null,is_running,resumed_at,active_seconds:accumulated,elapsed_seconds:Math.min(LIMIT,accumulated+delta)};
+}
 export async function GET(req:NextRequest){
  try{
  const url=new URL(req.url);const action=url.searchParams.get("action")||"list";
@@ -56,8 +64,8 @@ export async function GET(req:NextRequest){
  if(!passage)return err("Passage unavailable",404);
  const prior=attempts.find((a:J)=>a.passage_id===id);
  if(prior)return NextResponse.json({passage:safePassage(passage),completed:prior});
- const began=(await db("ark60_reading_starts","GET","select=started_at&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
- return NextResponse.json({passage:safePassage(passage),started_at:began?.started_at||null});
+ const began=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+ return NextResponse.json({passage:safePassage(passage),timer:timerState(began)});
  }catch(e){console.error("reading GET",e);return err("Unable to load reading materials",503)}
 }
 export async function POST(req:NextRequest){
@@ -72,13 +80,26 @@ export async function POST(req:NextRequest){
  const existing=prev.find((a:J)=>a.passage_id===id);
  if(existing)return NextResponse.json({ok:true,already_completed:true,result:existing});
  if(row.ordinal===2&&user.username!==previewName&&!prev.some((a:J)=>a.ordinal===1))return err("Complete Passage 1 first",403);
- if(b.action==="start"){
-  await db("ark60_reading_starts","POST","on_conflict=student_id,passage_id",{student_id:user.id,passage_id:id},"resolution=ignore-duplicates");
-  const start=(await db("ark60_reading_starts","GET","select=started_at&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
-  return NextResponse.json({ok:true,started_at:start?.started_at});
+ if(b.action==="start"||b.action==="resume"||b.action==="pause"){
+  if(b.action!=="pause"){
+   await db("ark60_reading_starts","POST","on_conflict=student_id,passage_id",
+    {student_id:user.id,passage_id:id},"resolution=ignore-duplicates");
+  }
+  const start=(await db("ark60_reading_starts","GET","select=student_id,passage_id,started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+  if(!start)return err("Start the passage before pausing",409);
+  const snapshot=timerState(start);
+  if(b.action==="pause"&&snapshot.is_running){
+   await db("ark60_reading_starts","PATCH","student_id=eq."+user.id+"&passage_id=eq."+id,
+     {active_seconds:snapshot.elapsed_seconds,resumed_at:null,is_running:false},"return=minimal");
+  }else if(b.action!=="pause"&&!snapshot.is_running&&snapshot.elapsed_seconds<LIMIT){
+   await db("ark60_reading_starts","PATCH","student_id=eq."+user.id+"&passage_id=eq."+id,
+     {resumed_at:new Date().toISOString(),is_running:true},"return=minimal");
+  }
+  const updated=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+  return NextResponse.json({ok:true,timer:timerState(updated)});
  }
  if(b.action!=="submit")return err("Unknown action");
- const start=(await db("ark60_reading_starts","GET","select=started_at&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+ const start=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
  if(!start)return err("Start the passage before submitting",409);
  const questions=Array.isArray(row.questions)?row.questions:[];
  const key=Array.isArray(row.answer_key)?row.answer_key:[];
@@ -89,7 +110,10 @@ export async function POST(req:NextRequest){
   const q=questions[i],valid=Array.isArray(key[i])?key[i]:[key[i]];
   if(valid.some((v:unknown)=>normalize(v)===normalize(answers[String(q.number)]))&&normalize(answers[String(q.number)]))score++;
  }
- const seconds=Math.max(0,Math.min(10800,Math.floor((Date.now()-Date.parse(start.started_at))/1000)));
+ const seconds=timerState(start).elapsed_seconds;
+ // Freeze the server clock on submission so reloading cannot extend the recorded study time.
+ if(start.is_running)await db("ark60_reading_starts","PATCH","student_id=eq."+user.id+"&passage_id=eq."+id,
+  {active_seconds:seconds,resumed_at:null,is_running:false},"return=minimal");
  const saved=await db("ark60_reading_attempts","POST","",{student_id:user.id,passage_id:id,day_number:day,ordinal:row.ordinal,answers,score,total:questions.length,elapsed_seconds:seconds},"return=representation");
  // Mirror completed reading work into the existing 60-day course metrics.
  // Only completed pairs count as a finished Reading module.
