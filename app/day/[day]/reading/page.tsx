@@ -85,17 +85,16 @@ export default function ChallengeReading(){
   <header className="cr-header">
    <div className="cr-head-start">{passage?<AnimatedBackButton onClick={goBack} ariaLabel="Back to passages"/>:<AnimatedBackButton href={"/day/"+day} ariaLabel="Back to study day"/>}</div>
    <div className="cr-head-center">{passage&&!result?<div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{elapsed(left)}</span><button className={timer.is_running?"cr-pause":"cr-play"} disabled={busy||left===0} onClick={()=>setRunning(timer.is_running?"pause":"start")}>{timer.is_running?<Pause size={14}/>:<Play size={14}/>} {timer.is_running?"Pause":timer.started_at?"Resume":"Start"}</button></div>:<strong>ARK EDUCATION <span>· READING CDI</span></strong>}</div>
-   <div className="cr-head-end"><span>ARK <b>EDUCATION</b></span>{passage&&<button className="cr-fullscreen" aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFullscreen}>{fullScreen?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button>}</div>
+   <div className="cr-head-end">{passage?<><span className="cr-head-practice">PRACTICE {String(passage.ordinal).padStart(2,"0")}</span><button className="cr-fullscreen" aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFullscreen}>{fullScreen?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></>:<span className="cr-head-day">DAY {String(day).padStart(2,"0")} <b>· READING</b></span>}</div>
   </header>
   {!passage?<section className="cr-picker">
-   <span className="cr-kicker">DAY {String(day).padStart(2,"0")} · IELTS READING</span>
-   <h1>Today’s Reading</h1><p>Complete the first passage to unlock the second. Each passage is timed and scored separately.</p>
+   <div className="cr-picker-intro"><div className="cr-picker-copy"><span className="cr-kicker">DAY {String(day).padStart(2,"0")} · IELTS READING</span><h1>Today’s Reading</h1><p>Two focused Passage 1 practices. Finish the first to unlock the second; review your answers after submission.</p><div className="cr-picker-chips"><span><BookOpen size={14}/>{items.length} practices</span><span><Clock3 size={14}/>20 min each</span><span><CheckCircle2 size={14}/>{items.filter(p=>p.completed).length} completed</span>{isPreview.current&&<span className="cr-preview-chip">Teacher preview</span>}</div></div><div className="cr-picker-progress"><span>DAILY PROGRESS</span><strong>{items.filter(p=>p.completed).length}<small>/{items.length||2}</small></strong><div className="cr-progress-rail"><i style={{width:(items.length?items.filter(p=>p.completed).length/items.length*100:0)+"%"}}/></div><small>{items.length&&items.every(p=>p.completed)?"Both practices completed":"Your submitted results are saved"}</small></div></div>
    {items.length===2&&items.every(p=>!!p.completed)&&<div className="cr-daily-completed"><CheckCircle2 size={20}/><div><b>Daily Reading completed</b><p>{items.reduce((n,p)=>n+(p.completed?.score||0),0)}/{items.reduce((n,p)=>n+(p.completed?.total||0),0)} correct · Total active time {elapsed(items.reduce((n,p)=>n+(p.completed?.elapsed_seconds||0),0))}</p></div></div>}
-   {items.map(p=><article key={p.id} className={"cr-tile "+(p.locked?"cr-locked":"")}><span className="cr-tile-icon">{p.completed?<CheckCircle2 size={27}/>:p.locked?<LockKeyhole size={27}/>:<BookOpen size={27}/>}</span><div><small>PRACTICE {String(p.ordinal).padStart(2,"0")} · {p.completed?"COMPLETED":p.locked?"LOCKED":"20 MINUTES"}</small><h2>{p.title}</h2>{p.completed&&<p>Score: {p.completed.score}/{p.completed.total} · Time: {elapsed(p.completed.elapsed_seconds)}</p>}</div><button disabled={p.locked||busy} onClick={()=>openPassage(p)}>{p.completed?"View Analysis":p.locked?"Locked":"Start"} <ChevronRight size={17}/></button></article>)}
+   <div className="cr-practice-list">{items.map(p=><article key={p.id} className={"cr-tile "+(p.locked?"cr-locked":p.completed?"cr-complete":"cr-ready")}><span className="cr-tile-icon">{p.completed?<CheckCircle2 size={22}/>:p.locked?<LockKeyhole size={22}/>:<BookOpen size={22}/>}</span><div className="cr-tile-body"><div className="cr-tile-meta"><small>PRACTICE {String(p.ordinal).padStart(2,"0")} · IELTS PASSAGE 1</small><span className={"cr-state "+(p.completed?"done":p.locked?"locked":"ready")}>{p.completed?"Completed":p.locked?"Locked":"Available"}</span></div><h2>{p.title}</h2><p>{p.completed?<><CheckCircle2 size={14}/> {p.completed.score}/{p.completed.total} correct <span className="cr-tile-sep">·</span> <Clock3 size={14}/>{elapsed(p.completed.elapsed_seconds)} active time</>:p.locked?"Complete Practice 01 to unlock this test.":<><Clock3 size={14}/>20 minutes <span className="cr-tile-sep">·</span> Saved results & detailed analysis</>}</p></div><button disabled={p.locked||busy} aria-label={(p.completed?"View analysis for ":p.locked?"Locked: ":"Start ")+p.title} onClick={()=>openPassage(p)}>{p.completed?"View Analysis":p.locked?"Locked":"Start"} <ChevronRight size={17}/></button></article>)}</div>
    {!items.length&&!error&&<div className="cr-empty">No published reading materials for this day yet.</div>}
    {draftCount>0&&<p className="cr-draft">{draftCount} passage(s) pending answer-key verification.</p>}
   </section>:result&&review?<ReadingAnalysis passage={passage} review={review} onBack={goBack} onNext={continueAfterReview} nextAvailable={passage.ordinal===1&&!!items.find(p=>p.ordinal===2&&!p.locked)} nextTitle={items.find(p=>p.ordinal===2)?.title}/>:result?<section className="cr-review-loading"><h2>Loading your saved analysis…</h2><p>Your result is recorded. Reopen this practice to load the full explanation.</p><AnimatedBackButton onClick={goBack} ariaLabel="Back to practices"/></section>:<>
-   <div className="cr-instructions"><div><small>PRACTICE {String(passage.ordinal).padStart(2,"0")} · DAY {day}</small><h1>{passage.title}</h1><p>{total} questions · 20 minutes · Select text to highlight</p></div><div className="cr-tools"><span className="cr-highlight-guide"><Highlighter size={15}/> Select text for highlight</span></div></div>
+   <div className="cr-instructions"><div><small>PRACTICE {String(passage.ordinal).padStart(2,"0")} · DAY {day}</small><h1>{passage.title}</h1><p>{total} questions <span>·</span> 20 minutes <span>·</span> {timer.is_running?"Timer running":timer.started_at?"Paused · Resume to continue":"Press Start when you are ready"} <span>·</span> Select text to highlight</p></div><div className="cr-tools"><span className="cr-highlight-guide"><Highlighter size={15}/> Select text for highlight</span></div></div>
    <div className="cr-mobile-tabs"><button className={tab==="passage"?"active":""} onClick={()=>setTab("passage")}>Passage</button><button className={tab==="questions"?"active":""} onClick={()=>setTab("questions")}>Questions</button></div>
    <div className="cr-split"><section style={{display:tab==="questions"?"var(--cr-hide-passage)":"block"}} className="cr-pane cr-passage" ref={passageRef} onMouseUp={showHighlightMenu} onTouchEnd={()=>setTimeout(showHighlightMenu,100)}><h2>{passage.title}</h2>{rows.map((para,i)=><p key={i}>{para}</p>)}</section>
    <section style={{display:tab==="passage"?"var(--cr-hide-questions)":"block"}} className="cr-pane cr-questions" ref={questionsRef} onMouseUp={showHighlightMenu} onTouchEnd={()=>setTimeout(showHighlightMenu,100)}>
@@ -103,7 +102,7 @@ export default function ChallengeReading(){
      {group.map(q=><div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div>
       {q.type==="tfng"?<div className="cr-options">{["TRUE","FALSE","NOT GIVEN"].map(opt=><label key={opt}><input type="radio" disabled={!!result} checked={answers[q.number]===opt} onChange={()=>setAnswers(a=>({...a,[q.number]:opt}))}/><span className="cr-radio"/>{opt}</label>)}</div>:q.type==="mcq"?<div className="cr-options">{(q.options||[]).map(opt=><label key={opt}><input type="radio" disabled={!!result} checked={answers[q.number]===opt[0]} onChange={()=>setAnswers(a=>({...a,[q.number]:opt[0]}))}/><span className="cr-radio"/>{opt}</label>)}</div>:<input className="cr-gap" type="text" placeholder="Your answer" autoComplete="off" spellCheck={false} disabled={!!result} value={answers[q.number]||""} onChange={e=>setAnswers(a=>({...a,[q.number]:e.target.value}))}/>}
      </div>)}</section>)}</section></div>
-   <footer className="cr-footer"><AnimatedBackButton onClick={goBack} ariaLabel="Back to passages"/><div className="cr-number-strip" aria-label="Question navigation">{passage.questions.map(q=><button key={q.number} className={answers[q.number]?"answered":""} onClick={()=>{setTab("questions");setTimeout(()=>document.getElementById("question-"+q.number)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}>{q.number}</button>)}</div><span className="cr-answer-count">{answered+" / "+total}</span><button className="cr-submit" disabled={busy||!timer.started_at} onClick={()=>submit(false)}><Send size={15}/> {busy?"Submitting…":"Submit"}</button></footer>
+   <footer className="cr-footer"><span className="cr-footer-label">QUESTION NAVIGATION</span><div className="cr-number-strip" aria-label="Question navigation">{passage.questions.map(q=><button key={q.number} className={answers[q.number]?"answered":""} onClick={()=>{setTab("questions");setTimeout(()=>document.getElementById("question-"+q.number)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}>{q.number}</button>)}</div><span className="cr-answer-count">{answered+" / "+total+" answered"}</span><button className="cr-submit" disabled={busy||!timer.started_at} onClick={()=>submit(false)}><Send size={15}/> {busy?"Submitting…":"Submit"}</button></footer>
   </>}
   {selectionMenu&&passage&&!result&&<div className="cr-highlight-menu" style={{left:selectionMenu.x,top:selectionMenu.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button aria-label="Yellow highlight" title="Yellow highlight" onClick={()=>applyHighlight("yellow")}><i className="swatch yellow"/></button><button aria-label="Mint highlight" title="Mint highlight" onClick={()=>applyHighlight("green")}><i className="swatch green"/></button><span className="cr-menu-sep"/><button aria-label="Remove highlight" title="Remove highlight" onClick={()=>applyHighlight("erase")}><Eraser size={17}/></button></div>}
   {error&&<div className="cr-error" role="alert">{error}<button onClick={()=>setError("")}>×</button></div>}
@@ -158,6 +157,70 @@ export default function ChallengeReading(){
   .cr-highlight-menu .yellow{background:#ffe785}.cr-highlight-menu .green{background:#b5f0cd}
   .cr-menu-sep{height:24px;width:1px;background:#e9e7f2;margin:0 3px}
   @media(max-width:780px){.cr-header{height:62px;padding:0 10px;grid-template-columns:108px minmax(0,1fr) 30px;gap:5px}.cr-head-start .ark-back-control{width:108px;height:44px;font-size:12px}.cr-head-start .ark-back-icon{width:34px;height:36px}.cr-head-start .ark-back-label{transform:translateX(10px)}.cr-head-end>span{display:none}.cr-time{font-size:18px}.cr-timer-controls{gap:7px}.cr-play,.cr-pause{padding:8px 9px;font-size:11px}.cr-highlight-guide{font-size:10px;padding:5px 7px}.cr-split{height:calc(100dvh - 62px - 108px - 46px - 64px)}.cr-pane{padding:19px 14px}.cr-passage{font-size:16px}.cr-picker{margin:24px auto}.cr-picker h1{font-size:27px}.cr-tile{gap:11px}.cr-tile h2{font-size:15px}.cr-head-center strong{font-size:10px}.cr-fullscreen{padding:6px}}
+
+  /* Premium Reading internals, aligned with ARK Challenge */
+  .cr-shell{background:#f8f9fd;color:#28263d}
+  .cr-header{height:60px;grid-template-columns:minmax(125px,1fr) minmax(0,1fr) minmax(125px,1fr);padding:0 22px;gap:10px}
+  .cr-head-start,.cr-head-center,.cr-head-end{min-width:0}
+  .cr-head-day,.cr-head-practice{display:inline-flex;align-items:center;gap:5px;border:1px solid #ece9f8;background:#f8f7fd;border-radius:8px;padding:8px 10px;white-space:nowrap;font-size:10px;color:#786d9a;font-weight:800;letter-spacing:.06em}.cr-head-day b{color:#aaa1bb}
+  .cr-timer-controls{gap:10px}.cr-time{font-size:20px}.cr-play,.cr-pause{min-height:35px;padding:8px 12px}.cr-fullscreen{width:35px;height:35px;min-width:35px;padding:7px}
+  .cr-picker{width:min(960px,calc(100% - 32px));margin:32px auto 54px}.cr-picker-intro{display:grid;grid-template-columns:minmax(0,1fr) 188px;gap:22px;align-items:start;margin-bottom:16px}
+  .cr-picker h1{font-size:clamp(28px,3vw,37px);margin:8px 0;line-height:1.15}
+  .cr-picker-copy>p{font-size:12px;max-width:590px;line-height:1.7;color:#77748e;margin:0}
+  .cr-picker-chips{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:16px}
+  .cr-picker-chips>span{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #eae7f5;border-radius:7px;padding:7px 9px;color:#776e90;font-size:10px;font-weight:750}
+  .cr-picker-chips .cr-preview-chip{background:#eaf8f0;border-color:#d2eadc;color:#2d805a}
+  .cr-picker-progress{background:#fff;border:1px solid #e9e6f3;border-radius:12px;padding:13px 15px;box-shadow:0 5px 20px #2e245007}
+  .cr-picker-progress>span{display:block;color:#928ca6;font-size:9px;letter-spacing:.11em;font-weight:850}
+  .cr-picker-progress>strong{display:block;font-size:30px;line-height:1.4;color:#322d50;letter-spacing:-.05em}.cr-picker-progress>strong small{font-size:13px;color:#a9a3ba}
+  .cr-progress-rail{height:5px;overflow:hidden;border-radius:20px;background:#efebfa}.cr-progress-rail i{display:block;height:100%;border-radius:20px;background:#6655d8;transition:width .2s}
+  .cr-picker-progress>small{display:block;font-size:9px;color:#aaa3b9;margin-top:8px}
+  .cr-practice-list{display:grid;gap:11px}
+  .cr-tile{min-height:108px;margin:0;padding:18px 20px;gap:17px;border-radius:12px;box-shadow:0 4px 18px #2e245006;transition:border-color .18s,box-shadow .18s}
+  .cr-tile.cr-ready:hover,.cr-tile.cr-complete:hover{border-color:#b5a9ec;box-shadow:0 8px 24px #6252d916}
+  .cr-tile-icon{width:44px;height:44px;border-radius:10px}.cr-tile-icon svg{width:22px;height:22px}
+  .cr-tile-body{min-width:0;flex:1}.cr-tile-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .cr-tile small{font-size:9px;letter-spacing:.09em}
+  .cr-state{border-radius:30px;padding:5px 8px;font-size:9px;font-weight:850;letter-spacing:.04em;background:#f1efff;color:#6655cb}
+  .cr-state.done{background:#e9f8f0;color:#298155}.cr-state.locked{background:#f5f5f8;color:#9791a3}
+  .cr-tile h2{font-size:17px;margin:8px 0 7px}
+  .cr-tile p{font-size:11px!important;color:#888399!important;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .cr-tile.cr-complete p{color:#32805b!important}.cr-tile-sep{color:#c4bed0;padding:0 3px}
+  .cr-tile button{min-height:40px;border-radius:8px;font-size:11px;padding:11px 13px;white-space:nowrap}
+  .cr-tile button:not(:disabled):hover,.cr-submit:hover:not(:disabled){background:#5342c6}
+  .cr-tile.cr-locked{background:#fcfcfe}.cr-tile.cr-locked button{background:#f4f3f8;color:#a19bae;border:1px solid #e9e7ef}
+  .cr-daily-completed{margin:0 0 12px;padding:13px 15px}
+  .cr-instructions{min-height:74px;padding:11px 19px}.cr-instructions h1{font-size:18px;margin:3px 0}.cr-instructions p{font-size:11px;color:#8b849e}.cr-instructions p span{color:#bbb3d0;padding:0 4px}
+  .cr-highlight-guide{font-size:10px;border-radius:8px}
+  .cr-split{height:calc(100dvh - 60px - 74px - 60px);padding:11px 13px;gap:12px}
+  .cr-pane{padding:24px 26px;border-radius:11px}.cr-questions{font-size:13px}.cr-question-head span{font-size:13px;line-height:1.7}
+  .cr-question-head b{border-radius:6px}.cr-radio{border-color:#8577d7}.cr-options input:checked+.cr-radio:after{background:#6a59d3}
+  .cr-footer{min-height:60px;padding:8px 16px;gap:12px}.cr-footer-label{font-size:9px;color:#9d95b4;letter-spacing:.09em;font-weight:850;white-space:nowrap}
+  .cr-number-strip{flex:1;justify-content:center;max-width:calc(100vw - 380px);gap:5px}.cr-number-strip button{width:30px;height:30px;flex-basis:30px;border-radius:7px}
+  .cr-submit{min-height:36px;font-size:11px;padding:10px 14px;white-space:nowrap}
+  @media(max-width:800px){
+   .cr-header{height:56px;padding:0 9px;grid-template-columns:110px minmax(0,1fr) 34px;gap:4px}
+   .cr-head-start .ark-back-control{width:110px!important;height:36px!important;font-size:11px!important}
+   .cr-head-start .ark-back-icon{width:29px!important;height:30px!important}
+   .cr-head-start .ark-back-label{font-size:11px!important;transform:translateX(10px)!important}
+   .cr-head-center strong{font-size:9px;letter-spacing:.04em}.cr-head-center strong span{display:none}
+   .cr-head-day,.cr-head-practice{display:none}.cr-timer-controls{gap:5px}.cr-time{font-size:15px;gap:3px}.cr-time svg{width:13px}
+   .cr-play,.cr-pause{min-height:32px;padding:7px 8px;font-size:10px;gap:4px}
+   .cr-fullscreen{width:32px;height:32px;min-width:32px;padding:5px}
+   .cr-picker{margin:20px auto 38px;width:calc(100% - 22px)}.cr-picker-intro{grid-template-columns:1fr;gap:12px}
+   .cr-picker h1{font-size:27px}.cr-picker-chips{margin-top:12px}.cr-picker-progress{display:none}
+   .cr-tile{min-height:88px;padding:13px 11px;gap:10px}.cr-tile-icon{width:36px;height:36px}.cr-tile-icon svg{width:19px}
+   .cr-tile-meta{gap:5px}.cr-tile small{font-size:8px}.cr-state{font-size:8px;padding:4px 7px}
+   .cr-tile h2{font-size:14px;margin:5px 0}.cr-tile p{font-size:10px!important}
+   .cr-tile button{min-height:35px;padding:8px;font-size:10px}
+   .cr-instructions{min-height:73px;padding:9px 11px}.cr-instructions h1{font-size:15px}.cr-instructions p{font-size:10px}.cr-highlight-guide{display:none}
+   .cr-mobile-tabs{height:40px;align-items:center;background:#f6f4fc;padding:4px 8px}
+   .cr-mobile-tabs button{height:31px;color:#9089a1;font-size:11px}.cr-mobile-tabs .active{color:#6654d8}
+   .cr-split{height:calc(100dvh - 56px - 73px - 40px - 56px);padding:6px 8px}
+   .cr-pane{padding:15px 14px}.cr-footer{min-height:56px;padding:6px 8px;gap:6px}
+   .cr-footer-label,.cr-answer-count{display:none}.cr-number-strip{justify-content:flex-start;max-width:calc(100vw - 101px)}.cr-number-strip button{width:29px;height:29px;flex-basis:29px}
+   .cr-submit{min-height:35px;padding:8px 9px}
+  }
 `}</style>
  </main>;
 }
