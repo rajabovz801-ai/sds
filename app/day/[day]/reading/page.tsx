@@ -43,13 +43,13 @@ export default function ChallengeReading(){
   const rect=r.getBoundingClientRect();selectionRef.current=r.cloneRange();
   setSelectionMenu({x:Math.min(window.innerWidth-112,Math.max(112,rect.left+rect.width/2)),y:Math.max(66,rect.top-54)});
  }
- function applyHighlight(shade:"yellow"|"green"|"erase"){
+ function applyHighlight(shade:"yellow"|"erase"){
   const range=selectionRef.current,h=window.CSS?.highlights;
   if(!range||!h){setError("Please use an updated Chrome, Edge or Safari for text highlighting.");return}
   if(shade==="erase"){
    for(const key of ["ark-reading-yellow","ark-reading-green"]){const old=h.get(key);if(!old)continue;const keep=Array.from(old).filter(r=>!(r instanceof Range&&r.compareBoundaryPoints(Range.END_TO_START,range)>0&&r.compareBoundaryPoints(Range.START_TO_END,range)<0));if(keep.length)h.set(key,new Highlight(...keep));else h.delete(key)}
   }else{
-   const key=shade==="yellow"?"ark-reading-yellow":"ark-reading-green";
+   const key="ark-reading-yellow";
    const old=h.get(key);h.set(key,old?new Highlight(...Array.from(old),range.cloneRange()):new Highlight(range.cloneRange()));
   }
   window.getSelection()?.removeAllRanges();selectionRef.current=null;setSelectionMenu(null);
@@ -96,7 +96,7 @@ export default function ChallengeReading(){
    {!items.length&&!error&&<div className="cr-empty">No published reading materials for this day yet.</div>}
    {draftCount>0&&<p className="cr-draft">{draftCount} passage(s) pending answer-key verification.</p>}
   </section>:result&&review?<ReadingAnalysis passage={passage} review={review} onBack={goBack} onNext={continueAfterReview} nextAvailable={passage.ordinal===1&&!!items.find(p=>p.ordinal===2&&!p.locked)} nextTitle={items.find(p=>p.ordinal===2)?.title}/>:result?<section className="cr-review-loading"><h2>Loading your saved analysis…</h2><p>Your result is recorded. Reopen this practice to load the full explanation.</p><AnimatedBackButton onClick={goBack} ariaLabel="Back to practices"/></section>:<>
-   <div className="cr-instructions"><div><small>PRACTICE {String(passage.ordinal).padStart(2,"0")} · DAY {day}</small><h1>{passage.title}</h1><p>{total} questions <span>·</span> 20 minutes <span>·</span> {timer.is_running?"Timer running":timer.started_at?"Paused · Resume to continue":"Press Start when you are ready"} <span>·</span> Select text to highlight</p></div><div className="cr-tools"><span className="cr-highlight-guide"><Highlighter size={15}/> Select text for highlight</span></div></div>
+   <div className="cr-instructions"><div><small>PRACTICE {String(passage.ordinal).padStart(2,"0")} · DAY {day}</small><h1>{passage.title}</h1><p>{total} questions <span>·</span> 20 minutes <span>·</span> {timer.is_running?"Timer running":timer.started_at?"Paused · Resume to continue":"Press Start when you are ready"}</p></div><div className="cr-tools"><span className="cr-highlight-guide"><Highlighter size={15}/> Select text for yellow highlight</span></div></div>
    <div className="cr-mobile-tabs"><button className={tab==="passage"?"active":""} onClick={()=>setTab("passage")}>Passage</button><button className={tab==="questions"?"active":""} onClick={()=>setTab("questions")}>Questions</button></div>
    <div className="cr-split"><section style={{display:tab==="questions"?"var(--cr-hide-passage)":"block"}} className="cr-pane cr-passage" ref={passageRef} onMouseUp={showHighlightMenu} onTouchEnd={()=>setTimeout(showHighlightMenu,100)}><h2>{passage.title}</h2>{rows.map((para,i)=><p key={i}>{para}</p>)}</section>
    <section style={{display:tab==="passage"?"var(--cr-hide-questions)":"block"}} className="cr-pane cr-questions" ref={questionsRef} onMouseUp={showHighlightMenu} onTouchEnd={()=>setTimeout(showHighlightMenu,100)}>
@@ -106,11 +106,10 @@ export default function ChallengeReading(){
      </div>)}</section>)}</section></div>
    <footer className="cr-footer"><span className="cr-footer-label">QUESTION NAVIGATION</span><div className="cr-number-strip" aria-label="Question navigation">{passage.questions.map(q=><button key={q.number} className={answers[q.number]?"answered":""} onClick={()=>{setTab("questions");setTimeout(()=>document.getElementById("question-"+q.number)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}>{q.number}</button>)}</div><span className="cr-answer-count">{answered+" / "+total+" answered"}</span><button className="cr-submit" disabled={busy||!timer.started_at} onClick={()=>submit(false)}><Send size={15}/> {busy?"Submitting…":"Submit"}</button></footer>
   </>}
-  {selectionMenu&&passage&&!result&&<div className="cr-highlight-menu" style={{left:selectionMenu.x,top:selectionMenu.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button aria-label="Yellow highlight" title="Yellow highlight" onClick={()=>applyHighlight("yellow")}><i className="swatch yellow"/></button><button aria-label="Mint highlight" title="Mint highlight" onClick={()=>applyHighlight("green")}><i className="swatch green"/></button><span className="cr-menu-sep"/><button aria-label="Remove highlight" title="Remove highlight" onClick={()=>applyHighlight("erase")}><Eraser size={17}/></button></div>}
+  {selectionMenu&&passage&&!result&&<div className="cr-highlight-menu" style={{left:selectionMenu.x,top:selectionMenu.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button aria-label="Yellow highlight" title="Highlight yellow" onClick={()=>applyHighlight("yellow")}><i className="swatch yellow"/></button><span className="cr-menu-sep"/><button aria-label="Remove highlight" title="Remove highlight" onClick={()=>applyHighlight("erase")}><Eraser size={17}/></button></div>}
   {error&&<div className="cr-error" role="alert">{error}<button onClick={()=>setError("")}>×</button></div>}
   <style jsx global>{`
-  ::highlight(ark-reading-yellow){background:#ffe785;color:inherit}
-  ::highlight(ark-reading-green){background:#b5f0cd;color:inherit}
+  ::highlight(ark-reading-yellow){background:#ffe58a;color:inherit}
   .cr-daily-completed{display:flex;align-items:center;gap:12px;border:1px solid #cde9d8;background:#f0faf4;border-radius:10px;padding:16px 18px;margin:18px 0;color:#267b53}.cr-daily-completed b{font-size:13px}.cr-daily-completed p{font-size:12px;color:#58936e;margin:4px 0 0}.cr-review-loading{padding:40px 20px;max-width:600px;margin:auto}.cr-review-loading button{padding:11px 15px;border:none;border-radius:8px;background:#6252d9;color:#fff}
   .cr-shell{--cr-hide-passage:block;--cr-hide-questions:block;min-height:100vh;background:#fff;font:15px/1.55 Arial,"Lato",sans-serif;color:#121820;display:flex;flex-direction:column}
   .cr-header{height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e7e9ed;padding:0 23px;gap:15px}
@@ -298,6 +297,42 @@ export default function ChallengeReading(){
    .cr-tile h2{font-size:17px}
    .cr-instructions h1{font-size:15px}
    .cr-split{height:calc(100dvh - 56px - 73px - 40px - 56px)}
+  }
+
+  /* Shared CDI reading accessibility: applied to every current and future passage. */
+  .cr-shell:not(.cr-overview){background:#f5f4ef;color:#172b45}
+  .cr-shell:not(.cr-overview) .cr-instructions{background:#fbfaf6;border-bottom:1px solid #d9dfe6}
+  .cr-shell:not(.cr-overview) .cr-split{background:#f1f2ef}
+  .cr-shell:not(.cr-overview) .cr-pane{background:#fffdf8;border:1px solid #ccd5df;box-shadow:0 3px 13px #1e334b0b}
+  .cr-shell:not(.cr-overview) .cr-passage{color:#1c2c3f;line-height:1.88}
+  .cr-shell:not(.cr-overview) .cr-passage h2{color:#142740;font-weight:800}
+  .cr-shell:not(.cr-overview) .cr-qgroup-head{padding-bottom:12px;border-bottom:1px solid #e1e5e8;margin-bottom:18px}
+  .cr-shell:not(.cr-overview) .cr-qgroup-head h3{color:#142740;font-size:19px;font-weight:850;line-height:1.4}
+  .cr-shell:not(.cr-overview) .cr-qgroup-head p{font-size:14px;font-weight:550;line-height:1.7;color:#40546b}
+  .cr-shell:not(.cr-overview) .cr-question{margin-bottom:19px;padding-bottom:20px;border-bottom:1px solid #dfe5e8}
+  .cr-shell:not(.cr-overview) .cr-question-head{gap:12px;align-items:flex-start}
+  .cr-shell:not(.cr-overview) .cr-question-head b{min-width:34px;min-height:34px;display:grid;place-items:center;padding:5px 8px;border-radius:7px;background:#eaf2fa;border:1px solid #bfd0e0;color:#142740;font-size:14px;font-weight:850}
+  .cr-shell:not(.cr-overview) .cr-question-head span{padding-top:2px;font-size:16px;font-weight:600;line-height:1.75;color:#172b45;letter-spacing:0;white-space:pre-line}
+  .cr-shell:not(.cr-overview) .cr-options{margin-top:14px;gap:10px}
+  .cr-shell:not(.cr-overview) .cr-options label{font-size:14px;line-height:1.55;font-weight:600;color:#243850;padding:4px 0}
+  .cr-shell:not(.cr-overview) .cr-options label:hover{color:#142740}
+  .cr-shell:not(.cr-overview) .cr-radio{border-color:#7189a1;background:#fffdf8}
+  .cr-shell:not(.cr-overview) .cr-options input:checked+.cr-radio{border-color:#142740}
+  .cr-shell:not(.cr-overview) .cr-gap{min-height:44px;padding:9px 12px;background:#fff;border:1.5px solid #9dafc2;border-radius:7px;color:#172b45;font-size:15px;font-weight:650}
+  .cr-shell:not(.cr-overview) .cr-gap::placeholder{color:#718297;font-weight:500}
+  .cr-shell:not(.cr-overview) .cr-gap:focus{outline:3px solid #ffe58a;border-color:#b88e42}
+  .cr-shell:not(.cr-overview) .cr-highlight-guide{background:#fff3d6;border:1px solid #ebd7a6;color:#76541e;font-weight:800}
+  .cr-shell:not(.cr-overview) .cr-highlight-menu{border-color:#d8c69e;background:#fffdf8}
+  .cr-shell:not(.cr-overview) .cr-highlight-menu .yellow{background:#ffe58a}
+  .cr-shell:not(.cr-overview) .cr-number-strip button.answered{background:#e9f5eb;border-color:#a8d1b5;color:#245b40;font-weight:850}
+  .cr-shell:not(.cr-overview) .cr-footer{background:#fbfaf6;border-top:1px solid #dce3e9}
+  @media(max-width:800px){
+   .cr-shell:not(.cr-overview) .cr-qgroup-head h3{font-size:17px}
+   .cr-shell:not(.cr-overview) .cr-qgroup-head p{font-size:13px}
+   .cr-shell:not(.cr-overview) .cr-question-head span{font-size:15px;line-height:1.7}
+   .cr-shell:not(.cr-overview) .cr-question-head b{min-width:32px;min-height:32px}
+   .cr-shell:not(.cr-overview) .cr-gap{font-size:16px;max-width:calc(100% - 40px)}
+   .cr-shell:not(.cr-overview) .cr-options label{font-size:14px}
   }
 `}</style>
  </main>;
