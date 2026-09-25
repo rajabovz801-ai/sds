@@ -120,6 +120,46 @@ export default function ReadingAnalysis({passage,review,onBack,onNext,nextAvaila
     .ra-left,.ra-right{height:100%}.ra-left{padding:16px}.ra-right{padding:14px}
     .ra-footer{min-height:56px;padding:7px 9px;gap:7px}.ra-next{font-size:10px;padding:9px 10px}
    }
+
+   /* Analysis matches the ARK dashboard without disturbing passage evidence or answers. */
+   .ra-shell{background:#f8fafc;color:#142338}
+   .ra-summary{background:#fff;border-bottom:1px solid #e2e8ef}
+   .ra-kicker{color:#926c2e}
+   .ra-summary-title h2{font:700 26px Georgia,"Times New Roman",serif;color:#142740;letter-spacing:-.04em}
+   .ra-summary-title p{color:#546d87}
+   .ra-stats>div{background:linear-gradient(125deg,#fff,#f8fbff);border:1px solid #e5eaf0}
+   .ra-stats>div:nth-child(2){background:linear-gradient(125deg,#fff,#fff9ef);border-color:#f0e5d1}
+   .ra-stats>div span{color:#627791}
+   .ra-stats>div strong{color:#142740;font-family:Georgia,"Times New Roman",serif;font-weight:700}
+   .ra-grid{background:#f7f9fc}
+   .ra-left,.ra-right{border-color:#e1e7ed;background:#fff;box-shadow:0 5px 18px #162d4608}
+   .ra-left-caption{color:#9a7130}
+   .ra-left-caption span{color:#6d8099}
+   .ra-left h2{font:700 24px Georgia,"Times New Roman",serif;color:#142740;letter-spacing:-.03em}
+   .ra-left p{color:#27364b}
+   .ra-paranum{color:#8a9bad}
+   .ra-review-heading h3{font:700 20px Georgia,"Times New Roman",serif;color:#142740}
+   .ra-filters{background:#f0f4f8}
+   .ra-filters button{color:#60738b}.ra-filters button.active{background:#142740;color:#fff}
+   .ra-question-grid{border-bottom-color:#e5eaf0}
+   .ra-qnum{border-color:#dce3eb;color:#4b617a}
+   .ra-qnum.selected{outline-color:#bd9450}
+   .ra-card-heading>span:first-child{color:#8d682f}
+   .ra-question-text{color:#152b44}
+   .ra-answer-pair>div{background:#f9fbfd;border-color:#e4e9ef}
+   .ra-answer-pair span{color:#718298}
+   .ra-evidence-meta{color:#906b2d}
+   .ra-evidence-meta span{color:#708298}
+   .ra-evidence-meta button{background:#fff8ea;color:#825e28;border-color:#efe0c5}
+   .ra-table-wrap{border-color:#e4e9ef}.ra-table-wrap th{background:#f1f5f9;color:#405a79}
+   .ra-table-wrap td{border-color:#e6ebf0;color:#374f6a}
+   .ra-explanation{background:#eff8f2}
+   .ra-step-nav button{color:#344f70;border-color:#dce5ef}
+   .ra-footer{border-top-color:#e4e9ef;background:#fff}
+   .ra-next{background:#142740}.ra-next:hover{background:#294969}
+   .ra-mobile-tabs{background:#f2f6f9}
+   .ra-mobile-tabs button.active{color:#1d4668;background:#fff;border-color:#dfe7ee}
+   @media(max-width:800px){.ra-summary-title h2{font-size:19px}.ra-review-heading h3{font-size:17px}}
 `}</style>
  </div>;
 }
