@@ -73,26 +73,40 @@ export default function ArticlePage(){
  useEffect(()=>{const f=(e:KeyboardEvent)=>{if(e.key==="Escape"){setPopup(null);setMenu(null)}};window.addEventListener("keydown",f);return()=>window.removeEventListener("keydown",f)},[]);
  if(loading)return <main className="aa-shell"><div className="aa-loading">Loading the article…</div></main>;
  if(!data)return <main className="aa-shell"><div className="aa-loading"><AnimatedBackButton href={"/day/"+day}/><p>{error||"Article unavailable"}</p></div></main>;
- const article=data.article,pages=article.sections,current=pages[page],read=data.progress.visited_pages.length,completed=!!data.progress.completed_at;
+ const article=data.article,pages=article.sections,current=pages[page],read=data.progress.visited_pages.length,completed=!!data.progress.completed_at,readyToFinish=read===pages.length&&!completed;
  return <main className="aa-shell" onClick={()=>popup&&setPopup(null)}>
   <header className="aa-header"><AnimatedBackButton href={"/day/"+day}/><span className="aa-brand">ARK <b>EDUCATION</b><em> · ARTICLE CDI</em></span><span className="aa-day">DAY {String(day).padStart(2,"0")}</span></header>
   <div className="aa-container">
-   <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAY {String(day).padStart(2,"0")} · DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>5 pages</span><span>40 interactive words</span></div></div><RoomArt/></section>
-   <div className="aa-work-title"><div><span className="aa-kicker">YOUR READING WORKSPACE</span><h2>Read, explore and remember</h2></div><span className="aa-progress-label">{completed?<><CheckCircle2 size={16}/> Completed</>:<><BookOpen size={16}/> {read}/{pages.length} pages</>}</span></div>
+   <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAY {String(day).padStart(2,"0")} · DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} pages</span><span>{words.length} interactive words</span></div></div><RoomArt/></section>
+   <div className="aa-work-title">
+    <div className="aa-work-copy"><span className="aa-kicker">YOUR READING WORKSPACE</span><h2>Read, explore and remember</h2></div>
+    <div className="aa-work-actions" aria-live="polite">
+     <span className={"aa-progress-label "+(completed?"aa-completed-label":"")}>{completed?<><CheckCircle2 size={16}/> Article completed</>:<><BookOpen size={16}/> {read}/{pages.length} pages</>}</span>
+     {readyToFinish&&<button type="button" className="aa-finish-cta" onClick={complete} disabled={busy}><CheckCircle2 size={16}/>{busy?"Saving…":"Finish Article"}</button>}
+     {completed&&<Link className="aa-work-vocab" href={"/day/"+day+"/vocabulary"}>Vocabulary <ArrowRight size={15}/></Link>}
+    </div>
+   </div>
    <div className="aa-progress-rail"><i style={{width:(read/pages.length*100)+"%"}}/></div>
    <div className="aa-mobile-tabs"><button className={tab==="article"?"active":""} onClick={()=>setTab("article")}><BookOpen size={15}/> Article</button><button className={tab==="vocab"?"active":""} onClick={()=>setTab("vocab")}><Bookmark size={15}/> Vocabulary</button></div>
    <div className="aa-grid">
     <div ref={reader} className={"aa-reader "+(tab==="article"?"aa-mobile-visible":"")} onMouseUp={selectedText} onTouchEnd={()=>setTimeout(selectedText,100)}>
-     <div className="aa-reader-top"><span><BookOpen size={16}/> PAGE {page+1}/{pages.length}</span><span><Highlighter size={15}/> Select text for highlight</span></div>
-     <div className="aa-pages">{pages.map((p,i)=><button key={p.page} onClick={()=>visit(i)} disabled={busy} className={i===page?"active":data.progress.visited_pages.includes(i+1)?"visited":""}>{String(i+1).padStart(2,"0")}</button>)}</div>
+     <div className="aa-reader-toolbar">
+      <div className="aa-reader-navigation"><span className="aa-reader-page-title"><BookOpen size={15}/> PAGES</span>
+       <nav className="aa-pages" aria-label="Article page navigation">{pages.map((p,i)=><button key={p.page} type="button" onClick={()=>visit(i)} disabled={busy} aria-current={i===page?"page":undefined} aria-label={"Page "+(i+1)+(data.progress.visited_pages.includes(i+1)?", read":"")} className={i===page?"active":data.progress.visited_pages.includes(i+1)?"visited":""}>{String(i+1).padStart(2,"0")}</button>)}</nav>
+      </div>
+      <span className="aa-highlight-hint"><Highlighter size={15}/> Select text for highlight</span>
+     </div>
      <div className="aa-section-heading"><div><h2>{current.heading}</h2><div className="aa-original">ORIGINAL ARTICLE · PAGE {current.page}</div></div><SectionArt kind={current.illustration}/></div>
      {current.paragraphs.map((p,i)=><p className="aa-text" key={i}>{rich(p)}</p>)}
      <div className="aa-callout-box"><div className="aa-callout-head"><Leaf size={16}/> MORE FROM THE ARTICLE</div>{current.callouts.map((c,i)=><div key={i} className="aa-callout"><h3>{c.title}</h3><p>{rich(c.text)}</p></div>)}</div>
-     <div className="aa-reader-nav"><button onClick={()=>visit(page-1)} disabled={page===0||busy}><ChevronLeft size={16}/> Previous</button>{page<pages.length-1?<button className="aa-next" onClick={()=>visit(page+1)} disabled={busy}>Next page <ChevronRight size={16}/></button>:completed?<Link className="aa-next" href={"/day/"+day+"/vocabulary"}>Vocabulary <ArrowRight size={16}/></Link>:<button className="aa-next" disabled={busy||read<pages.length} onClick={complete}><CheckCircle2 size={16}/> Finish article</button>}</div>
+     <div className="aa-reader-nav"><button onClick={()=>visit(page-1)} disabled={page===0||busy}><ChevronLeft size={16}/> Previous</button>
+      {page<pages.length-1?<button className="aa-next" onClick={()=>visit(page+1)} disabled={busy}>Next page <ChevronRight size={16}/></button>:completed?<Link className="aa-next" href={"/day/"+day+"/vocabulary"}>Open Vocabulary <ArrowRight size={16}/></Link>:<button className="aa-next" disabled={busy||!readyToFinish} onClick={complete}><CheckCircle2 size={16}/>{busy?"Saving…":"Finish Article"}</button>}
+     </div>
+     {page===pages.length-1&&readyToFinish&&<p className="aa-finish-note">All {pages.length} pages have been visited. Select Finish Article to save your completion.</p>}
     </div>
     <aside className={"aa-vocab "+(tab==="vocab"?"aa-mobile-visible":"")}><div className="aa-vocab-head"><span className="aa-kicker">B2+ / C1 · IN CONTEXT</span><h2>Interactive glossary</h2><p>Tap underlined words in the article for Uzbek meanings and English explanations.</p></div>
-      <div className="aa-words">{words.map((w,i)=><button key={w.id} onClick={e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setPopup({word:w,x:Math.min(innerWidth-310,Math.max(12,r.left)),y:r.bottom+255>innerHeight?Math.max(61,r.top-251):r.bottom+9})}}><span className="aa-index">{String(i+1).padStart(2,"0")}</span><span><b>{w.display_word}</b><small>{w.meaning_uz}</small></span><em>{w.level}</em></button>)}</div>
-      <div className="aa-side-footer"><p>2 units · 20 words each · Pass at 18/20</p><Link href={"/day/"+day+"/vocabulary"}>Open Vocabulary <ArrowRight size={16}/></Link></div>
+      <div className="aa-words" aria-label="Article vocabulary">{words.map((w,i)=><button key={w.id} onClick={e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setPopup({word:w,x:Math.min(innerWidth-310,Math.max(12,r.left)),y:r.bottom+255>innerHeight?Math.max(61,r.top-251):r.bottom+9})}}><span className="aa-index">{String(i+1).padStart(2,"0")}</span><span><b>{w.display_word}</b><small>{w.meaning_uz}</small></span><em>{w.level}</em></button>)}</div>
+      <div className="aa-side-footer"><p>{Math.ceil(words.length/20)} units · 20 words each · Pass at 18/20</p><Link href={"/day/"+day+"/vocabulary"}>Open Vocabulary <ArrowRight size={16}/></Link></div>
     </aside>
    </div>
    {error&&<div className="aa-alert" role="alert"><AlertCircle size={17}/>{error}<button onClick={()=>setError("")} aria-label="Dismiss"><X size={17}/></button></div>}
