@@ -1,5 +1,5 @@
-import AnimatedBackButton from "../../components/animated-back-button";
 "use client";
+import AnimatedBackButton from "../../components/animated-back-button";
 import Link from "next/link";
 import {useParams} from "next/navigation";
 import {useEffect,useState} from "react";
