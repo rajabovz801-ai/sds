@@ -160,6 +160,38 @@ export default function ReadingAnalysis({passage,review,onBack,onNext,nextAvaila
    .ra-mobile-tabs{background:#f2f6f9}
    .ra-mobile-tabs button.active{color:#1d4668;background:#fff;border-color:#dfe7ee}
    @media(max-width:800px){.ra-summary-title h2{font-size:19px}.ra-review-heading h3{font-size:17px}}
+
+   /* Unified readability rules for every Reading analysis — same hierarchy as the exam. */
+   .ra-shell{background:#f5f4ef;color:#172b45}
+   .ra-summary{background:#fbfaf6;border-bottom:1px solid #dce3e9}
+   .ra-summary-title h2{color:#142740}
+   .ra-summary-title p{color:#4f667f}
+   .ra-grid{background:#f1f2ef}
+   .ra-left,.ra-right{background:#fffdf8;border-color:#ccd5df}
+   .ra-left p{color:#1c2c3f;font-size:16px;line-height:1.88}
+   .ra-left .ra-paragraph-active{background:#fff8d7;border-left-color:#d4a83f}
+   .ra-evidence-mark{background:#ffe58a;color:inherit;border-radius:2px;padding:0;font-weight:inherit}
+   .ra-review-heading h3{color:#142740}
+   .ra-question-text{font-size:16px;font-weight:650;line-height:1.72;color:#111f31;margin:14px 0 16px}
+   .ra-card-heading>span:first-child{color:#7c5a23;font-weight:900}
+   .ra-answer-pair>div{background:#fff;border-color:#dfe6ed}
+   .ra-answer-pair span{color:#677b93}
+   .ra-proof blockquote{background:#fff9dc;border-left-color:#d5ad45;color:#2f3d4f;font-size:14px;line-height:1.8}
+   .ra-evidence-meta{color:#7b5a24}
+   .ra-evidence-meta button{background:#fff6db;border-color:#ead39b;color:#6e4f1d}
+   .ra-table-wrap{border-color:#dfe6ed}
+   .ra-table-wrap th{background:#eef3f7;color:#314a66}
+   .ra-table-wrap td{border-top-color:#e4e9ee;color:#334a64}
+   .ra-table-wrap td:nth-child(2){background:#f7fbf8;color:#257553}
+   .ra-explanation{background:#eff8f2;border-color:#d7ebdf}
+   .ra-step-nav button{border-color:#dce4ec;color:#334e6d}
+   .ra-qnum.selected{outline-color:#d0a445}
+   .ra-mobile-tabs{background:#edf2f6}
+   .ra-mobile-tabs button.active{background:#fffdf8;color:#173b5d;border-color:#d8e1e9}
+   @media(max-width:800px){
+    .ra-question-text{font-size:15px;font-weight:650;line-height:1.7}
+    .ra-left p{font-size:16px;line-height:1.82}
+   }
 `}</style>
  </div>;
 }
