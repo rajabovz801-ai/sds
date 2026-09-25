@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import AnimatedBackButton from "../components/animated-back-button";
 import {useEffect,useMemo,useState} from "react";
 import {LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,Medal,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,LockKeyhole,Clock3,Flame,ChevronRight,Menu,X,Bell,Settings,LogOut,CalendarCheck,Target,CircleHelp,ArrowUpRight,CheckCircle2,FileText,ChevronLeft,Sun,Moon,Coins,ShieldCheck} from "lucide-react";
 
@@ -58,7 +59,7 @@ export default function Dashboard(){
    <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="side-overline" style={{marginTop:30}}>MY MODULES</div>
    <nav className="learning-nav small">{regular.map(({name,icon:Icon,tone})=><button key={name} onClick={()=>{setView("Dashboard");setSidebar(false);document.getElementById("day-detail")?.scrollIntoView({behavior:"smooth"})}}><span className={"mini-icon "+tone}><Icon size={14}/></span><span>{name}</span></button>)}</nav>
-   <div className="sidebar-bottom"><div className="side-promo"><Target size={18}/><b>One day at a time.</b><p>Stay consistent through your 60-day IELTS journey.</p></div><button className="back-login" onClick={exit}><LogOut size={15}/> {stats?"Log out":"Back to sign in"}</button><div className="user-tile"><span className="user-avatar">{initials}</span><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student preview"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Target band · Set at signup"}</small></div></div></div>
+   <div className="sidebar-bottom"><div className="side-promo"><Target size={18}/><b>One day at a time.</b><p>Stay consistent through your 60-day IELTS journey.</p></div>{stats?<button className="back-login" onClick={exit}><LogOut size={15}/> Log out</button>:<AnimatedBackButton onClick={exit} ariaLabel="Back to sign in"/>}<div className="user-tile"><span className="user-avatar">{initials}</span><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student preview"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Target band · Set at signup"}</small></div></div></div>
   </aside>
   {sidebar&&<button className="sidebar-overlay" aria-label="Close navigation" onClick={()=>setSidebar(false)}/>}
   <div className="learning-main">
@@ -77,7 +78,7 @@ export default function Dashboard(){
        <div className="day-detail-footer"><div><span>DAY STATUS</span><b>{live?"Materials pending upload":"Available on "+format(chosen.date,{day:"numeric",month:"short"})}</b></div><button disabled={!live} className="detail-btn" onClick={()=>{if(live)location.href="/day/"+chosen.n}}>{live?"View study day":"Future day locked"}<ChevronRight size={16}/></button></div></aside>
      </div>
      <section className="bottom-insights"><article><div className="insight-icon"><ShieldCheck size={20}/></div><div><b>Calendar-based access</b><p>Each day unlocks at 00:00 Uzbekistan time. Previous unfinished days stay available without late coins.</p></div></article><article><div className="insight-icon"><Clock3 size={20}/></div><div><b>Automatic study-time tracking</b><p>Article and every other module will log active platform time after account activation.</p></div></article></section>
-    </>:<section className="empty-view"><div className="empty-icon">{view==="Leaderboard"?<Trophy size={31}/>:view==="Progress"?<ChartNoAxesCombined size={31}/>:view==="Achievements"?<Medal size={31}/>:<Bell size={31}/>}</div><h1>{view}</h1><p>This section will display real course data once student accounts and backend tracking are activated. No demonstration scores are shown as real results.</p><button onClick={()=>setView("Dashboard")}>Back to your calendar <ChevronRight size={17}/></button></section>}
+    </>:<section className="empty-view"><div className="empty-icon">{view==="Leaderboard"?<Trophy size={31}/>:view==="Progress"?<ChartNoAxesCombined size={31}/>:view==="Achievements"?<Medal size={31}/>:<Bell size={31}/>}</div><h1>{view}</h1><p>This section will display real course data once student accounts and backend tracking are activated. No demonstration scores are shown as real results.</p><AnimatedBackButton onClick={()=>setView("Dashboard")} ariaLabel="Back to your calendar"/></section>}
    </main>
   </div>
  </div>;
