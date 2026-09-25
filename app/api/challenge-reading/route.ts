@@ -32,6 +32,21 @@ function normalize(s:unknown){return String(s??"").trim().normalize("NFKC").toLo
 async function catalogue(day:number){return await db("ark60_reading_passages","GET","select=id,day_number,ordinal,title,status&day_number=eq."+day+"&order=ordinal.asc");}
 async function completed(student:string,day:number){return await db("ark60_reading_attempts","GET","select=passage_id,ordinal,score,total,elapsed_seconds,submitted_at&student_id=eq."+student+"&day_number=eq."+day+"&order=ordinal.asc");}
 function safePassage(row:J){return {id:row.id,day_number:row.day_number,ordinal:row.ordinal,title:row.title,text:row.passage_text,question_source:row.question_source,questions:row.questions};}
+function reviewFor(passage:J,attempt:J){
+ const questions=Array.isArray(passage.questions)?passage.questions:[];
+ const keys=Array.isArray(passage.answer_key)?passage.answer_key:[];
+ const analysis=Array.isArray(passage.analysis)?passage.analysis:[];
+ const submitted=(attempt.answers&&typeof attempt.answers==="object"&&!Array.isArray(attempt.answers)?attempt.answers:{}) as J;
+ const items=questions.map((q:J,i:number)=>{
+  const correct=Array.isArray(keys[i])?keys[i]:[keys[i]];
+  const given=String(submitted[String(q.number)]??"");
+  const status=!normalize(given)?"empty":correct.some((v:unknown)=>normalize(v)===normalize(given))?"correct":"wrong";
+  const proof=analysis.find((a:J)=>Number(a.number)===Number(q.number));
+  return {number:q.number,question:q.text,type:q.type,submitted:given,correct,status,
+   evidence:proof?{paragraph:Number(proof.paragraph),quote:proof.quote||"",pairs:proof.pairs||[],explanation:proof.explanation||"",note:proof.note||""}:null};
+ });
+ return {score:attempt.score,total:attempt.total,elapsed_seconds:attempt.elapsed_seconds,submitted_at:attempt.submitted_at,items};
+}
 const LIMIT=1200;
 function timerState(row:J|null|undefined){
  const accumulated=Math.max(0,Number(row?.active_seconds||0));
@@ -60,10 +75,16 @@ export async function GET(req:NextRequest){
  const id=url.searchParams.get("id")||"";if(!idValid(id))return err("Invalid passage");
  const meta=rows.find((r:J)=>r.id===id&&r.status==="published");if(!meta)return err("Passage not published",404);
  if(meta.ordinal===2&&user.username!==previewName&&!attempts.some((a:J)=>a.ordinal===1))return err("Finish the first passage to unlock this one",403);
- const passage=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,title,passage_text,question_source,questions,status&id=eq."+id+"&status=eq.published&limit=1"))[0];
+ const passage=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,title,passage_text,question_source,questions,answer_key,analysis,status&id=eq."+id+"&status=eq.published&limit=1"))[0];
  if(!passage)return err("Passage unavailable",404);
  const prior=attempts.find((a:J)=>a.passage_id===id);
- if(prior)return NextResponse.json({passage:safePassage(passage),completed:prior});
+ if(prior){
+  // Completion is checked before returning the key and explanations; only the
+  // authenticated owner may retrieve their answers or review materials.
+  const attempt=(await db("ark60_reading_attempts","GET","select=answers,score,total,elapsed_seconds,submitted_at&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+  if(!attempt)return err("Unable to locate your saved answers",404);
+  return NextResponse.json({passage:safePassage(passage),completed:prior,review:reviewFor(passage,attempt)});
+ }
  const began=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
  return NextResponse.json({passage:safePassage(passage),timer:timerState(began)});
  }catch(e){console.error("reading GET",e);return err("Unable to load reading materials",503)}
@@ -74,11 +95,15 @@ export async function POST(req:NextRequest){
  const user=await viewer(req);if(!user)return err("Please sign in",401);
  const b=await req.json();const day=Number(b.day),id=String(b.passage_id||"");
  if(!allowed(day,user)||!idValid(id))return err("Invalid day or passage",403);
- const row=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,questions,answer_key,status&id=eq."+id+"&day_number=eq."+day+"&status=eq.published&limit=1"))[0];
+ const row=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,questions,answer_key,analysis,status&id=eq."+id+"&day_number=eq."+day+"&status=eq.published&limit=1"))[0];
  if(!row)return err("Passage unavailable",404);
  const prev=await completed(String(user.id),day);
  const existing=prev.find((a:J)=>a.passage_id===id);
- if(existing)return NextResponse.json({ok:true,already_completed:true,result:existing});
+ if(existing){
+  const passage=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,title,passage_text,question_source,questions,answer_key,analysis&id=eq."+id+"&limit=1"))[0];
+  const attempt=(await db("ark60_reading_attempts","GET","select=answers,score,total,elapsed_seconds,submitted_at&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+  return NextResponse.json({ok:true,already_completed:true,result:existing,review:reviewFor(passage,attempt)});
+ }
  if(row.ordinal===2&&user.username!==previewName&&!prev.some((a:J)=>a.ordinal===1))return err("Complete Passage 1 first",403);
  if(b.action==="start"||b.action==="resume"||b.action==="pause"){
   if(b.action!=="pause"){
@@ -132,6 +157,7 @@ export async function POST(req:NextRequest){
   }
  }catch(syncError){console.error("reading metric sync",syncError)}
 
- return NextResponse.json({ok:true,result:{id:saved[0]?.id,score,total:questions.length,elapsed_seconds:seconds,answers:key.map((k:unknown,i:number)=>({number:questions[i].number,correct:k}))}});
+ return NextResponse.json({ok:true,result:{id:saved[0]?.id,score,total:questions.length,elapsed_seconds:seconds},
+  review:reviewFor(row,{answers,score,total:questions.length,elapsed_seconds:seconds,submitted_at:saved[0]?.submitted_at||new Date().toISOString()})});
  }catch(e){console.error("reading POST",e);return err("Unable to record reading result",503)}
 }
