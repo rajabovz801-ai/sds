@@ -3,6 +3,7 @@ import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {useParams} from "next/navigation";
 import AnimatedBackButton from "../../../components/animated-back-button";
+import ChallengeSidebar from "../../../components/challenge-sidebar";
 import {ArrowRight,BookOpen,Bookmark,Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Layers3,LockKeyhole,RefreshCw,RotateCcw,Sparkles,Target,Trophy,X,AlertCircle} from "lucide-react";
 import "./vocabulary.css";
 
@@ -105,7 +106,9 @@ export default function VocabularyPage(){
    {error&&<div className="vv-error" role="alert">{error}<button onClick={()=>setError("")}><X size={16}/></button></div>}
   </main>;
  }
- return <main className="vv-shell">
+ return <main className="vv-shell ch-layout vv-layout">
+  <ChallengeSidebar day={day} active="Vocabulary"/>
+  <div className="ch-page vv-page">
   <header className="vv-top"><AnimatedBackButton href={"/day/"+day}/><div className="vv-brand">ARK <b>EDUCATION</b><span> · VOCABULARY</span></div><span className="vv-top-tag">DAY {String(day).padStart(2,"0")}</span></header>
   <div className="vv-inner vv-overview">
    <div className="vv-intro"><div><span className="vv-eyebrow">60 DAY CHALLENGE · DAILY VOCABULARY</span><h1>Vocabulary Practice</h1><p>Every word is unique across the 60-day course. Study and master each 20-word unit at 18/20 or above.</p><div className="vv-intro-chips"><span><Bookmark size={15}/> 40 new words per source</span><span><Layers3 size={15}/> 20 per unit</span><span><Target size={15}/> 90% to complete</span></div></div><div className="vv-intro-stat"><span>YOUR PROGRESS</span><b>{units.filter(u=>u.completed).length}<small> / {units.length}</small></b><div><i style={{width:(units.length?units.filter(u=>u.completed).length/units.length*100:0)+"%"}}/></div><small>Units completed</small></div></div>
@@ -117,6 +120,7 @@ export default function VocabularyPage(){
      </article>)}</div>
     </section>)}
    {error&&<div className="vv-error" role="alert">{error}<button onClick={()=>setError("")}><X size={16}/></button></div>}
+  </div>
   </div>
  </main>;
 }
