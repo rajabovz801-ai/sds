@@ -54,7 +54,9 @@ export default function ArticlePage(){
  });}
  async function visit(n:number){
   if(!data||busy||n<0||n>=data.article.sections.length)return;
-  setPage(n);setTab("article");setPopup(null);reader.current?.scrollTo({top:0});
+  setPage(n);setTab("article");setPopup(null);setMenu(null);
+  // The article follows the normal browser scroll, so return to its first line when changing pages.
+  window.requestAnimationFrame(()=>reader.current?.scrollIntoView({behavior:"smooth",block:"start"}));
   if(data.progress.visited_pages.includes(n+1))return;
   setBusy(true);try{
    const r=await fetch("/api/challenge-article",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"page",day,page:n+1})});const x=await r.json();
@@ -63,6 +65,10 @@ export default function ArticlePage(){
  }
  useEffect(()=>{if(data&&!data.progress.visited_pages.includes(page+1)&&!busy)void visit(page)},[data?.article.title]);
  async function complete(){if(!data||busy)return;setBusy(true);try{const r=await fetch("/api/challenge-article",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"finish",day})});const x=await r.json();if(!r.ok)throw Error(x.error||"Read all pages");setData(o=>o?{...o,progress:x.progress}:o);}catch(e){setError(String(e))}finally{setBusy(false)}}
+ function switchTab(next:"article"|"vocab"){
+  setTab(next);setPopup(null);setMenu(null);
+  window.requestAnimationFrame(()=>document.getElementById("aa-reading-workspace")?.scrollIntoView({behavior:"smooth",block:"start"}));
+ }
  function selectedText(){const s=getSelection();if(!s||s.isCollapsed||!s.rangeCount)return;const r=s.getRangeAt(0);if(!reader.current?.contains(r.commonAncestorContainer))return;const rect=r.getBoundingClientRect();chosen.current=r.cloneRange();setMenu({x:Math.max(100,Math.min(innerWidth-100,rect.left+rect.width/2)),y:Math.max(60,rect.top-52)});}
  function highlight(color:"yellow"|"green"|"erase"){
   const range=chosen.current,h=window.CSS?.highlights;if(!range||!h)return;
@@ -87,8 +93,8 @@ export default function ArticlePage(){
     </div>
    </div>
    <div className="aa-progress-rail"><i style={{width:(read/pages.length*100)+"%"}}/></div>
-   <div className="aa-mobile-tabs"><button className={tab==="article"?"active":""} onClick={()=>setTab("article")}><BookOpen size={15}/> Article</button><button className={tab==="vocab"?"active":""} onClick={()=>setTab("vocab")}><Bookmark size={15}/> Vocabulary</button></div>
-   <div className="aa-grid">
+   <div className="aa-mobile-tabs"><button className={tab==="article"?"active":""} onClick={()=>switchTab("article")}><BookOpen size={15}/> Article</button><button className={tab==="vocab"?"active":""} onClick={()=>switchTab("vocab")}><Bookmark size={15}/> Vocabulary</button></div>
+   <div id="aa-reading-workspace" className="aa-grid">
     <div ref={reader} className={"aa-reader "+(tab==="article"?"aa-mobile-visible":"")} onMouseUp={selectedText} onTouchEnd={()=>setTimeout(selectedText,100)}>
      <div className="aa-reader-toolbar">
       <div className="aa-reader-navigation"><span className="aa-reader-page-title"><BookOpen size={15}/> PAGES</span>
