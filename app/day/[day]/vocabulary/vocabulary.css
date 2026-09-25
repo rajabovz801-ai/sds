@@ -95,3 +95,97 @@
  .vv-result{padding-top:45px}.vv-result h1{font-size:29px}.vv-result-scores strong{font-size:25px}.vv-result-scores span{font-size:8px}
 }
 @media(prefers-reduced-motion:reduce){.vv-quiz-progress i,.vv-unit{transition:none}}
+
+
+/* Dashboard brand across Vocabulary overview, study cards, quizzes and results. */
+.vv-shell{background:linear-gradient(180deg,#fff 0%,#fffdf9 36%,#fbfaf7 100%);color:#142338}
+.vv-layout{background:#fdfcf9}
+.vv-layout .vv-page{min-width:0}
+.vv-top{height:67px;background:#fff;border-bottom:1px solid #e4e9ef;gap:10px;padding:0 29px}
+.vv-brand{color:#142740}.vv-brand b{color:#142740}.vv-brand span{color:#967239}
+.vv-top-tag{background:#fffaf1;border:1px solid #f0e3cd;color:#815c28}
+.vv-inner{max-width:1320px;padding:28px clamp(13px,2.3vw,30px) 65px}
+.vv-eyebrow{color:#956d2c}
+.vv-intro{position:relative;isolation:isolate;min-height:136px;gap:23px;overflow:hidden;grid-template-columns:minmax(0,1fr) 184px;margin-bottom:23px}
+.vv-intro:before{content:"";position:absolute;z-index:-1;pointer-events:none;right:135px;top:-15px;width:min(60%,670px);height:160px;background:url("/ark-hero-landscape.svg") right top/contain no-repeat;opacity:.65}
+.vv-intro h1{font:700 clamp(34px,3.4vw,48px)/1.13 Georgia,"Times New Roman",serif;letter-spacing:-.055em;color:#142338;margin:10px 0 9px}
+.vv-intro p{color:#586d84;font-size:12px;line-height:1.7}
+.vv-intro-chips{gap:8px;margin-top:16px}
+.vv-intro-chips span{background:#fff;border:1px solid #e2e8ef;color:#50647e;padding:8px 10px}
+.vv-intro-chips svg{color:#a67b31}
+.vv-intro-stat{background:linear-gradient(130deg,#fff,#fff9ef);border-color:#eee3d3;box-shadow:0 4px 18px #2a304007}
+.vv-intro-stat>span{color:#846730}
+.vv-intro-stat>b{font:700 38px Georgia,"Times New Roman",serif;color:#142740}
+.vv-intro-stat>b small{font-family:Manrope,system-ui,sans-serif;color:#71829a}
+.vv-intro-stat>div{background:#f0ebdf}.vv-intro-stat i{background:linear-gradient(90deg,#142740,#bd9352)}
+.vv-intro-stat>small{color:#677890}
+.vv-group{margin:23px 0 28px}
+.vv-group-heading h2{font:700 24px Georgia,"Times New Roman",serif;color:#142740;letter-spacing:-.035em}
+.vv-group-heading p{color:#647892}
+.vv-group-status{background:#fffaf0;border-color:#eee1c8;color:#86652f}
+.vv-unit{border:1px solid #e3e8ef;background:#fff;box-shadow:0 4px 16px #1d314707;border-radius:11px;padding:20px}
+.vv-unit:hover{border-color:#bbcad9;box-shadow:0 7px 18px #15365313}
+.vv-unit-top>span:first-child{background:#eaf2ff;color:#30537d}
+.vv-unit.reading2 .vv-unit-top>span:first-child{background:#eff5fb;color:#477195}
+.vv-unit.article .vv-unit-top>span:first-child{background:#fff2df;color:#99702d}
+.vv-unit-badge{color:#60738b;background:#f4f6f9}
+.vv-unit-badge.done{color:#278055;background:#eaf8ef}
+.vv-unit-badge.doing{color:#9a6d20;background:#fff3df}
+.vv-unit h3{color:#142338;font:700 22px Georgia,"Times New Roman",serif}
+.vv-unit-sub{color:#61758e}
+.vv-unit-score{color:#65758d;border-top-color:#e8edf2}
+.vv-unit-actions button{color:#36516e;border-color:#e0e7ee}
+.vv-unit-actions button:hover:not(:disabled){background:#f6f9fc}
+.vv-unit-actions .vv-start{background:#142740;border-color:#142740;color:#fff}
+.vv-unit-actions .vv-start:hover:not(:disabled){background:#29496b;border-color:#29496b}
+.vv-unit-actions .vv-done{background:#eef8f1;color:#277750;border-color:#d2e7db}
+.vv-study>h1{font:700 clamp(31px,3vw,42px) Georgia,"Times New Roman",serif;color:#142338;letter-spacing:-.055em}
+.vv-study h1 span{font-family:Manrope,system-ui,sans-serif;background:#fff8e9;color:#956e2d;border-color:#f2e1c0;font-weight:850}
+.vv-study>p{color:#5d728d}
+.vv-study-grid article{border-color:#e2e8ee;box-shadow:0 4px 16px #132b4406}
+.vv-study-grid b{color:#142740}
+.vv-study-grid em{color:#906b2b;background:#fff2df}
+.vv-study-grid h3{color:#257a55}.vv-study-grid p{color:#62758d}
+.vv-study-grid small{color:#4d5f73;background:#f7f9fb;max-height:none}
+.vv-study-actions button,.vv-result-actions button{border-color:#e2e8ee;color:#36516d}
+.vv-study-actions .vv-purple,.vv-result-actions .vv-purple{background:#142740;border-color:#142740;color:#fff}
+.vv-study-actions .vv-purple:hover:not(:disabled),.vv-result-actions .vv-purple:hover:not(:disabled){background:#29496b}
+.vv-quiz-top .vv-eyebrow{color:#88642b}
+.vv-quiz-count{color:#576e89}
+.vv-quiz-progress{background:#e6edf3}
+.vv-quiz-progress i{background:linear-gradient(90deg,#142740,#bb8f47)}
+.vv-quiz-card{border:1px solid #e2e8ef;background:#fff;box-shadow:0 10px 36px #192e430a}
+.vv-quiz-badges>span{color:#5b708b}
+.vv-quiz-badges>b{color:#875f23;background:#fff2da}
+.vv-word-prompt>span{color:#9b773e}
+.vv-word-prompt h1{color:#142740;font:700 clamp(33px,4vw,48px) Georgia,"Times New Roman",serif;letter-spacing:-.04em}
+.vv-option{border:1px solid #e0e6ef;color:#273d57;background:#fff}
+.vv-option:hover:not(:disabled){border-color:#9aafc7;background:#f7faff}
+.vv-opt-letter{background:#edf3f9;color:#3a5876}
+.vv-option.right{border-color:#71c996;background:#e6f8ed;color:#186941}
+.vv-option.right .vv-opt-letter{background:#37ae6d;color:#fff}
+.vv-option.wrong{border-color:#ea9d9d;background:#fff0f0;color:#9d3a43}
+.vv-option.wrong .vv-opt-letter{background:#e25761;color:#fff}
+.vv-quiz-bottom{color:#647993}
+.vv-result h1{font:700 39px Georgia,"Times New Roman",serif;color:#142740;letter-spacing:-.045em}
+.vv-result p{color:#596f89}
+.vv-result-scores>div{border-color:#e2e8ef}
+.vv-result-scores span{color:#516b89}
+.vv-result-scores strong{color:#142740;font-family:Georgia,"Times New Roman",serif}
+.vv-empty{border-color:#d9e2eb;color:#62758d}
+.vv-empty svg{color:#a07933}.vv-empty h2{color:#142740}
+.vv-unit-actions button:focus-visible,.vv-study-actions button:focus-visible,.vv-result-actions button:focus-visible,.vv-option:focus-visible{outline:3px solid #d8b777;outline-offset:2px}
+@media(max-width:1150px){.vv-layout{grid-template-columns:210px minmax(0,1fr)}}
+@media(max-width:850px){
+ .vv-layout{display:block}
+ .vv-top{height:56px;padding:0 10px;grid-template-columns:110px minmax(0,1fr) auto}
+ .vv-inner{padding:22px 12px 45px}
+ .vv-intro{min-height:0;grid-template-columns:1fr;gap:12px;margin-bottom:23px}
+ .vv-intro:before{right:-60px;width:90%;opacity:.3}
+ .vv-intro h1{font-size:34px}
+ .vv-intro-stat{display:none}
+ .vv-unit{padding:15px}
+ .vv-group-heading h2{font-size:20px}
+ .vv-study h1{font-size:29px}
+ .vv-word-prompt h1{font-size:36px}
+}
