@@ -328,3 +328,64 @@
   .aa-hero{height:auto}
   .aa-text{font-size:16px;line-height:1.85}
 }
+
+
+/* Shared ARK dashboard visual language, retaining the uncluttered CDI reading workflow. */
+.aa-shell{background:linear-gradient(180deg,#fff 0%,#fdfcf9 28%,#fbfaf7 100%);color:#142338;font-family:Manrope,ui-sans-serif,system-ui,sans-serif}
+.aa-header{background:#fff;border-bottom:1px solid #e4e9ef;box-shadow:0 2px 13px #15284307}
+.aa-brand{color:#142740}.aa-brand b{color:#142740}.aa-brand em{color:#99743e}
+.aa-day{background:#fffaf1;border:1px solid #f0e3cf;color:#775a2a}
+.aa-hero{background:linear-gradient(112deg,#fffdf9 9%,#fff7eb 70%,#fff1dd);border:1px solid #f0e1c9;box-shadow:0 6px 24px #352c1806}
+.aa-hero::after{background:#fff1d4b0}
+.aa-kicker{color:#986e2c}
+.aa-hero h1{color:#142338}
+.aa-hero p{color:#566578}
+.aa-hero-meta{color:#80664e}.aa-hero-meta span{border-left:1px solid #e3d3b8}
+.aa-work-title h2{color:#142338;font-family:Georgia,"Times New Roman",serif;font-size:20px;letter-spacing:-.025em}
+.aa-progress-label{color:#536b83}
+.aa-progress-rail{background:#e8eef4}.aa-progress-rail i{background:linear-gradient(90deg,#15324e 0%,#b58b44 64%,#51a37c 100%)}
+.aa-reader,.aa-vocab{border:1px solid #e2e8ee;border-radius:12px;box-shadow:0 5px 20px #1c2e4606;background:#fff}
+.aa-reader-toolbar{border-bottom:1px solid #e8edf2;box-shadow:0 4px 13px #25375008}
+.aa-reader-page-title{color:#304c70}
+.aa-highlight-hint{color:#687e98}
+.aa-pages button{border:1px solid #e1e7ee;color:#536880;background:#fff}
+.aa-pages button.active{background:#142740;color:#fff;border-color:#142740}
+.aa-pages button.visited:not(.active){background:#edf7f1;border-color:#cfebdc;color:#248056}
+.aa-reader h2{color:#142338}
+.aa-original{color:#9d834e}
+.aa-text{color:#253346}
+.aa-word{color:#7b5620;text-decoration-color:#d1aa60;text-decoration-style:dotted;text-decoration-thickness:2px;text-underline-offset:4px}
+.aa-word:hover,.aa-word:focus-visible{background:#fff2d8;color:#62451f;outline:2px solid transparent;border-radius:3px}
+.aa-vocab-head{background:linear-gradient(118deg,#fff,#fffaf3);border-bottom:1px solid #eee8dc}
+.aa-vocab-head h2{font-family:Georgia,"Times New Roman",serif;color:#152a44;font-weight:700;letter-spacing:-.035em}
+.aa-vocab-head p{color:#556a82}
+.aa-words button{border-bottom-color:#e8edf2}
+.aa-words button:hover,.aa-words button:focus-visible{background:#fffcf4}
+.aa-words b{color:#172c47}
+.aa-words small{color:#516780}
+.aa-words em{color:#946c2a;background:#fff2db}
+.aa-side-footer{background:#fffdfa;border-top:1px solid #e9edf2}
+.aa-side-footer p{color:#60748c}
+.aa-side-footer a,.aa-finish-cta{background:#142740;border-color:#142740;color:#fff}
+.aa-side-footer a:hover,.aa-finish-cta:hover:not(:disabled){background:#284969;border-color:#284969}
+.aa-work-vocab{color:#246744;background:#eaf7f0;border-color:#cde6d7}
+.aa-section-art{box-shadow:0 3px 15px #1d304710}
+.aa-callout-box{background:#fffdf9;border-color:#f0e7d7}
+.aa-callout-head{background:#fff6e6;color:#916a29}
+.aa-callout{border-color:#f1e7d7}
+.aa-callout h3{color:#865f27}.aa-callout p{color:#5e574f}
+.aa-reader-nav button,.aa-reader-nav a{border-color:#e0e7ee;color:#344b68}
+.aa-reader-nav .aa-next{background:#142740;border-color:#142740;color:#fff}
+.aa-reader-nav .aa-next:hover:not(:disabled){background:#27476b}
+.aa-definition{border-color:#e3e8ee;box-shadow:0 14px 38px #14253b30}
+.aa-definition>div strong{color:#142740}
+.aa-definition em{background:#fff3dd;color:#99712e}
+.aa-definition>small{background:#f8fafc;color:#536a84}
+.aa-mark-menu{border-color:#e2e7ee}
+.aa-finish-cta:focus-visible,.aa-side-footer a:focus-visible,.aa-reader-nav a:focus-visible{outline:3px solid #d7b276;outline-offset:3px}
+@media(max-width:850px){
+ .aa-mobile-tabs{background:#fdfcf9}
+ .aa-mobile-tabs button{border-color:#e1e7ee;color:#59718e}
+ .aa-mobile-tabs button.active{background:#fff8e9;color:#845e24;border-color:#e7d3af}
+ .aa-vocab-head{background:#fffcf6}
+}
