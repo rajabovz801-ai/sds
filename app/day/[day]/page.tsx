@@ -17,7 +17,7 @@ export default function DayPage(){
  const date=new Date(Date.UTC(2026,9,day)),sunday=date.getUTCDay()===0;
  const scheduledReading=[1,5,8,12,15].includes(day),iso=date.toISOString().slice(0,10);
  const [today,setToday]=useState("2026-09-25"),[teacher,setTeacher]=useState(false);
- useEffect(()=>{setToday(uzToday());let mounted=true;fetch("/api/ark60?action=me",{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted)setTeacher(r?.student?.username==="rustam7")}).catch(()=>{});return()=>{mounted=false}},[]);
+ useEffect(()=>{setToday(uzToday());let mounted=true;fetch("/api/challenge-reading?action=list&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted)setTeacher(r?.preview===true)}).catch(()=>{});return()=>{mounted=false}},[]);
  const available=teacher||iso<=today;
  const modules=sunday?[regular[1],regular[0],regular[4],regular[5]]:regular;
  const dateText=date.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
