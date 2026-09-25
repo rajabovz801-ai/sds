@@ -61,11 +61,16 @@ export async function GET(req:NextRequest){
  if(action==="admin"){
   const admin=await viewer(req,true);if(!admin)return err("Administrator login required",401);
   const day=Number(url.searchParams.get("day")||"1");if(day<1||day>60)return err("Invalid day");
-  const rows=await db("ark60_reading_attempts","GET","select=student_id,day_number,ordinal,score,total,elapsed_seconds,submitted_at,passage_id&day_number=eq."+day+"&order=submitted_at.desc");
+  const rows=await db("ark60_reading_attempts","GET","select=student_id,day_number,ordinal,score,total,elapsed_seconds,submitted_at,passage_id,answers&day_number=eq."+day+"&order=submitted_at.desc");
   const students=await db("ark60_students","GET","select=id,first_name,last_name,username&status=eq.active&limit=2000");
   const passages=await catalogue(day);
+  const details=await db("ark60_reading_passages","GET","select=id,questions,answer_key,analysis&day_number=eq."+day);
   const users=new Map(students.map((s:J)=>[s.id,s]));
-  return NextResponse.json({day,passages,attempts:rows.map((a:J)=>({...a,student:users.get(a.student_id)||null}))});
+  const source=new Map(details.map((p:J)=>[p.id,p]));
+  return NextResponse.json({day,passages,attempts:rows.map((a:J)=>({...a,student:users.get(a.student_id)||null,
+    review:source.get(a.passage_id)?reviewFor(source.get(a.passage_id) as J,a):null,
+    answers:undefined
+  }))});
  }
  const user=await viewer(req);if(!user)return err("Please sign in",401);
  const day=Number(url.searchParams.get("day"));if(!allowed(day,user))return err("This study day is locked",403);
