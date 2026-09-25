@@ -1,8 +1,8 @@
 "use client";
-import Link from "next/link";
+import AnimatedBackButton from "../../../components/animated-back-button";
 import {useParams} from "next/navigation";
 import {useEffect,useRef,useState} from "react";
-import {BookOpen,CheckCircle2,LockKeyhole,ChevronRight,ArrowLeft,Clock3,Highlighter,Send,Play,Pause,Maximize2,Minimize2,Eraser} from "lucide-react";
+import {BookOpen,CheckCircle2,LockKeyhole,ChevronRight,Clock3,Highlighter,Send,Play,Pause,Maximize2,Minimize2,Eraser} from "lucide-react";
 import ReadingAnalysis, {type ReadingReview} from "./ReadingAnalysis";
 
 type Q={number:number,type:"tfng"|"gap"|"mcq",text:string,options?:string[],instruction?:string};
@@ -83,7 +83,7 @@ export default function ChallengeReading(){
  async function continueAfterReview(){const next=items.find(p=>p.ordinal===2);if(passage?.ordinal===1&&next&&!next.locked){await openPassage(next)}else await goBack()}
  return <main className="cr-shell">
   <header className="cr-header">
-   <div className="cr-head-start">{passage?<button className="cr-back" onClick={goBack}><ArrowLeft size={17}/> Passages</button>:<Link href={"/day/"+day} className="cr-back"><ArrowLeft size={17}/> Study day</Link>}</div>
+   <div className="cr-head-start">{passage?<AnimatedBackButton onClick={goBack} ariaLabel="Back to passages"/>:<AnimatedBackButton href={"/day/"+day} ariaLabel="Back to study day"/>}</div>
    <div className="cr-head-center">{passage&&!result?<div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{elapsed(left)}</span><button className={timer.is_running?"cr-pause":"cr-play"} disabled={busy||left===0} onClick={()=>setRunning(timer.is_running?"pause":"start")}>{timer.is_running?<Pause size={14}/>:<Play size={14}/>} {timer.is_running?"Pause":timer.started_at?"Resume":"Start"}</button></div>:<strong>ARK EDUCATION <span>· READING CDI</span></strong>}</div>
    <div className="cr-head-end"><span>ARK <b>EDUCATION</b></span>{passage&&<button className="cr-fullscreen" aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFullscreen}>{fullScreen?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button>}</div>
   </header>
@@ -94,7 +94,7 @@ export default function ChallengeReading(){
    {items.map(p=><article key={p.id} className={"cr-tile "+(p.locked?"cr-locked":"")}><span className="cr-tile-icon">{p.completed?<CheckCircle2 size={27}/>:p.locked?<LockKeyhole size={27}/>:<BookOpen size={27}/>}</span><div><small>PRACTICE {String(p.ordinal).padStart(2,"0")} · {p.completed?"COMPLETED":p.locked?"LOCKED":"20 MINUTES"}</small><h2>{p.title}</h2>{p.completed&&<p>Score: {p.completed.score}/{p.completed.total} · Time: {elapsed(p.completed.elapsed_seconds)}</p>}</div><button disabled={p.locked||busy} onClick={()=>openPassage(p)}>{p.completed?"View Analysis":p.locked?"Locked":"Start"} <ChevronRight size={17}/></button></article>)}
    {!items.length&&!error&&<div className="cr-empty">No published reading materials for this day yet.</div>}
    {draftCount>0&&<p className="cr-draft">{draftCount} passage(s) pending answer-key verification.</p>}
-  </section>:result&&review?<ReadingAnalysis passage={passage} review={review} onBack={goBack} onNext={continueAfterReview} nextAvailable={passage.ordinal===1&&!!items.find(p=>p.ordinal===2&&!p.locked)} nextTitle={items.find(p=>p.ordinal===2)?.title}/>:result?<section className="cr-review-loading"><h2>Loading your saved analysis…</h2><p>Your result is recorded. Reopen this practice to load the full explanation.</p><button onClick={goBack}>Back to practices</button></section>:<>
+  </section>:result&&review?<ReadingAnalysis passage={passage} review={review} onBack={goBack} onNext={continueAfterReview} nextAvailable={passage.ordinal===1&&!!items.find(p=>p.ordinal===2&&!p.locked)} nextTitle={items.find(p=>p.ordinal===2)?.title}/>:result?<section className="cr-review-loading"><h2>Loading your saved analysis…</h2><p>Your result is recorded. Reopen this practice to load the full explanation.</p><AnimatedBackButton onClick={goBack} ariaLabel="Back to practices"/></section>:<>
    <div className="cr-instructions"><div><small>PRACTICE {String(passage.ordinal).padStart(2,"0")} · DAY {day}</small><h1>{passage.title}</h1><p>{total} questions · 20 minutes · Select text to highlight</p></div><div className="cr-tools"><span className="cr-highlight-guide"><Highlighter size={15}/> Select text for highlight</span></div></div>
    <div className="cr-mobile-tabs"><button className={tab==="passage"?"active":""} onClick={()=>setTab("passage")}>Passage</button><button className={tab==="questions"?"active":""} onClick={()=>setTab("questions")}>Questions</button></div>
    <div className="cr-split"><section style={{display:tab==="questions"?"var(--cr-hide-passage)":"block"}} className="cr-pane cr-passage" ref={passageRef} onMouseUp={showHighlightMenu} onTouchEnd={()=>setTimeout(showHighlightMenu,100)}><h2>{passage.title}</h2>{rows.map((para,i)=><p key={i}>{para}</p>)}</section>
@@ -103,7 +103,7 @@ export default function ChallengeReading(){
      {group.map(q=><div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div>
       {q.type==="tfng"?<div className="cr-options">{["TRUE","FALSE","NOT GIVEN"].map(opt=><label key={opt}><input type="radio" disabled={!!result} checked={answers[q.number]===opt} onChange={()=>setAnswers(a=>({...a,[q.number]:opt}))}/><span className="cr-radio"/>{opt}</label>)}</div>:q.type==="mcq"?<div className="cr-options">{(q.options||[]).map(opt=><label key={opt}><input type="radio" disabled={!!result} checked={answers[q.number]===opt[0]} onChange={()=>setAnswers(a=>({...a,[q.number]:opt[0]}))}/><span className="cr-radio"/>{opt}</label>)}</div>:<input className="cr-gap" type="text" placeholder="Your answer" autoComplete="off" spellCheck={false} disabled={!!result} value={answers[q.number]||""} onChange={e=>setAnswers(a=>({...a,[q.number]:e.target.value}))}/>}
      </div>)}</section>)}</section></div>
-   <footer className="cr-footer"><button className="cr-back-btn" onClick={goBack}>← Passages</button><div className="cr-number-strip" aria-label="Question navigation">{passage.questions.map(q=><button key={q.number} className={answers[q.number]?"answered":""} onClick={()=>{setTab("questions");setTimeout(()=>document.getElementById("question-"+q.number)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}>{q.number}</button>)}</div><span className="cr-answer-count">{answered+" / "+total}</span><button className="cr-submit" disabled={busy||!timer.started_at} onClick={()=>submit(false)}><Send size={15}/> {busy?"Submitting…":"Submit"}</button></footer>
+   <footer className="cr-footer"><AnimatedBackButton onClick={goBack} ariaLabel="Back to passages"/><div className="cr-number-strip" aria-label="Question navigation">{passage.questions.map(q=><button key={q.number} className={answers[q.number]?"answered":""} onClick={()=>{setTab("questions");setTimeout(()=>document.getElementById("question-"+q.number)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}>{q.number}</button>)}</div><span className="cr-answer-count">{answered+" / "+total}</span><button className="cr-submit" disabled={busy||!timer.started_at} onClick={()=>submit(false)}><Send size={15}/> {busy?"Submitting…":"Submit"}</button></footer>
   </>}
   {selectionMenu&&passage&&!result&&<div className="cr-highlight-menu" style={{left:selectionMenu.x,top:selectionMenu.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button aria-label="Yellow highlight" title="Yellow highlight" onClick={()=>applyHighlight("yellow")}><i className="swatch yellow"/></button><button aria-label="Mint highlight" title="Mint highlight" onClick={()=>applyHighlight("green")}><i className="swatch green"/></button><span className="cr-menu-sep"/><button aria-label="Remove highlight" title="Remove highlight" onClick={()=>applyHighlight("erase")}><Eraser size={17}/></button></div>}
   {error&&<div className="cr-error" role="alert">{error}<button onClick={()=>setError("")}>×</button></div>}
@@ -124,7 +124,7 @@ export default function ChallengeReading(){
   .cr-head-start{justify-self:start}.cr-head-center{justify-self:center}.cr-head-end{justify-self:end;display:flex;align-items:center;gap:14px;font-size:11px;letter-spacing:.11em;color:#73708d}.cr-head-end b{color:#302d4f}
   .cr-head-center strong{font-size:11px;letter-spacing:.14em;color:#3b3654}
   .cr-head-center strong span{color:#9691b0}
-  .cr-back{background:transparent;border:0;font:700 12px Manrope,sans-serif;cursor:pointer}
+  .cr-head-start{min-width:0}
   .cr-timer-controls{display:flex;align-items:center;justify-content:center;gap:15px}
   .cr-time{display:flex;gap:9px;align-items:center;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;color:#292641;letter-spacing:-.04em}
   .cr-play,.cr-pause{border:1px solid #e7e4f7;border-radius:8px;padding:9px 13px;display:flex;gap:7px;align-items:center;font-size:12px;font-weight:800;cursor:pointer}.cr-play{background:#6654d9;color:#fff}.cr-pause{background:#fff9e7;color:#795b16;border-color:#f3dfa9}.cr-play:disabled,.cr-pause:disabled{opacity:.55}
@@ -139,7 +139,7 @@ export default function ChallengeReading(){
   .cr-instructions{background:#fff;border-bottom-color:#ebe9f2}
   .cr-instructions h1{font-weight:850;letter-spacing:-.035em;color:#26233f}
   .cr-highlight-guide{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:#77718f;background:#f7f5ff;border:1px solid #ebe7ff;border-radius:9px;padding:8px 12px}
-  .cr-split{height:calc(100dvh - 72px - 77px - 66px);padding:13px 16px;gap:13px;background:#fafbff}
+  .cr-split{height:calc(100dvh - 72px - 77px - 74px);padding:13px 16px;gap:13px;background:#fafbff}
   .cr-pane{border-color:#e7e6f1;background:#fff;border-radius:10px;padding:26px 30px}
   .cr-passage{font:16px/1.8 "Palatino Linotype",Palatino,Georgia,serif;letter-spacing:.005em}
   .cr-passage h2{font:800 22px/1.35 Manrope,system-ui,sans-serif;letter-spacing:-.03em}
@@ -149,7 +149,7 @@ export default function ChallengeReading(){
   .cr-options label{font-size:13px;line-height:1.55}
   .cr-options input:focus-visible+.cr-radio{outline:3px solid #cfc5ff;outline-offset:2px}
   .cr-gap:focus{outline:3px solid #ded6ff;border-color:#8d7bdc}
-  .cr-footer{background:#fff;min-height:66px;border-top-color:#e9e7f3}
+  .cr-footer{background:#fff;min-height:74px;border-top-color:#e9e7f3}
   .cr-number-strip button.answered{background:#f1edff;border-color:#aa9eea;color:#5545b5}
   .cr-highlight-menu{position:fixed;z-index:100;transform:translateX(-50%);background:#fff;border:1px solid #dcd9ea;box-shadow:0 12px 35px #29204428;border-radius:12px;display:flex;align-items:center;gap:3px;padding:5px}
   .cr-highlight-menu button{width:37px;height:34px;background:#fff;border:0;border-radius:8px;display:grid;place-items:center;cursor:pointer;color:#55506f}
@@ -157,7 +157,7 @@ export default function ChallengeReading(){
   .cr-highlight-menu .swatch{width:23px;height:17px;border-radius:3px;display:block;border:1px solid #0000000e}
   .cr-highlight-menu .yellow{background:#ffe785}.cr-highlight-menu .green{background:#b5f0cd}
   .cr-menu-sep{height:24px;width:1px;background:#e9e7f2;margin:0 3px}
-  @media(max-width:780px){.cr-header{height:62px;padding:0 12px;grid-template-columns:auto 1fr auto;gap:6px}.cr-head-end>span{display:none}.cr-time{font-size:18px}.cr-timer-controls{gap:7px}.cr-play,.cr-pause{padding:8px 9px;font-size:11px}.cr-highlight-guide{font-size:10px;padding:5px 7px}.cr-split{height:calc(100dvh - 62px - 108px - 46px - 64px)}.cr-pane{padding:19px 14px}.cr-passage{font-size:16px}.cr-picker{margin:24px auto}.cr-picker h1{font-size:27px}.cr-tile{gap:11px}.cr-tile h2{font-size:15px}.cr-head-center strong{font-size:10px}.cr-fullscreen{padding:6px}}
+  @media(max-width:780px){.cr-header{height:62px;padding:0 10px;grid-template-columns:108px minmax(0,1fr) 30px;gap:5px}.cr-head-start .ark-back-control{width:108px;height:44px;font-size:12px}.cr-head-start .ark-back-icon{width:34px;height:36px}.cr-head-start .ark-back-label{transform:translateX(10px)}.cr-head-end>span{display:none}.cr-time{font-size:18px}.cr-timer-controls{gap:7px}.cr-play,.cr-pause{padding:8px 9px;font-size:11px}.cr-highlight-guide{font-size:10px;padding:5px 7px}.cr-split{height:calc(100dvh - 62px - 108px - 46px - 64px)}.cr-pane{padding:19px 14px}.cr-passage{font-size:16px}.cr-picker{margin:24px auto}.cr-picker h1{font-size:27px}.cr-tile{gap:11px}.cr-tile h2{font-size:15px}.cr-head-center strong{font-size:10px}.cr-fullscreen{padding:6px}}
 `}</style>
  </main>;
 }
