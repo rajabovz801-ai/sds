@@ -91,6 +91,23 @@ export async function POST(req:NextRequest){
  }
  const seconds=Math.max(0,Math.min(10800,Math.floor((Date.now()-Date.parse(start.started_at))/1000)));
  const saved=await db("ark60_reading_attempts","POST","",{student_id:user.id,passage_id:id,day_number:day,ordinal:row.ordinal,answers,score,total:questions.length,elapsed_seconds:seconds},"return=representation");
+ // Mirror completed reading work into the existing 60-day course metrics.
+ // Only completed pairs count as a finished Reading module.
+ try{
+  const date=todayUZ();
+  const existingTime=(await db("ark60_study_sessions","GET","select=id,active_seconds&student_id=eq."+user.id+"&study_date=eq."+date+"&day_number=eq."+day+"&module=eq.reading&order=last_active_at.desc&limit=1"))[0];
+  if(existingTime){
+   await db("ark60_study_sessions","PATCH","id=eq."+existingTime.id,{active_seconds:Number(existingTime.active_seconds||0)+seconds,last_active_at:new Date().toISOString()},"return=minimal");
+  }else{
+   await db("ark60_study_sessions","POST","",{student_id:user.id,study_date:date,day_number:day,module:"reading",active_seconds:seconds,last_active_at:new Date().toISOString()},"return=minimal");
+  }
+  const previous=prev.find((x:J)=>Number(x.ordinal)!==Number(row.ordinal));
+  if(previous){
+   const summary={passages:[{id:previous.passage_id,score:previous.score,total:previous.total,elapsed_seconds:previous.elapsed_seconds},{id,score,total:questions.length,elapsed_seconds:seconds}],total_seconds:Number(previous.elapsed_seconds||0)+seconds};
+   await db("ark60_submissions","POST","on_conflict=student_id,day_number,module",{student_id:user.id,day_number:day,module:"reading",payload:summary,score:Number(previous.score||0)+score,review_status:"reviewed"},"resolution=merge-duplicates,return=minimal");
+  }
+ }catch(syncError){console.error("reading metric sync",syncError)}
+
  return NextResponse.json({ok:true,result:{id:saved[0]?.id,score,total:questions.length,elapsed_seconds:seconds,answers:key.map((k:unknown,i:number)=>({number:questions[i].number,correct:k}))}});
  }catch(e){console.error("reading POST",e);return err("Unable to record reading result",503)}
 }
