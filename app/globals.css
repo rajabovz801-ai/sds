@@ -534,3 +534,54 @@ html,body{background:var(--ark-bg);color:var(--ark-ink);font-family:Manrope,ui-s
 .cd-day-open:hover{background:#5141bd}
 .cd-day-unavailable{display:flex;align-items:center;gap:6px;color:#aaa7b8;font-size:11px;font-weight:700}
 @media(max-width:700px){.cd-day-top{height:60px;padding:0 13px;gap:5px;grid-template-columns:1fr auto}.cd-day-brand{font-size:10px}.cd-day-brand i,.cd-day-top-end{display:none}.cd-day-body{padding:24px 12px 50px}.cd-day-hero{padding:23px 20px}.cd-day-module{padding:14px 12px;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;min-height:86px}.cd-day-icon{width:39px;height:39px}.cd-day-copy h3{font-size:14px}.cd-day-copy p{font-size:10px}.cd-day-open{padding:8px 9px;font-size:10px}.cd-day-unavailable{font-size:0}.cd-day-unavailable svg{width:14px;height:14px}}
+
+
+/* ARK shared animated back navigation — same green-expanding SVG control everywhere. */
+.ark-back-control{
+  appearance:none; -webkit-appearance:none; -webkit-tap-highlight-color:transparent;
+  position:relative; isolation:isolate; display:inline-flex; flex:0 0 auto;
+  align-items:center; justify-content:center; box-sizing:border-box;
+  width:192px; height:56px; padding:0; overflow:hidden; border:1px solid #e9eaf0;
+  border-radius:16px; background:#fff; color:#050505; text-decoration:none;
+  font:600 20px/1 Manrope,Inter,ui-sans-serif,system-ui,sans-serif;
+  cursor:pointer; box-shadow:0 2px 11px rgba(20,35,50,.025);
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+.ark-back-control:hover{border-color:#b9dac3;box-shadow:0 6px 18px rgba(18,55,31,.075);}
+.ark-back-control:focus-visible{outline:3px solid #2da85c;outline-offset:3px;}
+.ark-back-control .ark-back-icon{
+  position:absolute; z-index:2; left:4px; top:4px; width:48px; height:calc(100% - 8px);
+  display:flex; align-items:center; justify-content:center;
+  background:#4ade80; color:#000; border-radius:12px;
+  transition:width .5s cubic-bezier(.2,.75,.2,1);
+}
+.ark-back-control:hover .ark-back-icon,
+.ark-back-control:focus-visible .ark-back-icon{width:calc(100% - 8px);}
+.ark-back-control .ark-back-icon svg{display:block;flex:none;width:25px;height:25px;}
+.ark-back-control .ark-back-label{display:block;position:relative;z-index:1;white-space:nowrap;transform:translateX(8px);font-weight:600;color:#050505;}
+/* More specific than older page-scoped a/button rules. */
+.cr-admin header a.ark-back-control,
+.cr-footer button.ark-back-control,
+.ra-footer button.ark-back-control,
+.empty-view button.ark-back-control,
+.cr-review-loading button.ark-back-control{
+  display:inline-flex;align-items:center;justify-content:center;gap:0;
+  width:192px;height:56px;padding:0;border:1px solid #e9eaf0;border-radius:16px;
+  background:#fff;color:#050505;font-size:20px;font-weight:600;text-decoration:none;flex-shrink:0;
+}
+@media(max-width:760px){
+  .ark-back-control,
+  .cr-admin header a.ark-back-control,
+  .cr-footer button.ark-back-control,
+  .ra-footer button.ark-back-control,
+  .empty-view button.ark-back-control,
+  .cr-review-loading button.ark-back-control{
+    width:146px;height:46px;font-size:15px;border-radius:13px;
+  }
+  .ark-back-control .ark-back-icon{width:38px;height:calc(100% - 8px);border-radius:10px;}
+  .ark-back-control .ark-back-icon svg{width:21px;height:21px;}
+  .ark-back-control .ark-back-label{transform:translateX(12px);}
+}
+@media(prefers-reduced-motion:reduce){
+  .ark-back-control,.ark-back-control .ark-back-icon{transition:none;}
+}
