@@ -28,7 +28,8 @@ export default function ReadingAnalysis({passage,review,onBack,onNext,nextAvaila
  const leftRef=useRef<HTMLElement>(null);
  const items=review.items;
  const current=items.find(x=>x.number===selected)||items[0];
- const currentIndex=items.findIndex(x=>x.number===current?.number);
+ const navItems=filter==="mistakes"?items.filter(x=>x.status!=="correct"):items;
+ const currentIndex=navItems.findIndex(x=>x.number===current?.number);
  const para=paragraphs(passage.text);
  const relevant=filter==="all"?items:items.filter(x=>x.status!=="correct");
  function choose(n:number){
@@ -39,8 +40,8 @@ export default function ReadingAnalysis({passage,review,onBack,onNext,nextAvaila
   if(!current?.evidence?.paragraph)return;
   const left=leftRef.current;
   const node=left?.querySelector<HTMLElement>('[data-analysis-paragraph="'+current.evidence.paragraph+'"]');
-  if(left&&node)left.scrollTo({top:Math.max(0,node.offsetTop-left.offsetTop-24),behavior:"smooth"});
- },[selected,current?.evidence?.paragraph]);
+  if(left&&node&&((typeof window!=="undefined"&&window.innerWidth>800)||mobileTab==="passage"))left.scrollTo({top:Math.max(0,node.offsetTop-24),behavior:"smooth"});
+ },[selected,current?.evidence?.paragraph,mobileTab]);
  if(!current)return <div className="ra-empty">Your saved analysis is unavailable.</div>;
  const same=current.status==="correct";
  const nextLabel=nextAvailable?"Start Practice 02":passage.ordinal===2?"Return to Reading summary":"Back to passages";
@@ -64,17 +65,17 @@ export default function ReadingAnalysis({passage,review,onBack,onNext,nextAvaila
      <p className="ra-question-text">{current.question}</p>
      <div className="ra-answer-pair"><div><span>YOUR ANSWER</span><strong className={!same?"ra-user-wrong":""}>{current.submitted||"Not answered"}</strong></div><div><span>CORRECT ANSWER</span><strong className="ra-correct-answer">{current.correct.join(" / ")}</strong></div></div>
      {current.evidence?<div className="ra-proof">
-      <div className="ra-evidence-meta"><Highlighter size={16}/><strong>{current.evidence.note?"RELATED CONTEXT":"PASSAGE EVIDENCE"}</strong><span>Paragraph {current.evidence.paragraph}</span><button onClick={()=>{setMobileTab("passage");leftRef.current?.querySelector<HTMLElement>('[data-analysis-paragraph="'+current.evidence?.paragraph+'"]')?.scrollIntoView({block:"nearest",behavior:"smooth"})}}>Find in text <ArrowRight size={13}/></button></div>
+      <div className="ra-evidence-meta"><Highlighter size={16}/><strong>{current.evidence.note?"RELATED CONTEXT":"PASSAGE EVIDENCE"}</strong><span>Paragraph {current.evidence.paragraph}</span><button onClick={()=>{setMobileTab("passage")}}>Find in text <ArrowRight size={13}/></button></div>
       <blockquote>{current.evidence.quote||"See the paragraph highlighted in the full text."}</blockquote>
       <h4>Question keywords ↔ Passage paraphrases</h4>
       <div className="ra-table-wrap"><table><thead><tr><th>Question keywords</th><th>Passage words</th><th>Relationship</th></tr></thead><tbody>{current.evidence.pairs.map((pair,i)=><tr key={i}><td>{pair[0]}</td><td>{pair[1]}</td><td>{pair[2]}</td></tr>)}</tbody></table></div>
       <div className="ra-explanation"><strong>{current.correct.some(x=>x.toUpperCase()==="NOT GIVEN")?"Why NOT GIVEN?":current.correct.some(x=>x.toUpperCase()==="FALSE")?"Why FALSE?":"Explanation"}</strong><p>{current.evidence.explanation}</p></div>
      </div>:<div className="ra-proof-pending"><AlertCircle size={16}/> A source-checked explanation for this question is being reviewed. Your answer and score are saved.</div>}
     </div>
-    <div className="ra-step-nav"><button disabled={currentIndex<=0} onClick={()=>choose(items[currentIndex-1].number)}><ChevronLeft size={15}/> Previous</button><span>{currentIndex+1} / {items.length}</span><button disabled={currentIndex>=items.length-1} onClick={()=>choose(items[currentIndex+1].number)}>Next <ChevronRight size={15}/></button></div>
+    <div className="ra-step-nav"><button disabled={currentIndex<=0} onClick={()=>choose(navItems[currentIndex-1].number)}><ChevronLeft size={15}/> Previous</button><span>{Math.max(1,currentIndex+1)} / {navItems.length||items.length}</span><button disabled={currentIndex<0||currentIndex>=navItems.length-1} onClick={()=>choose(navItems[currentIndex+1].number)}>Next <ChevronRight size={15}/></button></div>
    </section>
   </div>
-  <footer className="ra-footer"><button className="ra-return" onClick={onBack}><ArrowLeft size={16}/> All practices</button><div><span>{passage.ordinal===1?"Finish this review, then continue.":"Both practices can be reviewed at any time."}</span><button className="ra-next" onClick={onNext}>{nextLabel}<ArrowRight size={17}/></button></div></footer>
+  <footer className="ra-footer"><button className="ra-return" onClick={onBack}><ArrowLeft size={16}/> All practices</button><div><span>{passage.ordinal===1?"Finish this review, then continue.":"Both practices can be reviewed at any time."}</span><button className="ra-next" onClick={onNext} title={nextTitle||nextLabel}>{nextLabel}<ArrowRight size={17}/></button></div></footer>
   <style jsx global>{`
    .ra-shell{--ra-purple:#6252d9;min-height:0;display:flex;flex-direction:column;flex:1;background:#fafbff;color:#292640;font-family:Manrope,Inter,system-ui,sans-serif}
    .ra-summary{padding:15px 22px;background:#fff;border-bottom:1px solid #e8e6f3;display:flex;align-items:center;justify-content:space-between;gap:20px}.ra-kicker{font-size:10px;font-weight:850;letter-spacing:.12em;color:#7260d6}.ra-summary h2{font-size:22px;margin:3px 0;letter-spacing:-.04em;font-weight:850}.ra-summary p{font-size:11px;color:#8c899e;margin:0}
