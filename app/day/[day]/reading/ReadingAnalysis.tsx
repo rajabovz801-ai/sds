@@ -49,17 +49,17 @@ export default function ReadingAnalysis({passage,review,onBack,onNext,nextAvaila
  return <div className="ra-shell">
   <div className="ra-summary">
    <div className="ra-summary-title"><span className="ra-kicker">DAY {String(passage.day_number).padStart(2,"0")} · PRACTICE {String(passage.ordinal).padStart(2,"0")}</span><h2>Reading Analysis</h2><p>{passage.title}</p></div>
-   <div className="ra-stats"><div><span>YOUR SCORE</span><strong>{review.score}<small>/{review.total}</small></strong></div><div><span>ACTIVE TIME</span><strong>{time(review.elapsed_seconds)}</strong></div><div><span>MISTAKES</span><strong>{review.items.filter(x=>x.status!=="correct").length}</strong></div></div>
+   <div className="ra-stats"><div><span>YOUR SCORE</span><strong>{review.score}<small>/{review.total}</small></strong></div><div><span>ACTIVE TIME</span><strong>{time(review.elapsed_seconds)}</strong></div><div><span>INCORRECT</span><strong>{review.items.filter(x=>x.status==="wrong").length}</strong></div><div><span>UNANSWERED</span><strong>{review.items.filter(x=>x.status==="empty").length}</strong></div></div>
   </div>
   <div className="ra-mobile-tabs"><button className={mobileTab==="passage"?"active":""} onClick={()=>setMobileTab("passage")}><BookOpen size={15}/> Full passage</button><button className={mobileTab==="analysis"?"active":""} onClick={()=>setMobileTab("analysis")}><Highlighter size={15}/> Analysis</button></div>
   <div className="ra-grid">
    <section className={"ra-left "+(mobileTab==="passage"?"ra-mobile-active":"")} ref={leftRef} aria-label="Entire reading passage">
-    <div className="ra-left-caption"><BookOpen size={15}/> FULL PASSAGE <span>All {para.length} paragraphs</span></div>
+    <div className="ra-left-caption"><BookOpen size={15}/> FULL PASSAGE <span>{para.length} paragraphs · Highlighted evidence</span></div>
     <h2>{passage.title}</h2>
     {para.map((p,i)=><p key={i} data-analysis-paragraph={i+1} className={current.evidence?.paragraph===i+1?"ra-paragraph-active":""}><span className="ra-paranum">{i+1}</span>{current.evidence?.paragraph===i+1?highlightExcerpt(p,current.evidence?.quote||""):p}</p>)}
    </section>
    <section className={"ra-right "+(mobileTab==="analysis"?"ra-mobile-active":"")} aria-label="Question-by-question review">
-    <div className="ra-review-heading"><div><span className="ra-kicker">QUESTION REVIEW</span><h3>Every answer, explained</h3></div><div className="ra-filters"><button className={filter==="all"?"active":""} onClick={()=>setFilter("all")}>All</button><button className={filter==="mistakes"?"active":""} onClick={()=>{setFilter("mistakes");const m=items.find(x=>x.status!=="correct");if(m)setSelected(m.number)}}>Mistakes</button></div></div>
+    <div className="ra-review-heading"><div><span className="ra-kicker">QUESTION REVIEW</span><h3>Evidence &amp; paraphrases</h3></div><div className="ra-filters"><button className={filter==="all"?"active":""} onClick={()=>setFilter("all")}>All</button><button className={filter==="mistakes"?"active":""} onClick={()=>{setFilter("mistakes");const m=items.find(x=>x.status!=="correct");if(m)setSelected(m.number)}}>Mistakes</button></div></div>
     <div className="ra-question-grid">{relevant.length?relevant.map(x=><button key={x.number} onClick={()=>choose(x.number)} aria-label={"Question "+x.number+": "+x.status} aria-pressed={selected===x.number} className={"ra-qnum "+x.status+(selected===x.number?" selected":"")}>{x.number}</button>):<span className="ra-all-correct"><CheckCircle2 size={16}/> All answers correct</span>}</div>
     <div className="ra-review-card">
      <div className="ra-card-heading"><span>QUESTION {String(current.number).padStart(2,"0")}</span><span className={"ra-status "+current.status}>{current.status==="correct"?"CORRECT":current.status==="empty"?"NOT ANSWERED":"INCORRECT"}</span></div>
@@ -69,7 +69,7 @@ export default function ReadingAnalysis({passage,review,onBack,onNext,nextAvaila
       <div className="ra-evidence-meta"><Highlighter size={16}/><strong>{current.evidence.note?"RELATED CONTEXT":"PASSAGE EVIDENCE"}</strong><span>Paragraph {current.evidence.paragraph}</span><button onClick={()=>{setMobileTab("passage")}}>Find in text <ArrowRight size={13}/></button></div>
       <blockquote>{current.evidence.quote||"See the paragraph highlighted in the full text."}</blockquote>
       <h4>Question keywords ↔ Passage paraphrases</h4>
-      <div className="ra-table-wrap"><table><thead><tr><th>Question keywords</th><th>Passage words</th><th>Relationship</th></tr></thead><tbody>{current.evidence.pairs.map((pair,i)=><tr key={i}><td>{pair[0]}</td><td>{pair[1]}</td><td>{pair[2]}</td></tr>)}</tbody></table></div>
+      <div className="ra-table-wrap"><table aria-label={"Question "+current.number+" keyword and synonym evidence"}><thead><tr><th>Question keywords</th><th>Passage words</th><th>Relationship</th></tr></thead><tbody>{current.evidence.pairs.map((pair,i)=><tr key={i}><td>{pair[0]}</td><td>{pair[1]}</td><td>{pair[2]}</td></tr>)}</tbody></table></div>
       <div className="ra-explanation"><strong>{current.correct.some(x=>x.toUpperCase()==="NOT GIVEN")?"Why NOT GIVEN?":current.correct.some(x=>x.toUpperCase()==="FALSE")?"Why FALSE?":"Explanation"}</strong><p>{current.evidence.explanation}</p></div>
      </div>:<div className="ra-proof-pending"><AlertCircle size={16}/> A source-checked explanation for this question is being reviewed. Your answer and score are saved.</div>}
     </div>
@@ -89,6 +89,37 @@ export default function ReadingAnalysis({passage,review,onBack,onNext,nextAvaila
    .ra-step-nav{display:flex;align-items:center;justify-content:space-between;margin-top:24px;gap:10px}.ra-step-nav button{display:flex;align-items:center;gap:4px;border:1px solid #e2dfee;background:#fff;color:#6558aa;border-radius:7px;font-size:11px;font-weight:850;padding:9px 11px;cursor:pointer}.ra-step-nav button:disabled{opacity:.35;cursor:not-allowed}.ra-step-nav span{font-size:11px;color:#aaa4ba;font-weight:800}
    .ra-footer{min-height:76px;display:flex;align-items:center;justify-content:space-between;padding:9px 22px;border-top:1px solid #e8e5f1;background:#fff;gap:15px}.ra-footer .ra-return{border:0;background:transparent;color:#77708f;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:750}.ra-footer>div{display:flex;gap:14px;align-items:center}.ra-footer>div>span{font-size:11px;color:#aaa4b7}.ra-next{background:#6252d9;border:0;border-radius:8px;color:#fff;display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;font-weight:850;font-size:12px;white-space:nowrap}.ra-mobile-tabs{display:none}.ra-empty{padding:30px}
    @media(max-width:800px){.ra-summary{padding:12px;gap:10px}.ra-summary h2{font-size:17px}.ra-summary p{font-size:10px}.ra-stats{gap:5px}.ra-stats>div{min-width:62px;padding:7px}.ra-stats span{font-size:8px}.ra-stats strong{font-size:16px}.ra-stats>div:last-child{display:none}.ra-mobile-tabs{display:flex;padding:7px 10px;gap:6px;background:#f7f5fc}.ra-mobile-tabs button{border:1px solid transparent;flex:1;padding:9px;display:flex;justify-content:center;align-items:center;gap:7px;color:#8d869d;background:transparent;font-size:12px;border-radius:8px;font-weight:800}.ra-mobile-tabs button.active{background:#fff;color:#6654d7;border-color:#e8e3f5}.ra-grid{display:block;min-height:0;height:calc(100dvh - 62px - 82px - 54px - 64px);padding:6px 9px}.ra-left,.ra-right{display:none;height:100%;width:100%}.ra-mobile-active{display:block}.ra-left{padding:20px 16px}.ra-right{padding:15px 13px}.ra-footer{padding:7px 10px;gap:7px}.ra-footer>div>span{display:none}.ra-return{font-size:11px!important}.ra-next{padding:10px 11px;font-size:11px}}
-  `}</style>
+  
+   /* Final ARK Reading Analysis skin — full passage remains visible alongside evidence. */
+   .ra-shell{background:#f8f9fd;color:#292640}
+   .ra-summary{min-height:103px;padding:13px 20px;border-bottom-color:#e9e7f2;gap:15px}
+   .ra-summary-title h2{font-size:23px;letter-spacing:-.04em;margin:5px 0 3px}
+   .ra-summary-title p{color:#8c86a0;font-size:11px}
+   .ra-stats{gap:7px}.ra-stats>div{min-width:86px;padding:9px 12px;border-radius:9px;background:#faf9fe}
+   .ra-stats span{font-size:8px;color:#88829d}.ra-stats strong{font-size:19px}
+   .ra-grid{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);height:calc(100dvh - 60px - 103px - 60px);min-height:390px;gap:11px;padding:11px 13px}
+   .ra-left,.ra-right{border-radius:11px;border-color:#e9e6f1;box-shadow:0 3px 16px #27204405}
+   .ra-left{padding:22px 25px}.ra-left h2{font-size:22px;margin:15px 0 20px}.ra-left p{font-size:16px;line-height:1.86;margin-bottom:22px}
+   .ra-left .ra-paragraph-active{background:#fffef5;border-left-color:#dbb950;padding-left:11px}
+   .ra-right{padding:20px 21px}.ra-review-heading h3{font-size:17px;letter-spacing:-.035em}
+   .ra-filters{padding:3px}.ra-filters button{min-height:31px;padding:7px 10px}
+   .ra-question-grid{padding:15px 0;gap:7px}.ra-qnum{height:32px;width:32px;border-radius:7px}
+   .ra-review-card{padding-top:16px}.ra-question-text{margin:13px 0 15px;font-size:14px;line-height:1.7}
+   .ra-answer-pair{gap:9px;margin:10px 0 18px}.ra-answer-pair>div{background:#faf9ff;border-radius:9px}
+   .ra-evidence-meta{gap:6px}.ra-evidence-meta button{border-radius:7px}
+   .ra-proof blockquote{margin:12px 0 18px;border-radius:0 7px 7px 0;background:#fffdf4}
+   .ra-table-wrap{border-radius:9px}.ra-table-wrap th{background:#f4f2fd}.ra-table-wrap td:nth-child(2){background:#fafffb;color:#29845b}
+   .ra-explanation{border-radius:9px;margin-top:13px}
+   .ra-footer{min-height:60px;padding:9px 18px}.ra-footer>div>span{color:#918ba4}
+   .ra-next{font-size:11px;padding:10px 13px;border-radius:8px}.ra-next:hover{background:#5342c5}
+   @media(max-width:800px){
+    .ra-summary{min-height:77px;padding:10px 12px;gap:8px}.ra-summary-title h2{font-size:17px}.ra-summary-title p{font-size:10px}
+    .ra-stats{gap:5px}.ra-stats>div{min-width:63px;padding:6px 8px}.ra-stats>div:nth-child(n+3){display:none}.ra-stats strong{font-size:15px}
+    .ra-mobile-tabs{min-height:43px;padding:5px 9px}.ra-mobile-tabs button{font-size:11px}
+    .ra-grid{height:calc(100dvh - 56px - 77px - 43px - 56px);min-height:300px;padding:6px 8px;display:block}
+    .ra-left,.ra-right{height:100%}.ra-left{padding:16px}.ra-right{padding:14px}
+    .ra-footer{min-height:56px;padding:7px 9px;gap:7px}.ra-next{font-size:10px;padding:9px 10px}
+   }
+`}</style>
  </div>;
 }
