@@ -599,3 +599,13 @@ html,body{background:var(--ark-bg);color:var(--ark-ink);font-family:Manrope,ui-s
 .learning-shell .empty-view,.admin-v2 .empty-view{border:1px solid var(--challenge-line);border-radius:16px;background:#fff;max-width:760px;margin:30px auto;padding:35px 25px;box-shadow:0 5px 22px #251a4b07}
 .learning-shell .empty-view button.ark-back-control,.admin-v2 .empty-view button.ark-back-control{margin-top:20px}
 .learning-shell .sidebar-bottom>.ark-back-control{margin:9px auto}
+
+/* Study-day reading allocation detail, rendered only when Reading is scheduled */
+.cd-day-hero-inner{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:25px;align-items:center;position:relative;z-index:1}
+.cd-day-hero-copy{min-width:0}
+.cd-day-hero-metric{display:flex;flex-direction:column;gap:4px;align-items:flex-start;padding:14px 15px;background:#faf9ff;border:1px solid #eae5fc;border-radius:11px}
+.cd-day-hero-metric>span{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:850;letter-spacing:.09em;color:#7666c5}
+.cd-day-hero-metric strong{font-size:31px;font-weight:850;line-height:1.14;letter-spacing:-.055em;color:#4f3fc0;margin-top:5px}
+.cd-day-hero-metric small{font-size:10px;color:#807797;font-weight:700}
+.cd-day-hero-metric em{font-size:9px;color:#34875b;font-style:normal;font-weight:850;margin-top:7px}
+@media(max-width:650px){.cd-day-hero-inner{grid-template-columns:1fr;gap:14px}.cd-day-hero-metric{display:none}}
