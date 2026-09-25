@@ -3,6 +3,7 @@ import Link from "next/link";
 import {useParams} from "next/navigation";
 import {useEffect,useRef,useState} from "react";
 import {BookOpen,CheckCircle2,LockKeyhole,ChevronRight,ArrowLeft,Clock3,Highlighter,Send,Play,Pause,Maximize2,Minimize2,Eraser} from "lucide-react";
+import ReadingAnalysis, {type ReadingReview} from "./ReadingAnalysis";
 
 type Q={number:number,type:"tfng"|"gap"|"mcq",text:string,options?:string[],instruction?:string};
 type Passage={id:string,day_number:number,ordinal:number,title:string,text:string,questions:Q[],question_source:string};
@@ -16,6 +17,7 @@ export default function ChallengeReading(){
  const {day:slug}=useParams<{day:string}>();const day=Number(slug);
  const [items,setItems]=useState<ListItem[]>([]),[draftCount,setDraftCount]=useState(0);
  const [passage,setPassage]=useState<Passage|null>(null),[answers,setAnswers]=useState<Record<string,string>>({});
+ const [review,setReview]=useState<ReadingReview|null>(null);
  const [result,setResult]=useState<Result|null>(null),[timer,setTimer]=useState<ServerTimer>(initialTimer),[now,setNow]=useState(Date.now());
  const [tab,setTab]=useState<"passage"|"questions">("passage"),[busy,setBusy]=useState(false),[error,setError]=useState("");
  const [selectionMenu,setSelectionMenu]=useState<{x:number,y:number}|null>(null),[fullScreen,setFullScreen]=useState(false);
@@ -31,7 +33,7 @@ export default function ChallengeReading(){
   try{const res=await fetch("/api/challenge-reading",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:action==="start"?(timer.started_at?"resume":"start"):"pause",day,passage_id:passage.id})});const obj=await res.json();if(!res.ok)throw new Error(obj.error||"Could not update timer");setTimer(obj.timer);setNow(Date.now())}
   catch(e){setError(String(e))}finally{setBusy(false)}
  }
- async function goBack(){if(passage&&!result&&timer.is_running){await setRunning("pause")};setPassage(null);setResult(null);setTimer(initialTimer);clearHighlights()}
+ async function goBack(){if(passage&&!result&&timer.is_running){await setRunning("pause")};setPassage(null);setResult(null);setReview(null);setTimer(initialTimer);clearHighlights()}
  async function toggleFullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{setError("Your browser does not allow fullscreen here. Use your browser's fullscreen control.")}}
  function clearHighlights(){const h=window.CSS?.highlights;if(h){h.delete("ark-reading-yellow");h.delete("ark-reading-green")}selectionRef.current=null;setSelectionMenu(null)}
  function showHighlightMenu(){
@@ -55,11 +57,11 @@ export default function ChallengeReading(){
   if(p.locked||busy)return;
   // Fullscreen must be requested in the actual click gesture, before the first await.
   if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});
-  clearHighlights();setBusy(true);setError("");setResult(null);setAnswers({});setTimer(initialTimer);setSelectionMenu(null);
+  clearHighlights();setBusy(true);setError("");setResult(null);setReview(null);setAnswers({});setTimer(initialTimer);setSelectionMenu(null);
   try{
    const res=await fetch("/api/challenge-reading?action=passage&day="+day+"&id="+encodeURIComponent(p.id),{cache:"no-store"});const obj=await res.json();if(!res.ok)throw new Error(obj.error||"Unable to open");
    setPassage(obj.passage);activeId.current=p.id;
-   if(obj.completed){setResult(obj.completed);setTimer(initialTimer)}
+   if(obj.completed){setResult(obj.completed);setReview(obj.review||null);setTimer(initialTimer)}
    else setTimer(obj.timer||initialTimer);
   }catch(e){setError(String(e))}finally{setBusy(false)}
  }
@@ -69,7 +71,7 @@ export default function ChallengeReading(){
   setBusy(true);setError("");
   try{
    const res=await fetch("/api/challenge-reading",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,passage_id:passage.id,answers})});
-   const obj=await res.json();if(!res.ok)throw new Error(obj.error||"Could not save result");setResult(obj.result);setTimer(t=>({...t,is_running:false,active_seconds:obj.result.elapsed_seconds||t.active_seconds,resumed_at:null}));clearHighlights();await loadList();
+   const obj=await res.json();if(!res.ok)throw new Error(obj.error||"Could not save result");setResult(obj.result);setReview(obj.review||null);setTimer(t=>({...t,is_running:false,active_seconds:obj.result.elapsed_seconds||t.active_seconds,resumed_at:null}));clearHighlights();await loadList();
   }catch(e){setError(String(e))}finally{setBusy(false)}
  }
  // Native CSS highlights never wrap or split text nodes, so layout stays unchanged.
@@ -77,7 +79,8 @@ export default function ChallengeReading(){
  const questionGroups:(Q[])[]=[];
  if(passage){for(const q of passage.questions){const last=questionGroups[questionGroups.length-1];if(!last||last[0]?.instruction!==q.instruction)questionGroups.push([q]);else last.push(q);}}
  const left=1200-usedSeconds(timer,now);
- const rows=passage?.text.split(/\n\s*\n/).filter(Boolean)||[];
+ const rows=passage?.text.replace(/\\n\\n/g,"\n\n").split(/\n\s*\n/).filter(p=>p.trim().length>8)||[];
+ async function continueAfterReview(){const next=items.find(p=>p.ordinal===2);if(passage?.ordinal===1&&next&&!next.locked){await openPassage(next)}else await goBack()}
  return <main className="cr-shell">
   <header className="cr-header">
    <div className="cr-head-start">{passage?<button className="cr-back" onClick={goBack}><ArrowLeft size={17}/> Passages</button>:<Link href={"/day/"+day} className="cr-back"><ArrowLeft size={17}/> Study day</Link>}</div>
@@ -87,10 +90,11 @@ export default function ChallengeReading(){
   {!passage?<section className="cr-picker">
    <span className="cr-kicker">DAY {String(day).padStart(2,"0")} · IELTS READING</span>
    <h1>Today’s Reading</h1><p>Complete the first passage to unlock the second. Each passage is timed and scored separately.</p>
-   {items.map(p=><article key={p.id} className={"cr-tile "+(p.locked?"cr-locked":"")}><span className="cr-tile-icon">{p.completed?<CheckCircle2 size={27}/>:p.locked?<LockKeyhole size={27}/>:<BookOpen size={27}/>}</span><div><small>PRACTICE {String(p.ordinal).padStart(2,"0")} · {p.completed?"COMPLETED":p.locked?"LOCKED":"20 MINUTES"}</small><h2>{p.title}</h2>{p.completed&&<p>Score: {p.completed.score}/{p.completed.total} · Time: {elapsed(p.completed.elapsed_seconds)}</p>}</div><button disabled={p.locked||busy} onClick={()=>openPassage(p)}>{p.completed?"View":p.locked?"Locked":"Start"} <ChevronRight size={17}/></button></article>)}
+   {items.length===2&&items.every(p=>!!p.completed)&&<div className="cr-daily-completed"><CheckCircle2 size={20}/><div><b>Daily Reading completed</b><p>{items.reduce((n,p)=>n+(p.completed?.score||0),0)}/{items.reduce((n,p)=>n+(p.completed?.total||0),0)} correct · Total active time {elapsed(items.reduce((n,p)=>n+(p.completed?.elapsed_seconds||0),0))}</p></div></div>}
+   {items.map(p=><article key={p.id} className={"cr-tile "+(p.locked?"cr-locked":"")}><span className="cr-tile-icon">{p.completed?<CheckCircle2 size={27}/>:p.locked?<LockKeyhole size={27}/>:<BookOpen size={27}/>}</span><div><small>PRACTICE {String(p.ordinal).padStart(2,"0")} · {p.completed?"COMPLETED":p.locked?"LOCKED":"20 MINUTES"}</small><h2>{p.title}</h2>{p.completed&&<p>Score: {p.completed.score}/{p.completed.total} · Time: {elapsed(p.completed.elapsed_seconds)}</p>}</div><button disabled={p.locked||busy} onClick={()=>openPassage(p)}>{p.completed?"View Analysis":p.locked?"Locked":"Start"} <ChevronRight size={17}/></button></article>)}
    {!items.length&&!error&&<div className="cr-empty">No published reading materials for this day yet.</div>}
    {draftCount>0&&<p className="cr-draft">{draftCount} passage(s) pending answer-key verification.</p>}
-  </section>:<>
+  </section>:result&&review?<ReadingAnalysis passage={passage} review={review} onBack={goBack} onNext={continueAfterReview} nextAvailable={passage.ordinal===1&&!!items.find(p=>p.ordinal===2&&!p.locked)} nextTitle={items.find(p=>p.ordinal===2)?.title}/>:result?<section className="cr-review-loading"><h2>Loading your saved analysis…</h2><p>Your result is recorded. Reopen this practice to load the full explanation.</p><button onClick={goBack}>Back to practices</button></section>:<>
    <div className="cr-instructions"><div><small>PRACTICE {String(passage.ordinal).padStart(2,"0")} · DAY {day}</small><h1>{passage.title}</h1><p>{total} questions · 20 minutes · Select text to highlight</p></div><div className="cr-tools"><span className="cr-highlight-guide"><Highlighter size={15}/> Select text for highlight</span></div></div>
    <div className="cr-mobile-tabs"><button className={tab==="passage"?"active":""} onClick={()=>setTab("passage")}>Passage</button><button className={tab==="questions"?"active":""} onClick={()=>setTab("questions")}>Questions</button></div>
    <div className="cr-split"><section style={{display:tab==="questions"?"var(--cr-hide-passage)":"block"}} className="cr-pane cr-passage" ref={passageRef} onMouseUp={showHighlightMenu} onTouchEnd={()=>setTimeout(showHighlightMenu,100)}><h2>{passage.title}</h2>{rows.map((para,i)=><p key={i}>{para}</p>)}</section>
@@ -107,6 +111,7 @@ export default function ChallengeReading(){
   <style jsx global>{`
   ::highlight(ark-reading-yellow){background:#ffe785;color:inherit}
   ::highlight(ark-reading-green){background:#b5f0cd;color:inherit}
+  .cr-daily-completed{display:flex;align-items:center;gap:12px;border:1px solid #cde9d8;background:#f0faf4;border-radius:10px;padding:16px 18px;margin:18px 0;color:#267b53}.cr-daily-completed b{font-size:13px}.cr-daily-completed p{font-size:12px;color:#58936e;margin:4px 0 0}.cr-review-loading{padding:40px 20px;max-width:600px;margin:auto}.cr-review-loading button{padding:11px 15px;border:none;border-radius:8px;background:#6252d9;color:#fff}
   .cr-shell{--cr-hide-passage:block;--cr-hide-questions:block;min-height:100vh;background:#fff;font:15px/1.55 Arial,"Lato",sans-serif;color:#121820;display:flex;flex-direction:column}
   .cr-header{height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e7e9ed;padding:0 23px;gap:15px}
   .cr-header strong{letter-spacing:.08em;font-size:12px}.cr-header strong span{color:#7c8593;font-weight:500}.cr-back{display:flex;gap:7px;align-items:center;text-decoration:none;color:#4a5360;font-size:12px}.cr-timer{display:flex;align-items:center;gap:7px;font-weight:800;font-variant-numeric:tabular-nums}
