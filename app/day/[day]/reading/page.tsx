@@ -83,7 +83,7 @@ export default function ChallengeReading(){
   const overlaps=(a:Range,b:Range)=>a.compareBoundaryPoints(Range.END_TO_START,b)>0&&a.compareBoundaryPoints(Range.START_TO_END,b)<0;
   for(const key of ["ark-reading-yellow","ark-reading-green"]){
    const existing=marks.get(key);if(!existing)continue;
-   const keep=Array.from(existing).filter((r)=>!overlaps(r,range));
+   const keep=Array.from(existing).filter((r)=>!(r instanceof Range&&overlaps(r,range)));
    if(keep.length)marks.set(key,new Highlight(...keep));else marks.delete(key);
   }
   if(tone!=="erase"){
