@@ -106,7 +106,7 @@ export default function AdminPage(){
 
 
  const sections=useMemo(()=>[
-  {name:"Overview",icon:LayoutDashboard},{name:"Requests",icon:UserPlus},{name:"Students",icon:Users},{name:"Content manager",icon:CalendarDays},{name:"Writing inbox",icon:FileText},{name:"Speaking inbox",icon:Mic},{name:"Results",icon:ChartNoAxesCombined},{name:"Leaderboard",icon:Trophy},{name:"Study time",icon:Clock3},
+  {name:"Overview",icon:LayoutDashboard},{name:"Reading results",icon:BookOpen},{name:"Requests",icon:UserPlus},{name:"Students",icon:Users},{name:"Content manager",icon:CalendarDays},{name:"Writing inbox",icon:FileText},{name:"Speaking inbox",icon:Mic},{name:"Results",icon:ChartNoAxesCombined},{name:"Leaderboard",icon:Trophy},{name:"Study time",icon:Clock3},
   ...(admin?.role==="super_admin"?[{name:"Admins",icon:UserCog}]:[]),{name:"Settings",icon:Settings}
  ],[admin?.role]);
  const chosen=courseDays[selected-1];
@@ -129,7 +129,7 @@ export default function AdminPage(){
   <aside className={"learning-sidebar "+(mobile?"open":"")}>
    <div className="learning-brand learning-brand-minimal"><button className="mobile-close" onClick={()=>setMobile(false)} aria-label="Close navigation"><X size={18}/></button></div>
    <div className="side-overline">MANAGEMENT</div>
-   <nav className="learning-nav">{sections.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setMobile(false)}}><Icon size={18} strokeWidth={1.8}/><span>{name}</span>{name==="Requests"&&!!dashboard?.pending_requests&&<span className="request-sidebar-count">{dashboard.pending_requests}</span>}{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
+   <nav className="learning-nav">{sections.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{if(name==="Reading results"){window.location.assign("/admin/reading");return;}setView(name);setMobile(false)}}><Icon size={18} strokeWidth={1.8}/><span>{name}</span>{name==="Requests"&&!!dashboard?.pending_requests&&<span className="request-sidebar-count">{dashboard.pending_requests}</span>}{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom"><button className="back-login" onClick={logout}><LogOut size={15}/> Log out</button><div className="user-tile"><span className="user-avatar">{admin.display_name.slice(0,2).toUpperCase()}</span><div><b>{admin.display_name}</b><small>{admin.role==="super_admin"?"Super Admin":"Admin"}</small></div></div></div>
   </aside>
   {mobile&&<button className="sidebar-overlay" onClick={()=>setMobile(false)} aria-label="Close navigation"/>}
