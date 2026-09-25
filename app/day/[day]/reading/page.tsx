@@ -44,7 +44,7 @@ export default function ChallengeReading(){
   const range=selectionRef.current,h=window.CSS?.highlights;
   if(!range||!h){setError("Please use an updated Chrome, Edge or Safari for text highlighting.");return}
   if(shade==="erase"){
-   for(const key of ["ark-reading-yellow","ark-reading-green"]){const old=h.get(key);if(!old)continue;const keep=Array.from(old).filter(r=>!(r.compareBoundaryPoints(Range.END_TO_START,range)>0&&r.compareBoundaryPoints(Range.START_TO_END,range)<0));if(keep.length)h.set(key,new Highlight(...keep));else h.delete(key)}
+   for(const key of ["ark-reading-yellow","ark-reading-green"]){const old=h.get(key);if(!old)continue;const keep=Array.from(old).filter(r=>!(r instanceof Range&&r.compareBoundaryPoints(Range.END_TO_START,range)>0&&r.compareBoundaryPoints(Range.START_TO_END,range)<0));if(keep.length)h.set(key,new Highlight(...keep));else h.delete(key)}
   }else{
    const key=shade==="yellow"?"ark-reading-yellow":"ark-reading-green";
    const old=h.get(key);h.set(key,old?new Highlight(...Array.from(old),range.cloneRange()):new Highlight(range.cloneRange()));
