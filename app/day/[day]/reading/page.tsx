@@ -7,7 +7,7 @@ import {BookOpen,CheckCircle2,LockKeyhole,ChevronRight,Clock3,Highlighter,Send,P
 import ReadingAnalysis, {type ReadingReview} from "./ReadingAnalysis";
 
 type Q={number:number,type:"tfng"|"gap"|"mcq"|"select",text:string,options?:string[],instruction?:string,pair_group?:string};
-const P2_DAYS=new Set([2,6,9,13,14]);
+const P2_DAYS=new Set([2,6,9,13,16]);
 const optionValue=(value:string)=>value.trim().match(/^([ivx]+|[A-H])(?:[.): ]|$)/i)?.[1]||value.trim();
 type Passage={id:string,day_number:number,ordinal:number,title:string,text:string,questions:Q[],question_source:string};
 type ListItem={id:string,ordinal:number,title:string,completed:{score:number,total:number,elapsed_seconds:number}|null,locked:boolean};

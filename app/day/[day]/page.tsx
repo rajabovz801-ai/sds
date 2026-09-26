@@ -5,7 +5,7 @@ import Link from "next/link";
 import {useParams} from "next/navigation";
 import {useEffect,useState} from "react";
 import {BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,ChevronRight,LockKeyhole,CalendarDays,Clock3,ShieldCheck} from "lucide-react";
-const P2_DAYS=new Set([2,6,9,13,14]);
+const P2_DAYS=new Set([2,6,9,13,16]);
 const regular=[
  {name:"Reading",description:"Two IELTS CDI passage practices",icon:BookOpen,tone:"purple"},
  {name:"Listening",description:"Full listening practice",icon:Headphones,tone:"blue"},
@@ -27,7 +27,7 @@ export default function DayPage(){
   fetch("/api/challenge-vocab?action=overview&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted)setPublishedVocabulary((r?.units||[]).filter((u:{word_count:number})=>u.word_count===20).length)}).catch(()=>{});
   return()=>{mounted=false}},[day]);
  const available=teacher||iso<=today;
- const modules=sunday?[regular[1],regular[0],regular[4],regular[5]]:regular;
+ const modules=sunday?[regular[1],regular[0],regular[4],regular[5]]:day===14?regular.filter(m=>m.name!=="Reading"&&m.name!=="Vocabulary"):regular;
  const dateText=date.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
  return <main className="cd-day ch-layout">
   <ChallengeSidebar day={day} active="Day"/>
@@ -42,12 +42,12 @@ export default function DayPage(){
      <span className="cd-day-date-badge"><CalendarDays size={17}/>{date.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"})}</span>
    </div></section>
    <div className="cd-day-stats" aria-label="Daily learning plan overview">
-    <div className="cd-day-stat"><CalendarDays size={20}/><div><span>DAILY MODULES</span><strong>{sunday?4:6}</strong><small>Focused study sections</small></div></div>
+    <div className="cd-day-stat"><CalendarDays size={20}/><div><span>DAILY MODULES</span><strong>{sunday?4:day===14?4:6}</strong><small>Focused study sections</small></div></div>
     <div className="cd-day-stat"><BookOpen size={20}/><div><span>READING PLAN</span><strong>{scheduledReading&&!sunday?"02":"—"}</strong><small>{scheduledReading&&!sunday?(isPassage2Day?"Passage 2 practices":"Passage 1 practices"):"Not scheduled today"}</small></div></div>
     <div className="cd-day-stat"><NotebookPen size={20}/><div><span>VOCABULARY</span><strong>{scheduledReading&&!sunday?(day===1?"120":"80"):"—"}</strong><small>{scheduledReading&&!sunday?"Unique words":"Not scheduled today"}</small></div></div>
     <div className="cd-day-stat"><ShieldCheck size={20}/><div><span>STUDY STATUS</span><strong className="cd-day-status-value">{teacher?"Preview":available?"Ready":"Locked"}</strong><small>{teacher?"Teacher access":available?"Your day is available":"Future study day"}</small></div></div>
    </div>
-   <section className="cd-day-list"><div className="cd-day-list-head"><h2>{sunday?"Mock sections":"Today's modules"}</h2><span>{sunday?"4 sections":"6 modules"}</span></div><div className="cd-day-modules">{modules.map(({name,description,icon:Icon,tone},i)=>{const ready=available&&!sunday&&((name==="Reading"&&scheduledReading&&(!isPassage2Day||publishedReading===2))||(name==="Article"&&day===1)||(name==="Vocabulary"&&scheduledReading&&(!isPassage2Day||publishedVocabulary===4)));const href=name==="Reading"?"/day/"+day+"/reading":name==="Article"?"/day/"+day+"/article":"/day/"+day+"/vocabulary";return <article className={"cd-day-module "+(ready?"ready":"")} key={name}><div className={"cd-day-icon "+tone}><Icon size={21} strokeWidth={1.75}/></div><div className="cd-day-copy"><span className="cd-day-sequence">{String(i+1).padStart(2,"0")} · {name.toUpperCase()}</span><h3>{name}</h3><p>{ready?(name==="Reading"?(isPassage2Day?"2 IELTS Passage 2 tests · independent results":"2 IELTS Passage 1 tests · independent results"):name==="Article"?"Declutter Your Life · CDI reading + Uzbek glossary":day===1?"6 units · 120 unique words · 18/20 to pass":"4 units · 80 unique words · 18/20 to pass"):name==="Reading"&&!scheduledReading?"No Reading assignment scheduled today":name==="Article"&&day!==1?"Article upload pending":!available?"Available on the scheduled day":sunday?"Full Mock materials pending upload":"Material pending upload"}</p></div>{ready?<Link className="cd-day-open" href={href}>{name==="Reading"?"Open Reading":name==="Article"?"Read Article":"Open Vocabulary"} <ChevronRight size={17}/></Link>:<span className="cd-day-unavailable"><LockKeyhole size={14}/> Locked</span>}</article>})}</div></section>
+   <section className="cd-day-list"><div className="cd-day-list-head"><h2>{sunday?"Mock sections":"Today's modules"}</h2><span>{sunday?"4 sections":day===14?"4 modules":"6 modules"}</span></div><div className="cd-day-modules">{modules.map(({name,description,icon:Icon,tone},i)=>{const ready=available&&!sunday&&((name==="Reading"&&scheduledReading&&(!isPassage2Day||publishedReading===2))||(name==="Article"&&day===1)||(name==="Vocabulary"&&scheduledReading&&(!isPassage2Day||publishedVocabulary===4)));const href=name==="Reading"?"/day/"+day+"/reading":name==="Article"?"/day/"+day+"/article":"/day/"+day+"/vocabulary";return <article className={"cd-day-module "+(ready?"ready":"")} key={name}><div className={"cd-day-icon "+tone}><Icon size={21} strokeWidth={1.75}/></div><div className="cd-day-copy"><span className="cd-day-sequence">{String(i+1).padStart(2,"0")} · {name.toUpperCase()}</span><h3>{name}</h3><p>{ready?(name==="Reading"?(isPassage2Day?"2 IELTS Passage 2 tests · independent results":"2 IELTS Passage 1 tests · independent results"):name==="Article"?"Declutter Your Life · CDI reading + Uzbek glossary":day===1?"6 units · 120 unique words · 18/20 to pass":"4 units · 80 unique words · 18/20 to pass"):name==="Reading"&&!scheduledReading?"No Reading assignment scheduled today":name==="Article"&&day!==1?"Article upload pending":!available?"Available on the scheduled day":sunday?"Full Mock materials pending upload":"Material pending upload"}</p></div>{ready?<Link className="cd-day-open" href={href}>{name==="Reading"?"Open Reading":name==="Article"?"Read Article":"Open Vocabulary"} <ChevronRight size={17}/></Link>:<span className="cd-day-unavailable"><LockKeyhole size={14}/> Locked</span>}</article>})}</div></section>
   </div>
   </div>
  </main>;

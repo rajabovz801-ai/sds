@@ -8,7 +8,7 @@ export type Row=Record<string,any>;
 
 const BASE=(process.env.NEXT_PUBLIC_SUPABASE_URL||"https://svdigxqdivcmljirjwhk.supabase.co").replace(/\/$/,"");
 const KEY=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY||"";
-export const VALID_DAYS=new Set([1,2,5,6,8,9,12,13,14,15]);
+export const VALID_DAYS=new Set([1,2,5,6,8,9,12,13,15,16]);
 export const isUuid=(s:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 export async function sqlTable(table:string,method="GET",query="",body?:unknown,prefer=""){
  if(!KEY)throw Error("Server database key missing");

@@ -5,8 +5,8 @@ import {useEffect,useMemo,useState} from "react";
 import {BookOpen,Clock3,Download,RefreshCw,Users,X,ClipboardList} from "lucide-react";
 type Entry={student_id:string,passage_id:string,day_number:number,ordinal:number,score:number,total:number,elapsed_seconds:number,submitted_at:string,student:{first_name:string,last_name:string,username:string}|null,review?:{items:{number:number,submitted:string,correct:string[],status:"correct"|"wrong"|"empty"}[]}|null};
 type P={id:string,day_number:number,ordinal:number,title:string,status:string};
-const days=[1,2,5,6,8,9,12,13,14,15];
-const dates=["1 October","2 October","5 October","6 October","8 October","9 October","12 October","13 October","14 October","15 October"];
+const days=[1,2,5,6,8,9,12,13,15,16];
+const dates=["1 October","2 October","5 October","6 October","8 October","9 October","12 October","13 October","15 October","16 October"];
 function mins(s:number){return Math.floor(s/60)+"m "+String(s%60).padStart(2,"0")+"s"}
 export default function ReadingAdmin(){
  const [day,setDay]=useState(1),[rows,setRows]=useState<Entry[]>([]),[passages,setPassages]=useState<P[]>([]),[error,setError]=useState(""),[loading,setLoading]=useState(true),[unauthorized,setUnauthorized]=useState(false),[selected,setSelected]=useState<Entry|null>(null);
