@@ -37,10 +37,15 @@ function reviewFor(passage:J,attempt:J){
  const keys=Array.isArray(passage.answer_key)?passage.answer_key:[];
  const analysis=Array.isArray(passage.analysis)?passage.analysis:[];
  const submitted=(attempt.answers&&typeof attempt.answers==="object"&&!Array.isArray(attempt.answers)?attempt.answers:{}) as J;
+ const usedPairAnswers=new Map<string,Set<string>>();
  const items=questions.map((q:J,i:number)=>{
   const correct=Array.isArray(keys[i])?keys[i]:[keys[i]];
   const given=String(submitted[String(q.number)]??"");
-  const status=!normalize(given)?"empty":correct.some((v:unknown)=>normalize(v)===normalize(given))?"correct":"wrong";
+  const group=typeof q.pair_group==="string"?q.pair_group:"";
+  const used=group?(usedPairAnswers.get(group)||new Set<string>()):null;
+  const valid=!!normalize(given)&&correct.some((v:unknown)=>normalize(v)===normalize(given))&&(!used||!used.has(normalize(given)));
+  if(valid&&used){used.add(normalize(given));usedPairAnswers.set(group,used)}
+  const status=!normalize(given)?"empty":valid?"correct":"wrong";
   const proof=analysis.find((a:J)=>Number(a.number)===Number(q.number));
   return {number:q.number,question:q.text,type:q.type,submitted:given,correct,status,
    evidence:proof?{paragraph:Number(proof.paragraph),quote:proof.quote||"",pairs:proof.pairs||[],explanation:proof.explanation||"",note:proof.note||""}:null};
@@ -136,9 +141,12 @@ export async function POST(req:NextRequest){
  if(!questions.length||key.length!==questions.length)return err("Answer key is not verified; submission disabled",503);
  if(!b.answers||typeof b.answers!=="object"||Array.isArray(b.answers))return err("Invalid answers");
  const answers=b.answers as Record<string,unknown>;
- let score=0;for(let i=0;i<questions.length;i++){
+ let score=0;const usedPairAnswers=new Map<string,Set<string>>();for(let i=0;i<questions.length;i++){
   const q=questions[i],valid=Array.isArray(key[i])?key[i]:[key[i]];
-  if(valid.some((v:unknown)=>normalize(v)===normalize(answers[String(q.number)]))&&normalize(answers[String(q.number)]))score++;
+  const group=typeof q.pair_group==="string"?q.pair_group:"";
+  const used=group?(usedPairAnswers.get(group)||new Set<string>()):null;
+  const given=normalize(answers[String(q.number)]);
+  if(given&&valid.some((v:unknown)=>normalize(v)===given)&&(!used||!used.has(given))){score++;if(used){used.add(given);usedPairAnswers.set(group,used)}}
  }
  const seconds=timerState(start).elapsed_seconds;
  // Freeze the server clock on submission so reloading cannot extend the recorded study time.
