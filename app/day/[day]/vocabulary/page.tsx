@@ -16,7 +16,7 @@ const sourceOrder=(a:Unit,b:Unit)=>{
  const order=(u:Unit)=>u.source_kind==="article"?3:u.source_ordinal;
  return order(a)-order(b)||a.unit_number-b.unit_number;
 };
-const sourceLabel=(u:Unit)=>u.source_kind==="article"?"Article":"Reading · Passage "+u.source_ordinal;
+const sourceLabel=(u:Unit)=>u.source_kind==="article"?"Article":"Reading · Passage "+([3,7,10,14,17].includes(u.day_number)?3:[2,6,9,13,16].includes(u.day_number)?2:1)+" · Practice "+u.source_ordinal;
 const sourceClass=(u:Unit)=>u.source_kind==="article"?"article":u.source_ordinal===1?"reading1":"reading2";
 
 export default function VocabularyPage(){
