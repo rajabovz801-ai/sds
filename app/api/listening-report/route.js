@@ -7,11 +7,16 @@ export const maxDuration=60;
 const CODE="LISTENING-WATERTOWN-VARROA-AAR", TABLE="teddy_listening_test_reports";
 const HEAD={"access-control-allow-origin":"*","access-control-allow-methods":"GET,POST,OPTIONS","access-control-allow-headers":"Content-Type","cache-control":"no-store"};
 const KEY={1:"weight",2:"back",3:"beginners",4:"mat",5:"jumps",6:"competition",7:"snack",8:"work",9:"heart",10:"reception",11:"C",12:"E",13:"B",14:"D",15:"G",16:"B",17:"H",18:"D",19:"F",20:"E",21:"B",22:"C",23:"D",24:"A",25:"G",26:"E",27:"C",28:"F",29:"B",30:"D",31:"army",32:"safety",33:"learning",34:"reasons",35:"trust",36:"writing",37:"open",38:"leaders",39:"training",40:"time"};
-const norm=x=>String(x??"").normalize("NFKC").trim().toLowerCase().replace(/[’\u2019'-]/g,"").replace(/\s+/g," ");
+// Official key remains authoritative. Only context-valid spelling/number variants are allowed.
+const ALTERNATIVES={2:["backs"],34:["reason"]};
+const norm=x=>String(x??"").normalize("NFKC").trim().toLowerCase()
+ .replace(/[\u200B-\u200D\uFEFF]/g,"").replace(/[’‘]/g,"'")
+ .replace(/[.,!?;:]+$/g,"").replace(/\s+/g," ");
+const validAnswer=(q,value)=>[KEY[q],...(ALTERNATIVES[q]||[])].some(v=>norm(v)===norm(value));
 const clean=(x,n)=>String(x??"").replace(/[\r\n\t\u0000-\u001f<>]/g," ").replace(/\s+/g," ").trim().slice(0,n);
 const err=(msg,status=400)=>Response.json({ok:false,error:msg},{status,headers:HEAD});
 function grade(a){
- const correct={};for(let q=1;q<=40;q++)correct[q]=norm(a[q])===norm(KEY[q]);
+ const correct={};for(let q=1;q<=40;q++)correct[q]=validAnswer(q,a[q]);
  for(const [i,j,keys] of [[11,12,["C","E"]],[13,14,["B","D"]]]){
   const values=[a[i],a[j]].map(norm).filter(Boolean), unique=new Set(values);
   if(values.length!==unique.size)throw Error("Duplicate pair selections");
@@ -64,7 +69,24 @@ export async function POST(request){
   if(target.error)throw target.error;
   if(!target.data?.chat_id)throw Error("ARK AI STAFF chat not configured");
   const time=new Intl.DateTimeFormat("uz-UZ",{timeZone:"Asia/Tashkent",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date());
-  const text=["🎧 IELTS LISTENING · NATIJA","👤 "+name+" · ID: "+studentId,"📌 1️⃣ "+result.parts[0]+"/10  2️⃣ "+result.parts[1]+"/10  3️⃣ "+result.parts[2]+"/10  4️⃣ "+result.parts[3]+"/10","🏆 "+result.score+"/40 · Band "+result.band.toFixed(1),"🕐 "+time].join("\n");
+  const text=[
+   "🏛 ARK Education | English",
+   "🎧 IELTS LISTENING · NATIJA",
+   "",
+   "👤 "+name,
+   "🆔 ID: "+studentId,
+   "",
+   "📊 SECTION NATIJALARI",
+   "1️⃣ Section 1 — "+result.parts[0]+"/10",
+   "2️⃣ Section 2 — "+result.parts[1]+"/10",
+   "3️⃣ Section 3 — "+result.parts[2]+"/10",
+   "4️⃣ Section 4 — "+result.parts[3]+"/10",
+   "",
+   "🏆 Overall — "+result.score+"/40",
+   "⭐ IELTS Band — "+result.band.toFixed(1),
+   "",
+   "🕒 "+time
+  ].join("\n");
   let telegramMessage;
   try{telegramMessage=await telegram("sendMessage",{chat_id:target.data.chat_id,text,disable_web_page_preview:true});}
   catch(sendError){await db.from(TABLE).update({delivery_status:"failed",updated_at:new Date().toISOString()}).eq("id",stored.id);throw sendError;}
