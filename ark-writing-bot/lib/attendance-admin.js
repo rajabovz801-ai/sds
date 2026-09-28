@@ -134,6 +134,19 @@ async function sendFile(chatId,buffer,filename,type,caption,reply_markup) {
   if(!response.ok||!result.ok)throw new Error('Telegram fayl jo‘natmadi: '+(result.description||response.status));
   return result.result;
 }
+async function sendAttendancePreview(chatId,report) {
+  const {makeAttendancePreview}=await import('./attendance-sticker.js');
+  const png=await makeAttendancePreview(report);
+  const form=new FormData();
+  form.set('chat_id',String(chatId));
+  form.set('photo',new Blob([png],{type:'image/png'}),'ARK_Davomat_'+report.date+'.png');
+  form.set('caption','🏛 ARK EDUCATION CENTRE • '+displayDate(report.date));
+  form.set('reply_markup',JSON.stringify(reportButtons(report.date)));
+  const response=await fetch(api()+'/sendPhoto',{method:'POST',body:form});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.ok)throw new Error('Telegram preview: '+(result.description||response.status));
+  return result.result;
+}
 async function sendAdminSticker(chatId) {
   const {makeArkAdminSticker}=await import('./attendance-sticker.js');
   const sticker=await makeArkAdminSticker();
@@ -178,7 +191,10 @@ async function sendAttendance(chatId,day,{only='all'}={}) {
     await sendFile(chatId,await attendancePDF(report),'ARK_Davomat_'+day+'.pdf','application/pdf',
       '🖨 <b>ARK Davomat</b> · '+displayDate(day),reportButtons(day));return;
   }
-  if(only==='all')await message(chatId,compactSummary(report).slice(0,3800),reportButtons(day));
+  if(only==='all'){
+    await message(chatId,compactSummary(report).slice(0,3800),reportButtons(day));
+    await sendAttendancePreview(chatId,report).catch(e=>console.warn('Preview image unavailable',e?.message||e));
+  }
   const html=renderAttendanceHTML(report);
   await sendFile(chatId,Buffer.from(html,'utf8'),'ARK_Davomat_'+day+'.html','text/html',
     '🎨 <b>Rangli HTML hisobot</b> · '+displayDate(day)+'\n📚 '+report.groups.length+
@@ -236,6 +252,7 @@ export async function deliverAttendanceAtSixPM() {
     if(existing){sent.push({id,already_sent:true});continue;}
     try{
       await message(id,'🕕 <b>18:00 — kunlik davomat tayyor</b>\n\n'+compactSummary(report).slice(0,3400),reportButtons(today));
+      await sendAttendancePreview(id,report).catch(e=>console.warn('Scheduled attendance preview unavailable',e?.message||e));
       await sendFile(id,Buffer.from(renderAttendanceHTML(report),'utf8'),
         'ARK_Davomat_'+today+'.html','text/html','🎨 <b>18:00 • Yakuniy HTML hisobot</b>',reportButtons(today));
       const {error:saveError}=await db.from('sa_report_deliveries').upsert(
