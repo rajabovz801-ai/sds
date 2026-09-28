@@ -1,3 +1,4 @@
+import { handleAttendanceAdminUpdate } from "../../../../ark-writing-bot/lib/attendance-admin.js";
 import { waitUntil } from "@vercel/functions";
 import { telegram } from "../../../../ark-writing-bot/lib/telegram.js";
 import { performStudentAccess } from "../../../../lib/arkEnglishStudentAccess";
@@ -307,6 +308,9 @@ async function forwardToManager(origin, update) {
 }
 
 async function processUpdate(origin, update) {
+  // Teddy reports only on the writing-bot project, never on the English student bot.
+  if (process.env.VERCEL_PROJECT_ID === "prj_LZ7iM9e956Nsj91z2zeI87TgKO7e" &&
+      await handleAttendanceAdminUpdate(update)) return;
   const callback = update?.callback_query;
   if (callback?.message?.chat?.type === "private") {
     await handlePrivateCallback(origin, callback);
