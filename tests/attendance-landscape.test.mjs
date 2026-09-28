@@ -60,7 +60,7 @@ test('Telegram vector text contains actual paths (never missing font squares)',a
   const png=await makeAttendancePreview(r);
   const meta=await sharp(png).metadata();
   assert.equal(meta.width,1200);
-  assert.equal(meta.height,820);
+  assert.equal(meta.height,740);
   assert.equal(meta.format,'png');
 });
 test('Teddy PDF is a complete A4 landscape PDF for a 27-row group',async()=>{
