@@ -13,8 +13,7 @@ import {renderAttendanceHTML} from '../../lib/attendance-landscape.mjs';
 const api = () => 'https://api.telegram.org/bot' + process.env.TELEGRAM_BOT_TOKEN;
 const menuButtons = () => ({inline_keyboard:[
   [{text:'📊 Bugungi natijalar',callback_data:'att:today'}],
-  [{text:'🗓 Oldingi sanalar',callback_data:'att:month:'+todayInTashkent().slice(0,7)}],
-  [{text:'✨ ARK Education Centre',callback_data:'att:noop'}]
+  [{text:'🗓 Oldingi sanalar',callback_data:'att:month:'+todayInTashkent().slice(0,7)}]
 ]});
 const reportButtons = day => ({inline_keyboard:[
   [{text:'🎨 Rangli HTML',callback_data:'att:html:'+day},
@@ -130,8 +129,10 @@ async function sendAttendance(chatId,day,{only='all'}={}) {
       '🖨 <b>ARK Davomat</b> · '+displayDate(day),reportButtons(day));return;
   }
   if(only==='all'){
-    await message(chatId,compactSummary(report).slice(0,3800),reportButtons(day));
-    await sendAttendancePreview(chatId,report).catch(e=>console.warn('Preview image unavailable',e?.message||e));
+    try{await sendAttendancePreview(chatId,report);}catch(e){
+      console.warn('Preview image unavailable',e?.message||e);
+      await message(chatId,compactSummary(report).slice(0,3800),reportButtons(day));
+    }
   }
   const html=renderAttendanceHTML(report);
   await sendFile(chatId,Buffer.from(html,'utf8'),'ARK_Davomat_'+day+'.html','text/html',
