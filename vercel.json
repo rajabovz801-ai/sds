@@ -1,7 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "regions": ["hnd1"],
+  "regions": [
+    "hnd1"
+  ],
   "functions": {
     "api/**/*.py": {
       "maxDuration": 60,
@@ -9,6 +11,13 @@
     }
   },
   "crons": [
-    {"path": "/api/daily-homework-report", "schedule": "0 1 * * *"}
+    {
+      "path": "/api/daily-homework-report",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/attendance-daily-report",
+      "schedule": "0 13 * * *"
+    }
   ]
 }

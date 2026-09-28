@@ -1,3 +1,4 @@
+import { handleAttendanceAdminUpdate } from "../../../ark-writing-bot/lib/attendance-admin.js";
 import { waitUntil } from "@vercel/functions";
 import mammoth from "mammoth";
 import {
@@ -348,6 +349,7 @@ async function handlePhoto(incoming, photo, caption = "") {
 
 async function processUpdate(update) {
   try {
+    if (await handleAttendanceAdminUpdate(update)) return;
     const incoming = getIncoming(update);
     if (!incoming?.chatId) return;
     if (!(await isIncomingCustomerMessage(incoming))) return;
