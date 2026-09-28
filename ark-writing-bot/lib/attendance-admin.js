@@ -4,7 +4,7 @@ import PDFDocument from 'pdfkit';
 import { telegram } from './telegram.js';
 import { getServiceSupabase } from '../../lib/supabase/server';
 import {
-  ADMIN_IDS, OWNER_ID, isAttendanceAdmin, todayInTashkent, validDay, validMonth,
+  ADMIN_IDS, OWNER_ID, isAttendanceAdmin, isAdminCommand, todayInTashkent, validDay, validMonth,
   moveMonth, displayDate, htmlEscape, localClock, duration, summarizeAttendance,
   monthKeyboard, renderAttendanceHTML, compactSummary
 } from '../../lib/attendance-report-core.mjs';
@@ -228,7 +228,7 @@ export async function handleAttendanceAdminUpdate(update) {
     return true;
   }
   const m=update?.message;
-  if(!m?.text||!/^\/admin(?:@\w+)?(?:\s|$)/i.test(m.text.trim()))return false;
+  if(!m?.text||!isAdminCommand(m.text))return false;
   if(m.chat?.type!=='private'||!isAttendanceAdmin(m.from?.id)||String(m.chat.id)!==String(m.from?.id)){
     await message(m.chat.id,'🔒 Ushbu bo‘lim faqat vakolatli administratorlar uchun.');
     return true;
