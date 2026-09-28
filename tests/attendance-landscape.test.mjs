@@ -56,6 +56,7 @@ test('Telegram vector text contains actual paths (never missing font squares)',a
   const svg=buildAttendancePreviewSVG(r);
   assert.ok(svg.match(/<path d="M/));
   assert.ok(!svg.includes('<text'));
+  assert.ok((svg.match(/<path d=/g)||[]).length>80,'every heading and group label must contain rendered vector glyphs');
   assert.equal(safeCardLabel('O‘quvchi Шаҳзода'),'O\'quvchi Shahzoda');
   const png=await makeAttendancePreview(r);
   const meta=await sharp(png).metadata();
