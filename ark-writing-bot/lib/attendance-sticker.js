@@ -61,12 +61,12 @@ function groupTile(group,x,y){
     '<rect x="'+(x+19)+'" y="'+(y+48)+'" width="'+Math.max(0,(width-38)*ratio)+'" height="7" rx="3.5" fill="#209f77"/>';
 }
 export function buildAttendancePreviewSVG(report){
-  const t=report.totals,svg=[];
-  svg.push('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820">');
+  const t=report.totals,svg=[],height=report.groups.length<=2?740:820;
+  svg.push('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="'+height+'" viewBox="0 0 1200 '+height+'">');
   svg.push('<defs><linearGradient id="navy" x1="0" x2="1" y1="0" y2="1">'+
     '<stop stop-color="#10263f"/><stop offset=".66" stop-color="#1b415d"/>'+
     '<stop offset="1" stop-color="#276475"/></linearGradient></defs>');
-  svg.push('<rect width="1200" height="820" rx="36" fill="#f3f6f9"/>');
+  svg.push('<rect width="1200" height="'+height+'" rx="36" fill="#f3f6f9"/>');
   svg.push('<rect x="22" y="22" width="1156" height="285" rx="29" fill="url(#navy)"/>');
   svg.push('<rect x="58" y="55" width="5" height="32" rx="2.5" fill="#ecc788"/>');
   svg.push('<circle cx="1101" cy="143" r="170" fill="none" stroke="#ffffff" stroke-opacity=".09" stroke-width="2"/>');
@@ -82,10 +82,10 @@ export function buildAttendancePreviewSVG(report){
     svg.push(groupTile(g,37+(i%2)*585,555+Math.floor(i/2)*83));
   if(report.groups.length>4)svg.push(vectorText('+'+(report.groups.length-4)+' GURUH HTML HISOBOTDA',
     45,749,17,'#627a8b',{bold:true,maxWidth:800}));
-  svg.push('<path d="M45 779H1155" stroke="#d9e3eb" stroke-width="2"/>');
-  svg.push(vectorText('ARK / ROYAL ATTENDANCE',45,804,16,'#60788b',
+  svg.push('<path d="M45 '+(height-42)+'H1155" stroke="#d9e3eb" stroke-width="2"/>');
+  svg.push(vectorText('ARK / ROYAL ATTENDANCE',45,height-16,16,'#60788b',
     {bold:true,tracking:.8,maxWidth:740}));
-  svg.push(vectorText('TOSHKENT  |  '+report.date,1153,804,16,'#60788b',
+  svg.push(vectorText('TOSHKENT  |  '+report.date,1153,height-16,16,'#60788b',
     {bold:true,align:'right',maxWidth:360}));
   svg.push('</svg>');
   return svg.join('');
