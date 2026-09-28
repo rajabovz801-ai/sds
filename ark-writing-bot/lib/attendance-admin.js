@@ -134,6 +134,18 @@ async function sendFile(chatId,buffer,filename,type,caption,reply_markup) {
   if(!response.ok||!result.ok)throw new Error('Telegram fayl jo‘natmadi: '+(result.description||response.status));
   return result.result;
 }
+async function sendAdminSticker(chatId) {
+  const {makeArkAdminSticker}=await import('./attendance-sticker.js');
+  const sticker=await makeArkAdminSticker();
+  const form=new FormData();
+  form.set('chat_id',String(chatId));
+  form.set('sticker',new Blob([sticker],{type:'image/webp'}),'ark-admin.webp');
+  form.set('emoji','🏛');
+  const response=await fetch(api()+'/sendSticker',{method:'POST',body:form});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.ok)throw new Error('Telegram sticker: '+(result.description||response.status));
+  return result.result;
+}
 async function sendMenu(chatId,role='admin') {
   const privileged=role==='super_admin'?'👑 SUPER ADMIN':'🛡 ADMIN';
   return message(chatId,['🏛 <b>ARK EDUCATION CENTRE</b>','',privileged,
@@ -205,6 +217,7 @@ export async function handleAttendanceAdminUpdate(update) {
     await message(m.chat.id,'🔒 Ushbu bo‘lim faqat vakolatli administratorlar uchun.');
     return true;
   }
+  await sendAdminSticker(m.chat.id).catch(e=>console.warn('ARK admin sticker unavailable',e?.message||e));
   await sendMenu(m.chat.id,String(m.from.id)===OWNER_ID?'super_admin':'admin');
   return true;
 }
