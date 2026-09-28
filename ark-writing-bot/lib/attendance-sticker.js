@@ -60,7 +60,7 @@ function groupTile(group,x,y){
     '<rect x="'+(x+19)+'" y="'+(y+48)+'" width="'+(width-38)+'" height="7" rx="3.5" fill="#e7eef3"/>'+
     '<rect x="'+(x+19)+'" y="'+(y+48)+'" width="'+Math.max(0,(width-38)*ratio)+'" height="7" rx="3.5" fill="#209f77"/>';
 }
-export async function makeAttendancePreview(report){
+export function buildAttendancePreviewSVG(report){
   const t=report.totals,svg=[];
   svg.push('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820">');
   svg.push('<defs><linearGradient id="navy" x1="0" x2="1" y1="0" y2="1">'+
@@ -88,5 +88,8 @@ export async function makeAttendancePreview(report){
   svg.push(vectorText('TOSHKENT  |  '+report.date,1153,804,16,'#60788b',
     {bold:true,align:'right',maxWidth:360}));
   svg.push('</svg>');
-  return sharp(Buffer.from(svg.join(''))).png({compressionLevel:8}).toBuffer();
+  return svg.join('');
+}
+export async function makeAttendancePreview(report){
+  return sharp(Buffer.from(buildAttendancePreviewSVG(report))).png({compressionLevel:8}).toBuffer();
 }
