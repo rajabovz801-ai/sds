@@ -1,19 +1,19 @@
 // Teddy's isolated, private Telegram attendance administration flow.
 // Existing student and business chats are untouched.
-import PDFDocument from 'pdfkit';
+import {renderAttendancePDF} from './attendance-landscape-pdf.js';
 import { telegram } from './telegram.js';
 import { getServiceSupabase } from '../../lib/supabase/server';
 import {
   ADMIN_IDS, OWNER_ID, isAttendanceAdmin, isAdminCommand, todayInTashkent, validDay, validMonth,
   moveMonth, displayDate, htmlEscape, localClock, duration, summarizeAttendance,
-  monthKeyboard, renderAttendanceHTML, compactSummary
+  monthKeyboard, compactSummary
 } from '../../lib/attendance-report-core.mjs';
+import {renderAttendanceHTML} from '../../lib/attendance-landscape.mjs';
 
 const api = () => 'https://api.telegram.org/bot' + process.env.TELEGRAM_BOT_TOKEN;
 const menuButtons = () => ({inline_keyboard:[
   [{text:'📊 Bugungi natijalar',callback_data:'att:today'}],
-  [{text:'🗓 Oldingi sanalar',callback_data:'att:month:'+todayInTashkent().slice(0,7)}],
-  [{text:'✨ ARK Education Centre',callback_data:'att:noop'}]
+  [{text:'🗓 Oldingi sanalar',callback_data:'att:month:'+todayInTashkent().slice(0,7)}]
 ]});
 const reportButtons = day => ({inline_keyboard:[
   [{text:'🎨 Rangli HTML',callback_data:'att:html:'+day},
@@ -70,58 +70,7 @@ function ascii(value) {
   return String(value??'').replace(/./gu,c=>mapping[c]??c).normalize('NFD')
     .replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7e]/g,'?');
 }
-async function attendancePDF(report) {
-  const doc=new PDFDocument({size:'A4',margin:38,bufferPages:true,
-    info:{Title:'ARK Davomat '+report.date,Author:'ARK Education Centre'}});
-  const buffers=[];const completion=new Promise((resolve,reject)=>{
-    doc.on('data',b=>buffers.push(Buffer.from(b)));
-    doc.on('end',()=>resolve(Buffer.concat(buffers)));doc.on('error',reject);
-  });
-  const PAGE_BOTTOM=748;
-  function header(title,sub) {
-    doc.rect(38,35,519,44).fill('#111111');
-    doc.font('Helvetica-Bold').fillColor('white').fontSize(16).text('ARK EDUCATION CENTRE',49,49);
-    doc.fillColor('#111111').font('Helvetica-Bold').fontSize(18).text(ascii(title),38,94);
-    doc.font('Helvetica').fontSize(10).text(ascii(sub),38,122);
-    doc.moveTo(38,146).lineTo(557,146).lineWidth(1).stroke('#222222');
-  }
-  function row(y,values,bold=false) {
-    const x=[43,69,292,355,423,484],w=[22,214,55,58,60,65];
-    if(bold)doc.rect(38,y-2,519,22).fill('#eeeeee');
-    doc.font(bold?'Helvetica-Bold':'Helvetica').fontSize(8.5).fillColor('#111111');
-    values.forEach((v,i)=>doc.text(ascii(v),x[i],y+4,{width:w[i],height:12,ellipsis:true,lineBreak:false}));
-    doc.moveTo(38,y+20).lineTo(557,y+20).lineWidth(.4).stroke('#cccccc');
-  }
-  header('KUNLIK DAVOMAT HISOBOTI','Sana: '+displayDate(report.date)+'    |    Guruhlar: '+report.groups.length);
-  const t=report.totals;
-  doc.font('Helvetica-Bold').fontSize(11).text(ascii(
-    'Jami: '+t.total+'      Keldi: '+t.present+'      Kelmadi: '+t.absent+
-    '      Kechikdi: '+t.late+'      Davomat: '+report.percent+'%'),38,165);
-  let y=201;
-  for(const g of report.groups){
-    if(y>680){doc.addPage();header('KUNLIK DAVOMAT','Sana: '+displayDate(report.date));y=165;}
-    doc.font('Helvetica-Bold').fontSize(13).fillColor('#111111').text(ascii(
-      g.name+'    |    Jami: '+g.total+'    Keldi: '+g.present+'    Kelmadi: '+g.absent),38,y);
-    y+=24;
-    row(y,['#','OQUVCHI','KELDI','KETDI','DAVOMIY','HOLAT'],true);y+=24;
-    let index=0;
-    for(const r of g.rows){
-      if(y>PAGE_BOTTOM){doc.addPage();header(g.name+' (davomi)','Sana: '+displayDate(report.date));y=170;row(y,['#','OQUVCHI','KELDI','KETDI','DAVOMIY','HOLAT'],true);y+=24;}
-      row(y,[++index,r.name,localClock(r.in),localClock(r.out),duration(r.in,r.out),
-        r.absent?'Kelmadi':r.late?'Kechikdi':r.pending?'Kutilmoqda':'Keldi']);
-      y+=23;
-    }
-    y+=23;
-  }
-  const range=doc.bufferedPageRange();
-  for(let p=range.start;p<range.start+range.count;p++){
-    doc.switchToPage(p);
-    doc.font('Helvetica').fontSize(9).fillColor('#444444')
-      .text('ARK Education Centre  |  '+displayDate(report.date),38,807,{lineBreak:false});
-    doc.text('Sahifa '+(p+1)+' / '+range.count,478,807,{width:79,align:'right',lineBreak:false});
-  }
-  doc.end();return completion;
-}
+const attendancePDF=renderAttendancePDF;
 async function sendFile(chatId,buffer,filename,type,caption,reply_markup) {
   const form=new FormData();
   form.set('chat_id',String(chatId));
@@ -145,18 +94,6 @@ async function sendAttendancePreview(chatId,report) {
   const response=await fetch(api()+'/sendPhoto',{method:'POST',body:form});
   const result=await response.json().catch(()=>({}));
   if(!response.ok||!result.ok)throw new Error('Telegram preview: '+(result.description||response.status));
-  return result.result;
-}
-async function sendAdminSticker(chatId) {
-  const {makeArkAdminSticker}=await import('./attendance-sticker.js');
-  const sticker=await makeArkAdminSticker();
-  const form=new FormData();
-  form.set('chat_id',String(chatId));
-  form.set('sticker',new Blob([sticker],{type:'image/webp'}),'ark-admin.webp');
-  form.set('emoji','🏛');
-  const response=await fetch(api()+'/sendSticker',{method:'POST',body:form});
-  const result=await response.json().catch(()=>({}));
-  if(!response.ok||!result.ok)throw new Error('Telegram sticker: '+(result.description||response.status));
   return result.result;
 }
 async function sendMenu(chatId,role='admin') {
@@ -192,8 +129,10 @@ async function sendAttendance(chatId,day,{only='all'}={}) {
       '🖨 <b>ARK Davomat</b> · '+displayDate(day),reportButtons(day));return;
   }
   if(only==='all'){
-    await message(chatId,compactSummary(report).slice(0,3800),reportButtons(day));
-    await sendAttendancePreview(chatId,report).catch(e=>console.warn('Preview image unavailable',e?.message||e));
+    try{await sendAttendancePreview(chatId,report);}catch(e){
+      console.warn('Preview image unavailable',e?.message||e);
+      await message(chatId,compactSummary(report).slice(0,3800),reportButtons(day));
+    }
   }
   const html=renderAttendanceHTML(report);
   await sendFile(chatId,Buffer.from(html,'utf8'),'ARK_Davomat_'+day+'.html','text/html',
@@ -233,7 +172,6 @@ export async function handleAttendanceAdminUpdate(update) {
     await message(m.chat.id,'🔒 Ushbu bo‘lim faqat vakolatli administratorlar uchun.');
     return true;
   }
-  await sendAdminSticker(m.chat.id).catch(e=>console.warn('ARK admin sticker unavailable',e?.message||e));
   await sendMenu(m.chat.id,String(m.from.id)===OWNER_ID?'super_admin':'admin');
   return true;
 }
