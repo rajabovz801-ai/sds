@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  isAttendanceAdmin,todayInTashkent,validDay,moveMonth,monthKeyboard,
+  isAttendanceAdmin,isAdminCommand,todayInTashkent,validDay,moveMonth,monthKeyboard,
   summarizeAttendance,renderAttendanceHTML,compactSummary
 } from '../lib/attendance-report-core.mjs';
 
@@ -11,6 +11,15 @@ test('only both explicitly authorized Telegram IDs can enter /admin',()=>{
   assert.equal(isAttendanceAdmin('5170628706'),false);
   assert.equal(isAttendanceAdmin(''),false);
   assert.equal(isAttendanceAdmin(null),false);
+});
+
+test('only /admin opens this panel',()=>{
+  assert.equal(isAdminCommand('/admin'),true);
+  assert.equal(isAdminCommand(' /admin  '),true);
+  assert.equal(isAdminCommand('/admin@TeddyBot'),true);
+  assert.equal(isAdminCommand('/admib'),false);
+  assert.equal(isAdminCommand('/admin extra'),false);
+  assert.equal(isAdminCommand('/administrator'),false);
 });
 
 test('Tashkent date, safe calendar and month navigation',()=>{
