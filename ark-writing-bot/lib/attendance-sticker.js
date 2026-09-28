@@ -1,6 +1,6 @@
 // No SVG <text> elements: all letters are converted to Noto Sans vector paths.
 import sharp from 'sharp';
-import fontkit from 'fontkit';
+import * as fontkit from 'fontkit';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 let fonts;
