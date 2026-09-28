@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource/noto-sans": "^5.2.0",
     "@breezystack/lamejs": "^1.2.7",
     "@supabase/supabase-js": "^2.57.0",
     "@vercel/functions": "^2.2.0",
@@ -20,7 +21,8 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "lucide-react": "^0.468.0",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "fontkit": "^2.0.4"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
