@@ -45,7 +45,7 @@ export default function ArticlePage(){
  const [popup,setPopup]=useState<{word:Word;x:number;y:number}|null>(null),[menu,setMenu]=useState<{x:number;y:number}|null>(null);
  const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState("");
  const reader=useRef<HTMLDivElement>(null),chosen=useRef<Range|null>(null);
- useEffect(()=>{let alive=true;fetch("/api/challenge-article?day="+day,{cache:"no-store"}).then(async r=>{const x=await r.json();if(!r.ok)throw Error(x.error||"Article not found");if(alive){setData(x);setPage(Math.min(4,Math.max(0,(x.progress.last_page||1)-1)));}}).catch(e=>alive&&setError(String(e))).finally(()=>alive&&setLoading(false));return()=>{alive=false}},[day]);
+ useEffect(()=>{let alive=true;fetch("/api/challenge-article?day="+day,{cache:"no-store"}).then(async r=>{const x=await r.json();if(!r.ok)throw Error(x.error||"Article not found");if(alive){setData(x);setPage(Math.min(Math.max(0,(x.article?.sections?.length||1)-1),Math.max(0,(x.progress.last_page||1)-1)));}}).catch(e=>alive&&setError(String(e))).finally(()=>alive&&setLoading(false));return()=>{alive=false}},[day]);
  const words=data?.glossary||[];
  const dictionary=useMemo(()=>new Map(words.map(w=>[w.display_word.toLowerCase(),w])),[words]);
  const pattern=useMemo(()=>words.length?new RegExp("("+words.map(w=>escapeRE(w.display_word)).sort((a,b)=>b.length-a.length).join("|")+")","gi"):null,[words]);
@@ -83,7 +83,7 @@ export default function ArticlePage(){
  return <main className="aa-shell" onClick={()=>popup&&setPopup(null)}>
   <header className="aa-header"><AnimatedBackButton href={"/day/"+day}/><span className="aa-brand">ARK <b>EDUCATION</b><em> · ARTICLE CDI</em></span><span className="aa-day">DAY {String(day).padStart(2,"0")}</span></header>
   <div className="aa-container">
-   <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAY {String(day).padStart(2,"0")} · DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} pages</span><span>{words.length} interactive words</span></div></div><RoomArt/></section>
+   <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAY {String(day).padStart(2,"0")} · DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} pages</span><span>{words.length} interactive words</span></div></div>{day===1?<RoomArt/>:<div className="aa-topic-art" aria-hidden="true"><div className="aa-topic-orbit aa-topic-orbit-one"/><div className="aa-topic-orbit aa-topic-orbit-two"/><BookOpen size={82} strokeWidth={1.1}/><span>ARK · DAY {String(day).padStart(2,"0")}</span></div>}</section>
    <div className="aa-work-title">
     <div className="aa-work-copy"><span className="aa-kicker">YOUR READING WORKSPACE</span><h2>Read, explore and remember</h2></div>
     <div className="aa-work-actions" aria-live="polite">
@@ -104,7 +104,7 @@ export default function ArticlePage(){
      </div>
      <div className="aa-section-heading"><div><h2>{current.heading}</h2><div className="aa-original">ORIGINAL ARTICLE · PAGE {current.page}</div></div><SectionArt kind={current.illustration}/></div>
      {current.paragraphs.map((p,i)=><p className="aa-text" key={i}>{rich(p)}</p>)}
-     <div className="aa-callout-box"><div className="aa-callout-head"><Leaf size={16}/> MORE FROM THE ARTICLE</div>{current.callouts.map((c,i)=><div key={i} className="aa-callout"><h3>{c.title}</h3><p>{rich(c.text)}</p></div>)}</div>
+     {current.callouts.length>0&&<div className="aa-callout-box"><div className="aa-callout-head"><Leaf size={16}/> MORE FROM THE ARTICLE</div>{current.callouts.map((c,i)=><div key={i} className="aa-callout"><h3>{c.title}</h3><p>{rich(c.text)}</p></div>)}</div>}
      <div className="aa-reader-nav"><button onClick={()=>visit(page-1)} disabled={page===0||busy}><ChevronLeft size={16}/> Previous</button>
       {page<pages.length-1?<button className="aa-next" onClick={()=>visit(page+1)} disabled={busy}>Next page <ChevronRight size={16}/></button>:completed?<Link className="aa-next" href={"/day/"+day+"/vocabulary"}>Open Vocabulary <ArrowRight size={16}/></Link>:<button className="aa-next" disabled={busy||!readyToFinish} onClick={complete}><CheckCircle2 size={16}/>{busy?"Saving…":"Finish Article"}</button>}
      </div>
