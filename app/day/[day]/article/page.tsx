@@ -3,12 +3,13 @@ import {useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {useParams} from "next/navigation";
 import AnimatedBackButton from "../../../components/animated-back-button";
-import {BookOpen,Bookmark,CheckCircle2,ChevronLeft,ChevronRight,ArrowRight,AlertCircle,X,Highlighter,Leaf} from "lucide-react";
+import {BookOpen,Bookmark,CheckCircle2,ChevronLeft,ChevronRight,ArrowRight,AlertCircle,X,Highlighter,Leaf,HeartHandshake,Footprints,Mountain,CloudMoon,Globe2,PartyPopper,Smile,BrainCircuit,Sparkles,ListChecks,HeartPulse,Landmark,BedDouble,Brain} from "lucide-react";
 import "./article.css";
 
 type Page={page:number;heading:string;paragraphs:string[];callouts:{title:string;text:string}[];illustration?:string};
 type Word={id:string;lemma:string;display_word:string;meaning_uz:string;definition_en:string;level:string;example:string};
 type Data={article:{title:string;deck:string;byline:string;sections:Page[]};progress:{visited_pages:number[];last_page:number;completed_at:string|null};glossary:Word[]};
+const TOPIC_ICONS:Record<number,typeof BookOpen>={2:HeartHandshake,3:Footprints,5:Mountain,6:CloudMoon,7:Globe2,8:PartyPopper,9:Smile,10:BrainCircuit,12:Sparkles,13:ListChecks,14:HeartPulse,15:Landmark,16:BedDouble,17:Brain};
 const escapeRE=(s:string)=>s.replace(/[\[\]{}()*+?.\\^$|]/g,"\\$&");
 
 function RoomArt(){return <svg viewBox="0 0 440 270" role="img" aria-label="Stylized tidy room illustration with books, boxes and a houseplant" className="aa-art">
@@ -80,10 +81,11 @@ export default function ArticlePage(){
  if(loading)return <main className="aa-shell"><div className="aa-loading">Loading the article…</div></main>;
  if(!data)return <main className="aa-shell"><div className="aa-loading"><AnimatedBackButton href={"/day/"+day}/><p>{error||"Article unavailable"}</p></div></main>;
  const article=data.article,pages=article.sections,current=pages[page],read=data.progress.visited_pages.length,completed=!!data.progress.completed_at,readyToFinish=read===pages.length&&!completed;
+ const TopicIcon=TOPIC_ICONS[day]||BookOpen;
  return <main className="aa-shell" onClick={()=>popup&&setPopup(null)}>
   <header className="aa-header"><AnimatedBackButton href={"/day/"+day}/><span className="aa-brand">ARK <b>EDUCATION</b><em> · ARTICLE CDI</em></span><span className="aa-day">DAY {String(day).padStart(2,"0")}</span></header>
   <div className="aa-container">
-   <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAY {String(day).padStart(2,"0")} · DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} pages</span><span>{words.length} interactive words</span></div></div>{day===1?<RoomArt/>:<div className="aa-topic-art" aria-hidden="true"><div className="aa-topic-orbit aa-topic-orbit-one"/><div className="aa-topic-orbit aa-topic-orbit-two"/><BookOpen size={82} strokeWidth={1.1}/><span>ARK · DAY {String(day).padStart(2,"0")}</span></div>}</section>
+   <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAY {String(day).padStart(2,"0")} · DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} pages</span><span>{words.length} interactive words</span></div></div>{day===1?<RoomArt/>:<div className={"aa-topic-art aa-topic-day-"+day} aria-hidden="true"><div className="aa-topic-orbit aa-topic-orbit-one"/><div className="aa-topic-orbit aa-topic-orbit-two"/><TopicIcon size={72} strokeWidth={1.25}/><span>ARK · DAY {String(day).padStart(2,"0")}</span></div>}</section>
    <div className="aa-work-title">
     <div className="aa-work-copy"><span className="aa-kicker">YOUR READING WORKSPACE</span><h2>Read, explore and remember</h2></div>
     <div className="aa-work-actions" aria-live="polite">
