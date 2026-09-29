@@ -20,6 +20,10 @@ export async function GET(req:NextRequest){
   return send({article:{id:a.id,title:a.title},students,progress});
  }
  const user=await getStudent(req);if(!user)return fail("Sign in to your challenge account",401);
+ if(action==="availability"){
+  if(!Number.isInteger(day)||day<1||day>60)return fail("Invalid day",400);
+  const a=await article(day);return send({published:!!a,title:a?.title||null});
+ }
  if(!isDayOpen(day,user))return fail("This study day is locked",403);
  const a=await article(day);if(!a)return fail("Article has not been published",404);
  const [progress,units,words]=await Promise.all([
@@ -53,7 +57,7 @@ export async function POST(req:NextRequest){
  }
  if(action==="finish"){
   const visited=progress?.visited_pages||[];
-  if(visited.length<total)return fail("Read all five article pages before completing",409);
+  if(visited.length<total)return fail("Read every article page before completing",409);
   const saved=await sqlTable("ark60_article_progress","PATCH",
    "student_id=eq."+user.id+"&article_id=eq."+a.id,
    {completed_at:progress?.completed_at||new Date().toISOString(),updated_at:new Date().toISOString()},
