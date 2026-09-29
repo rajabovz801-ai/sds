@@ -104,7 +104,7 @@ export default function ArticlePage(){
       </div>
       <span className="aa-highlight-hint"><Highlighter size={15}/> Select text for highlight</span>
      </div>
-     <div className="aa-section-heading"><div><h2>{current.heading}</h2><div className="aa-original">ORIGINAL ARTICLE · PAGE {current.page}</div></div><SectionArt kind={current.illustration}/></div>
+     <div className="aa-section-heading"><div><h2>{current.heading}</h2><div className="aa-original">ORIGINAL ARTICLE · PAGE {current.page}</div></div>{day===1?<SectionArt kind={current.illustration}/>:<div className={"aa-section-topic aa-topic-day-"+day} aria-hidden="true"><TopicIcon size={42} strokeWidth={1.4}/><span>{String(page+1).padStart(2,"0")}</span></div>}</div>
      {current.paragraphs.map((p,i)=><p className="aa-text" key={i}>{rich(p)}</p>)}
      {current.callouts.length>0&&<div className="aa-callout-box"><div className="aa-callout-head"><Leaf size={16}/> MORE FROM THE ARTICLE</div>{current.callouts.map((c,i)=><div key={i} className="aa-callout"><h3>{c.title}</h3><p>{rich(c.text)}</p></div>)}</div>}
      <div className="aa-reader-nav"><button onClick={()=>visit(page-1)} disabled={page===0||busy}><ChevronLeft size={16}/> Previous</button>
