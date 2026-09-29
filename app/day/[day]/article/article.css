@@ -389,3 +389,6 @@
  .aa-mobile-tabs button.active{background:#fff8e9;color:#845e24;border-color:#e7d3af}
  .aa-vocab-head{background:#fffcf6}
 }
+
+/* Topic-neutral, responsive original illustration for articles beyond Day 1. */
+.aa-topic-art{flex:0 0 310px;min-height:220px;position:relative;isolation:isolate;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;color:#5969a6;background:radial-gradient(circle at 75% 25%,#ffe7d5,transparent 53%),linear-gradient(145deg,#eef3ff,#e0f4ed);border-radius:26px;overflow:hidden}.aa-topic-art svg{position:relative;z-index:1;filter:drop-shadow(0 11px 11px #4b609433)}.aa-topic-art>span{position:relative;z-index:1;letter-spacing:.16em;font-size:11px;font-weight:800;color:#586c88}.aa-topic-orbit{position:absolute;border:1px solid #8d9acb80;border-radius:50%;width:220px;height:220px;transform:rotate(24deg) scaleX(1.4)}.aa-topic-orbit-two{width:320px;height:320px;transform:rotate(-30deg) scaleX(.9);opacity:.5}@media(max-width:850px){.aa-topic-art{flex-basis:auto;width:100%;min-height:155px}}
