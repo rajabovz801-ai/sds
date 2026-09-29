@@ -29,11 +29,11 @@ export async function GET(req:NextRequest){
  const [progress,units,words]=await Promise.all([
   sqlTable("ark60_article_progress","GET","select=last_page,visited_pages,completed_at&student_id=eq."+user.id+"&article_id=eq."+a.id+"&limit=1"),
   sqlTable("ark60_vocab_units","GET","select=id,unit_number,status&day_number=eq."+day+"&source_kind=eq.article&source_ordinal=eq.1&status=eq.published"),
-  sqlTable("ark60_vocab_terms","GET","select=id,lemma,display_word,meaning_uz,definition_en,level,example,unit_id&unit_id=in.("+
+  sqlTable("ark60_vocab_terms","GET","select=id,lemma,display_word,meaning_uz,definition_en,level,example,unit_id,position&unit_id=in.("+
    (await sqlTable("ark60_vocab_units","GET","select=id&day_number=eq."+day+"&source_kind=eq.article&source_ordinal=eq.1")).map((u:any)=>u.id).join(",")+")")
  ]);
  return send({article:a,progress:progress[0]||{last_page:0,visited_pages:[],completed_at:null},
-   glossary:words.filter((w:any)=>units.some((u:any)=>u.id===w.unit_id)),vocabulary_units:units});
+   glossary:words.filter((w:any)=>units.some((u:any)=>u.id===w.unit_id)).sort((a:any,b:any)=>{const au=units.find((u:any)=>u.id===a.unit_id)?.unit_number||0,bu=units.find((u:any)=>u.id===b.unit_id)?.unit_number||0;return au-bu||a.position-b.position}),vocabulary_units:units});
  }catch(e){console.error("Article GET",e);return fail("Unable to load article",503)}
 }
 export async function POST(req:NextRequest){
