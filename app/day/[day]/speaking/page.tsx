@@ -27,6 +27,7 @@ type Attempt={
 type ApiData={content:Content;attempt:Attempt|null;preview?:boolean};
 type Stage="intro"|"part1"|"part2"|"part3"|"review"|"complete";
 
+function pad(value:number){return String(value).padStart(2,"0")}
 function secondsLabel(value:number){
  const s=Math.max(0,Math.floor(value||0));
  return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
