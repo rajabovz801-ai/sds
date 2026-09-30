@@ -931,3 +931,6 @@ button.user-tile>svg{color:#8290a0;flex:none}
  .profile-signout{flex-direction:column;align-items:stretch}
  .profile-signout button{justify-content:center}
 }
+
+.topbar-status.preview-mode{background:#eef4ff;color:#294f7d;border:1px solid #d9e5f4}
+.topbar-status.preview-mode .status-pulse{background:#4e78a8}
