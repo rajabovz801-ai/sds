@@ -130,3 +130,49 @@ test("root layout declares a device-width mobile viewport",()=>{
   assert.match(layout,/width:"device-width"/);
   assert.match(layout,/initialScale:1/);
 });
+
+
+test("student dashboard exposes real reward leaderboard progress and profile panels",()=>{
+  const page=read("app/dashboard/page.tsx");
+  const panels=read("app/components/challenge-hub-panels.tsx");
+  assert.match(page,/LeaderboardPanel/);
+  assert.match(page,/ProgressPanel/);
+  assert.match(page,/AchievementsPanel/);
+  assert.match(page,/ProfilePanel/);
+  assert.match(page,/RewardModal/);
+  assert.match(page,/task-coin-badge/);
+  assert.doesNotMatch(page,/>MY MODULES</);
+  assert.match(panels,/action:"claim_daily_reward"/);
+  assert.match(panels,/action:"update_profile"/);
+  assert.match(panels,/action:"logout_all"/);
+  assert.match(panels,/action=leaderboard/);
+});
+
+test("challenge sidebar no longer duplicates the My Modules list",()=>{
+  const sidebar=read("app/components/challenge-sidebar.tsx");
+  assert.doesNotMatch(sidebar,/MY MODULES/);
+  assert.match(sidebar,/Day \{String\(day\)\.padStart/);
+});
+
+test("completion reward paths remain preview-safe",()=>{
+  const reading=read("app/api/challenge-reading/route.ts");
+  const article=read("app/api/challenge-article/route.ts");
+  const vocab=read("app/api/challenge-vocab/route.ts");
+  const writing=read("app/api/challenge-writing/route.js");
+  assert.match(reading,/preview:true/);
+  assert.match(article,/isPreview\(user\)/);
+  assert.match(vocab,/isPreview\(student\)/);
+  assert.match(writing,/student\.username === PREVIEW_USERNAME/);
+});
+
+test("student API provides reward center leaderboard and editable profile actions",()=>{
+  const backend=read("api/ark60.py");
+  assert.match(backend,/action=="reward_center"/);
+  assert.match(backend,/rpc\/ark60_reward_center/);
+  assert.match(backend,/action=="leaderboard"/);
+  assert.match(backend,/rpc\/ark60_leaderboard_snapshot/);
+  assert.match(backend,/action=="claim_daily_reward"/);
+  assert.match(backend,/rpc\/ark60_claim_daily_reward/);
+  assert.match(backend,/action=="update_profile"/);
+  assert.match(backend,/date_of_birth,gender,english_level,exam_date/);
+});
