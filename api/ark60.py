@@ -264,7 +264,8 @@ async def actions(request:Request,response:Response):
             raise HTTPException(status_code=409,detail="Username is unavailable. Please choose another.")
         rows=db("POST","ark60_students",payload={"first_name":first,"last_name":last,"username":username,"password_hash":hash_password(pwd),"target_band":band,"status":"pending"},prefer="return=representation")
         if not rows:raise HTTPException(status_code=502,detail="Could not submit registration request")
-        clear_limit(bucket)
+        # Keep successful registrations in the rate bucket too; otherwise one IP can
+        # create unlimited valid pending accounts by clearing the limiter on every success.
         return {"ok":True,"username":username,"target_band":band,"status":"pending","message":"Registration request sent. Save your username and wait for admin approval."}
     if action=="login":
         # One login form for students, admins and the single Super Admin.
