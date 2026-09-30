@@ -8,7 +8,7 @@ import "./article.css";
 
 type Page={page:number;heading:string;paragraphs:string[];callouts:{title:string;text:string}[];illustration?:string};
 type Word={id:string;lemma:string;display_word:string;meaning_uz:string;definition_en:string;level:string;example:string};
-type Data={article:{title:string;deck:string;byline:string;sections:Page[]};progress:{visited_pages:number[];last_page:number;completed_at:string|null};glossary:Word[]};
+type Data={article:{title:string;deck:string;byline:string;sections:Page[]};progress:{visited_pages:number[];last_page:number;completed_at:string|null};glossary:Word[];preview?:boolean};
 const TOPIC_ICONS:Record<number,typeof BookOpen>={2:HeartHandshake,3:Footprints,5:Mountain,6:CloudMoon,7:Globe2,8:PartyPopper,9:Smile,10:BrainCircuit,12:Sparkles,13:ListChecks,14:HeartPulse,15:Landmark,16:BedDouble,17:Brain};
 const escapeRE=(s:string)=>s.replace(/[\[\]{}()*+?.\\^$|]/g,"\\$&");
 
@@ -59,13 +59,18 @@ export default function ArticlePage(){
   // The article follows the normal browser scroll, so return to its first line when changing pages.
   window.requestAnimationFrame(()=>reader.current?.scrollIntoView({behavior:"smooth",block:"start"}));
   if(data.progress.visited_pages.includes(n+1))return;
+  if(data.preview){
+   const visited=[...new Set([...data.progress.visited_pages,n+1])].sort((a,b)=>a-b);
+   setData(old=>old?{...old,progress:{...old.progress,last_page:Math.max(old.progress.last_page,n+1),visited_pages:visited}}:old);
+   return;
+  }
   setBusy(true);try{
    const r=await fetch("/api/challenge-article",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"page",day,page:n+1})});const x=await r.json();
    if(!r.ok)throw Error(x.error||"Could not save progress");setData(old=>old?{...old,progress:x.progress}:old);
   }catch(e){setError(String(e))}finally{setBusy(false)}
  }
  useEffect(()=>{if(data&&!data.progress.visited_pages.includes(page+1)&&!busy)void visit(page)},[data?.article.title]);
- async function complete(){if(!data||busy)return;setBusy(true);try{const r=await fetch("/api/challenge-article",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"finish",day})});const x=await r.json();if(!r.ok)throw Error(x.error||"Read all pages");setData(o=>o?{...o,progress:x.progress}:o);}catch(e){setError(String(e))}finally{setBusy(false)}}
+ async function complete(){if(!data||busy)return;if(data.preview){if(data.progress.visited_pages.length<data.article.sections.length){setError("Read all pages");return}setData(o=>o?{...o,progress:{...o.progress,completed_at:new Date().toISOString()}}:o);return}setBusy(true);try{const r=await fetch("/api/challenge-article",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"finish",day})});const x=await r.json();if(!r.ok)throw Error(x.error||"Read all pages");setData(o=>o?{...o,progress:x.progress}:o);}catch(e){setError(String(e))}finally{setBusy(false)}}
  function switchTab(next:"article"|"vocab"){
   setTab(next);setPopup(null);setMenu(null);
   window.requestAnimationFrame(()=>document.getElementById("aa-reading-workspace")?.scrollIntoView({behavior:"smooth",block:"start"}));
