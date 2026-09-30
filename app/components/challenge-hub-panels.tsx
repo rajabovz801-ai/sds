@@ -87,7 +87,7 @@ export function ProfilePanel({stats,onStudent,onCoins,onLogout}:{stats:HubStats;
  const [saving,setSaving]=useState(false),[message,setMessage]=useState("");
  async function save(){
   setSaving(true);setMessage("");
-  try{const r=await fetch("/api/ark60",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"update_profile",...form,target_band:Number(form.target_band)})});const j=await r.json();if(!r.ok)throw new Error(j.detail||"Could not save profile.");onStudent(j.student);if(j.profile_bonus_awarded){onCoins(stats.coins+1);setMessage("Profile saved · +1 coin earned.")}else setMessage("Profile saved.")}catch(e){setMessage(e instanceof Error?e.message:"Could not save profile.")}finally{setSaving(false)}
+  try{const r=await fetch("/api/ark60",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"update_profile",...form,target_band:Number(form.target_band)})});const j=await r.json();if(!r.ok)throw new Error(j.detail||"Could not save profile.");onStudent(j.student);if(j.profile_bonus_awarded){onCoins(stats.coins+1);setMessage("Changes saved · +1 coin earned.")}else setMessage("Changes saved.")}catch(e){setMessage(e instanceof Error?e.message:"Could not save profile.")}finally{setSaving(false)}
  }
  async function logoutAll(){if(!window.confirm("Sign out this account on every device?"))return;try{await fetch("/api/ark60",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout_all"})})}finally{onLogout()}}
  const initials=(s.first_name[0]+s.last_name[0]).toUpperCase();
