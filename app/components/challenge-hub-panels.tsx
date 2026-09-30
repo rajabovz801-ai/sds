@@ -1,7 +1,7 @@
 "use client";
 
 import {useEffect,useMemo,useState} from "react";
-import {Award,CalendarDays,Check,Clock3,Coins,Gift,Medal,Save,ShieldCheck,Target,Trophy,UserRound,X} from "lucide-react";
+import {Award,Check,Clock3,Coins,Medal,Save,ShieldCheck,Target,Trophy,UserRound,X,type LucideIcon} from "lucide-react";
 
 type Student={
  id:string;first_name:string;last_name:string;username:string;target_band:number;
@@ -65,7 +65,7 @@ export function ProgressPanel({stats,completedDays}:{stats:HubStats;completedDay
 
 export function AchievementsPanel({stats,completedDays}:{stats:HubStats;completedDays:number}){
  const tasks=stats.completed.length,profile=Boolean(stats.student.date_of_birth&&stats.student.gender&&stats.student.english_level&&stats.student.exam_date);
- const items=[
+ const items:Array<[string,string,boolean,number,LucideIcon]>=[
   ["First task","Complete your first challenge task",tasks>=1,Math.min(100,tasks*100),Award],
   ["Five tasks","Complete 5 challenge tasks",tasks>=5,Math.min(100,tasks/5*100),Check],
   ["Ten tasks","Complete 10 challenge tasks",tasks>=10,Math.min(100,tasks/10*100),Medal],
@@ -75,7 +75,7 @@ export function AchievementsPanel({stats,completedDays}:{stats:HubStats;complete
   ["Coin collector","Earn 15 coins",stats.coins>=15,Math.min(100,stats.coins/15*100),Coins],
   ["Full profile","Complete your IELTS profile",profile,profile?100:40,UserRound],
   ["Day finisher","Complete every published task in one day",completedDays>=1,completedDays?100:0,ShieldCheck],
- ] as const;
+ ];
  return <section className="hub-panel"><div className="hub-heading"><div><small>MILESTONES</small><h1>Achievements</h1><p>Achievements unlock from actual saved course progress — no demo scores.</p></div><Medal size={34}/></div>
   <div className="achievement-grid">{items.map(([title,desc,done,progress,Icon])=><article className={done?"unlocked":""} key={title}><span><Icon size={21}/>{done&&<Check size={12}/>}</span><b>{title}</b><p>{desc}</p><div><i style={{width:progress+"%"}}/></div><small>{done?"Unlocked":Math.round(progress)+"%"}</small></article>)}</div>
  </section>;
