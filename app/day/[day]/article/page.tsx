@@ -2,7 +2,8 @@
 import {useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {useParams} from "next/navigation";
-import AnimatedBackButton from "../../../components/animated-back-button";\nimport StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
+import AnimatedBackButton from "../../../components/animated-back-button";
+import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {BookOpen,Bookmark,CheckCircle2,ChevronLeft,ChevronRight,ArrowRight,AlertCircle,X,Highlighter,Leaf,HeartHandshake,Footprints,Mountain,CloudMoon,Globe2,PartyPopper,Smile,BrainCircuit,Sparkles,ListChecks,HeartPulse,Landmark,BedDouble,Brain} from "lucide-react";
 import "./article.css";
 
