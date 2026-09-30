@@ -35,7 +35,7 @@ export function RewardModal({open,onClose,onBalance}:{open:boolean;onClose:()=>v
    <div className="reward-coin"><Coins size={28}/></div>
    <h2>Daily reward</h2><p>Come back every day — each consecutive day gives more coins.</p>
    <div className="reward-week">{Array.from({length:7},(_,i)=>i+1).map(n=><div key={n} className={"reward-day "+(n===active?"active ":"")+(data?.claimed_today&&n===data.streak_day?"claimed":"")}><small>{n===active&&!data?.claimed_today?"TODAY":"DAY "+n}</small><Coins size={19}/><b>+{n}</b>{data?.claimed_today&&n===data.streak_day&&<Check size={13}/>}</div>)}</div>
-   <button className="reward-claim" disabled={loading||!!data?.claimed_today||!!data?.preview} onClick={claim}>{data?.claimed_today?"Today's reward claimed":data?.preview?"Preview reward only":loading?"Loading…":"Claim +"+(data?.next_amount||1)+" coin"+((data?.next_amount||1)>1?"s":"")}</button>
+   <button className="reward-claim" disabled={loading||!!data?.claimed_today} onClick={claim}>{data?.claimed_today?"Today's reward claimed":loading?"Loading…":"Claim +"+(data?.next_amount||1)+" coin"+((data?.next_amount||1)>1?"s":"")}</button>
    {message&&<div className="reward-message">{message}</div>}
    <div className="reward-earn"><span><Coins size={18}/></span><div><b>Earn more</b><small>Complete any published module · +1 coin</small></div></div>
    <div className="reward-history-head"><span>Balance: <b>{data?.balance??0}</b> <Coins size={13}/></span><b>Coin history</b></div>
