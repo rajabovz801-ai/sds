@@ -28,7 +28,7 @@ const regular:ModuleCard[]=[
  {name:"Article",detail:"Academic article · CDI reader",icon:Newspaper,tone:"amber",time:"20–30 min"},
  {name:"Vocabulary",detail:"Daily words + review quiz",icon:NotebookPen,tone:"green",time:"15–25 min"},
  {name:"Writing",detail:"IELTS Task 1 or Task 2",icon:PenLine,tone:"orange",time:"40 min"},
- {name:"Speaking",detail:"Practice + audio recording",icon:Mic,tone:"pink",time:"15–20 min"}
+ {name:"Speaking",detail:"Full Speaking · Parts 1–3",icon:Mic,tone:"pink",time:"12–18 min"}
 ];
 const mockModules:ModuleCard[]=[
  {name:"Listening",detail:"4 sections · 40 questions",icon:Headphones,tone:"blue",time:"~30 min"},
