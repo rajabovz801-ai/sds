@@ -1,6 +1,6 @@
 import {NextRequest,NextResponse} from "next/server";
 import {randomInt} from "node:crypto";
-import {getStudent,getAdmin,isDayOpen,isOwnOrigin,isUuid,sqlTable,type Student} from "../../../lib/ark60-content-auth";
+import {getStudent,getAdmin,isDayOpen,isOwnOrigin,isUuid,isPreview,sqlTable,type Student} from "../../../lib/ark60-content-auth";
 export const dynamic="force-dynamic";
 const json=(data:unknown,status=200)=>NextResponse.json(data,{status,headers:{"Cache-Control":"private,no-store"}});
 const error=(message:string,status=400)=>json({error:message},status);
@@ -62,7 +62,8 @@ export async function GET(req:NextRequest){
    "select=id,day_number,source_kind,source_ordinal,unit_number,source_title,pass_mark,status&day_number=eq."+day+"&status=eq.published&order=source_kind,source_ordinal,unit_number") as Unit[];
   if(!units.length)return json({day,units:[],word_count:0,completed_count:0});
   const ids=units.map(u=>u.id);
-  const attempts=await sqlTable("ark60_vocab_attempts","GET",
+  const preview=isPreview(student);
+  const attempts=preview?[]:await sqlTable("ark60_vocab_attempts","GET",
    "select=id,unit_id,attempt_no,correct_count,status,finished_at&student_id=eq."+student.id+"&unit_id=in.("+ids.join(",")+")&order=attempt_no.desc");
   const counts=await sqlTable("ark60_vocab_terms","GET","select=unit_id&unit_id=in.("+ids.join(",")+")&limit=2000");
   return json({day,units:units.map(u=>{
@@ -72,7 +73,7 @@ export async function GET(req:NextRequest){
      completed:mine.some((a:any)=>a.status==="completed"),
      attempts:mine.length,
      in_progress:mine.find((a:any)=>a.status==="in_progress")?.id||null};
-   }),preview:student.username.toLowerCase()==="rustam7"});
+   }),preview});
  }
  if(action==="learn"){
   const id=params.get("unit")||"",unit=await getUnit(id,student);if(!unit)return error("Unit unavailable",404);
@@ -99,6 +100,17 @@ export async function POST(req:NextRequest){
   const all=await terms(unit.id);
   if(all.length!==20||new Set(all.map(t=>t.meaning_uz.toLowerCase())).size!==20)
    return error("Quiz is still being prepared",409);
+  if(isPreview(student)){
+   const questions=shuffle(all).map(term=>{
+    const wrong=shuffle(all.filter(w=>w.id!==term.id&&w.meaning_uz!==term.meaning_uz)).slice(0,3);
+    const options=shuffle([term,...wrong].map(t=>t.meaning_uz));
+    return {number:0,word:term.display_word,level:term.level,context:term.example,options,correct_index:options.indexOf(term.meaning_uz)};
+   }).map((q,i)=>({...q,number:i+1}));
+   return json({unit,preview:true,attempt:{
+    id:"preview-"+unit.id,status:"in_progress",attempt_no:1,score:0,answered:0,answers:[],
+    started_at:new Date().toISOString(),pass_mark:18,questions
+   }});
+  }
   const attempts=await sqlTable("ark60_vocab_attempts","GET",
    "select=id,unit_id,attempt_no,questions,answers,correct_count,status,started_at,finished_at&student_id=eq."+student.id+"&unit_id=eq."+unit.id+"&order=attempt_no.desc");
   const current=attempts.find((a:any)=>a.status==="in_progress");
@@ -116,6 +128,7 @@ export async function POST(req:NextRequest){
   return json({unit,attempt:await attemptForClient(inserted[0])});
  }
  if(action==="answer"){
+  if(isPreview(student))return error("Preview quiz answers are evaluated locally and are not saved.",409);
   const record=await getAttempt(String(body.attempt_id||""),student);
   if(!record)return error("Attempt unavailable",404);
   const position=Number(body.position),choice=Number(body.choice);
