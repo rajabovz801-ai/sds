@@ -778,3 +778,8 @@ button.user-tile>svg{color:#8290a0;flex:none}
  .hub-kpis,.achievement-grid{grid-template-columns:1fr}.module-progress-list>div{grid-template-columns:1fr;gap:7px}.module-progress-list>div>b{text-align:left}
  .profile-hero-card{grid-template-columns:auto 1fr;padding:17px}.profile-big-avatar{width:58px;height:58px}.profile-main-copy h1{font-size:22px}.profile-summary{grid-template-columns:1fr}.profile-summary>div:last-child{grid-column:auto}.two-input{grid-template-columns:1fr}.profile-signout{flex-direction:column;gap:14px;align-items:flex-start}
 }
+
+.sidebar-reward-btn{width:100%;border:1px solid #d9e4d7;background:#f8fcf6;border-radius:11px;min-height:54px;padding:9px 10px;display:flex;align-items:center;gap:9px;text-align:left;color:#23352a;cursor:pointer;margin-bottom:10px;font-family:inherit}
+.sidebar-reward-btn>span{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:#f6bd36;color:#fff;border:2px solid #d29210;flex:none}
+.sidebar-reward-btn>div{display:grid;gap:2px;flex:1;min-width:0}.sidebar-reward-btn b{font-size:10px}.sidebar-reward-btn small{font-size:8px;color:#78867d}.sidebar-reward-btn>svg{color:#7a897e}
+.sidebar-reward-btn:hover{background:#eef6ec;border-color:#bcd0b8}
