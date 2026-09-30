@@ -222,3 +222,45 @@ test("reward and profile polish keeps preview mode explicit",()=>{
   assert.match(hub,/Save changes/);
   assert.match(hub,/Sign out on all devices/);
 });
+
+
+test("Dashboard and 60-Day Plan are distinct live views",()=>{
+  const page=read("app/dashboard/page.tsx");
+  assert.match(page,/view==="Dashboard"/);
+  assert.match(page,/view==="60-Day Plan"/);
+  assert.match(page,/TODAY'S PLAN/);
+  assert.match(page,/Challenge calendar/);
+  assert.doesNotMatch(page,/view==="Dashboard"\|\|view==="60-Day Plan"/);
+});
+
+test("student sidebar keeps only reward and profile at the bottom",()=>{
+  const page=read("app/dashboard/page.tsx");
+  assert.match(page,/sidebar-reward-btn/);
+  assert.match(page,/sidebar-profile-tile/);
+  assert.doesNotMatch(page,/One day at a time/);
+  assert.doesNotMatch(page,/className="back-login"/);
+});
+
+test("dashboard topbar removes clock and duplicate profile and adds theme control",()=>{
+  const page=read("app/dashboard/page.tsx");
+  assert.doesNotMatch(page,/time-chip/);
+  assert.doesNotMatch(page,/profile-chip/);
+  assert.match(page,/theme-toggle/);
+  assert.match(page,/ark60-theme/);
+  assert.match(page,/Switch to dark mode/);
+});
+
+test("full Welcome title uses typewriter animation",()=>{
+  const page=read("app/dashboard/page.tsx");
+  const css=read("app/globals.css");
+  assert.match(page,/const full="Welcome, "\+stats\.student\.first_name\+"\."/);
+  assert.match(page,/setTypedWelcome\(full\.slice\(0,index\)\)/);
+  assert.match(page,/typewriter-caret/);
+  assert.match(css,/ark-caret-blink/);
+});
+
+test("calendar dots reflect published module requirements",()=>{
+  const page=read("app/dashboard/page.tsx");
+  assert.match(page,/required\.includes\(m\.name\.toLowerCase\(\)\)\?m\.tone:"muted"/);
+  assert.match(page,/dot-small muted/);
+});
