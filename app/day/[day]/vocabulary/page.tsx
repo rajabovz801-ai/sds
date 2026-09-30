@@ -3,7 +3,8 @@ import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {useParams} from "next/navigation";
 import AnimatedBackButton from "../../../components/animated-back-button";
-import ChallengeSidebar from "../../../components/challenge-sidebar";\nimport StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
+import ChallengeSidebar from "../../../components/challenge-sidebar";
+import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {ArrowRight,BookOpen,Bookmark,Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Layers3,LockKeyhole,RefreshCw,RotateCcw,Sparkles,Target,Trophy,X,AlertCircle} from "lucide-react";
 import "./vocabulary.css";
 
