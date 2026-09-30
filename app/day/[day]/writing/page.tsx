@@ -21,7 +21,7 @@ export default function WritingPage(){
  const router=useRouter();
  const [data,setData]=useState<ApiData|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState("");
  const [answer,setAnswer]=useState(""),[started,setStarted]=useState(false),[paused,setPaused]=useState(false),[remaining,setRemaining]=useState(0),[sending,setSending]=useState(false),[message,setMessage]=useState(""),[fullScreen,setFullScreen]=useState(false);
- const timerRef=useRef<number|null>(null),draftSaveRef=useRef<number|null>(null),lastTick=useRef(Date.now());
+ const timerRef=useRef<number|null>(null),draftSaveRef=useRef<number|null>(null),lastDraftSyncRef=useRef(0),lastTick=useRef(Date.now());
  const storageKey=data?.draft_scope?`ark60-writing-${data.draft_scope}-day-${day}`:"";
 
  useEffect(()=>{let live=true;(async()=>{setLoading(true);setError("");try{const r=await fetch(`/api/challenge-writing?day=${day}`,{credentials:"same-origin",cache:"no-store"});const obj:ApiData=await r.json();if(!r.ok)throw new Error((obj as any).detail||"Writing task could not be loaded.");if(!live)return;setData(obj);const duration=Number(obj.content?.payload?.duration_seconds||0);setRemaining(duration);setAnswer("");setStarted(false);setPaused(false);
@@ -48,14 +48,16 @@ export default function WritingPage(){
   try{localStorage.setItem(storageKey,JSON.stringify(payload))}catch{}
   if(data.preview)return;
   if(draftSaveRef.current)window.clearTimeout(draftSaveRef.current);
+  const wait=Math.max(500,5000-(Date.now()-lastDraftSyncRef.current));
   draftSaveRef.current=window.setTimeout(async()=>{
    try{
-    await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    const res=await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({
      action:"draft",day,answer,duration_seconds:Math.max(0,Number(data.content.payload.duration_seconds||0)-remaining),
      timer_started:started,timer_paused:paused,remaining_seconds:remaining
     })});
+    if(res.ok)lastDraftSyncRef.current=Date.now();
    }catch{}
-  },1200);
+  },wait);
   return()=>{if(draftSaveRef.current)window.clearTimeout(draftSaveRef.current)};
  },[answer,started,paused,remaining,data?.submission,data?.preview,storageKey,day]);
 
