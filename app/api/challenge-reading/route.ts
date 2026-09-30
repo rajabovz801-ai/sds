@@ -72,7 +72,8 @@ export async function GET(req:NextRequest){
   const details=await db("ark60_reading_passages","GET","select=id,questions,answer_key,analysis&day_number=eq."+day);
   const users=new Map(students.map((s:J)=>[s.id,s]));
   const source=new Map(details.map((p:J)=>[p.id,p]));
-  return NextResponse.json({day,passages,attempts:rows.map((a:J)=>({...a,student:users.get(a.student_id)||null,
+  const realRows=rows.filter((a:J)=>String((users.get(a.student_id) as J|undefined)?.username||"").toLowerCase()!==previewName);
+  return NextResponse.json({day,passages,attempts:realRows.map((a:J)=>({...a,student:users.get(a.student_id)||null,
     review:source.get(a.passage_id)?reviewFor(source.get(a.passage_id) as J,a):null,
     answers:undefined
   }))});
