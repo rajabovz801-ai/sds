@@ -97,7 +97,9 @@ test("practice timer never locks Writing editor or submit",()=>{
 
 test("preview account cannot create study-time heartbeat records",()=>{
   const backend=read("api/ark60.py");
-  const heartbeat=backend.slice(backend.indexOf('if action=="heartbeat":'),backend.indexOf('raise HTTPException(status_code=404,detail="Unknown action")'));
+  const heartbeatStart=backend.indexOf('if action=="heartbeat":');
+  const heartbeatEnd=backend.indexOf('raise HTTPException(status_code=404,detail="Unknown action")',heartbeatStart);
+  const heartbeat=backend.slice(heartbeatStart,heartbeatEnd);
   assert.match(heartbeat,/user\.get\("username"\)=="rustam7"/);
   assert.match(heartbeat,/"preview":True,"added_seconds":0/);
 });
