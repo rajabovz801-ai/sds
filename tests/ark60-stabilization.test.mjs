@@ -134,15 +134,16 @@ test("root layout declares a device-width mobile viewport",()=>{
 });
 
 
-test("student dashboard exposes real reward leaderboard progress and profile panels",()=>{
+test("student dashboard exposes real reward leaderboard progress and profile panels without Achievements",()=>{
   const page=read("app/dashboard/page.tsx");
   const panels=read("app/components/challenge-hub-panels.tsx");
   assert.match(page,/LeaderboardPanel/);
   assert.match(page,/ProgressPanel/);
-  assert.match(page,/AchievementsPanel/);
   assert.match(page,/ProfilePanel/);
   assert.match(page,/RewardModal/);
   assert.match(page,/task-coin-badge/);
+  assert.doesNotMatch(page,/Achievements/);
+  assert.doesNotMatch(panels,/AchievementsPanel/);
   assert.doesNotMatch(page,/>MY MODULES</);
   assert.match(panels,/action:"claim_daily_reward"/);
   assert.match(panels,/action:"update_profile"/);
