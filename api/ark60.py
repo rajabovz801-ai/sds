@@ -167,14 +167,16 @@ def get_data(request:Request, action:str="health", day:int=1):
         user=require_student(request)
         rows=db("POST","rpc/ark60_student_dashboard_summary",payload={"p_student":user["id"],"p_today":str(today())})
         summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
+        preview=user.get("username")=="rustam7"
         return {
             "student":user,
-            "active_seconds":int(summary.get("active_seconds") or 0),
-            "today_seconds":int(summary.get("today_seconds") or 0),
-            "by_module":summary.get("by_module") or {m:0 for m in sorted(MODULES)},
-            "completed":summary.get("completed") or [],
-            "coins":int(summary.get("coins") or 0),
-            "required_by_day":summary.get("required_by_day") or {}
+            "active_seconds":0 if preview else int(summary.get("active_seconds") or 0),
+            "today_seconds":0 if preview else int(summary.get("today_seconds") or 0),
+            "by_module":({m:0 for m in sorted(MODULES)} if preview else (summary.get("by_module") or {m:0 for m in sorted(MODULES)})),
+            "completed":[] if preview else (summary.get("completed") or []),
+            "coins":0 if preview else int(summary.get("coins") or 0),
+            "required_by_day":summary.get("required_by_day") or {},
+            "preview":preview
         }
     if action=="day":
         require_student(request)
