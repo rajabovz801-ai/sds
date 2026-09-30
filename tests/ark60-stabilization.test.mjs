@@ -52,3 +52,25 @@ test("dashboard polling is throttled and skips hidden tabs",()=>{
   assert.match(dashboard,/300000/);
   assert.doesNotMatch(dashboard,/setInterval\(refresh,60000\)/);
 });
+
+
+test("Writing timer restores an explicit zero instead of resetting to full duration",()=>{
+  const page=read("app/day/[day]/writing/page.tsx");
+  assert.match(page,/Number\.isFinite\(savedRemaining\)\?Math\.max\(0,savedRemaining\):duration/);
+  assert.doesNotMatch(page,/Number\(saved\.remaining\)\|\|duration/);
+});
+
+test("dashboard redirects expired sessions and surfaces load failures",()=>{
+  const dashboard=read("app/dashboard/page.tsx");
+  assert.match(dashboard,/res\.status===401/);
+  assert.match(dashboard,/window\.location\.replace\("\/"\)/);
+  assert.match(dashboard,/Could not load your dashboard/);
+});
+
+
+test("successful registrations stay inside the anti-spam rate-limit bucket",()=>{
+  const backend=read("api/ark60.py");
+  const register=backend.slice(backend.indexOf('if action=="register":'),backend.indexOf('if action=="login":'));
+  assert.match(register,/rate_limit\(request,"register",True\)/);
+  assert.doesNotMatch(register,/clear_limit\(bucket\)/);
+});
