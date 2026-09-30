@@ -1,7 +1,7 @@
 "use client";
 
 import {useEffect,useMemo,useState} from "react";
-import {Award,Check,Clock3,Coins,LogOut,Medal,Save,ShieldCheck,Star,Target,Trophy,UserRound,X,type LucideIcon} from "lucide-react";
+import {Check,Clock3,Coins,LogOut,Medal,Save,Star,Target,Trophy,X} from "lucide-react";
 
 type Student={
  id:string;first_name:string;last_name:string;username:string;target_band:number;
@@ -60,24 +60,6 @@ export function ProgressPanel({stats,completedDays}:{stats:HubStats;completedDay
  return <section className="hub-panel"><div className="hub-heading"><div><small>REAL ACTIVITY</small><h1>Your progress</h1><p>Only saved challenge activity is counted here.</p></div><Target size={34}/></div>
   <div className="hub-kpis"><article><span>Completed days</span><b>{completedDays}<small>/60</small></b></article><article><span>Completed tasks</span><b>{total}<small>/{required||"—"}</small></b></article><article><span>Total study time</span><b>{fmt(stats.active_seconds)}</b></article><article><span>Coins earned</span><b>{stats.coins}</b></article></div>
   <div className="module-progress-list">{modules.map(m=>{const count=stats.completed.filter(x=>x.module===m).length;const seconds=Number(stats.by_module?.[m]||0);return <div key={m}><span className="module-progress-name">{moduleLabel(m)}</span><div className="module-progress-bar"><i style={{width:Math.min(100,Math.max(count?8:0,(seconds/3600)*12))+"%"}}/></div><b>{count} tasks · {fmt(seconds)}</b></div>})}</div>
- </section>;
-}
-
-export function AchievementsPanel({stats,completedDays}:{stats:HubStats;completedDays:number}){
- const tasks=stats.completed.length,profile=Boolean(stats.student.date_of_birth&&stats.student.gender&&stats.student.english_level&&stats.student.exam_date);
- const items:Array<[string,string,boolean,number,LucideIcon]>=[
-  ["First task","Complete your first challenge task",tasks>=1,Math.min(100,tasks*100),Award],
-  ["Five tasks","Complete 5 challenge tasks",tasks>=5,Math.min(100,tasks/5*100),Check],
-  ["Ten tasks","Complete 10 challenge tasks",tasks>=10,Math.min(100,tasks/10*100),Medal],
-  ["One focused hour","Study actively for 1 hour",stats.active_seconds>=3600,Math.min(100,stats.active_seconds/3600*100),Clock3],
-  ["Five focused hours","Study actively for 5 hours",stats.active_seconds>=18000,Math.min(100,stats.active_seconds/18000*100),Clock3],
-  ["Coin starter","Earn 5 coins",stats.coins>=5,Math.min(100,stats.coins/5*100),Coins],
-  ["Coin collector","Earn 15 coins",stats.coins>=15,Math.min(100,stats.coins/15*100),Coins],
-  ["Full profile","Complete your IELTS profile",profile,profile?100:40,UserRound],
-  ["Day finisher","Complete every published task in one day",completedDays>=1,completedDays?100:0,ShieldCheck],
- ];
- return <section className="hub-panel"><div className="hub-heading"><div><small>MILESTONES</small><h1>Achievements</h1><p>Achievements unlock from actual saved course progress — no demo scores.</p></div><Medal size={34}/></div>
-  <div className="achievement-grid">{items.map(([title,desc,done,progress,Icon])=><article className={done?"unlocked":""} key={title}><span><Icon size={21}/>{done&&<Check size={12}/>}</span><b>{title}</b><p>{desc}</p><div><i style={{width:progress+"%"}}/></div><small>{done?"Unlocked":Math.round(progress)+"%"}</small></article>)}</div>
  </section>;
 }
 
