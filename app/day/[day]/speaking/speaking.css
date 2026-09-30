@@ -12,9 +12,10 @@
 .sp-back{width:116px;height:36px;border-color:#dfe5eb!important;border-radius:10px!important;box-shadow:0 2px 7px rgba(27,46,67,.04)!important}
 .sp-back:hover{border-color:#bdcbd8!important;box-shadow:0 5px 15px rgba(27,46,67,.07)!important}
 .sp-back:focus-visible{outline:2px solid #708aa4!important}
-.sp-back .ark-back-icon{left:3px!important;top:3px!important;width:29px!important;height:calc(100% - 6px)!important;background:#eef3f8!important;border-radius:7px!important;transition:background .18s ease,transform .2s ease!important}
-.sp-back:hover .ark-back-icon,.sp-back:focus-visible .ark-back-icon{width:29px!important;background:#e4edf5!important;transform:translateX(-1px)}
-.sp-back .ark-back-icon svg path{fill:#163a5f!important}
+.sp-back .ark-back-icon{left:3px!important;top:3px!important;width:29px!important;height:calc(100% - 6px)!important;background:#eef3f8!important;border-radius:7px!important;transition:width .48s cubic-bezier(.2,.75,.2,1),background .22s ease!important}
+.sp-back:hover .ark-back-icon,.sp-back:focus-visible .ark-back-icon{width:calc(100% - 6px)!important;background:#173c62!important}
+.sp-back .ark-back-icon svg path{fill:#163a5f!important;transition:fill .18s ease}
+.sp-back:hover .ark-back-icon svg path,.sp-back:focus-visible .ark-back-icon svg path{fill:#fff!important}
 .sp-back .ark-back-label{font-size:11px!important;color:#20364f!important;transform:translateX(8px)!important}
 
 .sp-progress{height:50px;top:56px;gap:8px;padding:0 16px}
