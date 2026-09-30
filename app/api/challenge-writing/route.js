@@ -124,7 +124,9 @@ export async function GET(request) {
     const people = new Map(students.map((s) => [s.id, s]));
     return json({
       admin,
-      submissions: (submissions || []).map((row) => ({ ...row, student: people.get(row.student_id) || null })),
+      submissions: (submissions || [])
+        .filter((row) => String(people.get(row.student_id)?.username || "").toLowerCase() !== PREVIEW_USERNAME)
+        .map((row) => ({ ...row, student: people.get(row.student_id) || null })),
     });
   }
 
