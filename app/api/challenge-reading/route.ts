@@ -200,7 +200,6 @@ export async function POST(req:NextRequest){
   if(published.length>0&&published.every((p:J)=>doneIds.has(String(p.id)))){
    const summary={passages:done.map((a:J)=>({id:a.passage_id,score:a.score,total:a.total,elapsed_seconds:a.elapsed_seconds})),total_seconds:done.reduce((sum:number,a:J)=>sum+Number(a.elapsed_seconds||0),0)};
    await db("ark60_submissions","POST","on_conflict=student_id,day_number,module",{student_id:user.id,day_number:day,module:"reading",payload:summary,score:done.reduce((sum:number,a:J)=>sum+Number(a.score||0),0),review_status:"reviewed"},"resolution=merge-duplicates,return=minimal");
-   await db("rpc/ark60_award_completion","POST","",{p_student:user.id,p_day:day,p_module:"reading"});
   }
  }catch(syncError){console.error("reading metric sync",syncError)}
 
