@@ -17,7 +17,9 @@ export async function GET(req:NextRequest){
    sqlTable("ark60_article_progress","GET","select=student_id,article_id,last_page,visited_pages,completed_at,updated_at&article_id=eq."+a.id),
    sqlTable("ark60_students","GET","select=id,first_name,last_name,username&status=eq.active&limit=2000")
   ]);
-  return send({article:{id:a.id,title:a.title},students,progress});
+  const realStudents=students.filter((s:any)=>String(s.username||"").toLowerCase()!=="rustam7");
+  const ids=new Set(realStudents.map((s:any)=>s.id));
+  return send({article:{id:a.id,title:a.title},students:realStudents,progress:progress.filter((p:any)=>ids.has(p.student_id))});
  }
  const user=await getStudent(req);if(!user)return fail("Sign in to your challenge account",401);
  if(action==="availability"){
