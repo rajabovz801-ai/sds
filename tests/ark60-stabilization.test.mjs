@@ -501,21 +501,20 @@ test("Listening restores readable exam typography and boxed gap-fill fields",()=
   assert.match(css,/\.ls-number-groups button\{[\s\S]*height:28px;[\s\S]*min-width:21px;[\s\S]*font-size:11px/);
 });
 
-test("Listening uses persistent yellow overlay highlights without changing text layout",()=>{
+test("Listening uses the same native highlight engine as the working Reading test",()=>{
+  const reading=read("app/day/[day]/reading/page.tsx");
   const page=read("app/day/[day]/listening/page.tsx");
   const css=read("app/day/[day]/listening/listening.css");
-  assert.match(page,/selectionRangeRef/);
-  assert.match(page,/paperRef/);
-  assert.match(page,/highlightRects/);
-  assert.match(page,/range\.getClientRects\(\)/);
-  assert.match(page,/ls-highlight-layer/);
-  assert.match(page,/ls-highlight-overlay/);
-  assert.match(page,/onClick=\{applyHighlight\}/);
+  assert.match(reading,/window\.CSS\?\.highlights/);
+  assert.match(reading,/new Highlight\(/);
+  assert.match(page,/window\.CSS\?\.highlights/);
+  assert.match(page,/new Highlight\(/);
+  assert.match(page,/highlights\.set\(key/);
+  assert.match(page,/range\.cloneRange\(\)/);
+  assert.match(page,/onMouseUp=\{showHighlightMenu\}/);
+  assert.match(page,/onTouchEnd=\{\(\)=>setTimeout\(showHighlightMenu,100\)\}/);
   assert.match(page,/\.ls-qnum,input,textarea,select,button,\.ls-bottom-nav,\.ls-topbar/);
-  assert.match(css,/\.ls-highlight-overlay\{[\s\S]*background:rgba\(255,241,118,.72\)/);
-  assert.match(css,/mix-blend-mode:multiply/);
-  assert.match(css,/\.ls-question-paper,[\s\S]*text-align:left!important/);
-  assert.match(css,/\.ls-selection-popup button\{[\s\S]*min-width:96px/);
+  assert.match(css,/::highlight\(ark-listening-yellow\)\{[\s\S]*background:#ffe58a;[\s\S]*color:inherit;/);
 });
 
 
@@ -530,15 +529,12 @@ test("Listening uses stronger paper and bottom navigation contrast",()=>{
 });
 
 
-test("Listening highlight uses persistent overlay rectangles and paper is left aligned",()=>{
+test("Listening active paper is pinned to the left without the old centered gutter",()=>{
   const page=read("app/day/[day]/listening/page.tsx");
   const css=read("app/day/[day]/listening/listening.css");
   assert.match(page,/paperRef=useRef<HTMLElement\|null>/);
-  assert.match(page,/highlightRects/);
-  assert.match(page,/range\.getClientRects\(\)/);
-  assert.match(page,/ls-highlight-layer/);
-  assert.match(page,/ls-highlight-overlay/);
-  assert.match(css,/\.ls-workspace\{[\s\S]*margin:10px 18px 105px/);
-  assert.match(css,/\.ls-highlight-overlay\{[\s\S]*background:rgba\(255,241,118,.72\)/);
-  assert.match(css,/mix-blend-mode:multiply/);
+  assert.doesNotMatch(page,/highlightRects/);
+  assert.doesNotMatch(page,/ls-highlight-layer/);
+  assert.match(css,/\.ls-workspace\{[\s\S]*width:100%;[\s\S]*max-width:none;[\s\S]*margin:10px 0 105px;[\s\S]*padding:0 14px/);
+  assert.match(css,/\.ls-question-paper\{[\s\S]*width:100%;[\s\S]*box-sizing:border-box/);
 });

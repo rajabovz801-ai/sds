@@ -364,3 +364,47 @@
   margin:10px 10px 100px;
  }
 }
+
+
+/* Reading-parity highlight: same native engine and paint rule as the working Reading test. */
+::highlight(ark-listening-yellow){
+ background:#ffe58a;
+ color:inherit;
+}
+
+/* Keep the active Listening paper genuinely left aligned on desktop. */
+.ls-instruction,
+.ls-resume-banner,
+.ls-message{
+ width:auto;
+ max-width:none;
+ margin-left:14px;
+ margin-right:14px;
+}
+.ls-workspace{
+ width:100%;
+ max-width:none;
+ box-sizing:border-box;
+ margin:10px 0 105px;
+ padding:0 14px;
+}
+.ls-question-paper{
+ width:100%;
+ box-sizing:border-box;
+}
+.ls-highlight-layer,
+.ls-highlight-overlay{display:none!important}
+
+@media(max-width:720px){
+ .ls-instruction,
+ .ls-resume-banner,
+ .ls-message{
+  margin-left:8px;
+  margin-right:8px;
+ }
+ .ls-workspace{
+  width:100%;
+  margin:10px 0 100px;
+  padding:0 8px;
+ }
+}

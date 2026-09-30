@@ -44,7 +44,6 @@ export default function ListeningPage(){
  const selectionRangeRef=useRef<Range|null>(null);
  const paperRef=useRef<HTMLElement|null>(null);
  const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
- const [highlightRects,setHighlightRects]=useState<Record<number,{left:number;top:number;width:number;height:number}[]>>({});
 
  const payload=data?.content.payload;
  const sections=payload?.sections||[];
@@ -96,57 +95,49 @@ export default function ListeningPage(){
 
  useEffect(()=>()=>{if(saveTimer.current)window.clearTimeout(saveTimer.current)},[]);
 
+ function clearHighlights(){
+  const h=window.CSS?.highlights;
+  if(h)h.delete("ark-listening-yellow");
+  selectionRangeRef.current=null;
+  setHighlightPopup(null);
+ }
+ useEffect(()=>{clearHighlights()},[section,reviewMode]);
  useEffect(()=>{
-  if(!started||reviewMode)return;
-  const forbidden=".ls-qnum,input,textarea,select,button,.ls-bottom-nav,.ls-topbar,.ls-inline-review,.ls-review-line,.ls-highlight";
-  const closestElement=(node:Node|null)=>node instanceof Element?node:node?.parentElement||null;
-  const onMouseUp=(event:MouseEvent)=>{
-   const target=event.target as Element|null;
-   if(target?.closest(forbidden)){setHighlightPopup(null);selectionRangeRef.current=null;return}
-   const selection=window.getSelection();
-   if(!selection||selection.isCollapsed||selection.rangeCount===0){setHighlightPopup(null);selectionRangeRef.current=null;return}
-   let range=selection.getRangeAt(0).cloneRange();
-   const startEl=closestElement(range.startContainer),endEl=closestElement(range.endContainer);
-   if(!startEl?.closest(".ls-question-paper")||!endEl?.closest(".ls-question-paper")){setHighlightPopup(null);selectionRangeRef.current=null;return}
-   if(range.startContainer.nodeType===Node.TEXT_NODE){
-    const text=range.startContainer.textContent||"";let start=range.startOffset;
-    while(start>0&&/[^\s]/.test(text[start-1]||""))start--;
-    range.setStart(range.startContainer,start);
-   }
-   if(range.endContainer.nodeType===Node.TEXT_NODE){
-    const text=range.endContainer.textContent||"";let end=range.endOffset;
-    while(end<text.length&&/[^\s]/.test(text[end]||""))end++;
-    range.setEnd(range.endContainer,end);
-   }
-   if(!range.toString().trim()){setHighlightPopup(null);selectionRangeRef.current=null;return}
-   selectionRangeRef.current=range;
-   const rect=range.getBoundingClientRect();
-   setHighlightPopup({x:Math.min(Math.max(rect.left+rect.width/2,76),window.innerWidth-76),y:Math.max(10,rect.top-48)});
-  };
   const hide=(event:MouseEvent)=>{
    const target=event.target as Element|null;
    if(target?.closest(".ls-selection-popup"))return;
    setHighlightPopup(null);
   };
-  const hideOnScroll=()=>setHighlightPopup(null);
-  document.addEventListener("mouseup",onMouseUp);
   document.addEventListener("mousedown",hide);
-  window.addEventListener("scroll",hideOnScroll,true);
-  return()=>{document.removeEventListener("mouseup",onMouseUp);document.removeEventListener("mousedown",hide);window.removeEventListener("scroll",hideOnScroll,true)};
- },[started,reviewMode]);
+  return()=>document.removeEventListener("mousedown",hide);
+ },[]);
 
+ function showHighlightMenu(){
+  if(!started||reviewMode||result)return;
+  const selection=window.getSelection();
+  if(!selection||selection.isCollapsed||!selection.rangeCount)return;
+  const range=selection.getRangeAt(0);
+  if(!paperRef.current?.contains(range.commonAncestorContainer))return;
+  const forbidden=".ls-qnum,input,textarea,select,button,.ls-bottom-nav,.ls-topbar,.ls-inline-review,.ls-review-line";
+  const elementOf=(node:Node)=>node instanceof Element?node:node.parentElement;
+  if(elementOf(range.startContainer)?.closest(forbidden)||elementOf(range.endContainer)?.closest(forbidden))return;
+  const rect=range.getBoundingClientRect();
+  selectionRangeRef.current=range.cloneRange();
+  setHighlightPopup({
+   x:Math.min(window.innerWidth-112,Math.max(112,rect.left+rect.width/2)),
+   y:Math.max(66,rect.top-54)
+  });
+ }
  function applyHighlight(){
-  const range=selectionRangeRef.current,paper=paperRef.current;if(!range||!paper)return;
-  const paperBox=paper.getBoundingClientRect();
-  const rects=Array.from(range.getClientRects()).filter(r=>r.width>1&&r.height>1).map(r=>({
-   left:r.left-paperBox.left,
-   top:r.top-paperBox.top,
-   width:r.width,
-   height:r.height
-  }));
-  if(rects.length)setHighlightRects(prev=>({...prev,[section]:[...(prev[section]||[]),...rects]}));
+  const range=selectionRangeRef.current;
+  const highlights=window.CSS?.highlights;
+  if(!range||!highlights){setMessage("Please use an updated Chrome, Edge or Safari for text highlighting.");return}
+  const key="ark-listening-yellow";
+  const old=highlights.get(key);
+  highlights.set(key,old?new Highlight(...Array.from(old),range.cloneRange()):new Highlight(range.cloneRange()));
   window.getSelection()?.removeAllRanges();
-  selectionRangeRef.current=null;setHighlightPopup(null);
+  selectionRangeRef.current=null;
+  setHighlightPopup(null);
  }
 
  async function startTest(){
@@ -257,8 +248,7 @@ export default function ListeningPage(){
    {message&&<div className="ls-message">{message}<button onClick={()=>setMessage("")}>×</button></div>}
    <section className="ls-instruction"><div><b>{reviewMode?"ANSWER REVIEW":currentSection?.label}</b><span>{reviewMode?"Your answers and the official correct answers":currentSection?.range}</span></div>{!reviewMode&&<span className="ls-save-state">{saving?"Saving answers…":"Answers auto-save"}</span>}</section>
    <div className="ls-workspace">
-    <section className="ls-question-paper" ref={paperRef}>
-     <div className="ls-highlight-layer" aria-hidden="true">{(highlightRects[section]||[]).map((r,i)=><span key={i} className="ls-highlight-overlay" style={{left:r.left,top:r.top,width:r.width,height:r.height}}/>)}</div>
+    <section className="ls-question-paper" ref={paperRef} onMouseUp={showHighlightMenu} onTouchEnd={()=>setTimeout(showHighlightMenu,100)}>
      <div className="ls-section-heading"><span>{currentSection?.label}</span><b>{currentSection?.range}</b></div>
      {currentSection?.blocks?.map((b:any,i:number)=>renderBlock(b,i))}
     </section>
