@@ -10,7 +10,8 @@ import "./writing.css";
 
 type WritingContent={id:string;day_number:number;title:string;payload:{task_type:"task1"|"task2";duration_seconds:number;min_words:number;prompt:string;visual_kind?:string;instructions?:string[]}};
 type Submission={id:string;submitted_at:string;band:number|null;review_status:string;review_feedback:string|null;reviewed_at:string|null;payload?:Record<string,unknown>};
-type ApiData={content:WritingContent;submission:Submission|null;preview?:boolean};
+type Draft={answer:string;duration_seconds:number;timer_started:boolean;timer_paused:boolean;remaining_seconds:number;updated_at:string};
+type ApiData={content:WritingContent;submission:Submission|null;draft?:Draft|null;draft_scope?:string|null;preview?:boolean};
 
 function countWords(value:string){return value.trim()?value.trim().split(/\s+/).length:0}
 function formatTime(total:number){const s=Math.max(0,Math.floor(total));return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`}
@@ -20,12 +21,45 @@ export default function WritingPage(){
  const router=useRouter();
  const [data,setData]=useState<ApiData|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState("");
  const [answer,setAnswer]=useState(""),[started,setStarted]=useState(false),[paused,setPaused]=useState(false),[remaining,setRemaining]=useState(0),[sending,setSending]=useState(false),[message,setMessage]=useState(""),[fullScreen,setFullScreen]=useState(false);
- const timerRef=useRef<number|null>(null),lastTick=useRef(Date.now());
- const storageKey=`ark60-writing-day-${day}`;
+ const timerRef=useRef<number|null>(null),draftSaveRef=useRef<number|null>(null),lastDraftSyncRef=useRef(0),lastTick=useRef(Date.now());
+ const storageKey=data?.draft_scope?`ark60-writing-${data.draft_scope}-day-${day}`:"";
 
- useEffect(()=>{let live=true;(async()=>{setLoading(true);setError("");try{const r=await fetch(`/api/challenge-writing?day=${day}`,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Writing task could not be loaded.");if(!live)return;setData(obj);const duration=Number(obj.content?.payload?.duration_seconds||0);setRemaining(duration);if(!obj.submission){try{const raw=localStorage.getItem(storageKey);if(raw){const saved=JSON.parse(raw);if(typeof saved.answer==="string")setAnswer(saved.answer);if(saved.started){setStarted(true);setPaused(Boolean(saved.paused));const savedRemaining=Number(saved.remaining);let rem=Number.isFinite(savedRemaining)?Math.max(0,savedRemaining):duration;if(!saved.paused&&saved.savedAt)rem=Math.max(0,rem-Math.floor((Date.now()-Number(saved.savedAt))/1000));setRemaining(rem)}}}catch{}}}catch(e){if(live)setError(e instanceof Error?e.message:"Writing task could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day,storageKey]);
+ useEffect(()=>{let live=true;(async()=>{setLoading(true);setError("");try{const r=await fetch(`/api/challenge-writing?day=${day}`,{credentials:"same-origin",cache:"no-store"});const obj:ApiData=await r.json();if(!r.ok)throw new Error((obj as any).detail||"Writing task could not be loaded.");if(!live)return;setData(obj);const duration=Number(obj.content?.payload?.duration_seconds||0);setRemaining(duration);setAnswer("");setStarted(false);setPaused(false);
+   if(!obj.submission){
+    const scopedKey=obj.draft_scope?`ark60-writing-${obj.draft_scope}-day-${day}`:"";
+    let local:any=null;try{const raw=scopedKey?localStorage.getItem(scopedKey):null;if(raw)local=JSON.parse(raw)}catch{}
+    const server=obj.draft?{answer:obj.draft.answer,started:obj.draft.timer_started,paused:obj.draft.timer_paused,remaining:obj.draft.remaining_seconds,savedAt:Date.parse(obj.draft.updated_at)||0}:null;
+    const localStamp=Number(local?.savedAt)||0,serverStamp=Number(server?.savedAt)||0;
+    const saved=localStamp>serverStamp?local:server;
+    if(saved){
+     if(typeof saved.answer==="string")setAnswer(saved.answer);
+     if(saved.started){
+      setStarted(true);setPaused(Boolean(saved.paused));
+      const savedRemaining=Number(saved.remaining);let rem=Number.isFinite(savedRemaining)?Math.max(0,savedRemaining):duration;
+      if(!saved.paused&&saved.savedAt)rem=Math.max(0,rem-Math.floor((Date.now()-Number(saved.savedAt))/1000));
+      setRemaining(rem);
+     }else if(Number.isFinite(Number(saved.remaining)))setRemaining(Math.max(0,Number(saved.remaining)));
+    }
+   }}catch(e){if(live)setError(e instanceof Error?e.message:"Writing task could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day]);
 
- useEffect(()=>{if(!data||data.submission)return;const payload={answer,started,paused,remaining,savedAt:Date.now()};try{localStorage.setItem(storageKey,JSON.stringify(payload))}catch{}},[answer,started,paused,remaining,data,storageKey]);
+ useEffect(()=>{
+  if(!data||data.submission||!storageKey)return;
+  const savedAt=Date.now(),payload={answer,started,paused,remaining,savedAt};
+  try{localStorage.setItem(storageKey,JSON.stringify(payload))}catch{}
+  if(data.preview)return;
+  if(draftSaveRef.current)window.clearTimeout(draftSaveRef.current);
+  const wait=Math.max(500,5000-(Date.now()-lastDraftSyncRef.current));
+  draftSaveRef.current=window.setTimeout(async()=>{
+   try{
+    const res=await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+     action:"draft",day,answer,duration_seconds:Math.max(0,Number(data.content.payload.duration_seconds||0)-remaining),
+     timer_started:started,timer_paused:paused,remaining_seconds:remaining
+    })});
+    if(res.ok)lastDraftSyncRef.current=Date.now();
+   }catch{}
+  },wait);
+  return()=>{if(draftSaveRef.current)window.clearTimeout(draftSaveRef.current)};
+ },[answer,started,paused,remaining,data?.submission,data?.preview,storageKey,day]);
 
  useEffect(()=>{if(!started||paused||remaining<=0||data?.submission)return;lastTick.current=Date.now();timerRef.current=window.setInterval(()=>{const now=Date.now();const passed=Math.max(1,Math.floor((now-lastTick.current)/1000));lastTick.current=now;setRemaining(v=>Math.max(0,v-passed))},1000);return()=>{if(timerRef.current)window.clearInterval(timerRef.current)}},[started,paused,data?.submission]);
 
@@ -39,7 +73,7 @@ export default function WritingPage(){
  function togglePause(){if(remaining<=0)return;setPaused(v=>!v);lastTick.current=Date.now()}
  async function toggleFullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{}}
  async function goBack(){try{if(document.fullscreenElement)await document.exitFullscreen()}catch{}router.push("/day/"+day)}
- async function submit(auto=false){if(!data||sending||data.submission)return;if(!answer.trim()){if(!auto)setMessage("Write your response before submitting.");return}if(!auto&&!window.confirm("Submit this Writing response? You will not be able to edit it afterwards."))return;setSending(true);setMessage("");try{const r=await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,answer,duration_seconds:used})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit your response.");try{localStorage.removeItem(storageKey)}catch{};setData(prev=>prev?{...prev,submission:obj.submission}:prev);setPaused(true);setMessage(obj.preview?"Preview completed. Nothing was saved to student results.":"Your response has been submitted. Your result will be available soon.")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit your response.")}finally{setSending(false)}}
+ async function submit(auto=false){if(!data||sending||data.submission)return;if(!answer.trim()){if(!auto)setMessage("Write your response before submitting.");return}if(!auto&&!window.confirm("Submit this Writing response? You will not be able to edit it afterwards."))return;setSending(true);setMessage("");try{const r=await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,answer,duration_seconds:used})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit your response.");if(draftSaveRef.current)window.clearTimeout(draftSaveRef.current);try{if(storageKey)localStorage.removeItem(storageKey)}catch{};setData(prev=>prev?{...prev,submission:obj.submission,draft:null}:prev);setPaused(true);setMessage(obj.preview?"Preview completed. Nothing was saved to student results.":"Your response has been submitted. Your result will be available soon.")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit your response.")}finally{setSending(false)}}
 
  if(loading)return <main className="writing-loading"><span>ARK EDUCATION</span><b>Loading Writing task…</b></main>;
  if(error||!data)return <main className="writing-loading"><span>ARK EDUCATION</span><b>{error||"Writing task unavailable."}</b><Link href={`/day/${day}`}>Back to Day {day}</Link></main>;

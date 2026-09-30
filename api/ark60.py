@@ -179,11 +179,15 @@ def get_data(request:Request, action:str="health", day:int=1):
             "preview":preview
         }
     if action=="day":
-        require_student(request)
-        d=day_status(day)
+        user=require_student(request)
+        if day<1 or day>60:
+            raise HTTPException(status_code=400,detail="Invalid course day")
+        d=START+timedelta(days=day-1)
+        if user.get("username")!="rustam7" and today()<d:
+            raise HTTPException(status_code=403,detail="This day is not yet available")
         available=["listening","reading","writing","speaking"] if d.weekday()==6 else ["reading","listening","article","vocabulary","writing","speaking"]
         rows=db("GET","ark60_content",{"select":"module,title,payload","day_number":"eq."+str(day),"status":"eq.published","limit":6})
-        return {"day":day,"date":str(d),"mock":d.weekday()==6,"modules":available,"published":rows}
+        return {"day":day,"date":str(d),"mock":d.weekday()==6,"modules":available,"published":rows,"preview":user.get("username")=="rustam7"}
     if action=="admin_me":
         return {"admin":require_admin(request)}
     if action=="admin_dashboard":

@@ -41,6 +41,7 @@ export async function GET(req:NextRequest){
 }
 export async function POST(req:NextRequest){
  try{
+ const declared=Number(req.headers.get("content-length")||0);if(Number.isFinite(declared)&&declared>12000)return fail("Request too large",413);
  if(!isOwnOrigin(req))return fail("Invalid origin",403);
  const user=await getStudent(req);if(!user)return fail("Sign in to your challenge account",401);
  const body=await req.json(),day=Number(body.day||1),action=String(body.action||"");

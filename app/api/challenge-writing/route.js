@@ -212,26 +212,86 @@ export async function GET(request) {
   if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
 
   let submission = null;
+  let draft = null;
   if (student && !admin && student.username !== PREVIEW_USERNAME) {
-    const result = await supabase
-      .from("ark60_submissions")
-      .select("id,submitted_at,band,review_status,review_feedback,reviewed_at,payload")
-      .eq("student_id", student.id)
-      .eq("day_number", day)
-      .eq("module", "writing")
-      .maybeSingle();
-    submission = result.data || null;
+    const [submissionResult, draftResult] = await Promise.all([
+      supabase
+        .from("ark60_submissions")
+        .select("id,submitted_at,band,review_status,review_feedback,reviewed_at,payload")
+        .eq("student_id", student.id)
+        .eq("day_number", day)
+        .eq("module", "writing")
+        .maybeSingle(),
+      supabase
+        .from("ark60_writing_drafts")
+        .select("answer,duration_seconds,timer_started,timer_paused,remaining_seconds,updated_at")
+        .eq("student_id", student.id)
+        .eq("day_number", day)
+        .maybeSingle(),
+    ]);
+    submission = submissionResult.data || null;
+    draft = submission ? null : (draftResult.data || null);
   }
-  return json({ content, submission, preview: Boolean(admin || student?.username === PREVIEW_USERNAME) });
+  const draftScope = student
+    ? digest(String(student.id)).slice(0, 16)
+    : admin
+      ? "admin-" + digest(String(admin.id)).slice(0, 16)
+      : null;
+  return json({ content, submission, draft, draft_scope: draftScope, preview: Boolean(admin || student?.username === PREVIEW_USERNAME) });
 }
 
 export async function POST(request) {
+  const declaredLength = Number(request.headers.get("content-length") || 0);
+  if (Number.isFinite(declaredLength) && declaredLength > 45000) return json({ detail: "Request is too large." }, 413);
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) return json({ detail: "Invalid request origin." }, 403);
   const supabase = getServiceSupabase();
   let body = {};
   try { body = await request.json(); } catch { return json({ detail: "Invalid request." }, 400); }
   const action = String(body.action || "");
+
+  if (action === "draft") {
+    const student = await studentFromRequest(request);
+    if (!student) return json({ detail: "Please sign in." }, 401);
+    const day = validDay(body.day);
+    if (!day) return json({ detail: "No daily Writing task is scheduled for this day." }, 400);
+    if (student.username !== PREVIEW_USERNAME && dayIso(day) > uzDate()) return json({ detail: "This Writing task is not available yet." }, 403);
+    const content = await getContent(day);
+    if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
+
+    const answer = String(body.answer || "");
+    if (answer.length > 30000) return json({ detail: "Draft is too long." }, 413);
+    const durationLimit = Math.max(0, Number(content.payload?.duration_seconds || 0));
+    const remaining = Math.max(0, Math.min(durationLimit || 3600, Math.floor(Number(body.remaining_seconds) || 0)));
+    const durationSeconds = Math.max(0, Math.min(durationLimit || 3600, Math.floor(Number(body.duration_seconds) || 0)));
+    if (student.username === PREVIEW_USERNAME) return json({ ok: true, preview: true, saved: false });
+
+    const { data: existing } = await supabase
+      .from("ark60_submissions")
+      .select("id")
+      .eq("student_id", student.id)
+      .eq("day_number", day)
+      .eq("module", "writing")
+      .maybeSingle();
+    if (existing) return json({ ok: true, submitted: true, saved: false });
+
+    const { data, error } = await supabase
+      .from("ark60_writing_drafts")
+      .upsert({
+        student_id: student.id,
+        day_number: day,
+        answer,
+        duration_seconds: durationSeconds,
+        timer_started: Boolean(body.timer_started),
+        timer_paused: Boolean(body.timer_paused),
+        remaining_seconds: remaining,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "student_id,day_number" })
+      .select("updated_at")
+      .maybeSingle();
+    if (error) return json({ detail: "Could not save your Writing draft." }, 500);
+    return json({ ok: true, saved: true, updated_at: data?.updated_at || null });
+  }
 
   if (action === "grade") {
     const admin = await adminFromRequest(request);
@@ -300,5 +360,10 @@ export async function POST(request) {
     if (String(error.code) === "23505") return json({ detail: "You have already submitted this Writing task." }, 409);
     return json({ detail: "Could not submit your Writing response." }, 500);
   }
+  await supabase
+    .from("ark60_writing_drafts")
+    .delete()
+    .eq("student_id", student.id)
+    .eq("day_number", day);
   return json({ ok: true, submission: data });
 }
