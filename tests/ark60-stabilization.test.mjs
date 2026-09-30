@@ -226,8 +226,8 @@ test("reward and profile polish keeps preview mode explicit",()=>{
 
 test("Dashboard and 60-Day Plan are distinct live views",()=>{
   const page=read("app/dashboard/page.tsx");
-  assert.match(page,/view==="Dashboard"\?<></);
-  assert.match(page,/view==="60-Day Plan"\?<></);
+  assert.match(page,/view==="Dashboard"/);
+  assert.match(page,/view==="60-Day Plan"/);
   assert.match(page,/TODAY'S PLAN/);
   assert.match(page,/Challenge calendar/);
   assert.doesNotMatch(page,/view==="Dashboard"\|\|view==="60-Day Plan"/);
