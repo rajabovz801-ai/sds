@@ -42,7 +42,6 @@ export default function ListeningPage(){
  const saveTimer=useRef<number|null>(null);
  const startedRef=useRef(false);
  const selectionRangeRef=useRef<Range|null>(null);
- const highlightRangesRef=useRef<Range[]>([]);
  const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
 
  const payload=data?.content.payload;
@@ -136,15 +135,39 @@ export default function ListeningPage(){
 
  function applyHighlight(){
   const range=selectionRangeRef.current;if(!range)return;
-  const registry=(CSS as any).highlights;
-  const HighlightCtor=(window as any).Highlight;
-  if(!registry||!HighlightCtor){
-   setMessage("Highlight is not supported by this browser.");
-   setHighlightPopup(null);return;
+  const forbidden=".ls-qnum,input,textarea,select,button,.ls-bottom-nav,.ls-topbar,.ls-inline-review,.ls-review-line,.ls-selection-popup,.ls-highlight";
+  const root=range.commonAncestorContainer;
+  const parts:{node:Text;start:number;end:number}[]=[];
+  const collect=(node:Node)=>{
+   if(node.nodeType!==Node.TEXT_NODE||!node.textContent?.trim())return;
+   const textNode=node as Text;
+   const parent=textNode.parentElement;
+   if(!parent||parent.closest(forbidden))return;
+   try{
+    if(!range.intersectsNode(textNode))return;
+   }catch{return}
+   let start=0,end=textNode.length;
+   if(textNode===range.startContainer)start=Math.max(0,Math.min(textNode.length,range.startOffset));
+   if(textNode===range.endContainer)end=Math.max(0,Math.min(textNode.length,range.endOffset));
+   if(end>start)parts.push({node:textNode,start,end});
+  };
+  if(root.nodeType===Node.TEXT_NODE)collect(root);
+  else{
+   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+   let node=walker.nextNode();
+   while(node){collect(node);node=walker.nextNode()}
   }
-  const next=[...highlightRangesRef.current,range.cloneRange()];
-  highlightRangesRef.current=next;
-  registry.set("listening-yellow",new HighlightCtor(...next));
+  for(let i=parts.length-1;i>=0;i--){
+   const {node,start,end}=parts[i];
+   let selected=node;
+   if(end<selected.length)selected.splitText(end);
+   if(start>0)selected=selected.splitText(start);
+   if(!selected.textContent?.trim())continue;
+   const mark=document.createElement("span");
+   mark.className="ls-highlight";
+   selected.parentNode?.insertBefore(mark,selected);
+   mark.appendChild(selected);
+  }
   window.getSelection()?.removeAllRanges();
   selectionRangeRef.current=null;setHighlightPopup(null);
  }
