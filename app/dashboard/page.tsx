@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import AnimatedBackButton from "../components/animated-back-button";
-import {AchievementsPanel,LeaderboardPanel,ProfilePanel,ProgressPanel,RewardModal,type HubStats} from "../components/challenge-hub-panels";
+import {LeaderboardPanel,ProfilePanel,ProgressPanel,RewardModal,type HubStats} from "../components/challenge-hub-panels";
 import {useEffect,useMemo,useState} from "react";
-import {LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,Medal,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,LockKeyhole,Clock3,Flame,ChevronRight,Menu,X,Bell,Settings,LogOut,CalendarCheck,Target,CircleHelp,ArrowUpRight,CheckCircle2,FileText,ChevronLeft,Sun,Moon,Coins,ShieldCheck} from "lucide-react";
+import {LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,LockKeyhole,Clock3,Flame,ChevronRight,Menu,X,Bell,Settings,LogOut,CalendarCheck,Target,CircleHelp,ArrowUpRight,CheckCircle2,FileText,ChevronLeft,Sun,Moon,Coins,ShieldCheck} from "lucide-react";
 
 type Day={n:number,date:Date,mock:boolean};
 type StudentStats=HubStats;
@@ -52,7 +52,7 @@ export default function Dashboard(){
  const chosen=DAYS[selected-1];
  const live=unlocked(chosen,today)||stats?.student.username==="rustam7";
  const currentDay=DAYS.find(x=>x.date.toISOString().slice(0,10)===today)?.n||0;
- const navigation=[{name:"Dashboard",icon:LayoutDashboard},{name:"60-Day Plan",icon:CalendarDays},{name:"Progress",icon:ChartNoAxesCombined},{name:"Leaderboard",icon:Trophy},{name:"Achievements",icon:Medal}];
+ const navigation=[{name:"Dashboard",icon:LayoutDashboard},{name:"60-Day Plan",icon:CalendarDays},{name:"Progress",icon:ChartNoAxesCombined},{name:"Leaderboard",icon:Trophy}];
  const visible=month==="all"?DAYS:DAYS.filter(x=>month==="oct"?x.date.getUTCMonth()===9:x.date.getUTCMonth()===10);
  const display=useMemo(()=>{const dayNumber=DAYS.filter(x=>x.n<chosen.n&&!x.mock).length;return chosen.mock?mockModules:regular.map(x=>x.name==="Writing"?{...x,detail:dayNumber%2===0?"IELTS Writing Task 1":"IELTS Writing Task 2",time:dayNumber%2===0?"20 min":"40 min"}:x)},[chosen]);
  const chosenRequired=stats?.required_by_day?.[String(chosen.n)]||[];
@@ -92,7 +92,7 @@ export default function Dashboard(){
        <div className="day-detail-footer"><div><span>DAY STATUS</span><b>{live?(chosenRequired.length?chosenRequired.length+" published modules":"Materials pending upload"):"Available on "+format(chosen.date,{day:"numeric",month:"short"})}</b></div><button disabled={!live} className="detail-btn" onClick={()=>{if(live)location.href="/day/"+chosen.n}}>{live?"View study day":"Future day locked"}<ChevronRight size={16}/></button></div></aside>
      </div>
      <section className="bottom-insights"><article><div className="insight-icon"><ShieldCheck size={20}/></div><div><b>Calendar-based access</b><p>Each day unlocks at 00:00 Uzbekistan time. Previous unfinished days stay available so students can complete them later.</p></div></article><article><div className="insight-icon"><Clock3 size={20}/></div><div><b>Automatic study-time tracking</b><p>Visible, recently active study time is tracked automatically across supported challenge modules.</p></div></article></section>
-    </>:view==="Leaderboard"&&stats?<LeaderboardPanel studentId={stats.student.id}/>:view==="Progress"&&stats?<ProgressPanel stats={stats} completedDays={completedDays}/>:view==="Achievements"&&stats?<AchievementsPanel stats={stats} completedDays={completedDays}/>:view==="Profile"&&stats?<ProfilePanel stats={stats} onStudent={student=>setStats(prev=>prev?{...prev,student:{...prev.student,...student}}:prev)} onCoins={coins=>setStats(prev=>prev?{...prev,coins}:prev)} onLogout={exit}/>:<section className="empty-view"><div className="empty-icon"><Bell size={31}/></div><h1>{view}</h1><p>This section is not available yet.</p><AnimatedBackButton onClick={()=>setView("Dashboard")} ariaLabel="Back to your calendar"/></section>}
+    </>:view==="Leaderboard"&&stats?<LeaderboardPanel studentId={stats.student.id}/>:view==="Progress"&&stats?<ProgressPanel stats={stats} completedDays={completedDays}/>:view==="Profile"&&stats?<ProfilePanel stats={stats} onStudent={student=>setStats(prev=>prev?{...prev,student:{...prev.student,...student}}:prev)} onCoins={coins=>setStats(prev=>prev?{...prev,coins}:prev)} onLogout={exit}/>:<section className="empty-view"><div className="empty-icon"><Bell size={31}/></div><h1>{view}</h1><p>This section is not available yet.</p><AnimatedBackButton onClick={()=>setView("Dashboard")} ariaLabel="Back to your calendar"/></section>}
    </main>
   </div>
   <RewardModal open={rewardOpen} onClose={()=>setRewardOpen(false)} onBalance={coins=>setStats(prev=>prev?{...prev,coins}:prev)}/>
