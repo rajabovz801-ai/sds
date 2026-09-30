@@ -66,3 +66,11 @@ test("dashboard redirects expired sessions and surfaces load failures",()=>{
   assert.match(dashboard,/window\.location\.replace\("\/"\)/);
   assert.match(dashboard,/Could not load your dashboard/);
 });
+
+
+test("successful registrations stay inside the anti-spam rate-limit bucket",()=>{
+  const backend=read("api/ark60.py");
+  const register=backend.slice(backend.indexOf('if action=="register":'),backend.indexOf('if action=="login":'));
+  assert.match(register,/rate_limit\(request,"register",True\)/);
+  assert.doesNotMatch(register,/clear_limit\(bucket\)/);
+});
