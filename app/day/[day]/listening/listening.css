@@ -171,3 +171,56 @@
  .ls-selection-popup button{min-width:70px;height:36px;font-size:11px;padding:0 9px}
  .ls-number-groups button{font-size:11px}
 }
+
+
+/* Listening polish: left-aligned question content + one reliable yellow highlighter */
+.ls-question-paper,
+.ls-block,
+.ls-block-head,
+.ls-source-title,
+.ls-mcq,
+.ls-mcq h3,
+.ls-two,
+.ls-two h3,
+.ls-notes-sheet,
+.ls-notes-sheet>h2,
+.ls-note-group,
+.ls-note-box,
+.ls-note-box h3{
+ text-align:left!important;
+}
+
+/* Native CSS Custom Highlight API: paints text only, never changes DOM geometry. */
+::highlight(listening-yellow){
+ background:#fff176;
+ color:inherit;
+}
+.ls-highlight,
+.ls-highlight-yellow,
+.ls-highlight-mint{background:transparent!important}
+.ls-selection-popup button{
+ min-width:96px;
+ border-right:0;
+}
+.ls-selection-popup button.yellow>span{background:#fff176}
+.ls-selection-popup button.mint{display:none!important}
+
+/* Slightly smaller bottom question controls after the readability increase. */
+.ls-bottom-nav{min-height:78px}
+.ls-number-groups>div{padding:5px}
+.ls-number-groups>div>span{font-size:8.5px;margin-bottom:4px}
+.ls-number-groups button{
+ height:28px;
+ min-width:21px;
+ font-size:11px;
+}
+.ls-submit{height:40px;font-size:10.5px}
+.ls-arrow{width:38px;height:38px}
+
+@media(max-width:720px){
+ .ls-number-groups>div>span{font-size:7.5px}
+ .ls-number-groups button{height:27px;font-size:10.5px}
+}
+@media(max-width:430px){
+ .ls-number-groups button{font-size:10px}
+}

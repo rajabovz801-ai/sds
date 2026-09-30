@@ -498,19 +498,21 @@ test("Listening restores readable exam typography and boxed gap-fill fields",()=
   assert.match(css,/\.ls-mcq h3\{font-size:16\.5px/);
   assert.match(css,/\.ls-option span,\.ls-check span\{font-size:15\.8px/);
   assert.match(css,/\.ls-gap-wrap input\{[\s\S]*width:155px;[\s\S]*height:34px;[\s\S]*border:1px solid #aeb8c6;[\s\S]*font-size:15\.5px/);
-  assert.match(css,/\.ls-number-groups button\{height:30px;min-width:22px;font-size:12px/);
+  assert.match(css,/\.ls-number-groups button\{[\s\S]*height:28px;[\s\S]*min-width:21px;[\s\S]*font-size:11px/);
 });
 
-test("Listening supports yellow and mint selection highlights without layout shift",()=>{
+test("Listening uses one native yellow highlight without changing text layout",()=>{
   const page=read("app/day/[day]/listening/page.tsx");
   const css=read("app/day/[day]/listening/listening.css");
   assert.match(page,/selectionRangeRef/);
-  assert.match(page,/applyHighlight\(tone:"yellow"\|"mint"\)/);
-  assert.match(page,/ls-selection-popup/);
-  assert.match(page,/applyHighlight\("yellow"\)/);
-  assert.match(page,/applyHighlight\("mint"\)/);
+  assert.match(page,/highlightRangesRef/);
+  assert.match(page,/const registry=\(CSS as any\)\.highlights/);
+  assert.match(page,/new HighlightCtor\(\.\.\.next\)/);
+  assert.match(page,/registry\.set\("listening-yellow"/);
+  assert.match(page,/onClick=\{applyHighlight\}/);
+  assert.doesNotMatch(page,/applyHighlight\("mint"\)/);
   assert.match(page,/\.ls-qnum,input,textarea,select,button,\.ls-bottom-nav,\.ls-topbar/);
-  assert.match(css,/\.ls-highlight\{[\s\S]*display:inline;[\s\S]*margin:0!important;[\s\S]*padding:0!important;[\s\S]*border:0!important;[\s\S]*line-height:inherit!important/);
-  assert.match(css,/\.ls-highlight-yellow\{background:#fff176!important\}/);
-  assert.match(css,/\.ls-highlight-mint\{background:#bff3d6!important\}/);
+  assert.match(css,/::highlight\(listening-yellow\)\{[\s\S]*background:#fff176;[\s\S]*color:inherit;/);
+  assert.match(css,/\.ls-question-paper,[\s\S]*text-align:left!important/);
+  assert.match(css,/\.ls-selection-popup button\{[\s\S]*min-width:96px/);
 });
