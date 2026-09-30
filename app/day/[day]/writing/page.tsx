@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import {useParams,useRouter} from "next/navigation";
-import AnimatedBackButton from "../../../components/animated-back-button";\nimport StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
+import AnimatedBackButton from "../../../components/animated-back-button";
+import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {ArrowLeft,CheckCircle2,Clock3,Pause,Play,Send,ShieldCheck,Maximize2,Minimize2} from "lucide-react";
 import TaskVisual from "./TaskVisual";
