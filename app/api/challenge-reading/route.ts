@@ -102,6 +102,7 @@ export async function GET(req:NextRequest){
 }
 export async function POST(req:NextRequest){
  try{
+ const declared=Number(req.headers.get("content-length")||0);if(Number.isFinite(declared)&&declared>50000)return err("Request too large",413);
  const origin=req.headers.get("origin");if(origin&&origin!==new URL(req.url).origin)return err("Invalid origin",403);
  const user=await viewer(req);if(!user)return err("Please sign in",401);
  const b=await req.json();const day=Number(b.day),id=String(b.passage_id||"");
