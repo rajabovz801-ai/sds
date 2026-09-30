@@ -528,3 +528,17 @@ test("Listening uses stronger paper and bottom navigation contrast",()=>{
   assert.match(css,/\.ls-number-groups button\{[\s\S]*background:#e9eef3;[\s\S]*color:#2c4055;[\s\S]*border:1px solid #d3dce5/);
   assert.match(css,/\.ls-number-groups button\.current\{[\s\S]*background:#173b61;[\s\S]*color:#fff/);
 });
+
+
+test("Listening highlight uses persistent overlay rectangles and paper is left aligned",()=>{
+  const page=read("app/day/[day]/listening/page.tsx");
+  const css=read("app/day/[day]/listening/listening.css");
+  assert.match(page,/paperRef=useRef<HTMLElement\|null>/);
+  assert.match(page,/highlightRects/);
+  assert.match(page,/range\.getClientRects\(\)/);
+  assert.match(page,/ls-highlight-layer/);
+  assert.match(page,/ls-highlight-overlay/);
+  assert.match(css,/\.ls-workspace\{[\s\S]*margin:10px 18px 105px/);
+  assert.match(css,/\.ls-highlight-overlay\{[\s\S]*background:rgba\(255,241,118,.72\)/);
+  assert.match(css,/mix-blend-mode:multiply/);
+});
