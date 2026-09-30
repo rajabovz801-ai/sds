@@ -42,6 +42,7 @@ export default function ListeningPage(){
  const saveTimer=useRef<number|null>(null);
  const startedRef=useRef(false);
  const selectionRangeRef=useRef<Range|null>(null);
+ const highlightRangesRef=useRef<Range[]>([]);
  const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
 
  const payload=data?.content.payload;
@@ -133,33 +134,17 @@ export default function ListeningPage(){
   return()=>{document.removeEventListener("mouseup",onMouseUp);document.removeEventListener("mousedown",hide);window.removeEventListener("scroll",hideOnScroll,true)};
  },[started,reviewMode]);
 
- function applyHighlight(tone:"yellow"|"mint"){
+ function applyHighlight(){
   const range=selectionRangeRef.current;if(!range)return;
-  const forbidden=".ls-qnum,input,textarea,select,button,.ls-bottom-nav,.ls-topbar,.ls-inline-review,.ls-review-line,.ls-highlight";
-  const root=range.commonAncestorContainer;
-  const nodes:Text[]=[];
-  const maybeAdd=(node:Node)=>{
-   if(node.nodeType!==Node.TEXT_NODE||!node.textContent?.trim())return;
-   const parent=node.parentElement;if(!parent||parent.closest(forbidden))return;
-   try{if(range.intersectsNode(node))nodes.push(node as Text)}catch{}
-  };
-  if(root.nodeType===Node.TEXT_NODE)maybeAdd(root);
-  else{
-   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-   let node=walker.nextNode();while(node){maybeAdd(node);node=walker.nextNode()}
+  const registry=(CSS as any).highlights;
+  const HighlightCtor=(window as any).Highlight;
+  if(!registry||!HighlightCtor){
+   setMessage("Highlight is not supported by this browser.");
+   setHighlightPopup(null);return;
   }
-  for(let i=nodes.length-1;i>=0;i--){
-   const node=nodes[i];let start=0,end=node.length;
-   if(node===range.startContainer)start=range.startOffset;
-   if(node===range.endContainer)end=range.endOffset;
-   if(end<=start)continue;
-   const selected=start===0?node:node.splitText(start);
-   if(end-start<selected.length)selected.splitText(end-start);
-   const mark=document.createElement("span");
-   mark.className="ls-highlight ls-highlight-"+tone;
-   selected.parentNode?.insertBefore(mark,selected);
-   mark.appendChild(selected);
-  }
+  const next=[...highlightRangesRef.current,range.cloneRange()];
+  highlightRangesRef.current=next;
+  registry.set("listening-yellow",new HighlightCtor(...next));
   window.getSelection()?.removeAllRanges();
   selectionRangeRef.current=null;setHighlightPopup(null);
  }
@@ -277,7 +262,7 @@ export default function ListeningPage(){
      {currentSection?.blocks?.map((b:any,i:number)=>renderBlock(b,i))}
     </section>
    </div>
-   {highlightPopup&&!reviewMode&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button className="yellow" onClick={()=>applyHighlight("yellow")} type="button"><span/> Yellow</button><button className="mint" onClick={()=>applyHighlight("mint")} type="button"><span/> Mint</button></div>}
+   {highlightPopup&&!reviewMode&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button className="yellow" onClick={applyHighlight} type="button"><span/> Highlight</button></div>}
    <nav className="ls-bottom-nav">
     <button className="ls-arrow" disabled={currentQuestion<=1} onClick={()=>goQuestion(currentQuestion-1)}><ChevronLeft size={17}/></button>
     <div className="ls-number-groups">{[1,2,3,4].map(s=><div className={section===s?"active":""} key={s}><span>SECTION {s}</span><div>{Array.from({length:10},(_,i)=>(s-1)*10+i+1).map(q=>{const st=answerStatus(review,q);return <button key={q} className={(currentQuestion===q?"current ":"")+(answers[String(q)]?"answered ":"")+(reviewMode&&st?st.status:"")} onClick={()=>goQuestion(q)}>{q}</button>})}</div></div>)}</div>
