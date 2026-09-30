@@ -5,7 +5,7 @@ import {useEffect,useMemo,useState} from "react";
 import {LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,Medal,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,LockKeyhole,Clock3,Flame,ChevronRight,Menu,X,Bell,Settings,LogOut,CalendarCheck,Target,CircleHelp,ArrowUpRight,CheckCircle2,FileText,ChevronLeft,Sun,Moon,Coins,ShieldCheck} from "lucide-react";
 
 type Day={n:number,date:Date,mock:boolean};
-type StudentStats={student:{id:string,first_name:string,last_name:string,username:string,target_band:number},today_seconds:number,active_seconds:number,coins:number,by_module:Record<string,number>,completed:{day_number:number,module:string,score:number|null,band:number|null,review_status:string}[]};
+type StudentStats={student:{id:string,first_name:string,last_name:string,username:string,target_band:number},today_seconds:number,active_seconds:number,coins:number,by_module:Record<string,number>,completed:{day_number:number,module:string,score:number|null,band:number|null,review_status:string}[],required_by_day:Record<string,string[]>};
 function duration(seconds:number){const s=Math.max(0,Math.floor(seconds));return Math.floor(s/3600)+"h "+String(Math.floor((s%3600)/60)).padStart(2,"0")+"m";}
 const DAYS:Day[]=Array.from({length:60},(_,i)=>{const date=new Date(Date.UTC(2026,9,1+i));return {n:i+1,date,mock:date.getUTCDay()===0}});
 const daysOfWeek=["MON","TUE","WED","THU","FRI","SAT","SUN"];
@@ -37,9 +37,9 @@ export default function Dashboard(){
  const [month,setMonth]=useState<"all"|"oct"|"nov">("oct");
  const [stats,setStats]=useState<StudentStats|null>(null);
  const [authChecked,setAuthChecked]=useState(false);
- useEffect(()=>{let mounted=true;async function refresh(){try{const res=await fetch("/api/ark60?action=me",{credentials:"same-origin",cache:"no-store"});if(res.ok){const obj=await res.json();if(mounted)setStats(obj)}else if(mounted)setStats(null)}catch{}finally{if(mounted)setAuthChecked(true)}}refresh();const id=setInterval(refresh,60000);return()=>{mounted=false;clearInterval(id)}},[]);
+ useEffect(()=>{let mounted=true,inFlight=false;async function refresh(){if(inFlight)return;inFlight=true;try{const res=await fetch("/api/ark60?action=me",{credentials:"same-origin",cache:"no-store"});if(res.ok){const obj=await res.json();if(mounted)setStats(obj)}else if(mounted)setStats(null)}catch{}finally{inFlight=false;if(mounted)setAuthChecked(true)}}const onVisible=()=>{if(document.visibilityState==="visible")void refresh()};void refresh();window.addEventListener("focus",onVisible);document.addEventListener("visibilitychange",onVisible);const id=setInterval(()=>{if(document.visibilityState==="visible")void refresh()},300000);return()=>{mounted=false;clearInterval(id);window.removeEventListener("focus",onVisible);document.removeEventListener("visibilitychange",onVisible)}},[]);
  async function exit(){if(stats){try{await fetch("/api/ark60",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"logout"})})}catch{}}window.location.assign("/")}
- const completedDays=stats?DAYS.filter(d=>{const required=d.mock?["listening","reading","writing","speaking"]:regular.filter(x=>d.n!==14||(x.name!=="Reading"&&x.name!=="Vocabulary")).map(x=>x.name.toLowerCase());return required.every(module=>stats.completed.some(x=>x.day_number===d.n&&x.module===module))}).length:0;
+ const completedDays=stats?DAYS.filter(d=>{const required=stats.required_by_day?.[String(d.n)]||[];return required.length>0&&required.every(module=>stats.completed.some(x=>x.day_number===d.n&&x.module===module))}).length:0;
  const initials=stats?(stats.student.first_name[0]+stats.student.last_name[0]).toUpperCase():"AR";
  useEffect(()=>{
   function tick(){const iso=tashkentDate();setToday(iso);setClock(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Tashkent",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date()))}

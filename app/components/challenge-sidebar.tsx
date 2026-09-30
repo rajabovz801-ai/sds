@@ -14,7 +14,7 @@ const modules: {name:ModuleName;icon:typeof BookOpen;tone:string}[]=[
 ];
 export default function ChallengeSidebar({day,active="Day"}:Props){
  const scheduled=[1,2,3,5,6,7,8,9,10,12,13,14,15,16,17].includes(day);
- const url=(name:ModuleName)=>(name==="Reading"&&scheduled?"/day/"+day+"/reading":name==="Vocabulary"&&scheduled?"/day/"+day+"/vocabulary":name==="Writing"&&scheduled?"/day/"+day+"/writing":name==="Article"&&day===1?"/day/"+day+"/article":null);
+ const url=(name:ModuleName)=>(name==="Reading"&&scheduled?"/day/"+day+"/reading":name==="Vocabulary"&&scheduled?"/day/"+day+"/vocabulary":name==="Writing"&&scheduled?"/day/"+day+"/writing":name==="Article"&&scheduled?"/day/"+day+"/article":null);
  return <aside className="ch-sidebar" aria-label="Challenge navigation">
   <div className="ch-sidebar-brand"><span className="ch-brand-name"><b>ARK</b> EDUCATION</span><span>60 DAY IELTS CHALLENGE <i/></span></div>
   <div className="ch-sidebar-group"><div className="ch-sidebar-label">WORKSPACE</div>

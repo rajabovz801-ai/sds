@@ -72,14 +72,15 @@ export async function GET(req:NextRequest){
   const details=await db("ark60_reading_passages","GET","select=id,questions,answer_key,analysis&day_number=eq."+day);
   const users=new Map(students.map((s:J)=>[s.id,s]));
   const source=new Map(details.map((p:J)=>[p.id,p]));
-  return NextResponse.json({day,passages,attempts:rows.map((a:J)=>({...a,student:users.get(a.student_id)||null,
+  const realRows=rows.filter((a:J)=>String((users.get(a.student_id) as J|undefined)?.username||"").toLowerCase()!==previewName);
+  return NextResponse.json({day,passages,attempts:realRows.map((a:J)=>({...a,student:users.get(a.student_id)||null,
     review:source.get(a.passage_id)?reviewFor(source.get(a.passage_id) as J,a):null,
     answers:undefined
   }))});
  }
  const user=await viewer(req);if(!user)return err("Please sign in",401);
  const day=Number(url.searchParams.get("day"));if(!allowed(day,user))return err("This study day is locked",403);
- const rows=await catalogue(day);const attempts=await completed(String(user.id),day);
+ const rows=await catalogue(day);const attempts=user.username===previewName?[]:await completed(String(user.id),day);
  if(action==="list")return NextResponse.json({day,preview:user.username===previewName,passages:rows.filter((r:J)=>r.status==="published").map((r:J)=>({id:r.id,ordinal:r.ordinal,title:r.title,completed:attempts.find((a:J)=>a.passage_id===r.id)||null,locked:r.ordinal===2&&user.username!==previewName&&!attempts.some((a:J)=>a.ordinal===1)})),draft_count:rows.filter((r:J)=>r.status==="draft").length});
  if(action!=="passage")return err("Unknown action",404);
  const id=url.searchParams.get("id")||"";if(!idValid(id))return err("Invalid passage");
@@ -107,7 +108,7 @@ export async function POST(req:NextRequest){
  if(!allowed(day,user)||!idValid(id))return err("Invalid day or passage",403);
  const row=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,questions,answer_key,analysis,status&id=eq."+id+"&day_number=eq."+day+"&status=eq.published&limit=1"))[0];
  if(!row)return err("Passage unavailable",404);
- const prev=await completed(String(user.id),day);
+ const prev=user.username===previewName?[]:await completed(String(user.id),day);
  const existing=prev.find((a:J)=>a.passage_id===id);
  if(existing){
   const passage=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,title,passage_text,question_source,questions,answer_key,analysis&id=eq."+id+"&limit=1"))[0];
@@ -116,6 +117,14 @@ export async function POST(req:NextRequest){
  }
  if(row.ordinal===2&&user.username!==previewName&&!prev.some((a:J)=>a.ordinal===1))return err("Complete Passage 1 first",403);
  if(b.action==="start"||b.action==="resume"||b.action==="pause"){
+  if(user.username===previewName){
+   const elapsed=Math.max(0,Math.min(LIMIT,Number(b.elapsed_seconds)||0));
+   const nowIso=new Date().toISOString();
+   return NextResponse.json({ok:true,preview:true,timer:{
+    started_at:nowIso,active_seconds:elapsed,resumed_at:b.action==="pause"?null:nowIso,
+    is_running:b.action!=="pause",elapsed_seconds:elapsed
+   }});
+  }
   if(b.action!=="pause"){
    await db("ark60_reading_starts","POST","on_conflict=student_id,passage_id",
     {student_id:user.id,passage_id:id},"resolution=ignore-duplicates");
@@ -134,10 +143,31 @@ export async function POST(req:NextRequest){
   return NextResponse.json({ok:true,timer:timerState(updated)});
  }
  if(b.action!=="submit")return err("Unknown action");
- const start=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
- if(!start)return err("Start the passage before submitting",409);
  const questions=Array.isArray(row.questions)?row.questions:[];
  const key=Array.isArray(row.answer_key)?row.answer_key:[];
+ if(user.username===previewName){
+  if(!questions.length||key.length!==questions.length)return err("Answer key is not verified; submission disabled",503);
+  if(!b.answers||typeof b.answers!=="object"||Array.isArray(b.answers))return err("Invalid answers");
+  const answers=b.answers as Record<string,unknown>;
+  let score=0;const usedPairAnswers=new Map<string,Set<string>>();
+  for(let i=0;i<questions.length;i++){
+   const q=questions[i],valid=Array.isArray(key[i])?key[i]:[key[i]];
+   const group=typeof q.pair_group==="string"?q.pair_group:"";
+   const used=group?(usedPairAnswers.get(group)||new Set<string>()):null;
+   const given=normalize(answers[String(q.number)]);
+   if(given&&valid.some((v:unknown)=>normalize(v)===given)&&(!used||!used.has(given))){
+    score++;if(used){used.add(given);usedPairAnswers.set(group,used)}
+   }
+  }
+  const seconds=Math.max(0,Math.min(LIMIT,Math.floor(Number(b.elapsed_seconds)||0)));
+  const stamp=new Date().toISOString();
+  return NextResponse.json({ok:true,preview:true,
+   result:{id:"preview-"+id,score,total:questions.length,elapsed_seconds:seconds},
+   review:reviewFor(row,{answers,score,total:questions.length,elapsed_seconds:seconds,submitted_at:stamp})
+  });
+ }
+ const start=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+ if(!start)return err("Start the passage before submitting",409);
  if(!questions.length||key.length!==questions.length)return err("Answer key is not verified; submission disabled",503);
  if(!b.answers||typeof b.answers!=="object"||Array.isArray(b.answers))return err("Invalid answers");
  const answers=b.answers as Record<string,unknown>;

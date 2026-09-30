@@ -165,10 +165,19 @@ def get_data(request:Request, action:str="health", day:int=1):
         return {"valid":True,"available":free,"message":"Available" if free else "Username already taken"}
     if action=="me":
         user=require_student(request)
-        totals=db("GET","ark60_study_sessions",{"select":"active_seconds,study_date,module,day_number","student_id":"eq."+user["id"],"limit":5000})
-        completed=db("GET","ark60_submissions",{"select":"day_number,module,score,band,review_status","student_id":"eq."+user["id"],"limit":1000})
-        coins=db("GET","ark60_coin_events",{"select":"amount","student_id":"eq."+user["id"],"limit":1000})
-        return {"student":user,"active_seconds":sum(int(x["active_seconds"]) for x in totals),"today_seconds":sum(int(x["active_seconds"]) for x in totals if x["study_date"]==str(today())),"by_module":{m:sum(int(x["active_seconds"]) for x in totals if x["module"]==m) for m in sorted(MODULES)},"completed":completed,"coins":sum(int(x["amount"]) for x in coins)}
+        rows=db("POST","rpc/ark60_student_dashboard_summary",payload={"p_student":user["id"],"p_today":str(today())})
+        summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
+        preview=user.get("username")=="rustam7"
+        return {
+            "student":user,
+            "active_seconds":0 if preview else int(summary.get("active_seconds") or 0),
+            "today_seconds":0 if preview else int(summary.get("today_seconds") or 0),
+            "by_module":({m:0 for m in sorted(MODULES)} if preview else (summary.get("by_module") or {m:0 for m in sorted(MODULES)})),
+            "completed":[] if preview else (summary.get("completed") or []),
+            "coins":0 if preview else int(summary.get("coins") or 0),
+            "required_by_day":summary.get("required_by_day") or {},
+            "preview":preview
+        }
     if action=="day":
         require_student(request)
         d=day_status(day)
@@ -179,16 +188,41 @@ def get_data(request:Request, action:str="health", day:int=1):
         return {"admin":require_admin(request)}
     if action=="admin_dashboard":
         admin=require_admin(request)
-        students=db("GET","ark60_students",{"select":"id,first_name,last_name,username,target_band,status,created_at","status":"neq.deleted","limit":2000})
-        hours=db("GET","ark60_study_sessions",{"select":"student_id,active_seconds,study_date,module","limit":20000})
-        pending=db("GET","ark60_submissions",{"select":"module,review_status","review_status":"eq.pending","limit":1000})
-        by_student={x["id"]:{"id":x["id"],"first_name":x["first_name"],"last_name":x["last_name"],"username":x["username"],"target_band":x["target_band"],"status":x["status"],"created_at":x["created_at"],"today_seconds":0,"total_seconds":0} for x in students}
-        for h in hours:
-            item=by_student.get(h["student_id"])
-            if item:
-                item["total_seconds"]+=int(h["active_seconds"])
-                if h["study_date"]==str(today()):item["today_seconds"]+=int(h["active_seconds"])
-        return {"admin":admin,"students":list(by_student.values()),"total_students":len(students),"active_today":sum(1 for x in by_student.values() if x["today_seconds"]>0),"today_seconds":sum(x["today_seconds"] for x in by_student.values()),"pending_writing":sum(1 for x in pending if x["module"]=="writing"),"pending_speaking":sum(1 for x in pending if x["module"]=="speaking"),"pending_requests":sum(1 for x in students if x["status"]=="pending")}
+        rows=db("POST","rpc/ark60_admin_dashboard_summary",payload={"p_today":str(today())})
+        summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
+        return {
+            "admin":admin,
+            "students":summary.get("students") or [],
+            "total_students":int(summary.get("total_students") or 0),
+            "active_today":int(summary.get("active_today") or 0),
+            "today_seconds":int(summary.get("today_seconds") or 0),
+            "pending_writing":int(summary.get("pending_writing") or 0),
+            "pending_speaking":int(summary.get("pending_speaking") or 0),
+            "pending_requests":int(summary.get("pending_requests") or 0)
+        }
+    if action=="admin_content":
+        require_admin(request)
+        if day<1 or day>60:
+            raise HTTPException(status_code=400,detail="Invalid course day")
+        reading=db("GET","ark60_reading_passages",{"select":"status,title","day_number":"eq."+str(day),"limit":10})
+        articles=db("GET","ark60_articles",{"select":"status,title","day_number":"eq."+str(day),"limit":5})
+        vocab=db("GET","ark60_vocab_units",{"select":"status,source_title","day_number":"eq."+str(day),"limit":20})
+        generic=db("GET","ark60_content",{"select":"module,status,title","day_number":"eq."+str(day),"limit":10})
+        def state(rows,expected=None):
+            published=sum(1 for x in rows if x.get("status")=="published")
+            drafts=sum(1 for x in rows if x.get("status")=="draft")
+            total=len(rows)
+            ready=published>0 and (expected is None or published>=expected) and drafts==0
+            return {"status":"Published" if ready else ("Draft" if total else "Missing"),"published":published,"drafts":drafts,"total":total}
+        modules={
+            "Reading":state(reading,2),
+            "Article":state(articles,1),
+            "Vocabulary":state(vocab,None)
+        }
+        for name in ("Listening","Writing","Speaking"):
+            rows=[x for x in generic if x.get("module")==name.lower()]
+            modules[name]=state(rows,1)
+        return {"day":day,"modules":modules}
     if action=="admin_admins":
         admin=require_super_admin(request)
         rows=db("GET","ark60_admins",{"select":"id,display_name,username,role,status,created_at","order":"created_at.asc","limit":200})
@@ -360,10 +394,19 @@ async def actions(request:Request,response:Response):
         module=data.get("module")
         if not isinstance(day,int) or module not in MODULES:
             raise HTTPException(status_code=400,detail="Invalid module")
-        d=day_status(day)
+        if user.get("username")=="rustam7":
+            return {"ok":True,"preview":True,"added_seconds":0}
+        day_status(day)
         today_d=today()
         # Record actual date of activity, not the original course date for late work.
-        content=db("GET","ark60_content",{"select":"id","day_number":"eq."+str(day),"module":"eq."+module,"status":"eq.published","limit":1})
+        if module=="reading":
+            content=db("GET","ark60_reading_passages",{"select":"id","day_number":"eq."+str(day),"status":"eq.published","limit":1})
+        elif module=="article":
+            content=db("GET","ark60_articles",{"select":"id","day_number":"eq."+str(day),"status":"eq.published","limit":1})
+        elif module=="vocabulary":
+            content=db("GET","ark60_vocab_units",{"select":"id","day_number":"eq."+str(day),"status":"eq.published","limit":1})
+        else:
+            content=db("GET","ark60_content",{"select":"id","day_number":"eq."+str(day),"module":"eq."+module,"status":"eq.published","limit":1})
         if not content:raise HTTPException(status_code=403,detail="This module is not yet available")
         # A heartbeat can add at most 20 seconds every 18 seconds per module.
         rows=db("GET","ark60_study_sessions",{"select":"id,last_active_at,active_seconds","student_id":"eq."+user["id"],"study_date":"eq."+str(today_d),"day_number":"eq."+str(day),"module":"eq."+module,"order":"last_active_at.desc","limit":1})

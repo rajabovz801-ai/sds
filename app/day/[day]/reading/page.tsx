@@ -33,7 +33,15 @@ export default function ChallengeReading(){
  useEffect(()=>{const fn=()=>setFullScreen(!!document.fullscreenElement);document.addEventListener("fullscreenchange",fn);return()=>document.removeEventListener("fullscreenchange",fn)},[]);
  useEffect(()=>{if(!timer.is_running||!passage||result||busy)return;if(usedSeconds(timer,now)>=1200)submit(true)},[now,timer,passage,result,busy]);
  async function setRunning(action:"start"|"pause"){
-  if(!passage||busy||result)return;setBusy(true);setError("");
+  if(!passage||busy||result)return;
+  if(isPreview.current){
+   const stamp=Date.now(),used=usedSeconds(timer,stamp);
+   setTimer(t=>action==="pause"
+    ?{...t,started_at:t.started_at||new Date(stamp).toISOString(),active_seconds:used,resumed_at:null,is_running:false,elapsed_seconds:used}
+    :{...t,started_at:t.started_at||new Date(stamp).toISOString(),active_seconds:used,resumed_at:new Date(stamp).toISOString(),is_running:true,elapsed_seconds:used});
+   setNow(stamp);return;
+  }
+  setBusy(true);setError("");
   try{const res=await fetch("/api/challenge-reading",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:action==="start"?(timer.started_at?"resume":"start"):"pause",day,passage_id:passage.id})});const obj=await res.json();if(!res.ok)throw new Error(obj.error||"Could not update timer");setTimer(obj.timer);setNow(Date.now())}
   catch(e){setError(String(e))}finally{setBusy(false)}
  }
@@ -74,7 +82,7 @@ export default function ChallengeReading(){
   if(!auto&&!confirm("Submit this passage? You cannot change your answers afterward."))return;
   setBusy(true);setError("");
   try{
-   const res=await fetch("/api/challenge-reading",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,passage_id:passage.id,answers})});
+   const res=await fetch("/api/challenge-reading",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,passage_id:passage.id,answers,elapsed_seconds:usedSeconds(timer,Date.now())})});
    const obj=await res.json();if(!res.ok)throw new Error(obj.error||"Could not save result");setResult(obj.result);setReview(obj.review||null);setTimer(t=>({...t,is_running:false,active_seconds:obj.result.elapsed_seconds||t.active_seconds,resumed_at:null}));clearHighlights();await loadList();
   }catch(e){setError(String(e))}finally{setBusy(false)}
  }
