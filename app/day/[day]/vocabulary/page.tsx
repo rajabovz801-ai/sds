@@ -3,7 +3,7 @@ import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {useParams} from "next/navigation";
 import AnimatedBackButton from "../../../components/animated-back-button";
-import ChallengeSidebar from "../../../components/challenge-sidebar";
+import ChallengeSidebar from "../../../components/challenge-sidebar";\nimport StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {ArrowRight,BookOpen,Bookmark,Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Layers3,LockKeyhole,RefreshCw,RotateCcw,Sparkles,Target,Trophy,X,AlertCircle} from "lucide-react";
 import "./vocabulary.css";
 
@@ -80,7 +80,7 @@ export default function VocabularyPage(){
   return out;
  },[units]);
  if(panel!=="overview"&&currentUnit){
-  return <main className="vv-shell">
+  return <main className="vv-shell"><StudyTimeHeartbeat day={day} module="vocabulary"/>
    <header className="vv-top"><AnimatedBackButton onClick={back}/><div className="vv-brand">ARK <b>EDUCATION</b><span> · VOCABULARY</span></div><span className="vv-top-tag">DAY {String(day).padStart(2,"0")}</span></header>
    {panel==="study"&&<div className="vv-inner vv-study">
     <div className="vv-eyebrow">STUDY YOUR WORDS</div><h1>{currentUnit.source_title} <span>Unit {currentUnit.unit_number}</span></h1>
