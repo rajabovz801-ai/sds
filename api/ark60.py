@@ -217,7 +217,7 @@ def get_data(request:Request, action:str="health", day:int=1):
         modules={
             "Reading":state(reading,2),
             "Article":state(articles,1),
-            "Vocabulary":state(vocab,None)
+            "Vocabulary":state(vocab,6)
         }
         for name in ("Listening","Writing","Speaking"):
             rows=[x for x in generic if x.get("module")==name.lower()]
