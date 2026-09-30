@@ -29,7 +29,8 @@ export default function DayPage(){
   fetch("/api/challenge-reading?action=list&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted){setTeacher(r?.preview===true);setPublishedReading(r?.passages?.length||0)}}).catch(()=>{});
   fetch("/api/challenge-article?action=availability&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted){setPublishedArticle(!!r?.published);setArticleTitle(r?.title||"")}}).catch(()=>{});
   fetch("/api/challenge-vocab?action=overview&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted){const complete=(r?.units||[]).filter((u:{word_count:number})=>u.word_count===20);setPublishedVocabulary(complete.length);setPublishedArticleVocab(complete.filter((u:{source_kind:string})=>u.source_kind==="article").length)}} ).catch(()=>{});
-  fetch("/api/challenge-speaking?action=availability&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted)setPublishedSpeaking(!!r?.published)}).catch(()=>{});\n  fetch("/api/challenge-listening?action=availability&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted)setPublishedListening(!!r?.published)}).catch(()=>{});
+  fetch("/api/challenge-speaking?action=availability&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted)setPublishedSpeaking(!!r?.published)}).catch(()=>{});
+  fetch("/api/challenge-listening?action=availability&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted)setPublishedListening(!!r?.published)}).catch(()=>{});
   return()=>{mounted=false}},[day]);
  const available=teacher||iso<=today;
  const modules=sunday?[regular[1],regular[0],regular[4],regular[5]]:regular;
