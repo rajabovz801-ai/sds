@@ -42,7 +42,9 @@ export default function ListeningPage(){
  const saveTimer=useRef<number|null>(null);
  const startedRef=useRef(false);
  const selectionRangeRef=useRef<Range|null>(null);
+ const paperRef=useRef<HTMLElement|null>(null);
  const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
+ const [highlightRects,setHighlightRects]=useState<Record<number,{left:number;top:number;width:number;height:number}[]>>({});
 
  const payload=data?.content.payload;
  const sections=payload?.sections||[];
@@ -134,40 +136,15 @@ export default function ListeningPage(){
  },[started,reviewMode]);
 
  function applyHighlight(){
-  const range=selectionRangeRef.current;if(!range)return;
-  const forbidden=".ls-qnum,input,textarea,select,button,.ls-bottom-nav,.ls-topbar,.ls-inline-review,.ls-review-line,.ls-selection-popup,.ls-highlight";
-  const root=range.commonAncestorContainer;
-  const parts:{node:Text;start:number;end:number}[]=[];
-  const collect=(node:Node)=>{
-   if(node.nodeType!==Node.TEXT_NODE||!node.textContent?.trim())return;
-   const textNode=node as Text;
-   const parent=textNode.parentElement;
-   if(!parent||parent.closest(forbidden))return;
-   try{
-    if(!range.intersectsNode(textNode))return;
-   }catch{return}
-   let start=0,end=textNode.length;
-   if(textNode===range.startContainer)start=Math.max(0,Math.min(textNode.length,range.startOffset));
-   if(textNode===range.endContainer)end=Math.max(0,Math.min(textNode.length,range.endOffset));
-   if(end>start)parts.push({node:textNode,start,end});
-  };
-  if(root.nodeType===Node.TEXT_NODE)collect(root);
-  else{
-   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-   let node=walker.nextNode();
-   while(node){collect(node);node=walker.nextNode()}
-  }
-  for(let i=parts.length-1;i>=0;i--){
-   const {node,start,end}=parts[i];
-   let selected=node;
-   if(end<selected.length)selected.splitText(end);
-   if(start>0)selected=selected.splitText(start);
-   if(!selected.textContent?.trim())continue;
-   const mark=document.createElement("span");
-   mark.className="ls-highlight";
-   selected.parentNode?.insertBefore(mark,selected);
-   mark.appendChild(selected);
-  }
+  const range=selectionRangeRef.current,paper=paperRef.current;if(!range||!paper)return;
+  const paperBox=paper.getBoundingClientRect();
+  const rects=Array.from(range.getClientRects()).filter(r=>r.width>1&&r.height>1).map(r=>({
+   left:r.left-paperBox.left,
+   top:r.top-paperBox.top,
+   width:r.width,
+   height:r.height
+  }));
+  if(rects.length)setHighlightRects(prev=>({...prev,[section]:[...(prev[section]||[]),...rects]}));
   window.getSelection()?.removeAllRanges();
   selectionRangeRef.current=null;setHighlightPopup(null);
  }
@@ -280,7 +257,8 @@ export default function ListeningPage(){
    {message&&<div className="ls-message">{message}<button onClick={()=>setMessage("")}>×</button></div>}
    <section className="ls-instruction"><div><b>{reviewMode?"ANSWER REVIEW":currentSection?.label}</b><span>{reviewMode?"Your answers and the official correct answers":currentSection?.range}</span></div>{!reviewMode&&<span className="ls-save-state">{saving?"Saving answers…":"Answers auto-save"}</span>}</section>
    <div className="ls-workspace">
-    <section className="ls-question-paper">
+    <section className="ls-question-paper" ref={paperRef}>
+     <div className="ls-highlight-layer" aria-hidden="true">{(highlightRects[section]||[]).map((r,i)=><span key={i} className="ls-highlight-overlay" style={{left:r.left,top:r.top,width:r.width,height:r.height}}/>)}</div>
      <div className="ls-section-heading"><span>{currentSection?.label}</span><b>{currentSection?.range}</b></div>
      {currentSection?.blocks?.map((b:any,i:number)=>renderBlock(b,i))}
     </section>

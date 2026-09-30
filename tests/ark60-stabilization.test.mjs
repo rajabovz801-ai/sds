@@ -501,19 +501,19 @@ test("Listening restores readable exam typography and boxed gap-fill fields",()=
   assert.match(css,/\.ls-number-groups button\{[\s\S]*height:28px;[\s\S]*min-width:21px;[\s\S]*font-size:11px/);
 });
 
-test("Listening uses one reliable DOM yellow highlight without changing text layout",()=>{
+test("Listening uses persistent yellow overlay highlights without changing text layout",()=>{
   const page=read("app/day/[day]/listening/page.tsx");
   const css=read("app/day/[day]/listening/listening.css");
   assert.match(page,/selectionRangeRef/);
-  assert.doesNotMatch(page,/highlightRangesRef/);
-  assert.doesNotMatch(page,/CSS as any\)\.highlights/);
-  assert.match(page,/document\.createElement\("span"\)/);
-  assert.match(page,/mark\.className="ls-highlight"/);
-  assert.match(page,/selected\.splitText\(end\)/);
-  assert.match(page,/selected=selected\.splitText\(start\)/);
+  assert.match(page,/paperRef/);
+  assert.match(page,/highlightRects/);
+  assert.match(page,/range\.getClientRects\(\)/);
+  assert.match(page,/ls-highlight-layer/);
+  assert.match(page,/ls-highlight-overlay/);
   assert.match(page,/onClick=\{applyHighlight\}/);
   assert.match(page,/\.ls-qnum,input,textarea,select,button,\.ls-bottom-nav,\.ls-topbar/);
-  assert.match(css,/\.ls-highlight\{[\s\S]*display:inline!important;[\s\S]*margin:0!important;[\s\S]*padding:0!important;[\s\S]*background:#fff176!important;[\s\S]*line-height:inherit!important/);
+  assert.match(css,/\.ls-highlight-overlay\{[\s\S]*background:rgba\(255,241,118,.72\)/);
+  assert.match(css,/mix-blend-mode:multiply/);
   assert.match(css,/\.ls-question-paper,[\s\S]*text-align:left!important/);
   assert.match(css,/\.ls-selection-popup button\{[\s\S]*min-width:96px/);
 });
@@ -527,4 +527,18 @@ test("Listening uses stronger paper and bottom navigation contrast",()=>{
   assert.match(css,/\.ls-number-groups>div\{[\s\S]*background:#f1f4f8;[\s\S]*border-color:#d4dce5/);
   assert.match(css,/\.ls-number-groups button\{[\s\S]*background:#e9eef3;[\s\S]*color:#2c4055;[\s\S]*border:1px solid #d3dce5/);
   assert.match(css,/\.ls-number-groups button\.current\{[\s\S]*background:#173b61;[\s\S]*color:#fff/);
+});
+
+
+test("Listening highlight uses persistent overlay rectangles and paper is left aligned",()=>{
+  const page=read("app/day/[day]/listening/page.tsx");
+  const css=read("app/day/[day]/listening/listening.css");
+  assert.match(page,/paperRef=useRef<HTMLElement\|null>/);
+  assert.match(page,/highlightRects/);
+  assert.match(page,/range\.getClientRects\(\)/);
+  assert.match(page,/ls-highlight-layer/);
+  assert.match(page,/ls-highlight-overlay/);
+  assert.match(css,/\.ls-workspace\{[\s\S]*margin:10px 18px 105px/);
+  assert.match(css,/\.ls-highlight-overlay\{[\s\S]*background:rgba\(255,241,118,.72\)/);
+  assert.match(css,/mix-blend-mode:multiply/);
 });
