@@ -235,7 +235,9 @@ export async function POST(req:NextRequest){
     if(error||!data)return json({detail:"Could not start Speaking."},500);
     attempt=data;
    }
-   return json({ok:true,attempt:publicAttempt(attempt,await getAnswers(attempt.id))});
+   const activeAttempt=attempt;
+   if(!activeAttempt)return json({detail:"Could not start Speaking."},500);
+   return json({ok:true,attempt:publicAttempt(activeAttempt,await getAnswers(activeAttempt.id))});
   }
 
   if(action==="start_preparation"){
