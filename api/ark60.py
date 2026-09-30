@@ -209,6 +209,13 @@ def get_data(request:Request, action:str="health", day:int=1):
         return {"day":day,"date":str(d),"mock":d.weekday()==6,"modules":available,"published":rows,"preview":user.get("username")=="rustam7"}
     if action=="admin_me":
         return {"admin":require_admin(request)}
+    if action=="admin_leaderboard":
+        require_admin(request)
+        rows=db("POST","rpc/ark60_leaderboard_snapshot",payload={})
+        board=rows if isinstance(rows,list) else []
+        for idx,item in enumerate(board):
+            item["rank"]=idx+1
+        return {"leaderboard":board}
     if action=="admin_dashboard":
         admin=require_admin(request)
         rows=db("POST","rpc/ark60_admin_dashboard_summary",payload={"p_today":str(today())})
