@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const STUDENT_COOKIE = "ark60_session";
 const ADMIN_COOKIE = "ark60_admin";
 const START_UTC = Date.UTC(2026, 9, 1);
-const WRITING_DAYS = new Set([1,2,3,5,6,7,8,9,10,12,13,14,15,16,17]);
+const WRITING_DAYS = new Set([1,2,3,5,6,7,8,9,10,12,13,14,15,16,17]);\nconst PREVIEW_USERNAME = "rustam7";
 
 function digest(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
@@ -204,7 +204,7 @@ export async function GET(request) {
   if (!student && !admin) return json({ detail: "Please sign in." }, 401);
   const day = validDay(url.searchParams.get("day"));
   if (!day) return json({ detail: "No daily Writing task is scheduled for this day." }, 404);
-  if (!admin && dayIso(day) > uzDate()) return json({ detail: "This Writing task is not available yet." }, 403);
+  if (!admin && student?.username !== PREVIEW_USERNAME && dayIso(day) > uzDate()) return json({ detail: "This Writing task is not available yet." }, 403);
   const content = await getContent(day);
   if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
 
@@ -219,7 +219,7 @@ export async function GET(request) {
       .maybeSingle();
     submission = result.data || null;
   }
-  return json({ content, submission, preview: Boolean(admin) });
+  return json({ content, submission, preview: Boolean(admin || student?.username === PREVIEW_USERNAME) });
 }
 
 export async function POST(request) {
@@ -253,7 +253,7 @@ export async function POST(request) {
   if (!student) return json({ detail: "Please sign in." }, 401);
   const day = validDay(body.day);
   if (!day) return json({ detail: "No daily Writing task is scheduled for this day." }, 400);
-  if (dayIso(day) > uzDate()) return json({ detail: "This Writing task is not available yet." }, 403);
+  if (student.username !== PREVIEW_USERNAME && dayIso(day) > uzDate()) return json({ detail: "This Writing task is not available yet." }, 403);
   const content = await getContent(day);
   if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
   const answer = String(body.answer || "").trim();
