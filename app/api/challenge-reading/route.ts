@@ -194,10 +194,12 @@ export async function POST(req:NextRequest){
   }else{
    await db("ark60_study_sessions","POST","",{student_id:user.id,study_date:date,day_number:day,module:"reading",active_seconds:seconds,last_active_at:new Date().toISOString()},"return=minimal");
   }
-  const previous=prev.find((x:J)=>Number(x.ordinal)!==Number(row.ordinal));
-  if(previous){
-   const summary={passages:[{id:previous.passage_id,score:previous.score,total:previous.total,elapsed_seconds:previous.elapsed_seconds},{id,score,total:questions.length,elapsed_seconds:seconds}],total_seconds:Number(previous.elapsed_seconds||0)+seconds};
-   await db("ark60_submissions","POST","on_conflict=student_id,day_number,module",{student_id:user.id,day_number:day,module:"reading",payload:summary,score:Number(previous.score||0)+score,review_status:"reviewed"},"resolution=merge-duplicates,return=minimal");
+  const [done,passages]=await Promise.all([completed(String(user.id),day),catalogue(day)]);
+  const published=passages.filter((p:J)=>p.status==="published");
+  const doneIds=new Set(done.map((a:J)=>String(a.passage_id)));
+  if(published.length>0&&published.every((p:J)=>doneIds.has(String(p.id)))){
+   const summary={passages:done.map((a:J)=>({id:a.passage_id,score:a.score,total:a.total,elapsed_seconds:a.elapsed_seconds})),total_seconds:done.reduce((sum:number,a:J)=>sum+Number(a.elapsed_seconds||0),0)};
+   await db("ark60_submissions","POST","on_conflict=student_id,day_number,module",{student_id:user.id,day_number:day,module:"reading",payload:summary,score:done.reduce((sum:number,a:J)=>sum+Number(a.score||0),0),review_status:"reviewed"},"resolution=merge-duplicates,return=minimal");
   }
  }catch(syncError){console.error("reading metric sync",syncError)}
 

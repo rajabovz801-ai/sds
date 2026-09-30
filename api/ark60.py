@@ -109,7 +109,7 @@ def session_user(request):
     rows=db("GET","ark60_sessions",{"select":"student_id,expires_at,revoked_at","token_hash":"eq."+digest(token),"limit":1})
     if not rows or rows[0]["revoked_at"] or datetime.fromisoformat(rows[0]["expires_at"].replace("Z","+00:00"))<=now():
         return None
-    user=db("GET","ark60_students",{"select":"id,first_name,last_name,username,target_band,status,created_at","id":"eq."+rows[0]["student_id"],"limit":1})
+    user=db("GET","ark60_students",{"select":"id,first_name,last_name,username,target_band,status,created_at,date_of_birth,gender,english_level,exam_date","id":"eq."+rows[0]["student_id"],"limit":1})
     return user[0] if user and user[0]["status"]=="active" else None
 
 def admin_auth(request):
@@ -178,6 +178,25 @@ def get_data(request:Request, action:str="health", day:int=1):
             "required_by_day":summary.get("required_by_day") or {},
             "preview":preview
         }
+    if action=="reward_center":
+        user=require_student(request)
+        preview=user.get("username")=="rustam7"
+        if preview:
+            return {"balance":0,"claimed_today":False,"today_amount":0,"streak_day":0,"next_amount":1,"history":[],"preview":True}
+        rows=db("POST","rpc/ark60_reward_center",payload={"p_student":user["id"],"p_today":str(today())})
+        center=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
+        center["preview"]=False
+        return center
+    if action=="leaderboard":
+        user=require_student(request)
+        rows=db("POST","rpc/ark60_leaderboard_snapshot",payload={})
+        board=rows if isinstance(rows,list) else []
+        current=None
+        for idx,item in enumerate(board):
+            item["rank"]=idx+1
+            if item.get("student_id")==user["id"]:current=item
+        return {"leaderboard":board,"current":current,"preview":user.get("username")=="rustam7"}
+
     if action=="day":
         user=require_student(request)
         if day<1 or day>60:
@@ -190,6 +209,13 @@ def get_data(request:Request, action:str="health", day:int=1):
         return {"day":day,"date":str(d),"mock":d.weekday()==6,"modules":available,"published":rows,"preview":user.get("username")=="rustam7"}
     if action=="admin_me":
         return {"admin":require_admin(request)}
+    if action=="admin_leaderboard":
+        require_admin(request)
+        rows=db("POST","rpc/ark60_leaderboard_snapshot",payload={})
+        board=rows if isinstance(rows,list) else []
+        for idx,item in enumerate(board):
+            item["rank"]=idx+1
+        return {"leaderboard":board}
     if action=="admin_dashboard":
         admin=require_admin(request)
         rows=db("POST","rpc/ark60_admin_dashboard_summary",payload={"p_today":str(today())})
@@ -315,6 +341,57 @@ async def actions(request:Request,response:Response):
             db("PATCH","ark60_sessions",params={"token_hash":"eq."+digest(token)},payload={"revoked_at":now().isoformat()},prefer="return=minimal")
         response.delete_cookie(COOKIE,path="/")
         return {"ok":True}
+    if action=="logout_all":
+        user=require_student(request)
+        db("PATCH","ark60_sessions",params={"student_id":"eq."+user["id"],"revoked_at":"is.null"},payload={"revoked_at":now().isoformat()},prefer="return=minimal")
+        response.delete_cookie(COOKIE,path="/")
+        return {"ok":True}
+    if action=="claim_daily_reward":
+        user=require_student(request)
+        if user.get("username")=="rustam7":
+            return {"ok":True,"claimed":True,"preview":True,"streak_day":1,"amount":1,"balance":0,"next_amount":2}
+        rows=db("POST","rpc/ark60_claim_daily_reward",payload={"p_student":user["id"],"p_today":str(today())})
+        reward=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
+        return reward
+    if action=="update_profile":
+        user=require_student(request)
+        first=str(data.get("first_name","")).strip()
+        last=str(data.get("last_name","")).strip()
+        dob=str(data.get("date_of_birth","")).strip()
+        gender=str(data.get("gender","")).strip()
+        level=str(data.get("english_level","")).strip().upper()
+        exam=str(data.get("exam_date","")).strip()
+        try: band=float(data.get("target_band",0))
+        except (TypeError,ValueError): band=0
+        if not (1<=len(first)<=55 and 1<=len(last)<=55):
+            raise HTTPException(status_code=400,detail="Enter your real first and last name.")
+        if gender not in {"male","female","prefer_not_to_say"}:
+            raise HTTPException(status_code=400,detail="Choose a valid gender option.")
+        if level not in {"A1","A2","B1","B2","C1","C2"}:
+            raise HTTPException(status_code=400,detail="Choose your current English level.")
+        if band not in TARGET_BANDS:
+            raise HTTPException(status_code=400,detail="Choose a valid target band.")
+        try:
+            dob_date=date.fromisoformat(dob)
+            exam_date=date.fromisoformat(exam)
+        except ValueError:
+            raise HTTPException(status_code=400,detail="Choose valid dates.")
+        if dob_date>=today() or dob_date<date(1940,1,1):
+            raise HTTPException(status_code=400,detail="Choose a valid date of birth.")
+        if exam_date<today()-timedelta(days=1) or exam_date>today()+timedelta(days=1095):
+            raise HTTPException(status_code=400,detail="Choose a realistic IELTS exam date.")
+        payload={"first_name":first,"last_name":last,"date_of_birth":dob,"gender":gender,"english_level":level,"target_band":band,"exam_date":exam}
+        updated=db("PATCH","ark60_students",params={"id":"eq."+user["id"]},payload=payload,prefer="return=representation")
+        if not updated:raise HTTPException(status_code=502,detail="Could not update your profile.")
+        bonus=False
+        if user.get("username")!="rustam7":
+            try:
+                inserted=db("POST","ark60_coin_events",params={"on_conflict":"student_id,day_number,module,kind"},payload={"student_id":user["id"],"day_number":1,"module":"profile","kind":"profile_bonus","amount":1},prefer="resolution=ignore-duplicates,return=representation")
+                bonus=bool(inserted)
+            except Exception:
+                bonus=False
+        return {"ok":True,"student":updated[0],"profile_bonus_awarded":bonus}
+
     if action=="admin_login":
         bucket=rate_limit(request,"admin_login")
         username=str(data.get("username","")).strip().lower()

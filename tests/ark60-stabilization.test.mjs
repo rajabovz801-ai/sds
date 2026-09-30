@@ -33,10 +33,12 @@ test("preview account is explicitly isolated from persistent challenge writes",(
   assert.match(backend,/user\.get\("username"\)=="rustam7"/);
 });
 
-test("Article navigation is available on every scheduled challenge day",()=>{
+test("Article remains reachable from the day plan after redundant module sidebar removal",()=>{
   const sidebar=read("app/components/challenge-sidebar.tsx");
-  assert.match(sidebar,/name==="Article"&&scheduled\?/);
-  assert.doesNotMatch(sidebar,/name==="Article"&&day===1/);
+  const dayPage=read("app/day/[day]/page.tsx");
+  assert.doesNotMatch(sidebar,/MY MODULES/);
+  assert.match(dayPage,/name==="Article"\?"\/day\/"\+day\+"\/article"/);
+  assert.doesNotMatch(dayPage,/name==="Article"&&day===1/);
 });
 
 test("dashboard completion uses published module requirements rather than six hardcoded modules",()=>{
@@ -129,4 +131,70 @@ test("root layout declares a device-width mobile viewport",()=>{
   assert.match(layout,/Viewport/);
   assert.match(layout,/width:"device-width"/);
   assert.match(layout,/initialScale:1/);
+});
+
+
+test("student dashboard exposes real reward leaderboard progress and profile panels",()=>{
+  const page=read("app/dashboard/page.tsx");
+  const panels=read("app/components/challenge-hub-panels.tsx");
+  assert.match(page,/LeaderboardPanel/);
+  assert.match(page,/ProgressPanel/);
+  assert.match(page,/AchievementsPanel/);
+  assert.match(page,/ProfilePanel/);
+  assert.match(page,/RewardModal/);
+  assert.match(page,/task-coin-badge/);
+  assert.doesNotMatch(page,/>MY MODULES</);
+  assert.match(panels,/action:"claim_daily_reward"/);
+  assert.match(panels,/action:"update_profile"/);
+  assert.match(panels,/action:"logout_all"/);
+  assert.match(panels,/action=leaderboard/);
+});
+
+test("challenge sidebar no longer duplicates the My Modules list",()=>{
+  const sidebar=read("app/components/challenge-sidebar.tsx");
+  assert.doesNotMatch(sidebar,/MY MODULES/);
+  assert.match(sidebar,/Day \{String\(day\)\.padStart/);
+});
+
+test("completion reward paths remain preview-safe",()=>{
+  const reading=read("app/api/challenge-reading/route.ts");
+  const article=read("app/api/challenge-article/route.ts");
+  const vocab=read("app/api/challenge-vocab/route.ts");
+  const writing=read("app/api/challenge-writing/route.js");
+  assert.match(reading,/preview:true/);
+  assert.match(article,/isPreview\(user\)/);
+  assert.match(vocab,/isPreview\(student\)/);
+  assert.match(writing,/student\.username === PREVIEW_USERNAME/);
+});
+
+test("student API provides reward center leaderboard and editable profile actions",()=>{
+  const backend=read("api/ark60.py");
+  assert.match(backend,/action=="reward_center"/);
+  assert.match(backend,/rpc\/ark60_reward_center/);
+  assert.match(backend,/action=="leaderboard"/);
+  assert.match(backend,/rpc\/ark60_leaderboard_snapshot/);
+  assert.match(backend,/action=="claim_daily_reward"/);
+  assert.match(backend,/rpc\/ark60_claim_daily_reward/);
+  assert.match(backend,/action=="update_profile"/);
+  assert.match(backend,/date_of_birth,gender,english_level,exam_date/);
+});
+
+
+test("study-time heartbeat ignores hidden and idle tabs",()=>{
+  const heartbeat=read("app/components/study-time-heartbeat.tsx");
+  assert.match(heartbeat,/document\.visibilityState!==\"visible\"/);
+  assert.match(heartbeat,/Date\.now\(\)-lastActivity>45000/);
+  assert.match(heartbeat,/pointerdown/);
+  assert.match(heartbeat,/keydown/);
+});
+
+test("admin leaderboard and study-time views use live metrics",()=>{
+  const admin=read("app/admin/page.tsx");
+  const backend=read("api/ark60.py");
+  assert.match(backend,/action==\"admin_leaderboard\"/);
+  assert.match(admin,/action=admin_leaderboard/);
+  assert.match(admin,/view===\"Leaderboard\"/);
+  assert.match(admin,/view===\"Study time\"/);
+  assert.match(admin,/completed_tasks/);
+  assert.match(admin,/active_seconds/);
 });
