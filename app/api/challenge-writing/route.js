@@ -200,7 +200,7 @@ export async function GET(request) {
   }
 
   const student = await studentFromRequest(request);
-  const admin = student ? null : await adminFromRequest(request);
+  const admin = await adminFromRequest(request);
   if (!student && !admin) return json({ detail: "Please sign in." }, 401);
   const day = validDay(url.searchParams.get("day"));
   if (!day) return json({ detail: "No daily Writing task is scheduled for this day." }, 404);
@@ -209,7 +209,7 @@ export async function GET(request) {
   if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
 
   let submission = null;
-  if (student) {
+  if (student && !admin) {
     const result = await supabase
       .from("ark60_submissions")
       .select("id,submitted_at,band,review_status,review_feedback,reviewed_at,payload")
@@ -219,7 +219,7 @@ export async function GET(request) {
       .maybeSingle();
     submission = result.data || null;
   }
-  return json({ content, submission, preview: Boolean(admin && !student) });
+  return json({ content, submission, preview: Boolean(admin) });
 }
 
 export async function POST(request) {
