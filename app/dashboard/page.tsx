@@ -53,6 +53,7 @@ function modulesFor(day:Day){
 }
 function moduleHref(day:number,name:string){
  if(name==="Reading")return "/day/"+day+"/reading";
+ if(name==="Listening")return "/day/"+day+"/listening";
  if(name==="Article")return "/day/"+day+"/article";
  if(name==="Vocabulary")return "/day/"+day+"/vocabulary";
  if(name==="Writing")return "/day/"+day+"/writing";
