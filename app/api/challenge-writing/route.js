@@ -365,12 +365,5 @@ export async function POST(request) {
     .delete()
     .eq("student_id", student.id)
     .eq("day_number", day);
-  let reward = null;
-  try {
-    const { data: rewardData } = await supabase.rpc("ark60_award_completion", { p_student: student.id, p_day: day, p_module: "writing" });
-    reward = rewardData || null;
-  } catch (rewardError) {
-    console.error("writing reward", rewardError);
-  }
-  return json({ ok: true, submission: data, reward });
+  return json({ ok: true, submission: data });
 }
