@@ -178,3 +178,23 @@ test("student API provides reward center leaderboard and editable profile action
   assert.match(backend,/action=="update_profile"/);
   assert.match(backend,/date_of_birth,gender,english_level,exam_date/);
 });
+
+
+test("study-time heartbeat ignores hidden and idle tabs",()=>{
+  const heartbeat=read("app/components/study-time-heartbeat.tsx");
+  assert.match(heartbeat,/document\.visibilityState!==\"visible\"/);
+  assert.match(heartbeat,/Date\.now\(\)-lastActivity>45000/);
+  assert.match(heartbeat,/pointerdown/);
+  assert.match(heartbeat,/keydown/);
+});
+
+test("admin leaderboard and study-time views use live metrics",()=>{
+  const admin=read("app/admin/page.tsx");
+  const backend=read("api/ark60.py");
+  assert.match(backend,/action==\"admin_leaderboard\"/);
+  assert.match(admin,/action=admin_leaderboard/);
+  assert.match(admin,/view===\"Leaderboard\"/);
+  assert.match(admin,/view===\"Study time\"/);
+  assert.match(admin,/completed_tasks/);
+  assert.match(admin,/active_seconds/);
+});
