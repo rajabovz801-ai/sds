@@ -9,7 +9,8 @@ export const dynamic = "force-dynamic";
 const STUDENT_COOKIE = "ark60_session";
 const ADMIN_COOKIE = "ark60_admin";
 const START_UTC = Date.UTC(2026, 9, 1);
-const WRITING_DAYS = new Set([1,2,3,5,6,7,8,9,10,12,13,14,15,16,17]);\nconst PREVIEW_USERNAME = "rustam7";
+const WRITING_DAYS = new Set([1,2,3,5,6,7,8,9,10,12,13,14,15,16,17]);
+const PREVIEW_USERNAME = "rustam7";
 
 function digest(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
