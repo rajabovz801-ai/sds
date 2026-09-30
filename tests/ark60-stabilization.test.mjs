@@ -52,3 +52,17 @@ test("dashboard polling is throttled and skips hidden tabs",()=>{
   assert.match(dashboard,/300000/);
   assert.doesNotMatch(dashboard,/setInterval\(refresh,60000\)/);
 });
+
+
+test("Writing timer restores an explicit zero instead of resetting to full duration",()=>{
+  const page=read("app/day/[day]/writing/page.tsx");
+  assert.match(page,/Number\.isFinite\(savedRemaining\)\?Math\.max\(0,savedRemaining\):duration/);
+  assert.doesNotMatch(page,/Number\(saved\.remaining\)\|\|duration/);
+});
+
+test("dashboard redirects expired sessions and surfaces load failures",()=>{
+  const dashboard=read("app/dashboard/page.tsx");
+  assert.match(dashboard,/res\.status===401/);
+  assert.match(dashboard,/window\.location\.replace\("\/"\)/);
+  assert.match(dashboard,/Could not load your dashboard/);
+});
