@@ -136,8 +136,8 @@ export default function AdminPage(){
 
 
  const sections=useMemo(()=>[
-  {name:"Overview",icon:LayoutDashboard},{name:"Reading results",icon:BookOpen},{name:"Requests",icon:UserPlus},{name:"Students",icon:Users},{name:"Content manager",icon:CalendarDays},{name:"Writing inbox",icon:FileText},{name:"Speaking inbox",icon:Mic},{name:"Results",icon:ChartNoAxesCombined},{name:"Leaderboard",icon:Trophy},{name:"Study time",icon:Clock3},
-  ...(admin?.role==="super_admin"?[{name:"Admins",icon:UserCog}]:[]),{name:"Settings",icon:Settings}
+  {name:"Overview",icon:LayoutDashboard},{name:"Reading results",icon:BookOpen},{name:"Requests",icon:UserPlus},{name:"Students",icon:Users},{name:"Content manager",icon:CalendarDays},{name:"Writing inbox",icon:FileText},{name:"Leaderboard",icon:Trophy},{name:"Study time",icon:Clock3},
+  ...(admin?.role==="super_admin"?[{name:"Admins",icon:UserCog}]:[])
  ],[admin?.role]);
  const chosen=courseDays[selected-1];
  const items=chosen.mock?[contentModules[1],contentModules[0],contentModules[4],contentModules[5]]:contentModules;
