@@ -364,33 +364,46 @@ async def actions(request:Request,response:Response):
         try: band=float(data.get("target_band",0))
         except (TypeError,ValueError): band=0
         if not (1<=len(first)<=55 and 1<=len(last)<=55):
-            raise HTTPException(status_code=400,detail="Enter your real first and last name.")
-        if gender not in {"male","female","prefer_not_to_say"}:
+            raise HTTPException(status_code=400,detail="Enter your first and last name.")
+        if gender and gender not in {"male","female","prefer_not_to_say"}:
             raise HTTPException(status_code=400,detail="Choose a valid gender option.")
-        if level not in {"A1","A2","B1","B2","C1","C2"}:
-            raise HTTPException(status_code=400,detail="Choose your current English level.")
+        if level and level not in {"A1","A2","B1","B2","C1","C2"}:
+            raise HTTPException(status_code=400,detail="Choose a valid English level.")
         if band not in TARGET_BANDS:
             raise HTTPException(status_code=400,detail="Choose a valid target band.")
-        try:
-            dob_date=date.fromisoformat(dob)
-            exam_date=date.fromisoformat(exam)
-        except ValueError:
-            raise HTTPException(status_code=400,detail="Choose valid dates.")
-        if dob_date>=today() or dob_date<date(1940,1,1):
-            raise HTTPException(status_code=400,detail="Choose a valid date of birth.")
-        if exam_date<today()-timedelta(days=1) or exam_date>today()+timedelta(days=1095):
-            raise HTTPException(status_code=400,detail="Choose a realistic IELTS exam date.")
-        payload={"first_name":first,"last_name":last,"date_of_birth":dob,"gender":gender,"english_level":level,"target_band":band,"exam_date":exam}
+        dob_date=None
+        exam_date=None
+        if dob:
+            try: dob_date=date.fromisoformat(dob)
+            except ValueError: raise HTTPException(status_code=400,detail="Choose a valid date of birth.")
+            if dob_date>=today() or dob_date<date(1940,1,1):
+                raise HTTPException(status_code=400,detail="Choose a valid date of birth.")
+        if exam:
+            try: exam_date=date.fromisoformat(exam)
+            except ValueError: raise HTTPException(status_code=400,detail="Choose a valid IELTS exam date.")
+            if exam_date<today()-timedelta(days=1) or exam_date>today()+timedelta(days=1095):
+                raise HTTPException(status_code=400,detail="Choose a realistic IELTS exam date.")
+        payload={
+            "first_name":first,
+            "last_name":last,
+            "date_of_birth":dob or None,
+            "gender":gender or None,
+            "english_level":level or None,
+            "target_band":band,
+            "exam_date":exam or None
+        }
         updated=db("PATCH","ark60_students",params={"id":"eq."+user["id"]},payload=payload,prefer="return=representation")
         if not updated:raise HTTPException(status_code=502,detail="Could not update your profile.")
+        saved=updated[0]
+        complete=bool(saved.get("first_name") and saved.get("last_name") and saved.get("date_of_birth") and saved.get("gender") and saved.get("english_level") and saved.get("target_band") and saved.get("exam_date"))
         bonus=False
-        if user.get("username")!="rustam7":
+        if complete and user.get("username")!="rustam7":
             try:
                 inserted=db("POST","ark60_coin_events",params={"on_conflict":"student_id,day_number,module,kind"},payload={"student_id":user["id"],"day_number":1,"module":"profile","kind":"profile_bonus","amount":1},prefer="resolution=ignore-duplicates,return=representation")
                 bonus=bool(inserted)
             except Exception:
                 bonus=False
-        return {"ok":True,"student":updated[0],"profile_bonus_awarded":bonus}
+        return {"ok":True,"student":saved,"profile_complete":complete,"profile_bonus_awarded":bonus}
 
     if action=="admin_login":
         bucket=rate_limit(request,"admin_login")

@@ -198,3 +198,26 @@ test("admin leaderboard and study-time views use live metrics",()=>{
   assert.match(admin,/completed_tasks/);
   assert.match(admin,/active_seconds/);
 });
+
+
+test("profile supports partial saves and awards bonus only when complete",()=>{
+  const backend=read("api/ark60.py");
+  const block=backend.slice(backend.indexOf('if action=="update_profile":'),backend.indexOf('if action=="admin_login":'));
+  assert.match(block,/if gender and gender not in/);
+  assert.match(block,/if level and level not in/);
+  assert.match(block,/if dob:/);
+  assert.match(block,/if exam:/);
+  assert.match(block,/complete=bool\(/);
+  assert.match(block,/if complete and user\.get\("username"\)!="rustam7"/);
+});
+
+test("reward and profile polish keeps preview mode explicit",()=>{
+  const page=read("app/dashboard/page.tsx");
+  const hub=read("app/components/challenge-hub-panels.tsx");
+  assert.match(page,/Preview mode/);
+  assert.match(page,/\+1 coin/);
+  assert.match(hub,/Complete a task to start your coin history/);
+  assert.match(hub,/COINS EARNED/);
+  assert.match(hub,/Save changes/);
+  assert.match(hub,/Sign out on all devices/);
+});
