@@ -136,7 +136,7 @@ export async function GET(request) {
       .select("id,day_number,payload,band,review_status,review_feedback,reviewed_at,submitted_at")
       .eq("student_id", student.id)
       .eq("module", "writing")
-      .eq("review_status", "checked")
+      .eq("review_status", "reviewed")
       .order("reviewed_at", { ascending: false, nullsFirst: false })
       .limit(100);
     if (error) return json({ detail: "Could not load notifications." }, 500);
@@ -182,7 +182,7 @@ export async function GET(request) {
     doc.moveDown(1);
     doc.font("Helvetica-Bold").fontSize(12).text("Student response");
     doc.moveDown(0.35).font("Helvetica").fontSize(10.5).text(String(payload.answer || ""), { lineGap: 4, align: "left" });
-    if (submission.review_status === "checked") {
+    if (submission.review_status === "reviewed") {
       doc.moveDown(1.2).font("Helvetica-Bold").fontSize(12).text(`Band: ${submission.band ?? "—"}`);
       if (submission.review_feedback) doc.moveDown(0.35).font("Helvetica").fontSize(10.5).text(`Feedback: ${submission.review_feedback}`, { lineGap: 3 });
     }
@@ -210,7 +210,7 @@ export async function GET(request) {
   if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
 
   let submission = null;
-  if (student && !admin) {
+  if (student && !admin && student.username !== PREVIEW_USERNAME) {
     const result = await supabase
       .from("ark60_submissions")
       .select("id,submitted_at,band,review_status,review_feedback,reviewed_at,payload")
@@ -224,6 +224,8 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) return json({ detail: "Invalid request origin." }, 403);
   const supabase = getServiceSupabase();
   let body = {};
   try { body = await request.json(); } catch { return json({ detail: "Invalid request." }, 400); }
@@ -240,7 +242,7 @@ export async function POST(request) {
     }
     const { data, error } = await supabase
       .from("ark60_submissions")
-      .update({ band, review_status: "checked", review_feedback: feedback || null, reviewed_at: new Date().toISOString() })
+      .update({ band, review_status: "reviewed", review_feedback: feedback || null, reviewed_at: new Date().toISOString() })
       .eq("id", id)
       .eq("module", "writing")
       .select("id,day_number,band,review_status,review_feedback,reviewed_at")
@@ -272,6 +274,21 @@ export async function POST(request) {
     min_words: Number(content.payload?.min_words || 0),
     source: "challenge-writing-v1",
   };
+  if (student.username === PREVIEW_USERNAME) {
+    return json({
+      ok: true,
+      preview: true,
+      submission: {
+        id: "preview-writing-" + day,
+        submitted_at: new Date().toISOString(),
+        band: null,
+        review_status: "preview",
+        review_feedback: null,
+        reviewed_at: null,
+        payload,
+      },
+    });
+  }
   const { data, error } = await supabase
     .from("ark60_submissions")
     .insert({ student_id: student.id, day_number: day, module: "writing", payload, review_status: "pending" })
