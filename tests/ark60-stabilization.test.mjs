@@ -375,5 +375,5 @@ test("Speaking reviews appear in student notifications",()=>{
   const notifications=read("app/notifications/page.tsx");
   assert.match(notifications,/challenge-speaking\?action=notifications/);
   assert.match(notifications,/Full Speaking reviewed/);
-  assert.match(notifications,/\/speaking/);
+  assert.match(notifications,/speaking\?\"speaking\":\"writing\"/);
 });
