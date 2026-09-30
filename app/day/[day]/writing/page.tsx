@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import {useParams,useRouter} from "next/navigation";
-import AnimatedBackButton from "../../../components/animated-back-button";
+import AnimatedBackButton from "../../../components/animated-back-button";\nimport StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {ArrowLeft,CheckCircle2,Clock3,Pause,Play,Send,ShieldCheck,Maximize2,Minimize2} from "lucide-react";
 import TaskVisual from "./TaskVisual";
@@ -45,7 +45,7 @@ export default function WritingPage(){
  if(data.submission)return <main className="writing-finish"><section><div className="writing-finish-icon"><CheckCircle2 size={34}/></div><small>DAY {String(day).padStart(2,"0")} · {taskLabel.toUpperCase()}</small><h1>Writing submitted</h1><p>{data.submission.review_status==="preview"?"Preview submission completed. Nothing was saved to student results.":"Your response has been submitted. Your result will be available soon."}</p><div className="writing-result-strip"><span>STATUS<b>{data.submission.review_status==="reviewed"?"Checked":data.submission.review_status==="preview"?"Preview only":"Pending review"}</b></span><span>WORDS<b>{String(data.submission.payload?.word_count||words||"—")}</b></span>{data.submission.review_status==="reviewed"&&<span>BAND<b>{data.submission.band??"—"}</b></span>}</div>{data.submission.review_status==="reviewed"&&data.submission.review_feedback&&<div className="writing-feedback"><b>Teacher feedback</b><p>{data.submission.review_feedback}</p></div>}<Link className="writing-back" href={`/day/${day}`}><ArrowLeft size={16}/> Back to Day {day}</Link></section></main>;
 
  const p=data.content.payload;
- return <main className="writing-shell">
+ return <main className="writing-shell"><StudyTimeHeartbeat day={day} module="writing"/>
   <header className="writing-topbar"><div className="writing-back-slot"><AnimatedBackButton onClick={goBack} ariaLabel="Back to study day"/></div><div className="writing-top-center"><span>DAY {String(day).padStart(2,"0")}</span><b>{taskLabel}</b></div><div className="writing-top-meta"><strong className={remaining<=300&&started&&remaining>0?"urgent":""}><Clock3 size={16}/>{formatTime(remaining)}</strong><button className="writing-fullscreen" type="button" aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFullscreen}>{fullScreen?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
   <section className="writing-toolbar"><div><span className="writing-task-chip">{taskLabel}</span><span className="writing-rule">{p.min_words}+ words · {Math.round(p.duration_seconds/60)} minutes</span></div><div className="writing-controls">{!started?<button className="primary" onClick={begin} disabled={remaining<=0}><Play size={16}/> Start timer</button>:<button onClick={togglePause} disabled={remaining<=0}>{remaining<=0?<><Clock3 size={16}/> Time up</>:paused?<><Play size={16}/> Resume timer</>:<><Pause size={16}/> Pause timer</>}</button>}<button className="submit" onClick={()=>submit(false)} disabled={sending||!answer.trim()}><Send size={16}/>{sending?"Submitting…":"Submit"}</button></div></section>
   <div className="writing-stage">
