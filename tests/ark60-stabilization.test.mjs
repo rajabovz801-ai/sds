@@ -392,3 +392,12 @@ test("Speaking intro uses compact ARK challenge hierarchy without duplicate bran
   assert.match(css,/\.sp-intro\{max-width:650px/);
   assert.match(css,/\.sp-back \.ark-back-icon/);
 });
+
+
+test("Speaking back button keeps the expanding hover animation",()=>{
+  const css=read("app/day/[day]/speaking/speaking.css");
+  assert.match(css,/transition:width \.48s cubic-bezier/);
+  assert.match(css,/width:calc\(100% - 6px\)!important/);
+  assert.match(css,/background:#173c62!important/);
+  assert.match(css,/fill:#fff!important/);
+});
