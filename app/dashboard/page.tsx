@@ -36,7 +36,8 @@ export default function Dashboard(){
  const [sidebar,setSidebar]=useState(false);
  const [month,setMonth]=useState<"all"|"oct"|"nov">("oct");
  const [stats,setStats]=useState<StudentStats|null>(null);
- const [authChecked,setAuthChecked]=useState(false);\n const [loadError,setLoadError]=useState("");
+ const [authChecked,setAuthChecked]=useState(false);
+ const [loadError,setLoadError]=useState("");
  useEffect(()=>{let mounted=true,inFlight=false;async function refresh(){if(inFlight)return;inFlight=true;try{const res=await fetch("/api/ark60?action=me",{credentials:"same-origin",cache:"no-store"});if(res.status===401){window.location.replace("/");return}if(!res.ok)throw new Error("Could not load your challenge data.");const obj=await res.json();if(mounted){setStats(obj);setLoadError("")}}catch(e){if(mounted)setLoadError(e instanceof Error?e.message:"Could not load your challenge data.")}finally{inFlight=false;if(mounted)setAuthChecked(true)}}const onVisible=()=>{if(document.visibilityState==="visible")void refresh()};void refresh();window.addEventListener("focus",onVisible);document.addEventListener("visibilitychange",onVisible);const id=setInterval(()=>{if(document.visibilityState==="visible")void refresh()},300000);return()=>{mounted=false;clearInterval(id);window.removeEventListener("focus",onVisible);document.removeEventListener("visibilitychange",onVisible)}},[]);
  async function exit(){if(stats){try{await fetch("/api/ark60",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"logout"})})}catch{}}window.location.assign("/")}
  const completedDays=stats?DAYS.filter(d=>{const required=stats.required_by_day?.[String(d.n)]||[];return required.length>0&&required.every(module=>stats.completed.some(x=>x.day_number===d.n&&x.module===module))}).length:0;
