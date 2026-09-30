@@ -53,7 +53,9 @@ export async function GET(req:NextRequest){
     (await sqlTable("ark60_vocab_units","GET","select=id&day_number=eq."+day)).map((u:any)=>u.id).join(",")+")"),
    sqlTable("ark60_students","GET","select=id,first_name,last_name,username&status=eq.active&limit=2000")
   ]);
-  return json({day,units,attempts,students});
+  const realStudents=(students as any[]).filter((s:any)=>String(s.username||"").toLowerCase()!=="rustam7");
+  const ids=new Set(realStudents.map((s:any)=>s.id));
+  return json({day,units,attempts:(attempts as any[]).filter((a:any)=>ids.has(a.student_id)),students:realStudents});
  }
  const student=await getStudent(req);if(!student)return error("Sign in to your challenge account",401);
  if(action==="overview"){
