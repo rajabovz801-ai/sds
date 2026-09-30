@@ -33,10 +33,12 @@ test("preview account is explicitly isolated from persistent challenge writes",(
   assert.match(backend,/user\.get\("username"\)=="rustam7"/);
 });
 
-test("Article navigation is available on every scheduled challenge day",()=>{
+test("Article remains reachable from the day plan after redundant module sidebar removal",()=>{
   const sidebar=read("app/components/challenge-sidebar.tsx");
-  assert.match(sidebar,/name==="Article"&&scheduled\?/);
-  assert.doesNotMatch(sidebar,/name==="Article"&&day===1/);
+  const dayPage=read("app/day/[day]/page.tsx");
+  assert.doesNotMatch(sidebar,/MY MODULES/);
+  assert.match(dayPage,/name==="Article"\?"\/day\/"\+day\+"\/article"/);
+  assert.doesNotMatch(dayPage,/name==="Article"&&day===1/);
 });
 
 test("dashboard completion uses published module requirements rather than six hardcoded modules",()=>{
