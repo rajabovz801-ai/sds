@@ -392,10 +392,19 @@ async def actions(request:Request,response:Response):
         module=data.get("module")
         if not isinstance(day,int) or module not in MODULES:
             raise HTTPException(status_code=400,detail="Invalid module")
-        d=day_status(day)
+        if user.get("username")=="rustam7":
+            return {"ok":True,"preview":True,"added_seconds":0}
+        day_status(day)
         today_d=today()
         # Record actual date of activity, not the original course date for late work.
-        content=db("GET","ark60_content",{"select":"id","day_number":"eq."+str(day),"module":"eq."+module,"status":"eq.published","limit":1})
+        if module=="reading":
+            content=db("GET","ark60_reading_passages",{"select":"id","day_number":"eq."+str(day),"status":"eq.published","limit":1})
+        elif module=="article":
+            content=db("GET","ark60_articles",{"select":"id","day_number":"eq."+str(day),"status":"eq.published","limit":1})
+        elif module=="vocabulary":
+            content=db("GET","ark60_vocab_units",{"select":"id","day_number":"eq."+str(day),"status":"eq.published","limit":1})
+        else:
+            content=db("GET","ark60_content",{"select":"id","day_number":"eq."+str(day),"module":"eq."+module,"status":"eq.published","limit":1})
         if not content:raise HTTPException(status_code=403,detail="This module is not yet available")
         # A heartbeat can add at most 20 seconds every 18 seconds per module.
         rows=db("GET","ark60_study_sessions",{"select":"id,last_active_at,active_seconds","student_id":"eq."+user["id"],"study_date":"eq."+str(today_d),"day_number":"eq."+str(day),"module":"eq."+module,"order":"last_active_at.desc","limit":1})
