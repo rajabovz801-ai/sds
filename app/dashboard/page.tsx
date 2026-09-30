@@ -1,12 +1,12 @@
 "use client";
 import Link from "next/link";
 import AnimatedBackButton from "../components/animated-back-button";
-import {AchievementsPanel,LeaderboardPanel,ProfilePanel,ProgressPanel,RewardModal} from "../components/challenge-hub-panels";
+import {AchievementsPanel,LeaderboardPanel,ProfilePanel,ProgressPanel,RewardModal,type HubStats} from "../components/challenge-hub-panels";
 import {useEffect,useMemo,useState} from "react";
 import {LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,Medal,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,LockKeyhole,Clock3,Flame,ChevronRight,Menu,X,Bell,Settings,LogOut,CalendarCheck,Target,CircleHelp,ArrowUpRight,CheckCircle2,FileText,ChevronLeft,Sun,Moon,Coins,ShieldCheck} from "lucide-react";
 
 type Day={n:number,date:Date,mock:boolean};
-type StudentStats={student:{id:string,first_name:string,last_name:string,username:string,target_band:number},today_seconds:number,active_seconds:number,coins:number,by_module:Record<string,number>,completed:{day_number:number,module:string,score:number|null,band:number|null,review_status:string}[],required_by_day:Record<string,string[]>};
+type StudentStats=HubStats;
 function duration(seconds:number){const s=Math.max(0,Math.floor(seconds));return Math.floor(s/3600)+"h "+String(Math.floor((s%3600)/60)).padStart(2,"0")+"m";}
 const DAYS:Day[]=Array.from({length:60},(_,i)=>{const date=new Date(Date.UTC(2026,9,1+i));return {n:i+1,date,mock:date.getUTCDay()===0}});
 const daysOfWeek=["MON","TUE","WED","THU","FRI","SAT","SUN"];
