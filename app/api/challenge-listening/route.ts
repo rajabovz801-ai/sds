@@ -84,7 +84,7 @@ function grade(payload:AnyObj,answers:Record<string,string>){
   statuses[String(q)]=ok?"correct":"wrong";
   if(ok)score++;
  }
- const partScores=[1,11,21,31].map(start=>Array.from({length:10},(_,i)=>statuses[String(start+i)]==="correct"?1:0).reduce((a,b)=>a+b,0));
+ const partScores=[1,11,21,31].map(start=>Array.from({length:10},(_,i)=>statuses[String(start+i)]==="correct"?1:0).reduce<number>((a,b)=>a+b,0));
  const review=Array.from({length:40},(_,i)=>{
   const q=i+1,group=pairByQuestion.get(q);
   const correct=group?group.correct:(Array.isArray(key[String(q)])?key[String(q)]:[key[String(q)]]);
