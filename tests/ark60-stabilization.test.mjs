@@ -119,6 +119,7 @@ test("challenge mutation routes reject oversized declared payloads",()=>{
     "app/api/challenge-vocab/route.ts",
     "app/api/challenge-article/route.ts",
     "app/api/challenge-writing/route.js",
+    "app/api/challenge-listening/route.ts",
   ]){
     const source=read(path);
     assert.match(source,/content-length/);
@@ -400,4 +401,91 @@ test("Speaking back button keeps the expanding hover animation",()=>{
   assert.match(css,/width:calc\(100% - 6px\)!important/);
   assert.match(css,/background:#173c62!important/);
   assert.match(css,/fill:#fff!important/);
+});
+
+
+test("Day 1 Listening uses the supplied Test 206 source and audio exactly",()=>{
+  const migration=read("supabase/migrations/20260930_day1_listening_test206.sql");
+  assert.match(migration,/IELTS Listening Test 206/);
+  assert.match(migration,/https:\/\/ia600504\.us\.archive\.org\/32\/items\/test-206\/TEST%20206\.mp3/);
+  assert.match(migration,/Oyster Bay Sailing Club Courses/);
+  assert.match(migration,/Working as a makeup trainee/);
+  assert.match(migration,/Which TWO features of the lecture on ocean biodiversity had the greatest impact on the students\?/);
+  assert.match(migration,/Sources of rubber/);
+  assert.match(migration,/"1":\["10","ten"\]/);
+  assert.match(migration,/"8":\["café","cafe"\]/);
+  assert.match(migration,/"21":\["B","D"\]/);
+  assert.match(migration,/"23":\["C","E"\]/);
+  assert.match(migration,/"31":\["metal","metals"\]/);
+  assert.match(migration,/"40":\["soil"\]/);
+});
+
+test("challenge Listening has no name ID Telegram or external reporting flow",()=>{
+  const page=read("app/day/[day]/listening/page.tsx");
+  const api=read("app/api/challenge-listening/route.ts");
+  assert.doesNotMatch(page,/studentName|studentId|Telegram|Rajabov_Zuhriddin|Bilimly/);
+  assert.doesNotMatch(api,/telegram|GOOGLE_SCRIPT|listening-report|student_name|student_id\s*=\s*String\(body/);
+  assert.match(page,/Start Listening/);
+  assert.match(page,/Review answers/);
+  assert.match(page,/Your answer:/);
+  assert.match(page,/Correct:/);
+});
+
+test("Listening answer key stays server-side until submission",()=>{
+  const api=read("app/api/challenge-listening/route.ts");
+  assert.match(api,/const \{answer_key:_a,pair_groups:_p,\.\.\.safe\}=payload\|\|\{\}/);
+  assert.match(api,/safePayload\(content\.payload\)/);
+  assert.match(api,/grade\(content\.payload/);
+  assert.doesNotMatch(read("app/day/[day]/listening/page.tsx"),/answer_key/);
+});
+
+test("Listening persists in-progress answers and resumes one-time audio from server start time",()=>{
+  const api=read("app/api/challenge-listening/route.ts");
+  const page=read("app/day/[day]/listening/page.tsx");
+  assert.match(api,/action==="save"/);
+  assert.match(api,/ark60_listening_attempts/);
+  assert.match(page,/queueSave/);
+  assert.match(page,/Date\.now\(\)-Date\.parse\(startedAt\)/);
+  assert.match(page,/audio\.currentTime=offset/);
+  assert.match(page,/Audio playback needs your permission/);
+  assert.doesNotMatch(page,/controls/);
+});
+
+test("Listening completion is preview-safe and awards through the existing submission trigger",()=>{
+  const api=read("app/api/challenge-listening/route.ts");
+  assert.match(api,/if\(isPreview\(student\)\)\{/);
+  assert.match(api,/preview:true,result/);
+  assert.match(api,/ark60_submissions/);
+  assert.match(api,/module:MODULE/);
+  assert.match(api,/review_status:"reviewed"/);
+  assert.match(api,/onConflict:"student_id,day_number,module"/);
+});
+
+test("Listening admin results expose all answers with official correct answers",()=>{
+  const admin=read("app/admin/listening/page.tsx");
+  const root=read("app/admin/page.tsx");
+  assert.match(root,/Listening results/);
+  assert.match(root,/\/admin\/listening/);
+  assert.match(admin,/selected\.review\.map/);
+  assert.match(admin,/Your answer:/);
+  assert.match(admin,/Correct:/);
+  assert.match(admin,/Band/);
+  assert.match(admin,/Section \{i\+1\}/);
+});
+
+test("Day 1 and Dashboard route Listening into the real challenge module",()=>{
+  const day=read("app/day/[day]/page.tsx");
+  const dashboard=read("app/dashboard/page.tsx");
+  assert.match(day,/challenge-listening\?action=availability/);
+  assert.match(day,/name==="Listening"&&publishedListening&&day===1/);
+  assert.match(day,/name==="Listening"\?"\/day\/"\+day\+"\/listening"/);
+  assert.match(dashboard,/if\(name==="Listening"\)return "\/day\/"\+day\+"\/listening"/);
+});
+
+test("Listening grading supports either-order pairs and official alternatives",()=>{
+  const api=read("app/api/challenge-listening/route.ts");
+  assert.match(api,/usedByGroup/);
+  assert.match(api,/!used\.has\(given\)/);
+  assert.match(api,/bandFor\(score\)/);
+  assert.match(api,/partScores=\[1,11,21,31\]/);
 });
