@@ -9,7 +9,7 @@ import "./vocabulary.css";
 
 type Unit={id:string;day_number:number;source_kind:"reading"|"article";source_ordinal:number;unit_number:number;source_title:string;pass_mark:number;word_count:number;best_score:number|null;completed:boolean;attempts:number;in_progress:string|null};
 type Word={id:string;lemma:string;display_word:string;meaning_uz:string;definition_en:string;level:string;example:string};
-type Question={number:number;word:string;level:string;context:string;options:string[]};
+type Question={number:number;word:string;level:string;context:string;options:string[];correct_index?:number};
 type Attempt={id:string;status:"in_progress"|"completed"|"retry";attempt_no:number;score:number;answered:number;answers:{position:number;selected:number;correct_index:number;correct:boolean}[];questions:Question[]};
 type Feedback={correct:boolean;correct_index:number;correct_meaning:string;score:number;answered:number;status:string};
 const sourceOrder=(a:Unit,b:Unit)=>{
@@ -22,13 +22,13 @@ const sourceClass=(u:Unit)=>u.source_kind==="article"?"article":u.source_ordinal
 export default function VocabularyPage(){
  const {day:sDay}=useParams<{day:string}>(),day=Number(sDay)||1;
  const [units,setUnits]=useState<Unit[]>([]),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState("");
- const [currentUnit,setCurrentUnit]=useState<Unit|null>(null),[attempt,setAttempt]=useState<Attempt|null>(null);
+ const [currentUnit,setCurrentUnit]=useState<Unit|null>(null),[attempt,setAttempt]=useState<Attempt|null>(null),[preview,setPreview]=useState(false);
  const [words,setWords]=useState<Word[]|null>(null),[panel,setPanel]=useState<"overview"|"study"|"quiz"|"result">("overview");
  const [feedback,setFeedback]=useState<(Feedback&{selected:number})|null>(null);
  const lock=useRef(false),nextTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
  const load=useCallback(async()=>{
   setLoading(true);try{const r=await fetch("/api/challenge-vocab?action=overview&day="+day,{cache:"no-store"}),d=await r.json();
-   if(!r.ok)throw Error(d.error||"Could not load vocabulary");setUnits((d.units||[]).sort(sourceOrder));
+   if(!r.ok)throw Error(d.error||"Could not load vocabulary");setUnits((d.units||[]).sort(sourceOrder));setPreview(!!d.preview);
   }catch(e){setError(String(e))}finally{setLoading(false)}
  },[day]);
  useEffect(()=>{load();return()=>{if(nextTimer.current)clearTimeout(nextTimer.current)}},[load]);
@@ -51,13 +51,21 @@ export default function VocabularyPage(){
   if(lock.current||busy||feedback||!attempt||attempt.answered>=20||attempt.status!=="in_progress")return;
   const index=attempt.answered;lock.current=true;
   try{
-   const r=await fetch("/api/challenge-vocab",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"answer",attempt_id:attempt.id,position:index+1,choice})}),x=await r.json();
-   if(!r.ok)throw Error(x.error||"Answer was not saved");
+   let x:Feedback;
+   if(preview){
+    const q=attempt.questions[index],correct_index=Number(q?.correct_index);
+    if(!Number.isInteger(correct_index)||correct_index<0||correct_index>3)throw Error("Preview answer key is unavailable");
+    const correct=choice===correct_index,answered=index+1,score=attempt.score+(correct?1:0);
+    x={correct,correct_index,correct_meaning:q.options[correct_index],score,answered,status:answered===20?(score>=18?"completed":"retry"):"in_progress"};
+   }else{
+    const r=await fetch("/api/challenge-vocab",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"answer",attempt_id:attempt.id,position:index+1,choice})}),body=await r.json();
+    if(!r.ok)throw Error(body.error||"Answer was not saved");x=body;
+   }
    const shown={...x,selected:choice} as Feedback&{selected:number};setFeedback(shown);
    nextTimer.current=setTimeout(()=>{
-    setAttempt(old=>old?{...old,score:x.score,answered:x.answered,status:x.status,answers:[...old.answers,{position:index+1,selected:choice,correct_index:x.correct_index,correct:x.correct}]}:old);
+    setAttempt(old=>old?{...old,score:x.score,answered:x.answered,status:x.status as Attempt["status"],answers:[...old.answers,{position:index+1,selected:choice,correct_index:x.correct_index,correct:x.correct}]}:old);
     setFeedback(null);lock.current=false;
-    if(x.answered===20){setPanel("result");void load();}
+    if(x.answered===20){setPanel("result");if(!preview)void load();}
    },x.correct?700:1150);
   }catch(e){lock.current=false;setError(String(e))}
  }
