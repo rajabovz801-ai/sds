@@ -501,18 +501,30 @@ test("Listening restores readable exam typography and boxed gap-fill fields",()=
   assert.match(css,/\.ls-number-groups button\{[\s\S]*height:28px;[\s\S]*min-width:21px;[\s\S]*font-size:11px/);
 });
 
-test("Listening uses one native yellow highlight without changing text layout",()=>{
+test("Listening uses one reliable DOM yellow highlight without changing text layout",()=>{
   const page=read("app/day/[day]/listening/page.tsx");
   const css=read("app/day/[day]/listening/listening.css");
   assert.match(page,/selectionRangeRef/);
-  assert.match(page,/highlightRangesRef/);
-  assert.match(page,/const registry=\(CSS as any\)\.highlights/);
-  assert.match(page,/new HighlightCtor\(\.\.\.next\)/);
-  assert.match(page,/registry\.set\("listening-yellow"/);
+  assert.doesNotMatch(page,/highlightRangesRef/);
+  assert.doesNotMatch(page,/CSS as any\)\.highlights/);
+  assert.match(page,/document\.createElement\("span"\)/);
+  assert.match(page,/mark\.className="ls-highlight"/);
+  assert.match(page,/selected\.splitText\(end\)/);
+  assert.match(page,/selected=selected\.splitText\(start\)/);
   assert.match(page,/onClick=\{applyHighlight\}/);
-  assert.doesNotMatch(page,/applyHighlight\("mint"\)/);
   assert.match(page,/\.ls-qnum,input,textarea,select,button,\.ls-bottom-nav,\.ls-topbar/);
-  assert.match(css,/::highlight\(listening-yellow\)\{[\s\S]*background:#fff176;[\s\S]*color:inherit;/);
+  assert.match(css,/\.ls-highlight\{[\s\S]*display:inline!important;[\s\S]*margin:0!important;[\s\S]*padding:0!important;[\s\S]*background:#fff176!important;[\s\S]*line-height:inherit!important/);
   assert.match(css,/\.ls-question-paper,[\s\S]*text-align:left!important/);
   assert.match(css,/\.ls-selection-popup button\{[\s\S]*min-width:96px/);
+});
+
+
+test("Listening uses stronger paper and bottom navigation contrast",()=>{
+  const css=read("app/day/[day]/listening/listening.css");
+  assert.match(css,/\.ls-shell\{background:#eef2f6\}/);
+  assert.match(css,/\.ls-question-paper\{background:#fffdf9/);
+  assert.match(css,/\.ls-source-table th\{background:#f1f4f7\}/);
+  assert.match(css,/\.ls-number-groups>div\{[\s\S]*background:#f1f4f8;[\s\S]*border-color:#d4dce5/);
+  assert.match(css,/\.ls-number-groups button\{[\s\S]*background:#e9eef3;[\s\S]*color:#2c4055;[\s\S]*border:1px solid #d3dce5/);
+  assert.match(css,/\.ls-number-groups button\.current\{[\s\S]*background:#173b61;[\s\S]*color:#fff/);
 });
