@@ -377,3 +377,18 @@ test("Speaking reviews appear in student notifications",()=>{
   assert.match(notifications,/Full Speaking reviewed/);
   assert.match(notifications,/speaking\?\"speaking\":\"writing\"/);
 });
+
+
+test("Speaking intro uses compact ARK challenge hierarchy without duplicate brand title",()=>{
+  const page=read("app/day/[day]/speaking/page.tsx");
+  const css=read("app/day/[day]/speaking/speaking.css");
+  assert.doesNotMatch(page,/ARK IELTS SPEAKING/);
+  assert.match(page,/DAY \{pad\(day\)\} · FULL SPEAKING/);
+  assert.match(page,/sp-preview-banner/);
+  assert.match(page,/No real submission or coin will be saved/);
+  assert.match(page,/className="sp-back"/);
+  assert.match(page,/stage==="intro"\|\|stage==="part1"/);
+  assert.match(css,/\.sp-start\{width:340px/);
+  assert.match(css,/\.sp-intro\{max-width:650px/);
+  assert.match(css,/\.sp-back \.ark-back-icon/);
+});

@@ -251,19 +251,19 @@ export default function SpeakingPage(){
 
  return <main className="sp-shell">
   <StudyTimeHeartbeat day={day} module="speaking"/>
-  <header className="sp-topbar"><AnimatedBackButton onClick={goBack} ariaLabel="Back to study day"/><div><b>ARK IELTS SPEAKING</b><span>DAY {pad(day)} · FULL SPEAKING</span></div><button className="sp-full" onClick={toggleFullscreen} aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"}>{fullScreen?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></header>
+  <header className="sp-topbar"><AnimatedBackButton className="sp-back" onClick={goBack} ariaLabel="Back to study day"/><div className="sp-top-title"><span>DAY {pad(day)} · FULL SPEAKING</span></div><button className="sp-full" onClick={toggleFullscreen} aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} title={fullScreen?"Exit fullscreen":"Fullscreen"}>{fullScreen?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></header>
 
-  <div className="sp-progress"><span className={stage==="part1"?"active":p1Done?"done":""}>01 <b>Part 1</b></span><i/><span className={stage==="part2"?"active":p2Done?"done":""}>02 <b>Part 2</b></span><i/><span className={stage==="part3"?"active":p3Done?"done":""}>03 <b>Part 3</b></span><i/><span className={stage==="review"||stage==="complete"?"active":""}>04 <b>Review</b></span></div>
+  <div className="sp-progress"><span className={stage==="intro"||stage==="part1"?"active":p1Done?"done":""}><em>{p1Done?<Check size={11}/>:"01"}</em><b>Part 1</b></span><i/><span className={stage==="part2"?"active":p2Done?"done":""}><em>{p2Done?<Check size={11}/>:"02"}</em><b>Part 2</b></span><i/><span className={stage==="part3"?"active":p3Done?"done":""}><em>{p3Done?<Check size={11}/>:"03"}</em><b>Part 3</b></span><i/><span className={stage==="review"||stage==="complete"?"active":""}><em>04</em><b>Review</b></span></div>
 
   <section className="sp-content">
    {message&&<div className="sp-message">{message}<button onClick={()=>setMessage("")}>×</button></div>}
 
    {stage==="intro"&&<div className="sp-intro">
-    <span className="sp-intro-icon"><Mic size={28}/></span><small>DAY {pad(day)} · IELTS SPEAKING</small><h1>Full Speaking Practice</h1><p>Answer every question with your microphone. Your saved recordings are sent securely to your teacher for review.</p>
-    <div className="sp-intro-parts"><div><b>Part 1</b><span>{p1.length} questions</span></div><div><b>Part 2</b><span>1-minute preparation</span></div><div><b>Part 3</b><span>{p3.length} questions</span></div></div>
+    {data.preview&&<div className="sp-preview-banner"><ShieldCheck size={14}/><span><b>Preview mode</b> · No real submission or coin will be saved.</span></div>}
+    <span className="sp-intro-icon"><Mic size={24}/></span><small>DAY {pad(day)} · FULL SPEAKING</small><h1>Full Speaking Practice</h1><p>Answer every question with your microphone. Your saved recordings are sent securely to your teacher for review.</p>
+    <div className="sp-intro-parts"><div className="active"><b>Part 1</b><span>{p1.length} questions</span></div><div><b>Part 2</b><span>1-minute preparation</span></div><div><b>Part 3</b><span>{p3.length} questions</span></div></div>
     <div className="sp-mic-check"><ShieldCheck size={17}/><span>{micReady?"Microphone ready":"Microphone permission is required"}</span>{!micReady&&<button onClick={checkMic} disabled={micChecking}>{micChecking?"Checking…":"Check microphone"}</button>}</div>
     <button className="sp-start" onClick={startSpeaking}><Mic size={17}/> Start Speaking</button>
-    {data.preview&&<p className="sp-preview-note">Preview mode: recordings stay temporary and do not enter real student results.</p>}
    </div>}
 
    {stage==="part1"&&<div className="sp-part">
