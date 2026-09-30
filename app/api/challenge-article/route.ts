@@ -67,7 +67,10 @@ export async function POST(req:NextRequest){
    "student_id=eq."+user.id+"&article_id=eq."+a.id,
    {completed_at:progress?.completed_at||new Date().toISOString(),updated_at:new Date().toISOString()},
    "return=representation");
-  return send({progress:saved[0]});
+  let reward:any=null;
+  try{reward=await sqlTable("rpc/ark60_award_completion","POST","",{p_student:user.id,p_day:day,p_module:"article"});}
+  catch(e){console.error("article reward",e)}
+  return send({progress:saved[0],reward});
  }
  return fail("Unknown action",404);
  }catch(e){console.error("Article POST",e);return fail("Could not save article progress",503)}
