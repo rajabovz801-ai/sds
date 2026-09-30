@@ -783,3 +783,26 @@ button.user-tile>svg{color:#8290a0;flex:none}
 .sidebar-reward-btn>span{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:#f6bd36;color:#fff;border:2px solid #d29210;flex:none}
 .sidebar-reward-btn>div{display:grid;gap:2px;flex:1;min-width:0}.sidebar-reward-btn b{font-size:10px}.sidebar-reward-btn small{font-size:8px;color:#78867d}.sidebar-reward-btn>svg{color:#7a897e}
 .sidebar-reward-btn:hover{background:#eef6ec;border-color:#bcd0b8}
+
+.admin-live-metrics{background:#fff;border:1px solid #e2e8ee;border-radius:13px;padding:19px;box-shadow:0 5px 20px rgba(29,47,69,.025)}
+.admin-live-metrics>header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid #edf0f3;padding-bottom:15px;margin-bottom:13px}
+.admin-live-metrics h2{font-family:Georgia,"Times New Roman",serif;font-size:25px;color:#142943;margin:6px 0 5px}
+.admin-live-metrics header p{margin:0;color:#687991;font-size:10px;line-height:1.6}
+.admin-live-metrics header button{height:37px;border:1px solid #dbe3ea;background:#fff;border-radius:8px;padding:0 13px;color:#2b4968;font-weight:800;font-size:10px;cursor:pointer}
+.admin-live-metrics header button:hover{background:#f4f7fa}
+.admin-metric-table{border:1px solid #e5e9ed;border-radius:10px;overflow:hidden}
+.admin-metric-row{display:grid;grid-template-columns:48px minmax(180px,1fr) 110px 145px 100px;align-items:center;gap:10px;min-height:58px;padding:9px 13px;border-bottom:1px solid #edf0f3;color:#314962}
+.admin-metric-row:last-child{border-bottom:0}
+.admin-metric-row.head{min-height:38px;background:#f7f9fb;color:#7b8b9d;font-size:8px;font-weight:900;letter-spacing:.08em}
+.admin-metric-row>b{font-size:12px;color:#8b6927}
+.admin-metric-row>span{display:grid;gap:3px}
+.admin-metric-row>span strong{font-size:11px;color:#1c344e}
+.admin-metric-row>span small{font-size:8px;color:#8796a6}
+.admin-metric-row>strong{font-size:10px;color:#29425c}
+.admin-metric-empty{padding:36px;text-align:center;color:#75869a;font-size:11px}
+@media(max-width:760px){
+ .admin-live-metrics{padding:12px}
+ .admin-live-metrics>header{flex-direction:column}
+ .admin-metric-table{overflow:auto}
+ .admin-metric-row{min-width:650px}
+}
