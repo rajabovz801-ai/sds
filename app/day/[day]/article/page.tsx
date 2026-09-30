@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {useParams} from "next/navigation";
-import AnimatedBackButton from "../../../components/animated-back-button";
+import AnimatedBackButton from "../../../components/animated-back-button";\nimport StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {BookOpen,Bookmark,CheckCircle2,ChevronLeft,ChevronRight,ArrowRight,AlertCircle,X,Highlighter,Leaf,HeartHandshake,Footprints,Mountain,CloudMoon,Globe2,PartyPopper,Smile,BrainCircuit,Sparkles,ListChecks,HeartPulse,Landmark,BedDouble,Brain} from "lucide-react";
 import "./article.css";
 
@@ -87,7 +87,7 @@ export default function ArticlePage(){
  if(!data)return <main className="aa-shell"><div className="aa-loading"><AnimatedBackButton href={"/day/"+day}/><p>{error||"Article unavailable"}</p></div></main>;
  const article=data.article,pages=article.sections,current=pages[page],read=data.progress.visited_pages.length,completed=!!data.progress.completed_at,readyToFinish=read===pages.length&&!completed;
  const TopicIcon=TOPIC_ICONS[day]||BookOpen;
- return <main className="aa-shell" onClick={()=>popup&&setPopup(null)}>
+ return <main className="aa-shell" onClick={()=>popup&&setPopup(null)}><StudyTimeHeartbeat day={day} module="article"/>
   <header className="aa-header"><AnimatedBackButton href={"/day/"+day}/><span className="aa-brand">ARK <b>EDUCATION</b><em> · ARTICLE CDI</em></span><span className="aa-day">DAY {String(day).padStart(2,"0")}</span></header>
   <div className="aa-container">
    <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAY {String(day).padStart(2,"0")} · DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} pages</span><span>{words.length} interactive words</span></div></div>{day===1?<RoomArt/>:<div className={"aa-topic-art aa-topic-day-"+day} aria-hidden="true"><div className="aa-topic-orbit aa-topic-orbit-one"/><div className="aa-topic-orbit aa-topic-orbit-two"/><TopicIcon size={72} strokeWidth={1.25}/><span>ARK · DAY {String(day).padStart(2,"0")}</span></div>}</section>
