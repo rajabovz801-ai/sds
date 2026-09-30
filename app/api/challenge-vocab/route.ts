@@ -139,19 +139,7 @@ export async function POST(req:NextRequest){
    return error("Invalid answer",400);
   const response=await sqlTable("rpc/ark60_vocab_submit_answer","POST","",
    {p_student:student.id,p_attempt:record.attempt.id,p_position:position,p_choice:choice});
-  let reward:any=null;
-  const result=Array.isArray(response)?response[0]:response;
-  if(result?.status==="completed"){
-   try{
-    const units=await sqlTable("ark60_vocab_units","GET","select=id&day_number=eq."+record.unit.day_number+"&status=eq.published");
-    const attempts=await sqlTable("ark60_vocab_attempts","GET","select=unit_id,status&student_id=eq."+student.id+"&unit_id=in.("+units.map((u:any)=>u.id).join(",")+")&status=eq.completed&limit=2000");
-    const done=new Set(attempts.map((a:any)=>a.unit_id));
-    if(units.length>0&&units.every((u:any)=>done.has(u.id))){
-     reward=await sqlTable("rpc/ark60_award_completion","POST","",{p_student:student.id,p_day:record.unit.day_number,p_module:"vocabulary"});
-    }
-   }catch(e){console.error("vocabulary reward",e)}
-  }
-  return json({...((Array.isArray(response)?response[0]:response)||{}),reward});
+  return json(response);
  }
  return error("Unknown action",404);
  }catch(e){
