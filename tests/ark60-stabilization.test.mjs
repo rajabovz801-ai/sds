@@ -264,3 +264,116 @@ test("calendar dots reflect published module requirements",()=>{
   assert.match(page,/required\.includes\(m\.name\.toLowerCase\(\)\)\?m\.tone:"muted"/);
   assert.match(page,/dot-small muted/);
 });
+
+
+test("Speaking is published only for Days 1 to 3 and uses the exact supplied source text",()=>{
+  const api=read("app/api/challenge-speaking/route.ts");
+  const migration=read("supabase/migrations/20260930_ark60_speaking_days_1_3.sql");
+  assert.match(api,/SPEAKING_DAYS=new Set\(\[1,2,3\]\)/);
+  assert.match(migration,/Do you think you spend too much time on social media\?/);
+  assert.match(migration,/What do people often do on social media\?/);
+  assert.match(migration,/Describe an occasion when you got up extremely early\./);
+  assert.match(migration,/Are you the kind of person who sticks to dreams\?/);
+  assert.match(migration,/Do you think you are an ambitious person\?/);
+  assert.match(migration,/Are you an ambitious person\?/);
+  assert.match(migration,/Describe a new law you would like to introduce in your country\./);
+  assert.match(migration,/Would you use mirrors to decorate your room\?/);
+  assert.match(migration,/Describe a person you know who loves to grow plants \(vegetables, fruits, flowers\)\./);
+  assert.match(migration,/How do people feel when they eat vegetables that they grew on their own\?/);
+});
+
+test("Speaking route validates date, owner, canonical question and payload size",()=>{
+  const api=read("app/api/challenge-speaking/route.ts");
+  assert.match(api,/isDayOpen\(day,student\)/);
+  assert.match(api,/\.eq\("student_id",student\.id\)/);
+  assert.match(api,/contentQuestionList\(content\.payload\)\.find\(q=>q\.key===questionKey\)/);
+  assert.match(api,/MAX_AUDIO_BYTES=8\*1024\*1024/);
+  assert.match(api,/Unsupported audio format/);
+  assert.match(api,/Invalid Speaking question/);
+  assert.doesNotMatch(api,/student_id=String\(form/);
+});
+
+test("Speaking preview never persists real audio, attempts or submissions",()=>{
+  const api=read("app/api/challenge-speaking/route.ts");
+  assert.match(api,/if\(isPreview\(student\)\)\{\n    return json\(\{ok:true,preview:true,answer:/);
+  assert.match(api,/preview-speaking-/);
+  assert.match(api,/if\(isPreview\(student\)\)return json\(\{ok:true,preview:true,submission:/);
+});
+
+test("Part 2 preparation is server persisted and cannot restart for a real attempt",()=>{
+  const api=read("app/api/challenge-speaking/route.ts");
+  const page=read("app/day/[day]/speaking/page.tsx");
+  assert.match(api,/part2_preparation_started_at/);
+  assert.match(api,/\.is\("part2_preparation_started_at",null\)/);
+  assert.match(api,/already_started:true/);
+  assert.match(page,/part2_preparation_expires_at/);
+  assert.match(page,/Preparation is running — this timer cannot be restarted/);
+});
+
+test("Speaking submit requires the complete canonical question-key set and awards through ark60_submissions",()=>{
+  const api=read("app/api/challenge-speaking/route.ts");
+  const migration=read("supabase/migrations/20260930_ark60_speaking_days_1_3.sql");
+  assert.match(api,/ark60_submit_speaking_attempt/);
+  assert.match(migration,/Complete every Speaking answer before submitting/);
+  assert.match(migration,/insert into public\.ark60_submissions/);
+  assert.match(migration,/'speaking'/);
+  assert.match(migration,/now\(\)\+interval '72 hours'/);
+});
+
+test("Speaking audio uses a private bounded bucket and short lived signed playback",()=>{
+  const api=read("app/api/challenge-speaking/route.ts");
+  const migration=read("supabase/migrations/20260930_ark60_speaking_days_1_3.sql");
+  assert.match(migration,/ark60-speaking-audio/);
+  assert.match(migration,/false,8388608/);
+  assert.match(api,/createSignedUrl\(answer\.storage_path,120\)/);
+  assert.match(api,/answer\.student_id!==student\.id/);
+  assert.match(api,/Admin sign-in required/);
+});
+
+test("Speaking cleanup is hourly, authenticated and only targets expired Speaking audio",()=>{
+  const fn=read("supabase/functions/ark60-speaking-cleanup/index.ts");
+  const migration=read("supabase/migrations/20260930_ark60_speaking_cleanup.sql");
+  assert.match(fn,/speaking_cleanup_token/);
+  assert.match(fn,/x-ark-cleanup-token/);
+  assert.match(fn,/ark60_speaking_attempts/);
+  assert.match(fn,/ark60_speaking_answers/);
+  assert.match(fn,/BUCKET="ark60-speaking-audio"/);
+  assert.match(fn,/\.lte\("expires_at",now\)/);
+  assert.match(fn,/audio_expired:true/);
+  assert.match(migration,/ark60-speaking-cleanup-hourly/);
+  assert.match(migration,/'7 \* \* \* \*'/);
+  assert.doesNotMatch(fn,/\.emptyBucket\(/);
+});
+
+test("Speaking student UI has per-question recording, waveform, review and active study tracking",()=>{
+  const page=read("app/day/[day]/speaking/page.tsx");
+  const css=read("app/day/[day]/speaking/speaking.css");
+  assert.match(page,/MediaRecorder/);
+  assert.match(page,/getUserMedia/);
+  assert.match(page,/canvasRef/);
+  assert.match(page,/Record again/);
+  assert.match(page,/Save answer/);
+  assert.match(page,/Submit Full Speaking/);
+  assert.match(page,/StudyTimeHeartbeat day=\{day\} module="speaking"/);
+  assert.match(css,/@media\(max-width:720px\)/);
+  assert.match(css,/@media\(max-width:410px\)/);
+});
+
+test("Speaking admin inbox supports exact-question audio review and band feedback",()=>{
+  const admin=read("app/admin/speaking/page.tsx");
+  const rootAdmin=read("app/admin/page.tsx");
+  assert.match(rootAdmin,/Speaking inbox/);
+  assert.match(rootAdmin,/\/admin\/speaking/);
+  assert.match(admin,/Play all answers/);
+  assert.match(admin,/audio controls/);
+  assert.match(admin,/Overall Speaking Band/);
+  assert.match(admin,/Teacher feedback/);
+  assert.match(admin,/Audio expired/);
+});
+
+test("Speaking reviews appear in student notifications",()=>{
+  const notifications=read("app/notifications/page.tsx");
+  assert.match(notifications,/challenge-speaking\?action=notifications/);
+  assert.match(notifications,/Full Speaking reviewed/);
+  assert.match(notifications,/speaking\?\"speaking\":\"writing\"/);
+});
