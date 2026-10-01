@@ -42,6 +42,19 @@ function tashkentDate(){
  return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tashkent",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 }
 function unlocked(d:Day,today:string){return d.date.toISOString().slice(0,10)<=today}
+function progressUnlocked(day:number,stats:StudentStats|null,today:string){
+ const target=DAYS[day-1];
+ if(!target||!stats)return false;
+ if(stats.preview)return true;
+ if(!unlocked(target,today))return false;
+ for(let prior=1;prior<day;prior+=1){
+  const required=stats.required_by_day?.[String(prior)]||[];
+  if(!required.length)continue;
+  const done=new Set(stats.completed.filter(x=>x.day_number===prior).map(x=>x.module));
+  if(!required.every(module=>done.has(module)))return false;
+ }
+ return true;
+}
 function modulesFor(day:Day){
  if(day.mock)return mockModules;
  const studyIndex=DAYS.filter(x=>x.n<day.n&&!x.mock).length;
@@ -153,10 +166,10 @@ export default function Dashboard(){
  const planRequired=stats?.required_by_day?.[String(planDayNumber)]||[];
  const planModules=modulesFor(planDay).filter(x=>planRequired.includes(x.name.toLowerCase()));
  const planDone=stats?planRequired.filter(module=>stats.completed.some(x=>x.day_number===planDayNumber&&x.module===module)).length:0;
- const planLive=unlocked(planDay,today)||preview;
+ const planLive=progressUnlocked(planDayNumber,stats,today);
 
  const chosen=DAYS[selected-1];
- const live=unlocked(chosen,today)||preview;
+ const live=progressUnlocked(chosen.n,stats,today);
  const chosenRequired=stats?.required_by_day?.[String(chosen.n)]||[];
  const display=useMemo(()=>modulesFor(chosen),[chosen]);
  const moduleReady=(name:string)=>chosenRequired.includes(name.toLowerCase());
@@ -253,7 +266,7 @@ export default function Dashboard(){
          const required=stats?.required_by_day?.[String(d.n)]||[];
          const cells=modulesFor(d);
          return <button key={d.n} className={"cal-cell "+(d.mock?"sunday ":"")+(selected===d.n?"selected ":"")+(today===d.date.toISOString().slice(0,10)?"is-today ":"")} onClick={()=>setSelected(d.n)} aria-label={"Day "+d.n+" "+format(d.date,{day:"numeric",month:"long"})+(d.mock?" Full Mock":"")}>
-          <span className="cal-upper"><span>Day {d.n}</span>{(unlocked(d,today)||preview)?<CheckCircle2 size={11}/>:<LockKeyhole size={11}/>}</span>
+          <span className="cal-upper"><span>Day {d.n}</span>{progressUnlocked(d.n,stats,today)?<CheckCircle2 size={11}/>:<LockKeyhole size={11}/>}</span>
           <b>{format(d.date,{day:"numeric",month:"short"})}</b>
           <div className="cal-dots">{cells.map((m,i)=><i key={i} className={required.includes(m.name.toLowerCase())?m.tone:"muted"}/>)}</div>
           {d.mock&&<small className="mock-label">FULL MOCK</small>}
