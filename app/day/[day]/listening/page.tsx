@@ -204,12 +204,12 @@ export default function ListeningPage(){
  async function toggleFull(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{}}
  function goQuestion(q:number){setCurrentQuestion(q);setSection(qSection(q));setTimeout(()=>document.getElementById("listen-q-"+q)?.scrollIntoView({behavior:"smooth",block:"center"}),80)}
 
- function Gap({q}:{q:number}){
+ function renderGap(q:number){
   const st=answerStatus(review,q);
   return <span className={"ls-gap-wrap "+(st?st.status:"")} id={"listen-q-"+q}><span className="ls-qnum">{q}</span><input aria-label={"Question "+q} disabled={reviewMode||!!result} value={answers[String(q)]||""} onFocus={()=>{setCurrentQuestion(q);setSection(qSection(q))}} onChange={e=>setAnswer(q,e.target.value)} />{reviewMode&&st&&<span className="ls-inline-review"><b>{st.status==="correct"?"✓":"✕"}</b> Correct: {st.correct.join(" / ")}</span>}</span>;
  }
  function tokens(items:Token[],key:string){
-  return <>{items.map((t,i)=><Fragment key={key+"-"+i}>{typeof t==="string"?<span className={i>0&&items[i-1]&&typeof items[i-1]!=="string"?"ls-after-gap":""}>{t}</span>:<Gap q={Number(t.q)}/>} {typeof t==="string"&&i<items.length-1&&typeof items[i+1]==="string"?<br/>:null}</Fragment>)}</>;
+  return <>{items.map((t,i)=><Fragment key={key+"-"+i}>{typeof t==="string"?<span className={i>0&&items[i-1]&&typeof items[i-1]!=="string"?"ls-after-gap":""}>{t}</span>:renderGap(Number(t.q))} {typeof t==="string"&&i<items.length-1&&typeof items[i+1]==="string"?<br/>:null}</Fragment>)}</>;
  }
  function Status({q}:{q:number}){const st=answerStatus(review,q);if(!reviewMode||!st)return null;return <div className={"ls-review-line "+st.status}><span>{st.status==="empty"?"No answer":"Your answer: "+(st.submitted||"—")}</span><b>Correct: {st.correct.join(" / ")}</b></div>}
 
