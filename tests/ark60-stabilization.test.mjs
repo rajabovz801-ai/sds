@@ -538,3 +538,40 @@ test("Listening active paper is pinned to the left without the old centered gutt
   assert.match(css,/\.ls-workspace\{[\s\S]*width:100%;[\s\S]*max-width:none;[\s\S]*margin:10px 0 105px;[\s\S]*padding:0 14px/);
   assert.match(css,/\.ls-question-paper\{[\s\S]*width:100%;[\s\S]*box-sizing:border-box/);
 });
+
+
+test("future challenge days require all earlier published days to be complete",()=>{
+  const auth=read("lib/ark60-content-auth.ts");
+  const backend=read("api/ark60.py");
+  assert.match(auth,/export async function isDayUnlocked/);
+  assert.match(auth,/rpc\/ark60_student_dashboard_summary/);
+  assert.match(auth,/required_by_day/);
+  assert.match(auth,/completed/);
+  assert.match(backend,/def day_unlocked_for_user\(/);
+  assert.match(backend,/rpc\/ark60_student_dashboard_summary/);
+  assert.match(backend,/day_unlocked_for_user\(user,day\)/);
+});
+
+test("all student challenge modules enforce the sequential day lock on the server",()=>{
+  for(const path of [
+    "app/api/challenge-reading/route.ts",
+    "app/api/challenge-listening/route.ts",
+    "app/api/challenge-article/route.ts",
+    "app/api/challenge-vocab/route.ts",
+    "app/api/challenge-speaking/route.ts",
+    "app/api/challenge-writing/route.js",
+  ]){
+    const source=read(path);
+    assert.match(source,/isDayUnlocked/);
+    assert.match(source,/await isDayUnlocked\(/);
+  }
+});
+
+test("dashboard and day page show later days locked until previous published work is complete",()=>{
+  const dashboard=read("app/dashboard/page.tsx");
+  const day=read("app/day/[day]/page.tsx");
+  assert.match(dashboard,/function progressUnlocked\(/);
+  assert.match(dashboard,/progressUnlocked\(d\.n,stats/);
+  assert.match(day,/progressUnlocked/);
+  assert.match(day,/action=me/);
+});
