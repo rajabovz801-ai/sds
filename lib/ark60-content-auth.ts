@@ -12,7 +12,7 @@ export const VALID_DAYS=new Set([1,2,3,5,6,7,8,9,10,12,13,14,15,16,17]);
 export const isUuid=(s:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 export async function sqlTable(table:string,method="GET",query="",body?:unknown,prefer=""){
  if(!KEY)throw Error("Server database key missing");
- if(!/^(ark60_[a-z_]+|rpc\/ark60_vocab_submit_answer)$/.test(table))throw Error("Unknown table");
+ if(!/^(ark60_[a-z_]+|rpc\/(ark60_vocab_submit_answer|ark60_student_dashboard_summary))$/.test(table))throw Error("Unknown table");
  const resp=await fetch(BASE+"/rest/v1/"+table+(query?"?"+query:""),{
    method,cache:"no-store",headers:{
     apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json",
@@ -42,6 +42,21 @@ export function isDayOpen(n:number,user:Student){
  if(!Number.isInteger(n)||n<1||n>60)return false;
  const iso=new Date(Date.UTC(2026,9,n)).toISOString().slice(0,10);
  return isPreview(user)||iso<=todayInTashkent();
+}
+export async function isDayUnlocked(n:number,user:Student){
+ if(!isDayOpen(n,user))return false;
+ if(isPreview(user)||n===1)return true;
+ const rows=await sqlTable("rpc/ark60_student_dashboard_summary","POST","",{p_student:user.id,p_today:todayInTashkent()});
+ const summary=Array.isArray(rows)?(rows[0]||{}):(rows||{});
+ const requiredByDay=(summary.required_by_day||{}) as Record<string,string[]>;
+ const completed=Array.isArray(summary.completed)?summary.completed as Array<{day_number:number;module:string}>:[];
+ for(let d=1;d<n;d+=1){
+  const required=Array.isArray(requiredByDay[String(d)])?requiredByDay[String(d)]:[];
+  if(!required.length)continue;
+  const done=new Set(completed.filter(item=>Number(item.day_number)===d).map(item=>String(item.module)));
+  if(!required.every(module=>done.has(module)))return false;
+ }
+ return true;
 }
 export function isOwnOrigin(req:NextRequest){
  const origin=req.headers.get("origin");return !origin||origin===new URL(req.url).origin;
