@@ -1,10 +1,10 @@
 import {NextRequest,NextResponse} from "next/server";
 import {createHash} from "node:crypto";
+import {isDayUnlocked} from "@/lib/ark60-content-auth";
 
 export const dynamic="force-dynamic";
 const SB=(process.env.NEXT_PUBLIC_SUPABASE_URL||"https://svdigxqdivcmljirjwhk.supabase.co").replace(/\/$/,"");
 const KEY=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY||"";
-const START=Date.UTC(2026,9,1);
 const previewName="rustam7";
 type J=Record<string,unknown>;
 function err(message:string,status=400){return NextResponse.json({error:message},{status});}
@@ -24,9 +24,7 @@ async function viewer(req:NextRequest,admin=false){
  const rows=await db(admin?"ark60_admins":"ark60_students","GET","select="+(admin?"id,username,display_name,role,status":"id,username,first_name,last_name,status")+"&id=eq."+(admin?session.admin_id:session.student_id)+"&limit=1");
  return rows[0]?.status==="active"?rows[0]:null;
 }
-function dayDate(n:number){return new Date(START+(n-1)*86400000).toISOString().slice(0,10);}
 function todayUZ(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tashkent",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
-function allowed(n:number,user:J){return Number.isInteger(n)&&n>=1&&n<=60&&(user.username===previewName||dayDate(n)<=todayUZ());}
 function idValid(x:string){return /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(x);}
 function normalize(s:unknown){return String(s??"").trim().normalize("NFKC").toLowerCase().replace(/[‘’]/g,"'").replace(/\s+/g," ").replace(/^[.,;:!?]+|[.,;:!?]+$/g,"");}
 async function catalogue(day:number){return await db("ark60_reading_passages","GET","select=id,day_number,ordinal,title,status&day_number=eq."+day+"&order=ordinal.asc");}
@@ -79,7 +77,7 @@ export async function GET(req:NextRequest){
   }))});
  }
  const user=await viewer(req);if(!user)return err("Please sign in",401);
- const day=Number(url.searchParams.get("day"));if(!allowed(day,user))return err("This study day is locked",403);
+ const day=Number(url.searchParams.get("day"));if(!(await isDayUnlocked(day,user as any)))return err("This study day is locked",403);
  const rows=await catalogue(day);const attempts=user.username===previewName?[]:await completed(String(user.id),day);
  if(action==="list")return NextResponse.json({day,preview:user.username===previewName,passages:rows.filter((r:J)=>r.status==="published").map((r:J)=>({id:r.id,ordinal:r.ordinal,title:r.title,completed:attempts.find((a:J)=>a.passage_id===r.id)||null,locked:r.ordinal===2&&user.username!==previewName&&!attempts.some((a:J)=>a.ordinal===1)})),draft_count:rows.filter((r:J)=>r.status==="draft").length});
  if(action!=="passage")return err("Unknown action",404);
@@ -106,7 +104,7 @@ export async function POST(req:NextRequest){
  const origin=req.headers.get("origin");if(origin&&origin!==new URL(req.url).origin)return err("Invalid origin",403);
  const user=await viewer(req);if(!user)return err("Please sign in",401);
  const b=await req.json();const day=Number(b.day),id=String(b.passage_id||"");
- if(!allowed(day,user)||!idValid(id))return err("Invalid day or passage",403);
+ if(!(await isDayUnlocked(day,user as any))||!idValid(id))return err("Invalid day or passage",403);
  const row=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,questions,answer_key,analysis,status&id=eq."+id+"&day_number=eq."+day+"&status=eq.published&limit=1"))[0];
  if(!row)return err("Passage unavailable",404);
  const prev=user.username===previewName?[]:await completed(String(user.id),day);

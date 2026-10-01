@@ -149,6 +149,29 @@ def day_status(day_num):
         raise HTTPException(status_code=403,detail="This day is not yet available")
     return d
 
+def day_unlocked_for_user(user,day_num):
+    if day_num<1 or day_num>60:
+        return False
+    if user.get("username")=="rustam7":
+        return True
+    d=START+timedelta(days=day_num-1)
+    if today()<d:
+        return False
+    if day_num==1:
+        return True
+    rows=db("POST","rpc/ark60_student_dashboard_summary",payload={"p_student":user["id"],"p_today":str(today())})
+    summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
+    required_by_day=summary.get("required_by_day") or {}
+    completed=summary.get("completed") or []
+    for prior_day in range(1,day_num):
+        required=required_by_day.get(str(prior_day)) or []
+        if not required:
+            continue
+        done={str(item.get("module")) for item in completed if int(item.get("day_number") or 0)==prior_day}
+        if any(str(module) not in done for module in required):
+            return False
+    return True
+
 @app.get("/api/ark60")
 def get_data(request:Request, action:str="health", day:int=1):
     if action=="health":
@@ -202,8 +225,8 @@ def get_data(request:Request, action:str="health", day:int=1):
         if day<1 or day>60:
             raise HTTPException(status_code=400,detail="Invalid course day")
         d=START+timedelta(days=day-1)
-        if user.get("username")!="rustam7" and today()<d:
-            raise HTTPException(status_code=403,detail="This day is not yet available")
+        if not day_unlocked_for_user(user,day):
+            raise HTTPException(status_code=403,detail="Finish all required tasks from earlier days first")
         available=["listening","reading","writing","speaking"] if d.weekday()==6 else ["reading","listening","article","vocabulary","writing","speaking"]
         rows=db("GET","ark60_content",{"select":"module,title,payload","day_number":"eq."+str(day),"status":"eq.published","limit":6})
         return {"day":day,"date":str(d),"mock":d.weekday()==6,"modules":available,"published":rows,"preview":user.get("username")=="rustam7"}

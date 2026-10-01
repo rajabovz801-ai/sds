@@ -1,6 +1,6 @@
 import {NextRequest,NextResponse} from "next/server";
 import {randomInt} from "node:crypto";
-import {getStudent,getAdmin,isDayOpen,isOwnOrigin,isUuid,isPreview,sqlTable,type Student} from "../../../lib/ark60-content-auth";
+import {getStudent,getAdmin,isDayUnlocked,isOwnOrigin,isUuid,isPreview,sqlTable,type Student} from "../../../lib/ark60-content-auth";
 export const dynamic="force-dynamic";
 const json=(data:unknown,status=200)=>NextResponse.json(data,{status,headers:{"Cache-Control":"private,no-store"}});
 const error=(message:string,status=400)=>json({error:message},status);
@@ -14,7 +14,7 @@ async function getUnit(id:string,student:Student,requirePublished=true):Promise<
  if(!isUuid(id))return null;
  const row=(await sqlTable("ark60_vocab_units","GET",
   "select=id,day_number,source_kind,source_ordinal,unit_number,source_title,pass_mark,status&id=eq."+id+"&limit=1"))[0] as Unit|undefined;
- if(!row||!isDayOpen(Number(row.day_number),student)||(requirePublished&&row.status!=="published"))return null;
+ if(!row||!(await isDayUnlocked(Number(row.day_number),student))||(requirePublished&&row.status!=="published"))return null;
  return row;
 }
 async function terms(id:string):Promise<Term[]>{
@@ -59,7 +59,7 @@ export async function GET(req:NextRequest){
  }
  const student=await getStudent(req);if(!student)return error("Sign in to your challenge account",401);
  if(action==="overview"){
-  const day=Number(params.get("day")||1);if(!isDayOpen(day,student))return error("Day is locked",403);
+  const day=Number(params.get("day")||1);if(!(await isDayUnlocked(day,student)))return error("Day is locked",403);
   const units=await sqlTable("ark60_vocab_units","GET",
    "select=id,day_number,source_kind,source_ordinal,unit_number,source_title,pass_mark,status&day_number=eq."+day+"&status=eq.published&order=source_kind,source_ordinal,unit_number") as Unit[];
   if(!units.length)return json({day,units:[],word_count:0,completed_count:0});
