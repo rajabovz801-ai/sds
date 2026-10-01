@@ -590,3 +590,11 @@ test("Reading submit remains safe for students already using an old tab without 
   assert.match(submitBlock,/resolution=ignore-duplicates/);
   assert.doesNotMatch(submitBlock,/Start the passage before submitting/);
 });
+
+
+test("Listening gap-fill inputs keep focus while typing",()=>{
+  const page=read("app/day/[day]/listening/page.tsx");
+  assert.doesNotMatch(page,/function Gap\(\{q\}:\{q:number\}\)/);
+  assert.match(page,/function renderGap\(q:number\)/);
+  assert.match(page,/renderGap\(Number\(t\.q\)\)/);
+});
