@@ -18,21 +18,36 @@ const regular=[
  {name:"Speaking",description:"Daily speaking practice",icon:Mic,tone:"pink"}
 ];
 function uzToday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tashkent",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
+type ProgressState={preview?:boolean;required_by_day?:Record<string,string[]>;completed?:Array<{day_number:number;module:string}>};
+function progressUnlocked(day:number,stats:ProgressState|null,today:string){
+ if(stats?.preview)return true;
+ const iso=new Date(Date.UTC(2026,9,day)).toISOString().slice(0,10);
+ if(iso>today||!stats)return false;
+ for(let prior=1;prior<day;prior+=1){
+  const required=stats.required_by_day?.[String(prior)]||[];
+  if(!required.length)continue;
+  const done=new Set((stats.completed||[]).filter(x=>x.day_number===prior).map(x=>x.module));
+  if(!required.every(module=>done.has(module)))return false;
+ }
+ return true;
+}
 export default function DayPage(){
  const params=useParams<{day:string}>();const day=Math.max(1,Math.min(60,Number(params.day)||1));
  const date=new Date(Date.UTC(2026,9,day)),sunday=date.getUTCDay()===0;
  const isPassage2Day=P2_DAYS.has(day),isPassage3Day=P3_DAYS.has(day);
  const scheduledReading=[1,5,8,12,15].includes(day)||isPassage2Day||isPassage3Day,iso=date.toISOString().slice(0,10);
- const [today,setToday]=useState("2026-09-25"),[teacher,setTeacher]=useState(false);
+ const [today,setToday]=useState("2026-09-25"),[teacher,setTeacher]=useState(false),[progress,setProgress]=useState<ProgressState|null>(null);
  const [publishedReading,setPublishedReading]=useState(0),[publishedVocabulary,setPublishedVocabulary]=useState(0),[publishedArticleVocab,setPublishedArticleVocab]=useState(0),[publishedArticle,setPublishedArticle]=useState(false),[articleTitle,setArticleTitle]=useState(""),[publishedSpeaking,setPublishedSpeaking]=useState(false),[publishedListening,setPublishedListening]=useState(false);
  useEffect(()=>{setToday(uzToday());let mounted=true;
+  fetch("/api/ark60?action=me",{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted&&r){setProgress(r);setTeacher(r.preview===true)}}).catch(()=>{});
   fetch("/api/challenge-reading?action=list&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted){setTeacher(r?.preview===true);setPublishedReading(r?.passages?.length||0)}}).catch(()=>{});
   fetch("/api/challenge-article?action=availability&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted){setPublishedArticle(!!r?.published);setArticleTitle(r?.title||"")}}).catch(()=>{});
   fetch("/api/challenge-vocab?action=overview&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted){const complete=(r?.units||[]).filter((u:{word_count:number})=>u.word_count===20);setPublishedVocabulary(complete.length);setPublishedArticleVocab(complete.filter((u:{source_kind:string})=>u.source_kind==="article").length)}} ).catch(()=>{});
   fetch("/api/challenge-speaking?action=availability&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted)setPublishedSpeaking(!!r?.published)}).catch(()=>{});
   fetch("/api/challenge-listening?action=availability&day="+day,{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).then(r=>{if(mounted)setPublishedListening(!!r?.published)}).catch(()=>{});
   return()=>{mounted=false}},[day]);
- const available=teacher||iso<=today;
+ useEffect(()=>{if(progress&&!progressUnlocked(day,progress,uzToday()))window.location.replace("/dashboard")},[day,progress]);
+ const available=teacher||progressUnlocked(day,progress,today);
  const modules=sunday?[regular[1],regular[0],regular[4],regular[5]]:regular;
  const dateText=date.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
  return <main className="cd-day ch-layout">
