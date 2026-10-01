@@ -109,7 +109,7 @@ test("preview account cannot create study-time heartbeat records",()=>{
 test("future day metadata supports the dedicated preview account",()=>{
   const backend=read("api/ark60.py");
   const dayBlock=backend.slice(backend.indexOf('if action=="day":'),backend.indexOf('if action=="admin_me":'));
-  assert.match(dayBlock,/user\.get\("username"\)!="rustam7"/);
+  assert.match(dayBlock,/day_unlocked_for_user\(user,day\)/);
   assert.match(dayBlock,/"preview":user\.get\("username"\)=="rustam7"/);
 });
 
@@ -285,7 +285,7 @@ test("Speaking is published only for Days 1 to 3 and uses the exact supplied sou
 
 test("Speaking route validates date, owner, canonical question and payload size",()=>{
   const api=read("app/api/challenge-speaking/route.ts");
-  assert.match(api,/isDayOpen\(day,student\)/);
+  assert.match(api,/await isDayUnlocked\(day,student\)/);
   assert.match(api,/\.eq\("student_id",student\.id\)/);
   assert.match(api,/contentQuestionList\(content\.payload\)\.find\(q=>q\.key===questionKey\)/);
   assert.match(api,/MAX_AUDIO_BYTES=8\*1024\*1024/);
