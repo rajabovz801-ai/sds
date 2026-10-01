@@ -165,8 +165,14 @@ export async function POST(req:NextRequest){
    review:reviewFor(row,{answers,score,total:questions.length,elapsed_seconds:seconds,submitted_at:stamp})
   });
  }
- const start=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
- if(!start)return err("Start the passage before submitting",409);
+ let start=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+ if(!start){
+  // Backward-compatibility for students who opened Reading before auto-start was deployed.
+  // Never reject their answers just because the older tab did not create a timer row.
+  await db("ark60_reading_starts","POST","on_conflict=student_id,passage_id",
+   {student_id:user.id,passage_id:id},"resolution=ignore-duplicates");
+  start=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+ }
  if(!questions.length||key.length!==questions.length)return err("Answer key is not verified; submission disabled",503);
  if(!b.answers||typeof b.answers!=="object"||Array.isArray(b.answers))return err("Invalid answers");
  const answers=b.answers as Record<string,unknown>;

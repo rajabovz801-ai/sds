@@ -575,3 +575,18 @@ test("dashboard and day page show later days locked until previous published wor
   assert.match(day,/progressUnlocked/);
   assert.match(day,/action=me/);
 });
+
+
+test("Reading auto-starts its server timer when an unfinished passage opens",()=>{
+  const page=read("app/day/[day]/reading/page.tsx");
+  const openBlock=page.slice(page.indexOf("async function openPassage"),page.indexOf("async function submit",page.indexOf("async function openPassage")));
+  assert.match(openBlock,/action:"start"/);
+  assert.match(openBlock,/setTimer\(startObj\.timer/);
+});
+
+test("Reading submit remains safe for students already using an old tab without a timer row",()=>{
+  const api=read("app/api/challenge-reading/route.ts");
+  const submitBlock=api.slice(api.indexOf('if(b.action!=="submit")'),api.indexOf("// Freeze the server clock",api.indexOf('if(b.action!=="submit")')));
+  assert.match(submitBlock,/resolution=ignore-duplicates/);
+  assert.doesNotMatch(submitBlock,/Start the passage before submitting/);
+});
