@@ -1,5 +1,5 @@
 import {NextRequest,NextResponse} from "next/server";
-import {getStudent,getAdmin,isDayOpen,isOwnOrigin,isPreview,sqlTable} from "../../../lib/ark60-content-auth";
+import {getStudent,getAdmin,isDayUnlocked,isOwnOrigin,isPreview,sqlTable} from "../../../lib/ark60-content-auth";
 export const dynamic="force-dynamic";
 const send=(data:unknown,status=200)=>NextResponse.json(data,{status,headers:{"Cache-Control":"private,no-store"}});
 const fail=(message:string,status=400)=>send({error:message},status);
@@ -26,7 +26,7 @@ export async function GET(req:NextRequest){
   if(!Number.isInteger(day)||day<1||day>60)return fail("Invalid day",400);
   const a=await article(day);return send({published:!!a,title:a?.title||null});
  }
- if(!isDayOpen(day,user))return fail("This study day is locked",403);
+ if(!(await isDayUnlocked(day,user)))return fail("This study day is locked",403);
  const a=await article(day);if(!a)return fail("Article has not been published",404);
  const [progress,units,words]=await Promise.all([
   sqlTable("ark60_article_progress","GET","select=last_page,visited_pages,completed_at&student_id=eq."+user.id+"&article_id=eq."+a.id+"&limit=1"),
@@ -45,7 +45,7 @@ export async function POST(req:NextRequest){
  if(!isOwnOrigin(req))return fail("Invalid origin",403);
  const user=await getStudent(req);if(!user)return fail("Sign in to your challenge account",401);
  const body=await req.json(),day=Number(body.day||1),action=String(body.action||"");
- if(!isDayOpen(day,user))return fail("Day locked",403);
+ if(!(await isDayUnlocked(day,user)))return fail("Day locked",403);
  if(isPreview(user))return fail("Preview article progress is kept only in this browser session and is not saved.",409);
  const a=await article(day);if(!a)return fail("Article not found",404);
  const progress=(await sqlTable("ark60_article_progress","GET",
