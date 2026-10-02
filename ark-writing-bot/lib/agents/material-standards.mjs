@@ -3,6 +3,13 @@ import { randomInt } from "node:crypto";
 export const MAX_QUESTIONS_PER_SHEET = 30;
 export const MAX_REQUESTED_QUIZ_QUESTIONS = 60;
 
+export function selectRequestedQuestions(questions, expectedCount) {
+  if (!Array.isArray(questions) || questions.length < expectedCount) {
+    throw new Error(`Quiz generator returned ${Array.isArray(questions) ? questions.length : 0}/${expectedCount} questions`);
+  }
+  return questions.slice(0, expectedCount);
+}
+
 export function parseRequestedQuestionCount(text = "", fallback = 10) {
   const patterns = [
     /\b(\d{1,2})\s*ta\s*(?:[\p{L}\p{N}'’ʻ-]+\s+){0,5}(?:quiz|test|savol)\b/iu,

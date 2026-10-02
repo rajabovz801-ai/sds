@@ -4,8 +4,15 @@ import {
   parseRequestedQuestionCount,
   validateQuizQuestions,
   formatSpoilerAnswerKey,
-  randomizeCorrectAnswerPositions
+  randomizeCorrectAnswerPositions,
+  selectRequestedQuestions
 } from "../ark-writing-bot/lib/agents/material-standards.mjs";
+
+test("31 generated questions safely become the requested 30; missing questions still fail", () => {
+  const questions = Array.from({length:31}, (_, index) => ({question:`Question ${index + 1}`}));
+  assert.deepEqual(selectRequestedQuestions(questions, 30), questions.slice(0, 30));
+  assert.throws(() => selectRequestedQuestions(questions.slice(0, 29), 30), /29\/30/);
+});
 
 test("quiz requests support up to 60 questions and safely cap larger requests", () => {
   assert.equal(parseRequestedQuestionCount("30 ta present perfect test"), 30);

@@ -1,5 +1,5 @@
 const OPENAI_API = "https://api.openai.com/v1";
-import { MAX_REQUESTED_QUIZ_QUESTIONS, randomizeCorrectAnswerPositions, validateQuizQuestions } from "./material-standards.mjs";
+import { MAX_REQUESTED_QUIZ_QUESTIONS, randomizeCorrectAnswerPositions, selectRequestedQuestions, validateQuizQuestions } from "./material-standards.mjs";
 
 function apiKey() {
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is missing");
@@ -148,8 +148,7 @@ correct_option_id must be an integer 0-3.`;
   }
   const parsed = parseJson(outputText(await response.json()));
   const questions = Array.isArray(parsed?.questions) ? parsed.questions : [];
-  if (questions.length !== safeCount) throw new Error(`Quiz generator returned ${questions.length}/${safeCount} questions`);
-  const normalized = validateQuizQuestions(questions, safeCount).map(item => ({
+  const normalized = validateQuizQuestions(selectRequestedQuestions(questions, safeCount), safeCount).map(item => ({
     question: item.question,
     options: item.options,
     correct_option_id: item.correct_option_id,
@@ -199,7 +198,7 @@ export async function reviewQuizContent(quiz, instruction = "") {
   }
   const reviewed = parseJson(outputText(await response.json()));
   if (reviewed?.valid !== true) throw new Error("ARK Checker could not verify every quiz question");
-  const questions = randomizeCorrectAnswerPositions(validateQuizQuestions(reviewed.questions, quiz.questions.length)).map(item => ({
+  const questions = randomizeCorrectAnswerPositions(validateQuizQuestions(selectRequestedQuestions(reviewed.questions, quiz.questions.length), quiz.questions.length)).map(item => ({
     question: item.question,
     options: item.options,
     correct_option_id: item.correct_option_id,
