@@ -613,3 +613,43 @@ test("Listening gap-fill inputs keep focus while typing",()=>{
   assert.match(page,/function renderGap\(q:number\)/);
   assert.match(page,/renderGap\(Number\(t\.q\)\)/);
 });
+
+
+test("Listening retakes preserve prior attempts and allow only one in-progress attempt",()=>{
+  const api=read("app/api/challenge-listening/route.ts");
+  const migration=read("supabase/migrations/20261002_listening_multiple_attempts.sql");
+  assert.match(migration,/add column if not exists attempt_number integer not null default 1/);
+  assert.match(migration,/drop constraint if exists ark60_listening_attempts_student_id_day_number_key/);
+  assert.match(migration,/unique \(student_id,day_number,attempt_number\)/);
+  assert.match(migration,/where status='in_progress'/);
+  assert.match(api,/action==="retry"/);
+  assert.match(api,/attempt_number/);
+  assert.match(api,/order\("attempt_number",\{ascending:false\}\)/);
+  assert.match(api,/status","in_progress"/);
+});
+
+test("Listening retry does not overwrite first completion or award another completion coin",()=>{
+  const api=read("app/api/challenge-listening/route.ts");
+  assert.match(api,/ignoreDuplicates:true/);
+  assert.match(api,/onConflict:"student_id,day_number,module"/);
+});
+
+test("Listening result UI offers an explicit retry and resets only local test state",()=>{
+  const page=read("app/day/[day]/listening/page.tsx");
+  assert.match(page,/async function retryTest\(\)/);
+  assert.match(page,/action:"retry"/);
+  assert.match(page,/Try again/);
+  assert.match(page,/setResult\(null\)/);
+  assert.match(page,/setReview\(null\)/);
+  assert.match(page,/setAnswers\(a\.answers\|\|\{\}\)/);
+});
+
+test("Listening admin shows every submitted attempt with its attempt number",()=>{
+  const api=read("app/api/challenge-listening/route.ts");
+  const admin=read("app/admin/listening/page.tsx");
+  assert.match(api,/attempt_number/);
+  assert.match(admin,/attempt_number:number/);
+  assert.match(admin,/Attempt \{row\.attempt_number\}/);
+  assert.match(admin,/Attempt \{selected\.attempt_number\}/);
+  assert.match(admin,/>Attempts</);
+});
