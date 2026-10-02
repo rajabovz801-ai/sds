@@ -1,7 +1,7 @@
 "use client";
 import {useEffect} from "react";
 
-type ModuleName="article"|"vocabulary"|"writing"|"listening"|"speaking";
+type ModuleName="reading"|"article"|"vocabulary"|"writing"|"listening"|"speaking";
 
 export default function StudyTimeHeartbeat({day,module}:{day:number;module:ModuleName}){
  useEffect(()=>{
