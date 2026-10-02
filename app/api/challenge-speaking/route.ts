@@ -93,15 +93,18 @@ export async function GET(req:NextRequest){
 
   if(action==="admin_list"){
    const admin=await getAdmin(req);if(!admin)return json({detail:"Admin sign-in required."},401);
-   const {data,error}=await supabase.from("ark60_speaking_attempts")
+   const requestedDay=Number(url.searchParams.get("day")||0);
+   let query=supabase.from("ark60_speaking_attempts")
     .select("id,student_id,day_number,status,submitted_at,expires_at,review_status,band,feedback,reviewed_at,audio_expired,answer_count,total_audio_seconds")
-    .eq("status","submitted").order("submitted_at",{ascending:false}).limit(300);
+    .eq("status","submitted").gt("expires_at",new Date().toISOString()).order("submitted_at",{ascending:false}).limit(300);
+   if(Number.isInteger(requestedDay)&&requestedDay>=1&&requestedDay<=60)query=query.eq("day_number",requestedDay);
+   const {data,error}=await query;
    if(error)return json({detail:"Could not load Speaking submissions."},500);
    const rows=data||[];const ids=[...new Set(rows.map(x=>x.student_id))];
    let students:any[]=[];
    if(ids.length){const result=await supabase.from("ark60_students").select("id,first_name,last_name,username").in("id",ids);students=result.data||[]}
-   const map=new Map(students.map(s=>[s.id,s]));
-   return json({admin,submissions:rows.map(r=>({...r,student:map.get(r.student_id)||null}))});
+   const map=new Map(students.filter(s=>String(s.username||"").toLowerCase()!=="rustam7").map(s=>[s.id,s]));
+   return json({admin,submissions:rows.filter(r=>map.has(r.student_id)).map(r=>({...r,student:map.get(r.student_id)||null}))});
   }
 
   if(action==="admin_detail"){
