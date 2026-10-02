@@ -24,14 +24,13 @@ test("admin overview uses live activity and no visible Content manager",()=>{
   assert.match(admin,/pending_speaking/);
 });
 
-test("Listening admin is day-aware without changing student Day 1 guard",()=>{
+test("Listening admin and student route are day-aware for published Listening days",()=>{
   const admin=read("app/admin/listening/page.tsx");
   const api=read("app/api/challenge-listening/route.ts");
   assert.match(admin,/selectedDay/);
   assert.doesNotMatch(admin,/admin_list&day=1/);
   assert.match(api,/available_days/);
-  assert.match(api,/const DAY=1/);
-  assert.match(api,/if\(day!==DAY/);
+  assert.doesNotMatch(api,/if\(day!==DAY/);
 });
 
 test("Writing admin separates active Writing time from task timer",()=>{

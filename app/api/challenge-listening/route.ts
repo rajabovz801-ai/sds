@@ -97,9 +97,9 @@ async function getAttempt(studentId:string,day=DAY){
  const {data,error}=await db.from("ark60_listening_attempts").select("*").eq("student_id",studentId).eq("day_number",day).maybeSingle();
  if(error)throw error;return data;
 }
-async function ensureSubmission(attempt:AnyObj){
+async function ensureSubmission(attempt:AnyObj,content:AnyObj){
  const db=getServiceSupabase();
- const payload={attempt_id:attempt.id,answers:attempt.answers||{},part_scores:attempt.part_scores||[],score:attempt.score,band:attempt.band,elapsed_seconds:attempt.elapsed_seconds,source:"listening-test-206-v1"};
+ const payload={attempt_id:attempt.id,answers:attempt.answers||{},part_scores:attempt.part_scores||[],score:attempt.score,band:attempt.band,elapsed_seconds:attempt.elapsed_seconds,source:String(content?.payload?.version||content?.payload?.test_code||"listening")};
  const {error}=await db.from("ark60_submissions").upsert({
   student_id:attempt.student_id,day_number:attempt.day_number,module:MODULE,payload,score:attempt.score,band:attempt.band,review_status:"reviewed"
  },{onConflict:"student_id,day_number,module"});
@@ -156,9 +156,9 @@ export async function GET(req:NextRequest){
   }
 
   const day=requestedDay;
-  if(day!==DAY){
+  if(!Number.isInteger(day)||day<1||day>60){
    if(action==="availability")return json({published:false});
-   return json({detail:"Listening is not published for this day yet."},404);
+   return json({detail:"Invalid Listening day."},400);
   }
   const content=await getContent(day);
   if(action==="availability")return json({published:!!content,title:content?.title||""});
@@ -168,7 +168,7 @@ export async function GET(req:NextRequest){
   if(!(await isDayUnlocked(day,student)))return json({detail:"This Listening task is not available yet."},403);
   if(isPreview(student))return json({content:{...content,payload:safePayload(content.payload)},attempt:null,preview:true});
   const attempt=await getAttempt(student.id,day);
-  if(attempt?.status==="submitted")await ensureSubmission(attempt);
+  if(attempt?.status==="submitted")await ensureSubmission(attempt,content);
   return json({content:{...content,payload:safePayload(content.payload)},attempt:attemptForClient(content,attempt),preview:false});
  }catch(e){console.error("Listening GET",e);return json({detail:"Could not load Listening."},500)}
 }
@@ -180,13 +180,13 @@ export async function POST(req:NextRequest){
   if(!isOwnOrigin(req))return json({detail:"Invalid request origin."},403);
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
   const body=await req.json().catch(()=>null);if(!body||typeof body!=="object")return json({detail:"Invalid request body."},400);
-  const day=Number(body.day||DAY);if(day!==DAY||!(await isDayUnlocked(day,student)))return json({detail:"This Listening task is unavailable."},403);
+  const day=Number(body.day||DAY);if(!Number.isInteger(day)||day<1||day>60||!(await isDayUnlocked(day,student)))return json({detail:"This Listening task is unavailable."},403);
   const content=await getContent(day);if(!content)return json({detail:"Listening material has not been published yet."},404);
   const action=String(body.action||"");
   const db=getServiceSupabase();
 
   if(action==="start"){
-   if(isPreview(student))return json({ok:true,preview:true,attempt:{id:"preview-listening-1",day_number:1,status:"in_progress",answers:{},started_at:new Date().toISOString(),elapsed_seconds:0}});
+   if(isPreview(student))return json({ok:true,preview:true,attempt:{id:"preview-listening-"+day,day_number:day,status:"in_progress",answers:{},started_at:new Date().toISOString(),elapsed_seconds:0}});
    let attempt=await getAttempt(student.id,day);
    if(!attempt){
     const ins=await db.from("ark60_listening_attempts").insert({student_id:student.id,day_number:day,status:"in_progress",answers:{}}).select("*").maybeSingle();
@@ -196,7 +196,7 @@ export async function POST(req:NextRequest){
     }else attempt=ins.data;
    }
    if(!attempt)return json({detail:"Could not start Listening."},500);
-   if(attempt.status==="submitted")await ensureSubmission(attempt);
+   if(attempt.status==="submitted")await ensureSubmission(attempt,content);
    return json({ok:true,attempt:attemptForClient(content,attempt)});
   }
 
@@ -223,7 +223,7 @@ export async function POST(req:NextRequest){
    let attempt=(await db.from("ark60_listening_attempts").select("*").eq("id",id).eq("student_id",student.id).eq("day_number",day).maybeSingle()).data;
    if(!attempt)return json({detail:"Listening attempt not found."},404);
    if(attempt.status==="submitted"){
-    await ensureSubmission(attempt);
+    await ensureSubmission(attempt,content);
     const again=grade(content.payload,attempt.answers||{});
     return json({ok:true,already_submitted:true,result:{score:attempt.score,band:attempt.band,part_scores:attempt.part_scores,elapsed_seconds:attempt.elapsed_seconds,submitted_at:attempt.submitted_at},review:again.review});
    }
@@ -233,7 +233,7 @@ export async function POST(req:NextRequest){
    if(updated.error)throw updated.error;
    attempt=updated.data||await getAttempt(student.id,day);
    if(!attempt)return json({detail:"Could not finish Listening."},500);
-   await ensureSubmission(attempt);
+   await ensureSubmission(attempt,content);
    return json({ok:true,result:{score:graded.score,band:graded.band,part_scores:graded.part_scores,elapsed_seconds:elapsed,submitted_at:attempt.submitted_at},review:graded.review});
   }
 

@@ -408,3 +408,7 @@
   padding:0 8px;
  }
 }
+
+.ls-map-image-wrap{display:flex;justify-content:center;align-items:center;margin:12px 0 16px;padding:12px;background:#fff;border:1px solid #dfe5ea;border-radius:10px;overflow:auto}
+.ls-map-image-wrap img{display:block;width:min(100%,760px);height:auto;max-height:520px;object-fit:contain}
+@media(max-width:700px){.ls-map-image-wrap{padding:8px;margin:10px 0 12px}.ls-map-image-wrap img{width:100%;max-height:none}}

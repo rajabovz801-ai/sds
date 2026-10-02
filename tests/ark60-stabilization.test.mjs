@@ -473,13 +473,27 @@ test("Listening admin results expose all answers with official correct answers",
   assert.match(admin,/Section \{i\+1\}/);
 });
 
-test("Day 1 and Dashboard route Listening into the real challenge module",()=>{
+test("Published Listening days and Dashboard route into the real challenge module",()=>{
   const day=read("app/day/[day]/page.tsx");
   const dashboard=read("app/dashboard/page.tsx");
   assert.match(day,/challenge-listening\?action=availability/);
-  assert.match(day,/name==="Listening"&&publishedListening&&day===1/);
+  assert.match(day,/name==="Listening"&&publishedListening/);
   assert.match(day,/name==="Listening"\?"\/day\/"\+day\+"\/listening"/);
   assert.match(dashboard,/if\(name==="Listening"\)return "\/day\/"\+day\+"\/listening"/);
+});
+
+
+test("Day 2 Listening uses Test 207, supplied MP3, map, and official answer key",()=>{
+  const migration=read("supabase/migrations/20261002_day2_listening_test207.sql");
+  const page=read("app/day/[day]/listening/page.tsx");
+  assert.match(migration,/IELTS Listening Test 207/);
+  assert.match(migration,/TEST%20207\.mp3/);
+  assert.match(migration,/test207-melby-coal-mine\.svg/);
+  assert.match(migration,/"15"\s*:\s*\[\s*"F"\s*\]/);
+  assert.match(migration,/"31"\s*:\s*\[\s*"pollution"\s*\]/);
+  assert.match(migration,/"25-26"\s*:\s*\{[\s\S]*?"questions"\s*:\s*\[\s*25\s*,\s*26\s*\][\s\S]*?"correct"\s*:\s*\[\s*"A"\s*,\s*"C"\s*\]/);
+  assert.match(page,/block\.image_url/);
+  assert.match(page,/String\(day\)\.padStart\(2,"0"\)/);
 });
 
 test("Listening grading supports either-order pairs and official alternatives",()=>{
