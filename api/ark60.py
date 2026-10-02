@@ -239,19 +239,123 @@ def get_data(request:Request, action:str="health", day:int=1):
         for idx,item in enumerate(board):
             item["rank"]=idx+1
         return {"leaderboard":board}
+    if action=="admin_live_activity":
+        require_admin(request)
+        students=db("GET","ark60_students",{"select":"id,first_name,last_name,username,status","status":"eq.active","username":"neq.rustam7","order":"first_name.asc","limit":300})
+        presence=db("GET","ark60_presence",{"select":"student_id,last_seen_at,last_interaction_at,current_area,day_number","limit":300})
+        today_rows=db("GET","ark60_study_sessions",{"select":"student_id,day_number,module,active_seconds,last_active_at","study_date":"eq."+str(today()),"limit":3000})
+        board=db("POST","rpc/ark60_leaderboard_snapshot",payload={})
+        sessions=db("GET","ark60_sessions",{"select":"student_id,created_at,revoked_at","order":"created_at.desc","limit":1500})
+        pmap={x.get("student_id"):x for x in presence}
+        total_map={x.get("student_id"):int(x.get("active_seconds") or 0) for x in (board if isinstance(board,list) else [])}
+        today_map={}
+        module_map={}
+        for row in today_rows:
+            sid=row.get("student_id")
+            sec=int(row.get("active_seconds") or 0)
+            today_map[sid]=today_map.get(sid,0)+sec
+            prev=module_map.get(sid)
+            if not prev or str(row.get("last_active_at") or "")>str(prev.get("last_active_at") or ""):
+                module_map[sid]=row
+        login_map={}
+        logout_map={}
+        for row in sessions:
+            sid=row.get("student_id")
+            if sid not in login_map: login_map[sid]=row.get("created_at")
+            if row.get("revoked_at") and sid not in logout_map: logout_map[sid]=row.get("revoked_at")
+        stamp=now()
+        items=[]
+        for student in students:
+            sid=student.get("id")
+            p=pmap.get(sid) or {}
+            last_seen=p.get("last_seen_at")
+            last_interaction=p.get("last_interaction_at")
+            seen_age=10**9
+            interaction_age=10**9
+            try:
+                if last_seen: seen_age=(stamp-datetime.fromisoformat(str(last_seen).replace("Z","+00:00"))).total_seconds()
+                if last_interaction: interaction_age=(stamp-datetime.fromisoformat(str(last_interaction).replace("Z","+00:00"))).total_seconds()
+            except (ValueError,TypeError):
+                pass
+            status="offline"
+            if seen_age<=60:
+                status="online" if interaction_age<=90 else "idle"
+            latest=module_map.get(sid) or {}
+            items.append({
+                "student_id":sid,
+                "full_name":(str(student.get("first_name") or "")+" "+str(student.get("last_name") or "")).strip() or "Student",
+                "username":student.get("username") or "student",
+                "status":status,
+                "current_area":p.get("current_area") or (str(latest.get("module") or "").title() if latest else "Offline"),
+                "day_number":p.get("day_number") or latest.get("day_number"),
+                "last_seen_at":last_seen,
+                "last_interaction_at":last_interaction,
+                "today_seconds":today_map.get(sid,0),
+                "total_seconds":total_map.get(sid,0),
+                "last_login_at":login_map.get(sid),
+                "last_logout_at":logout_map.get(sid)
+            })
+        order={"online":0,"idle":1,"offline":2}
+        items.sort(key=lambda x:(order.get(x["status"],3),-(datetime.fromisoformat(str(x["last_seen_at"]).replace("Z","+00:00")).timestamp() if x.get("last_seen_at") else 0)))
+        return {"activity":items,"online_now":sum(1 for x in items if x["status"]=="online"),"idle_now":sum(1 for x in items if x["status"]=="idle")}
+    if action=="admin_notifications":
+        require_admin(request)
+        cutoff=(now()-timedelta(hours=72)).isoformat()
+        writing=db("GET","ark60_submissions",{"select":"id,student_id,day_number,submitted_at","module":"eq.writing","review_status":"eq.pending","submitted_at":"gte."+cutoff,"order":"submitted_at.desc","limit":200})
+        speaking=db("GET","ark60_speaking_attempts",{"select":"id,student_id,day_number,submitted_at,expires_at","status":"eq.submitted","review_status":"eq.pending","expires_at":"gt."+now().isoformat(),"order":"submitted_at.desc","limit":200})
+        student_ids=list({x.get("student_id") for x in writing+speaking if x.get("student_id")})
+        student_rows=db("GET","ark60_students",{"select":"id,first_name,last_name,username","id":"in.("+",".join(student_ids)+")","limit":300}) if student_ids else []
+        by_id={x.get("id"):x for x in student_rows if str(x.get("username") or "").lower()!="rustam7"}
+        notes=[]
+        for module,rows2 in (("writing",writing),("speaking",speaking)):
+            for row in rows2:
+                student=by_id.get(row.get("student_id"))
+                if not student: continue
+                submitted=str(row.get("submitted_at") or "")
+                expires=row.get("expires_at")
+                if not expires and submitted:
+                    try: expires=(datetime.fromisoformat(submitted.replace("Z","+00:00"))+timedelta(hours=72)).isoformat()
+                    except ValueError: expires=None
+                notes.append({
+                    "id":row.get("id"),"module":module,"day_number":row.get("day_number"),
+                    "student_name":(str(student.get("first_name") or "")+" "+str(student.get("last_name") or "")).strip(),
+                    "username":student.get("username"),"submitted_at":row.get("submitted_at"),"expires_at":expires
+                })
+        notes.sort(key=lambda x:str(x.get("submitted_at") or ""),reverse=True)
+        return {"notifications":notes}
     if action=="admin_dashboard":
         admin=require_admin(request)
         rows=db("POST","rpc/ark60_admin_dashboard_summary",payload={"p_today":str(today())})
         summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
+        cutoff=(now()-timedelta(hours=72)).isoformat()
+        writing=db("GET","ark60_submissions",{"select":"student_id","module":"eq.writing","review_status":"eq.pending","submitted_at":"gte."+cutoff,"limit":500})
+        speaking=db("GET","ark60_speaking_attempts",{"select":"student_id","status":"eq.submitted","review_status":"eq.pending","expires_at":"gt."+now().isoformat(),"limit":500})
+        preview_rows=db("GET","ark60_students",{"select":"id","username":"eq.rustam7","limit":1})
+        preview_id=preview_rows[0].get("id") if preview_rows else None
+        presence=db("GET","ark60_presence",{"select":"last_seen_at,last_interaction_at","limit":500})
+        stamp=now()
+        online_now=0
+        idle_now=0
+        for row in presence:
+            try:
+                seen=(stamp-datetime.fromisoformat(str(row.get("last_seen_at")).replace("Z","+00:00"))).total_seconds()
+                interaction=(stamp-datetime.fromisoformat(str(row.get("last_interaction_at")).replace("Z","+00:00"))).total_seconds()
+            except (ValueError,TypeError):
+                continue
+            if seen<=60:
+                if interaction<=90: online_now+=1
+                else: idle_now+=1
         return {
             "admin":admin,
             "students":summary.get("students") or [],
             "total_students":int(summary.get("total_students") or 0),
             "active_today":int(summary.get("active_today") or 0),
             "today_seconds":int(summary.get("today_seconds") or 0),
-            "pending_writing":int(summary.get("pending_writing") or 0),
-            "pending_speaking":int(summary.get("pending_speaking") or 0),
-            "pending_requests":int(summary.get("pending_requests") or 0)
+            "pending_writing":sum(1 for x in writing if x.get("student_id")!=preview_id),
+            "pending_speaking":sum(1 for x in speaking if x.get("student_id")!=preview_id),
+            "pending_requests":int(summary.get("pending_requests") or 0),
+            "online_now":online_now,
+            "idle_now":idle_now
         }
     if action=="admin_content":
         require_admin(request)
@@ -506,6 +610,29 @@ async def actions(request:Request,response:Response):
         if status=="disabled":
             db("PATCH","ark60_admin_sessions",params={"admin_id":"eq."+admin_id,"revoked_at":"is.null"},payload={"revoked_at":now().isoformat()},prefer="return=minimal")
         return {"ok":True,"status":status}
+    if action=="presence":
+        user=require_student(request)
+        if user.get("username")=="rustam7":
+            return {"ok":True,"preview":True}
+        area=str(data.get("area") or "Dashboard").strip().title()
+        allowed={"Dashboard","Day","Notifications","Reading","Listening","Article","Vocabulary","Writing","Speaking"}
+        if area not in allowed:
+            area="Dashboard"
+        day=data.get("day")
+        if day is not None and (not isinstance(day,int) or day<1 or day>60):
+            day=None
+        stamp=now()
+        interaction_raw=str(data.get("last_interaction_at") or "")
+        interaction=stamp
+        try:
+            parsed=datetime.fromisoformat(interaction_raw.replace("Z","+00:00"))
+            if abs((stamp-parsed).total_seconds())<=300:
+                interaction=parsed
+        except (ValueError,TypeError):
+            pass
+        payload={"student_id":user["id"],"last_seen_at":stamp.isoformat(),"last_interaction_at":interaction.isoformat(),"current_area":area,"day_number":day,"updated_at":stamp.isoformat()}
+        db("POST","ark60_presence",params={"on_conflict":"student_id"},payload=payload,prefer="resolution=merge-duplicates,return=minimal")
+        return {"ok":True}
     if action=="heartbeat":
         user=require_student(request)
         day=data.get("day")
