@@ -4,15 +4,15 @@ import AnimatedBackButton from "../../../components/animated-back-button";
 import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {useParams,useRouter} from "next/navigation";
 import {Fragment,useCallback,useEffect,useMemo,useRef,useState} from "react";
-import {Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Headphones,LockKeyhole,Maximize2,Minimize2,Send,Volume2,XCircle} from "lucide-react";
+import {Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Headphones,LockKeyhole,Maximize2,Minimize2,RefreshCcw,Send,Volume2,XCircle} from "lucide-react";
 import "./listening.css";
 
 type Token=string|{q:number};
 type Payload={test_code:string;audio_url:string;total_questions:number;audio_once:boolean;sections:any[]};
 type ReviewItem={number:number;submitted:string;correct:string[];status:"correct"|"wrong"|"empty"};
-type Attempt={id:string;status:string;answers:Record<string,string>;started_at:string;submitted_at?:string|null;elapsed_seconds:number;part_scores?:number[]|null;score?:number|null;band?:number|null;review?:ReviewItem[]};
+type Attempt={id:string;attempt_number:number;status:string;answers:Record<string,string>;started_at:string;submitted_at?:string|null;elapsed_seconds:number;part_scores?:number[]|null;score?:number|null;band?:number|null;review?:ReviewItem[]};
 type ApiData={content:{title:string;payload:Payload};attempt:Attempt|null;preview:boolean};
-type Result={score:number;band:number;part_scores:number[];elapsed_seconds:number;submitted_at?:string};
+type Result={score:number;band:number;part_scores:number[];elapsed_seconds:number;submitted_at?:string;attempt_number?:number};
 
 function secLabel(v:number){const s=Math.max(0,Math.floor(v||0));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
 function answerStatus(review:ReviewItem[]|null,q:number){return review?.find(x=>x.number===q)}
@@ -23,6 +23,7 @@ export default function ListeningPage(){
  const day=Number(params.day)||1;
  const [data,setData]=useState<ApiData|null>(null);
  const [attemptId,setAttemptId]=useState("");
+ const [attemptNumber,setAttemptNumber]=useState(1);
  const [answers,setAnswers]=useState<Record<string,string>>({});
  const [startedAt,setStartedAt]=useState("");
  const [started,setStarted]=useState(false);
@@ -57,9 +58,9 @@ export default function ListeningPage(){
    setData(obj);
    const a=obj.attempt as Attempt|null;
    if(a){
-    setAttemptId(a.id);setAnswers(a.answers||{});setStartedAt(a.started_at||"");
+    setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers(a.answers||{});setStartedAt(a.started_at||"");
     if(a.status==="submitted"){
-     setResult({score:Number(a.score||0),band:Number(a.band||0),part_scores:a.part_scores||[0,0,0,0],elapsed_seconds:Number(a.elapsed_seconds||0),submitted_at:a.submitted_at||undefined});
+     setResult({score:Number(a.score||0),band:Number(a.band||0),part_scores:a.part_scores||[0,0,0,0],elapsed_seconds:Number(a.elapsed_seconds||0),submitted_at:a.submitted_at||undefined,attempt_number:Number(a.attempt_number||1)});
      setReview(a.review||null);setReviewMode(false);setStarted(false);
     }else{
      setStarted(true);startedRef.current=true;
@@ -146,7 +147,7 @@ export default function ListeningPage(){
    const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});
    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not start Listening.");
    const a=obj.attempt as Attempt;
-   setAttemptId(a.id);setAnswers(a.answers||{});setStartedAt(a.started_at);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);
+   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers(a.answers||{});setStartedAt(a.started_at);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);
    try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.()}catch{}
    requestAnimationFrame(async()=>{
     const audio=audioRef.current;if(!audio)return;
@@ -154,6 +155,25 @@ export default function ListeningPage(){
    });
   }catch(e){setMessage(e instanceof Error?e.message:"Could not start Listening.")}
  }
+ async function retryTest(){
+  if(!window.confirm("Start a new Listening attempt?\n\nYour previous result will stay saved as an earlier attempt."))return;
+  setSubmitting(true);setMessage("");
+  try{
+   const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"retry",day})});
+   const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not start another Listening attempt.");
+   const a=obj.attempt as Attempt;
+   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||attemptNumber+1));setAnswers(a.answers||{});setStartedAt(a.started_at);setElapsed(0);
+   setResult(null);setReview(null);setReviewMode(false);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);setAudioStatus("idle");
+   setData(prev=>prev?{...prev,attempt:a}:prev);
+   try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.()}catch{}
+   requestAnimationFrame(async()=>{
+    const audio=audioRef.current;if(!audio)return;
+    try{audio.currentTime=0;await audio.play();setAudioStatus("playing")}catch{setAudioStatus("resume")}
+   });
+  }catch(e){setMessage(e instanceof Error?e.message:"Could not start another Listening attempt.")}
+  finally{setSubmitting(false)}
+ }
+
  async function resumeAudio(){
   const audio=audioRef.current;if(!audio||!startedAt)return;
   const offset=Math.max(0,(Date.now()-Date.parse(startedAt))/1000);
@@ -233,7 +253,7 @@ export default function ListeningPage(){
  if(result&&!reviewMode)return <main className="ls-shell ls-result-shell">
   <StudyTimeHeartbeat day={day} module="listening"/>
   <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">DAY {String(day).padStart(2,"0")} · LISTENING</div><button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></header>
-  <section className="ls-result-card"><span className="ls-result-icon"><CheckCircle2 size={30}/></span><small>DAY {String(day).padStart(2,"0")} · LISTENING COMPLETE</small><h1>{result.score} <i>/ 40</i></h1><div className="ls-band">IELTS Band <b>{Number(result.band).toFixed(1)}</b></div><div className="ls-section-scores">{result.part_scores.map((s,i)=><div key={i}><span>Section {i+1}</span><b>{s}/10</b></div>)}</div><p>{data.preview?"Preview result only. Nothing was saved to the real student record or admin results.":"Your result is saved to your challenge account and is visible in the admin results panel."}</p><div className="ls-result-actions"><button onClick={()=>{setReviewMode(true);setSection(1);setCurrentQuestion(1)}}>Review answers <ChevronRight size={15}/></button><button className="ghost" onClick={goBack}>Back to Day {day}</button></div></section>
+  <section className="ls-result-card"><span className="ls-result-icon"><CheckCircle2 size={30}/></span><small>DAY {String(day).padStart(2,"0")} · LISTENING COMPLETE · ATTEMPT {result.attempt_number||attemptNumber}</small><h1>{result.score} <i>/ 40</i></h1><div className="ls-band">IELTS Band <b>{Number(result.band).toFixed(1)}</b></div><div className="ls-section-scores">{result.part_scores.map((s,i)=><div key={i}><span>Section {i+1}</span><b>{s}/10</b></div>)}</div><p>{data.preview?"Preview result only. Nothing was saved to the real student record or admin results.":"This attempt is saved. You can review it or start a fresh attempt without deleting this result."}</p><div className="ls-result-actions"><button onClick={()=>{setReviewMode(true);setSection(1);setCurrentQuestion(1)}}>Review answers <ChevronRight size={15}/></button><button className="ghost" disabled={submitting} onClick={retryTest}>{submitting?"Starting…":"Try again"} <RefreshCcw size={15}/></button><button className="ghost" onClick={goBack}>Back to Day {day}</button></div></section>
  </main>;
 
  return <main className={"ls-shell "+(reviewMode?"reviewing":"")}>
