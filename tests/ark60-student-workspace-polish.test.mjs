@@ -27,8 +27,8 @@ test("Progress keeps tasks and study-time data while using the compact report cl
   assert.match(block,/progress-v2/);
   assert.match(block,/Completed tasks/);
   assert.match(block,/Total study time/);
-  assert.match(block,/Reading/);
-  assert.match(block,/Speaking/);
+  assert.match(block,/"reading"/);
+  assert.match(block,/"speaking"/);
 });
 
 test("Leaderboard uses one board container and keeps real ranking semantics",()=>{
