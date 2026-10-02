@@ -24,7 +24,6 @@ async function viewer(req:NextRequest,admin=false){
  const rows=await db(admin?"ark60_admins":"ark60_students","GET","select="+(admin?"id,username,display_name,role,status":"id,username,first_name,last_name,status")+"&id=eq."+(admin?session.admin_id:session.student_id)+"&limit=1");
  return rows[0]?.status==="active"?rows[0]:null;
 }
-function todayUZ(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tashkent",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
 function idValid(x:string){return /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(x);}
 function normalize(s:unknown){return String(s??"").trim().normalize("NFKC").toLowerCase().replace(/[‘’]/g,"'").replace(/\s+/g," ").replace(/^[.,;:!?]+|[.,;:!?]+$/g,"");}
 async function catalogue(day:number){return await db("ark60_reading_passages","GET","select=id,day_number,ordinal,title,status&day_number=eq."+day+"&order=ordinal.asc");}
@@ -191,13 +190,6 @@ export async function POST(req:NextRequest){
  // Mirror completed reading work into the existing 60-day course metrics.
  // Only completed pairs count as a finished Reading module.
  try{
-  const date=todayUZ();
-  const existingTime=(await db("ark60_study_sessions","GET","select=id,active_seconds&student_id=eq."+user.id+"&study_date=eq."+date+"&day_number=eq."+day+"&module=eq.reading&order=last_active_at.desc&limit=1"))[0];
-  if(existingTime){
-   await db("ark60_study_sessions","PATCH","id=eq."+existingTime.id,{active_seconds:Number(existingTime.active_seconds||0)+seconds,last_active_at:new Date().toISOString()},"return=minimal");
-  }else{
-   await db("ark60_study_sessions","POST","",{student_id:user.id,study_date:date,day_number:day,module:"reading",active_seconds:seconds,last_active_at:new Date().toISOString()},"return=minimal");
-  }
   const [done,passages]=await Promise.all([completed(String(user.id),day),catalogue(day)]);
   const published=passages.filter((p:J)=>p.status==="published");
   const doneIds=new Set(done.map((a:J)=>String(a.passage_id)));
