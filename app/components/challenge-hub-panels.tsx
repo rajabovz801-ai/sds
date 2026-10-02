@@ -1,7 +1,7 @@
 "use client";
 
 import {useEffect,useMemo,useState} from "react";
-import {Check,Clock3,Coins,LogOut,Medal,Save,Star,Target,Trophy,X} from "lucide-react";
+import {Check,Clock3,Coins,Crown,LogOut,Save,Star,Target,Trophy,X} from "lucide-react";
 
 type Student={
  id:string;first_name:string;last_name:string;username:string;target_band:number;
@@ -14,7 +14,9 @@ export type HubStats={
 };
 type RewardEvent={id:string;day_number:number;module:string;kind:string;amount:number;created_at:string};
 type RewardCenter={balance:number;claimed_today:boolean;today_amount:number;streak_day:number;next_amount:number;history:RewardEvent[];preview?:boolean};
-type LeaderRow={student_id:string;full_name:string;username:string;coins:number;active_seconds:number;completed_tasks:number;rank?:number};
+type LeaderStatus="online"|"idle"|"offline";
+type LeaderPeriod="week"|"30d"|"all";
+type LeaderRow={student_id:string;full_name:string;username:string;coins:number;active_seconds:number;status:LeaderStatus;rank:number};
 
 const fmt=(s:number)=>{const n=Math.max(0,Math.floor(Number(s)||0));const h=Math.floor(n/3600),m=Math.floor((n%3600)/60);return h?h+"h "+String(m).padStart(2,"0")+"m":m+"m"};
 const moduleLabel=(m:string)=>m==="daily"?"Daily reward":m==="profile"?"Profile completion":m.split("_").map(x=>x[0]?.toUpperCase()+x.slice(1)).join(" ");
@@ -45,12 +47,73 @@ export function RewardModal({open,onClose,onBalance}:{open:boolean;onClose:()=>v
 }
 
 export function LeaderboardPanel({studentId}:{studentId:string}){
- const [rows,setRows]=useState<LeaderRow[]>([]),[metric,setMetric]=useState<"coins"|"time"|"tasks">("coins"),[loading,setLoading]=useState(true),[message,setMessage]=useState("");
- useEffect(()=>{let live=true;(async()=>{try{const r=await fetch("/api/ark60?action=leaderboard",{credentials:"same-origin",cache:"no-store"});const j=await r.json();if(!r.ok)throw new Error(j.detail||"Could not load leaderboard.");if(live)setRows(j.leaderboard||[])}catch(e){if(live)setMessage(e instanceof Error?e.message:"Could not load leaderboard.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[]);
- const sorted=useMemo(()=>rows.slice().sort((a,b)=>metric==="time"?b.active_seconds-a.active_seconds||b.coins-a.coins:metric==="tasks"?b.completed_tasks-a.completed_tasks||b.coins-a.coins:b.coins-a.coins||b.active_seconds-a.active_seconds),[rows,metric]);
- return <section className="hub-panel"><div className="hub-heading"><div><small>LIVE COURSE DATA</small><h1>Leaderboard</h1><p>Rankings are calculated from real earned coins, active study time and completed challenge tasks.</p></div><Trophy size={34}/></div>
-  <div className="leader-tabs"><button className={metric==="coins"?"active":""} onClick={()=>setMetric("coins")}><Coins size={15}/> Coins</button><button className={metric==="time"?"active":""} onClick={()=>setMetric("time")}><Clock3 size={15}/> Study time</button><button className={metric==="tasks"?"active":""} onClick={()=>setMetric("tasks")}><Check size={15}/> Tasks</button></div>
-  {message?<div className="hub-error">{message}</div>:loading?<div className="hub-loading">Loading real rankings…</div>:sorted.length?<div className="leader-list">{sorted.map((r,i)=><div className={"leader-row "+(r.student_id===studentId?"me":"")} key={r.student_id}><span className={"leader-rank rank-"+(i+1)}>{i<3?<Medal size={18}/>:i+1}</span><div className="leader-person"><b>{r.full_name}</b><small>@{r.username}{r.student_id===studentId?" · You":""}</small></div><div><span>COINS</span><b><Coins size={14}/>{r.coins}</b></div><div><span>STUDY</span><b><Clock3 size={14}/>{fmt(r.active_seconds)}</b></div><div><span>TASKS</span><b><Check size={14}/>{r.completed_tasks}</b></div></div>)}</div>:<div className="hub-empty"><Trophy size={28}/><b>Leaderboard starts with real student activity</b><p>No non-preview student has earned a ranked result yet.</p></div>}
+ const [rows,setRows]=useState<LeaderRow[]>([]),[period,setPeriod]=useState<LeaderPeriod>("week"),[loading,setLoading]=useState(true),[message,setMessage]=useState("");
+
+ useEffect(()=>{
+  let live=true;
+  async function load(silent=false){
+   if(!silent)setLoading(true);
+   try{
+    const r=await fetch("/api/ark60?action=leaderboard&period="+period,{credentials:"same-origin",cache:"no-store"});
+    const j=await r.json();
+    if(!r.ok)throw new Error(j.detail||"Could not load leaderboard.");
+    if(live){setRows(j.leaderboard||[]);setMessage("")}
+   }catch(e){
+    if(live&&!rows.length)setMessage(e instanceof Error?e.message:"Could not load leaderboard.");
+   }finally{
+    if(live&&!silent)setLoading(false);
+   }
+  }
+  void load();
+  const refresh=()=>{if(document.visibilityState==="visible")void load(true)};
+  const id=window.setInterval(refresh,60000);
+  document.addEventListener("visibilitychange",refresh);
+  return()=>{live=false;window.clearInterval(id);document.removeEventListener("visibilitychange",refresh)};
+ },[period]);
+
+ const sorted=useMemo(()=>rows.slice().sort((a,b)=>b.coins-a.coins||b.active_seconds-a.active_seconds||a.full_name.localeCompare(b.full_name)),[rows]);
+ const top=sorted.slice(0,3);
+ const table=sorted.slice(3,10);
+ const current=sorted.find(row=>row.student_id===studentId);
+ const initials=(row:LeaderRow)=>row.full_name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()).join("")||"ST";
+ const statusLabel=(status:LeaderStatus)=>status==="online"?"Online":status==="idle"?"Idle":"Offline";
+ const periodLabel=period==="week"?"This week":period==="30d"?"Last 30 days":"All time";
+
+ return <section className="hub-panel leaderboard-v2">
+  <div className="hub-heading lb-heading"><div><small>LIVE COURSE DATA</small><h1>Leaderboard</h1><p>Rankings are based on earned coins and active study time.</p></div><Trophy size={34}/></div>
+
+  <div className="lb-period-tabs" aria-label="Leaderboard period">
+   <button className={period==="week"?"active":""} onClick={()=>setPeriod("week")}>This week</button>
+   <button className={period==="30d"?"active":""} onClick={()=>setPeriod("30d")}>Last 30 days</button>
+   <button className={period==="all"?"active":""} onClick={()=>setPeriod("all")}>All time</button>
+  </div>
+
+  {message?<div className="hub-error">{message}</div>:loading?<div className="hub-loading">Loading real rankings…</div>:sorted.length?<>
+   <div className={"lb-podium lb-podium-"+Math.min(3,top.length)} aria-label={periodLabel+" top students"}>
+    {top.map(row=><article className={"lb-podium-card rank-"+row.rank+" "+(row.student_id===studentId?"me":"")} key={row.student_id}>
+     {row.rank===1&&<Crown className="lb-crown" size={28}/>}
+     <div className="lb-avatar">{initials(row)}</div>
+     <span className="lb-rank-badge">{row.rank}</span>
+     <h2>{row.full_name}</h2>
+     <p>@{row.username}{row.student_id===studentId?" · You":""}</p>
+     <div className="lb-podium-metrics"><span><Coins size={15}/><b>{row.coins}</b><small>Coins</small></span><span><Clock3 size={15}/><b>{fmt(row.active_seconds)}</b><small>Study time</small></span></div>
+     <div className={"lb-status "+row.status}><i/>{statusLabel(row.status)}</div>
+    </article>)}
+   </div>
+
+   {table.length>0&&<div className="lb-table-wrap">
+    <div className="lb-table-head"><span>#</span><span>Student</span><span>Coins</span><span>Study time</span><span>Status</span></div>
+    {table.map(row=><div className={"lb-table-row "+(row.student_id===studentId?"me":"")} key={row.student_id}>
+     <b className="lb-table-rank">{row.rank}</b>
+     <div className="lb-table-person"><span className="lb-mini-avatar">{initials(row)}</span><div><b>{row.full_name}</b><small>@{row.username}{row.student_id===studentId?" · You":""}</small></div></div>
+     <strong><Coins size={14}/>{row.coins}</strong>
+     <strong><Clock3 size={14}/>{fmt(row.active_seconds)}</strong>
+     <span className={"lb-status "+row.status}><i/>{statusLabel(row.status)}</span>
+    </div>)}
+   </div>}
+
+   {current&&current.rank>10&&<div className="lb-current-row"><span>Your rank</span><b>#{current.rank}</b><div><strong>{current.full_name}</strong><small>@{current.username}</small></div><span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span></div>}
+  </>:<div className="hub-empty"><Trophy size={28}/><b>No leaderboard activity in this period yet.</b><p>Earn coins or record active study time to appear here.</p></div>}
  </section>;
 }
 
