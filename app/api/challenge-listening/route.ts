@@ -92,22 +92,30 @@ function grade(payload:AnyObj,answers:Record<string,string>){
  });
  return {score,band:bandFor(score),part_scores:partScores,review};
 }
-async function getAttempt(studentId:string,day=DAY){
+async function getLatestAttempt(studentId:string,day=DAY){
  const db=getServiceSupabase();
- const {data,error}=await db.from("ark60_listening_attempts").select("*").eq("student_id",studentId).eq("day_number",day).maybeSingle();
+ const {data,error}=await db.from("ark60_listening_attempts").select("*").eq("student_id",studentId).eq("day_number",day).order("attempt_number",{ascending:false}).limit(1).maybeSingle();
  if(error)throw error;return data;
+}
+async function getInProgressAttempt(studentId:string,day=DAY){
+ const db=getServiceSupabase();
+ const {data,error}=await db.from("ark60_listening_attempts").select("*").eq("student_id",studentId).eq("day_number",day).eq("status","in_progress").limit(1).maybeSingle();
+ if(error)throw error;return data;
+}
+async function getCurrentAttempt(studentId:string,day=DAY){
+ return await getInProgressAttempt(studentId,day)||await getLatestAttempt(studentId,day);
 }
 async function ensureSubmission(attempt:AnyObj,content:AnyObj){
  const db=getServiceSupabase();
  const payload={attempt_id:attempt.id,answers:attempt.answers||{},part_scores:attempt.part_scores||[],score:attempt.score,band:attempt.band,elapsed_seconds:attempt.elapsed_seconds,source:String(content?.payload?.version||content?.payload?.test_code||"listening")};
  const {error}=await db.from("ark60_submissions").upsert({
   student_id:attempt.student_id,day_number:attempt.day_number,module:MODULE,payload,score:attempt.score,band:attempt.band,review_status:"reviewed"
- },{onConflict:"student_id,day_number,module"});
+ },{onConflict:"student_id,day_number,module",ignoreDuplicates:true});
  if(error)throw error;
 }
 function attemptForClient(content:AnyObj,attempt:AnyObj|null){
  if(!attempt)return null;
- const base={id:attempt.id,day_number:attempt.day_number,status:attempt.status,answers:attempt.answers||{},started_at:attempt.started_at,submitted_at:attempt.submitted_at,elapsed_seconds:attempt.elapsed_seconds||0,part_scores:attempt.part_scores||null,score:attempt.score??null,band:attempt.band??null};
+ const base={id:attempt.id,day_number:attempt.day_number,attempt_number:Number(attempt.attempt_number||1),status:attempt.status,answers:attempt.answers||{},started_at:attempt.started_at,submitted_at:attempt.submitted_at,elapsed_seconds:attempt.elapsed_seconds||0,part_scores:attempt.part_scores||null,score:attempt.score??null,band:attempt.band??null};
  if(attempt.status!=="submitted")return base;
  const graded=grade(content.payload,attempt.answers||{});
  return {...base,review:graded.review};
@@ -122,7 +130,7 @@ export async function GET(req:NextRequest){
   if(action==="admin_list"){
    const admin=await getAdmin(req);if(!admin)return json({detail:"Admin sign-in required."},401);
    const {data:allAttempts,error:allError}=await db.from("ark60_listening_attempts")
-    .select("id,student_id,day_number,status,submitted_at,elapsed_seconds,part_scores,score,band")
+    .select("id,student_id,day_number,attempt_number,status,submitted_at,elapsed_seconds,part_scores,score,band")
     .eq("status","submitted").order("submitted_at",{ascending:false}).limit(500);
    if(allError)throw allError;
    const allRows=allAttempts||[];
@@ -167,7 +175,7 @@ export async function GET(req:NextRequest){
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
   if(!(await isDayUnlocked(day,student)))return json({detail:"This Listening task is not available yet."},403);
   if(isPreview(student))return json({content:{...content,payload:safePayload(content.payload)},attempt:null,preview:true});
-  const attempt=await getAttempt(student.id,day);
+  const attempt=await getCurrentAttempt(student.id,day);
   if(attempt?.status==="submitted")await ensureSubmission(attempt,content);
   return json({content:{...content,payload:safePayload(content.payload)},attempt:attemptForClient(content,attempt),preview:false});
  }catch(e){console.error("Listening GET",e);return json({detail:"Could not load Listening."},500)}
@@ -186,18 +194,42 @@ export async function POST(req:NextRequest){
   const db=getServiceSupabase();
 
   if(action==="start"){
-   if(isPreview(student))return json({ok:true,preview:true,attempt:{id:"preview-listening-"+day,day_number:day,status:"in_progress",answers:{},started_at:new Date().toISOString(),elapsed_seconds:0}});
-   let attempt=await getAttempt(student.id,day);
+   if(isPreview(student))return json({ok:true,preview:true,attempt:{id:"preview-listening-"+day,day_number:day,attempt_number:1,status:"in_progress",answers:{},started_at:new Date().toISOString(),elapsed_seconds:0}});
+   let attempt=await getInProgressAttempt(student.id,day);
    if(!attempt){
-    const ins=await db.from("ark60_listening_attempts").insert({student_id:student.id,day_number:day,status:"in_progress",answers:{}}).select("*").maybeSingle();
+    const latest=await getLatestAttempt(student.id,day);
+    if(latest){
+     if(latest.status==="submitted")await ensureSubmission(latest,content);
+     return json({ok:true,attempt:attemptForClient(content,latest)});
+    }
+    const ins=await db.from("ark60_listening_attempts").insert({student_id:student.id,day_number:day,attempt_number:1,status:"in_progress",answers:{}}).select("*").maybeSingle();
     if(ins.error){
-     if(String(ins.error.code)==="23505")attempt=await getAttempt(student.id,day);
+     if(String(ins.error.code)==="23505")attempt=await getInProgressAttempt(student.id,day)||await getLatestAttempt(student.id,day);
      else throw ins.error;
     }else attempt=ins.data;
    }
    if(!attempt)return json({detail:"Could not start Listening."},500);
-   if(attempt.status==="submitted")await ensureSubmission(attempt,content);
    return json({ok:true,attempt:attemptForClient(content,attempt)});
+  }
+
+  if(action==="retry"){
+   if(isPreview(student))return json({ok:true,preview:true,attempt:{id:"preview-listening-"+day+"-"+Date.now(),day_number:day,attempt_number:2,status:"in_progress",answers:{},started_at:new Date().toISOString(),elapsed_seconds:0}});
+   const existing=await getInProgressAttempt(student.id,day);
+   if(existing)return json({ok:true,resumed:true,attempt:attemptForClient(content,existing)});
+   const latest=await getLatestAttempt(student.id,day);
+   if(!latest)return json({detail:"Complete or start the Listening test first."},409);
+   if(latest.status!=="submitted")return json({ok:true,resumed:true,attempt:attemptForClient(content,latest)});
+   await ensureSubmission(latest,content);
+   const nextNumber=Math.max(1,Number(latest.attempt_number||1))+1;
+   const ins=await db.from("ark60_listening_attempts").insert({student_id:student.id,day_number:day,attempt_number:nextNumber,status:"in_progress",answers:{}}).select("*").maybeSingle();
+   if(ins.error){
+    if(String(ins.error.code)==="23505"){
+     const concurrent=await getInProgressAttempt(student.id,day);
+     if(concurrent)return json({ok:true,resumed:true,attempt:attemptForClient(content,concurrent)});
+    }
+    throw ins.error;
+   }
+   return json({ok:true,retry:true,attempt:attemptForClient(content,ins.data)});
   }
 
   if(action==="save"){
@@ -225,16 +257,16 @@ export async function POST(req:NextRequest){
    if(attempt.status==="submitted"){
     await ensureSubmission(attempt,content);
     const again=grade(content.payload,attempt.answers||{});
-    return json({ok:true,already_submitted:true,result:{score:attempt.score,band:attempt.band,part_scores:attempt.part_scores,elapsed_seconds:attempt.elapsed_seconds,submitted_at:attempt.submitted_at},review:again.review});
+    return json({ok:true,already_submitted:true,result:{score:attempt.score,band:attempt.band,part_scores:attempt.part_scores,elapsed_seconds:attempt.elapsed_seconds,submitted_at:attempt.submitted_at,attempt_number:Number(attempt.attempt_number||1)},review:again.review});
    }
    const elapsed=Math.max(0,Math.min(7200,Math.floor((Date.now()-Date.parse(attempt.started_at))/1000)));
    const stamp=new Date().toISOString();
    const updated=await db.from("ark60_listening_attempts").update({status:"submitted",answers,submitted_at:stamp,updated_at:stamp,elapsed_seconds:elapsed,part_scores:graded.part_scores,score:graded.score,band:graded.band}).eq("id",attempt.id).eq("student_id",student.id).eq("status","in_progress").select("*").maybeSingle();
    if(updated.error)throw updated.error;
-   attempt=updated.data||await getAttempt(student.id,day);
+   attempt=updated.data||(await db.from("ark60_listening_attempts").select("*").eq("id",id).eq("student_id",student.id).maybeSingle()).data;
    if(!attempt)return json({detail:"Could not finish Listening."},500);
    await ensureSubmission(attempt,content);
-   return json({ok:true,result:{score:graded.score,band:graded.band,part_scores:graded.part_scores,elapsed_seconds:elapsed,submitted_at:attempt.submitted_at},review:graded.review});
+   return json({ok:true,result:{score:graded.score,band:graded.band,part_scores:graded.part_scores,elapsed_seconds:elapsed,submitted_at:attempt.submitted_at,attempt_number:Number(attempt.attempt_number||1)},review:graded.review});
   }
 
   return json({detail:"Unknown action."},400);
