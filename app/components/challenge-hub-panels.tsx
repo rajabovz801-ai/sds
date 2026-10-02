@@ -83,13 +83,15 @@ export function LeaderboardPanel({studentId}:{studentId:string}){
  return <section className="hub-panel leaderboard-v2">
   <div className="hub-heading lb-heading"><div><small>LIVE COURSE DATA</small><h1>Leaderboard</h1><p>Rankings are based on earned coins and active study time.</p></div><Trophy size={34}/></div>
 
-  <div className="lb-period-tabs" aria-label="Leaderboard period">
-   <button className={period==="week"?"active":""} onClick={()=>setPeriod("week")}>This week</button>
-   <button className={period==="30d"?"active":""} onClick={()=>setPeriod("30d")}>Last 30 days</button>
-   <button className={period==="all"?"active":""} onClick={()=>setPeriod("all")}>All time</button>
-  </div>
+  <div className="lb-board">
+   {sorted.some(row=>row.status==="online")&&<div className="lb-live-strip"><span><i/>{sorted.filter(row=>row.status==="online").length} student{sorted.filter(row=>row.status==="online").length===1?"":"s"} online now</span><div>{sorted.filter(row=>row.status==="online").slice(0,3).map(row=><b key={row.student_id}>{row.full_name}</b>)}</div></div>}
+   <div className="lb-period-tabs" aria-label="Leaderboard period">
+    <button className={period==="week"?"active":""} onClick={()=>setPeriod("week")}>This week</button>
+    <button className={period==="30d"?"active":""} onClick={()=>setPeriod("30d")}>Last 30 days</button>
+    <button className={period==="all"?"active":""} onClick={()=>setPeriod("all")}>All time</button>
+   </div>
 
-  {message?<div className="hub-error">{message}</div>:loading?<div className="hub-loading">Loading real rankings…</div>:sorted.length?<>
+   {message?<div className="hub-error">{message}</div>:loading?<div className="hub-loading">Loading real rankings…</div>:sorted.length?<>
    <div className={"lb-podium lb-podium-"+Math.min(3,top.length)} aria-label={periodLabel+" top students"}>
     {top.map(row=><article className={"lb-podium-card rank-"+row.rank+" "+(row.student_id===studentId?"me":"")} key={row.student_id}>
      {row.rank===1&&<Crown className="lb-crown" size={28}/>}
@@ -115,13 +117,14 @@ export function LeaderboardPanel({studentId}:{studentId:string}){
 
    {current&&current.rank>10&&<div className="lb-current-row"><span>Your rank</span><b>#{current.rank}</b><div><strong>{current.full_name}</strong><small>@{current.username}</small></div><span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span></div>}
   </>:<div className="hub-empty"><Trophy size={28}/><b>No leaderboard activity in this period yet.</b><p>Earn coins or record active study time to appear here.</p></div>}
+  </div>
  </section>;
 }
 
 export function ProgressPanel({stats,completedDays}:{stats:HubStats;completedDays:number}){
  const modules=["reading","article","vocabulary","writing","listening","speaking"];
  const total=stats.completed.length,required=Object.values(stats.required_by_day||{}).reduce((n,x)=>n+x.length,0);
- return <section className="hub-panel"><div className="hub-heading"><div><small>REAL ACTIVITY</small><h1>Your progress</h1><p>Only saved challenge activity is counted here.</p></div><Target size={34}/></div>
+ return <section className="hub-panel progress-v2"><div className="hub-heading"><div><small>REAL ACTIVITY</small><h1>Your progress</h1><p>Only saved challenge activity is counted here.</p></div><Target size={34}/></div>
   <div className="hub-kpis"><article><span>Completed days</span><b>{completedDays}<small>/60</small></b></article><article><span>Completed tasks</span><b>{total}<small>/{required||"—"}</small></b></article><article><span>Total study time</span><b>{fmt(stats.active_seconds)}</b></article><article><span>Coins earned</span><b>{stats.coins}</b></article></div>
   <div className="module-progress-list">{modules.map(m=>{const count=stats.completed.filter(x=>x.module===m).length;const seconds=Number(stats.by_module?.[m]||0);return <div key={m}><span className="module-progress-name">{moduleLabel(m)}</span><div className="module-progress-bar"><i style={{width:Math.min(100,Math.max(count?8:0,(seconds/3600)*12))+"%"}}/></div><b>{count} tasks · {fmt(seconds)}</b></div>})}</div>
  </section>;

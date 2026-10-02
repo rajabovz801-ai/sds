@@ -211,7 +211,7 @@ export default function Dashboard(){
     </div>
    </header>
 
-   <main className="learning-content">
+   <main className={"learning-content workspace-"+view.toLowerCase().replaceAll(" ","-")}>
     {loadError&&stats&&<div role="status" className="dashboard-live-warning">{loadError} Live stats may be temporarily out of date.</div>}
 
     {view==="Dashboard"?<>
