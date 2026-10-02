@@ -1,239 +1,69 @@
-import { telegram } from "../telegram.js";
+import { sendDocument, telegram } from "../telegram.js";
 import { matchTarget } from "./assignment-workflow-v2.js";
 import { runAgent } from "./openai.js";
-
-const STORE_URL = "https://svdigxqdivcmljirjwhk.supabase.co/functions/v1/ark-agent-store";
-const TZ = "Asia/Tashkent";
-
-function botToken() {
-  if (!process.env.TELEGRAM_BOT_TOKEN) throw new Error("TELEGRAM_BOT_TOKEN is missing");
-  return process.env.TELEGRAM_BOT_TOKEN;
-}
-
-async function store(action, payload = {}) {
-  const response = await fetch(STORE_URL, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-telegram-bot-token": botToken() },
-    body: JSON.stringify({ action, ...payload })
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok || !data.ok) throw new Error(`ARK agent store ${action} failed (${response.status}): ${data.error || "unknown error"}`);
-  return data;
-}
-
-function clean(value = "") {
-  return String(value || "").replace(/\s+/g, " ").trim();
-}
-
-function html(value = "") {
-  return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function isSpeakingContentRequest(text = "") {
-  const value = String(text || "").toLowerCase().replace(/[ʻ’`]/g, "'");
-  const speaking = /\bspeaking\b/.test(value);
-  const content = /(part\s*1|sample\s*answer|band\s*[4-9]|savol|question)/.test(value);
-  const create = /(tayyorla|tuz|yarat|ber|yoz)/.test(value);
-  const deliver = /(guruh|group|yubor|jo'nat|send)/.test(value);
-  return speaking && content && create && deliver;
-}
-
-function parseCount(text = "") {
-  const match = String(text).match(/\b(\d{1,2})\s*ta\s*(?:savol|question)/i);
-  return Math.max(1, Math.min(10, Number(match?.[1] || 4)));
-}
-
-function parseBand(text = "") {
-  const match = String(text).match(/\bband\s*([4-9](?:\.5)?)\b/i);
-  return match ? match[1] : "6";
-}
-
-function parseSentenceCount(text = "") {
-  const value = String(text);
-  const patterns = [
-    /har\s+bir(?:\s+javob|ida)?[^\d]{0,30}(\d{1,2})\s*ta\s*gap/i,
-    /(\d{1,2})\s*ta\s*gap[^.]{0,25}har\s+bir/i
-  ];
-  for (const pattern of patterns) {
-    const match = value.match(pattern);
-    if (match) return Math.max(2, Math.min(8, Number(match[1])));
-  }
-  return 4;
-}
+import { isSpeakingMaterialRequest, buildSpeakingMaterialPrompt } from "./speaking-standards.mjs";
+import { renderMaterialPdf } from "./quiz-pdf.mjs";
 
 function parseTopic(text = "") {
   const quoted = String(text).match(/["“”']([^"“”']{2,80})["“”']/);
-  if (quoted?.[1]) return clean(quoted[1]);
-  const mavzu = String(text).match(/(?:mavzusida|topic\s*[:\-]?)[\s]*([A-Za-z][A-Za-z\s-]{1,60}?)(?=\s+(?:IELTS|Speaking|Part|uchun|bo['‘]?yicha)|[,.]|$)/i);
-  if (mavzu?.[1]) return clean(mavzu[1]);
-  const about = String(text).match(/\b(?:haqida|about)\s+([A-Za-z][A-Za-z\s-]{1,50})/i);
-  if (about?.[1]) return clean(about[1]);
-  return "Teacher";
+  if (quoted?.[1]) return quoted[1].replace(/\s+/g, " ").trim();
+  const match = String(text).match(/(?:mavzusida|topic\s*[:\-]?|haqida)\s*([A-Za-z][A-Za-z\s&-]{1,55}?)(?=\s+(?:IELTS|Speaking|Part|uchun|bo'yicha|ber)|[,.]|$)/i);
+  return match?.[1]?.replace(/\s+/g, " ").trim() || "surprise me";
 }
 
-function tashkentDateParts(date = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(date);
-  return Object.fromEntries(parts.map(part => [part.type, part.value]));
+function asksForStudentDelivery(text = "") {
+  return /(guruh|group)/i.test(text) && /(yubor|jo['‘]?nat|send|tashla)/i.test(text);
 }
 
-function localIsoAt(hour, minute, dayOffset = 0) {
-  const p = tashkentDateParts();
-  const base = new Date(Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) + dayOffset, 12, 0, 0));
-  const y = base.getUTCFullYear();
-  const m = String(base.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(base.getUTCDate()).padStart(2, "0");
-  return new Date(`${y}-${m}-${d}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00+05:00`).toISOString();
-}
-
-function parseSendAt(text = "") {
-  const value = String(text || "").toLowerCase().replace(/[ʻ’`]/g, "'");
-  const match = value.match(/(?:soat\s*)?(\d{1,2})\s*[:.]\s*(\d{2})/);
-  if (!match || !/(yubor|jo'nat|send)/.test(value)) return new Date().toISOString();
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  if (hour > 23 || minute > 59) return new Date().toISOString();
-  return localIsoAt(hour, minute, /ertaga|tomorrow/.test(value) ? 1 : 0);
-}
-
-function formatSendTime(iso) {
-  return new Intl.DateTimeFormat("uz-UZ", {
-    timeZone: TZ,
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "2-digit",
-    month: "2-digit"
-  }).format(new Date(iso));
-}
-
-function speakingBlocks(raw = "", topic = "Teacher") {
-  let value = String(raw || "")
-    .replace(/\r/g, "\n")
-    .replace(/\*\*/g, "")
-    .replace(/^#+\s*/gm, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  value = value.replace(/^🎤\s*IELTS\s+Speaking\s+Part\s*1\s*[—-]\s*[^\d]+(?=\s*1\.)/i, "").trim();
-
-  const entries = [];
-  const re = /(?:^|\s)(\d{1,2})\.\s*(.*?)(?=(?:\s\d{1,2}\.\s)|$)/g;
-  let match;
-  while ((match = re.exec(value)) !== null) {
-    const number = Number(match[1]);
-    const block = clean(match[2]);
-    const parts = block.split(/\s*(?:Sample\s*answer|Sample answer|Answer|Javob)\s*:\s*/i);
-    const question = clean(parts.shift() || "").replace(/^Question\s*:\s*/i, "");
-    const answer = clean(parts.join(" "));
-    if (question && answer) entries.push({ number, question, answer });
+async function sendTextInParts(chatId, text) {
+  const paragraphs = String(text || "").split(/\n{2,}/);
+  let part = "";
+  for (const paragraph of paragraphs) {
+    const next = part ? `${part}\n\n${paragraph}` : paragraph;
+    if (next.length > 3500 && part) {
+      await telegram("sendMessage", { chat_id: chatId, text: part, disable_web_page_preview: true });
+      part = paragraph;
+    } else {
+      part = next;
+    }
   }
-
-  if (!entries.length) {
-    return {
-      html: `<b>🎤 IELTS Speaking Part 1 — ${html(topic)}</b>\n\n${html(value)}`,
-      plain: `🎤 IELTS Speaking Part 1 — ${topic}\n\n${value}`
-    };
-  }
-
-  const htmlBlocks = entries.map(item =>
-    `<b>${item.number}. ${html(item.question)}</b>\n<b>Sample answer:</b>\n${html(item.answer)}`
-  );
-  const plainBlocks = entries.map(item =>
-    `${item.number}. ${item.question}\nSample answer:\n${item.answer}`
-  );
-
-  return {
-    html: `<b>🎤 IELTS Speaking Part 1 — ${html(topic)}</b>\n\n${htmlBlocks.join("\n\n")}`,
-    plain: `🎤 IELTS Speaking Part 1 — ${topic}\n\n${plainBlocks.join("\n\n")}`
-  };
+  if (part) await telegram("sendMessage", { chat_id: chatId, text: part, disable_web_page_preview: true });
 }
 
 export async function tryHandleSpeakingContentRequest(incoming) {
   const text = incoming?.message?.text || incoming?.message?.caption || "";
-  if (!isSpeakingContentRequest(text)) return false;
+  if (!isSpeakingMaterialRequest(text)) return false;
 
-  const matched = await matchTarget(text);
-  if (!matched.target) {
+  const topic = parseTopic(text);
+  const material = await runAgent(
+    "teacher",
+    buildSpeakingMaterialPrompt(topic, text),
+    "Create this as a complete, ready-to-use IELTS Speaking practice material. Do not claim old topics were searched."
+  );
+  const wantsGroup = asksForStudentDelivery(text);
+  const matched = wantsGroup ? await matchTarget(text) : { target: null, targets: [] };
+
+  if (wantsGroup && !matched.target) {
     const names = matched.targets.slice(0, 8).map(item => `• ${item.title}`).join("\n");
     await telegram("sendMessage", {
       chat_id: Number(incoming.chatId),
-      text: `🧸 <b>Qaysi guruhga yuboray?</b>\n${html(names)}`,
-      parse_mode: "HTML"
+      text: `Qaysi guruhga yuboray?${names ? `\n${names}` : ""}`
     });
     return true;
   }
 
-  const count = parseCount(text);
-  const band = parseBand(text);
-  const sentenceCount = parseSentenceCount(text);
-  const topic = parseTopic(text);
-  const sendAt = parseSendAt(text);
-
-  const generationInstruction = [
-    `Create student-facing IELTS Speaking Part 1 practice on the topic "${topic}".`,
-    `Give exactly ${count} Part 1 questions.`,
-    `For each question, write one Band ${band} sample answer with exactly ${sentenceCount} complete sentences.`,
-    "Use natural English suitable for that band. Keep answers realistic and easy for students to learn from.",
-    "Output ONLY the finished student material. Do not mention the staff instruction, target group, scheduling, homework workflow, files, replies, or administration.",
-    `Use exactly this structure:\n🎤 IELTS Speaking Part 1 — ${topic}\n\n1. Question\nSample answer: four-sentence answer\n\n2. Question\nSample answer: four-sentence answer.`,
-    "Keep every numbered question and its sample answer clearly separated."
-  ].join("\n");
-
-  const generated = await runAgent("teacher", generationInstruction, "This text will be sent directly to students, so it must be polished and student-facing only.");
-  const material = speakingBlocks(generated, topic);
-  const future = new Date(sendAt).getTime() > Date.now() + 30_000;
-
-  if (future) {
-    await store("insert_assignment", {
-      assignment: {
-        staff_chat_id: Number(incoming.chatId),
-        target_id: matched.target.id,
-        target_chat_id: Number(matched.target.chat_id),
-        target_title: matched.target.title,
-        created_by: Number(incoming.message?.from?.id || 0) || null,
-        title: `Speaking Part 1 — ${topic}`,
-        body: material.plain,
-        assignment_type: "content",
-        status: "scheduled",
-        send_at: sendAt,
-        deadline_at: null,
-        remind_at: null,
-        source_chat_id: null,
-        source_message_id: null,
-        requires_submission: false,
-        payload: {
-          generated_by: "teacher",
-          content_kind: "speaking_part_1",
-          topic,
-          band,
-          question_count: count,
-          sentence_count: sentenceCount,
-          telegram_html: material.html
-        }
-      }
-    });
-    await telegram("sendMessage", {
-      chat_id: Number(incoming.chatId),
-      text: `🧸 <b>Speaking materiali tayyor.</b>\n${html(matched.target.title)} guruhiga <b>${html(formatSendTime(sendAt))}</b> da yuboraman.\n<i>${count} ta Part 1 savol • Band ${html(band)} • har javob ${sentenceCount} ta gap.</i>`,
-      parse_mode: "HTML"
-    });
-    return true;
+  const destination = matched.target ? Number(matched.target.chat_id) : Number(incoming.chatId);
+  const wantsPdf = /\bpdf\b/i.test(text);
+  if (wantsPdf) {
+    const pdf = await renderMaterialPdf(`IELTS Speaking — ${topic === "surprise me" ? "Practice" : topic}`, material);
+    const safeName = topic.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "").slice(0, 42) || "Speaking_Practice";
+    await sendDocument(destination, pdf, `${safeName}_Speaking.pdf`, "ARK Education • IELTS Speaking • A4 • Latin Modern");
+  } else {
+    await sendTextInParts(destination, material);
   }
 
-  await telegram("sendMessage", {
-    chat_id: Number(matched.target.chat_id),
-    text: material.html,
-    parse_mode: "HTML",
-    disable_web_page_preview: true
-  });
-  await telegram("sendMessage", {
-    chat_id: Number(incoming.chatId),
-    text: `🧸 <b>Tayyor materialni ${html(matched.target.title)} guruhiga yubordim.</b>\n<i>${count} ta Part 1 savol • Band ${html(band)} • har javob ${sentenceCount} ta gap.</i>`,
-    parse_mode: "HTML"
-  });
+  if (matched.target) {
+    await telegram("sendMessage", { chat_id: Number(incoming.chatId), text: `🧸 Speaking materiali ${matched.target.title} guruhiga yuborildi.` });
+  }
   return true;
 }

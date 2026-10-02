@@ -27,7 +27,6 @@ export async function GET(request) {
       allowed_updates: [
         "message",
         "callback_query",
-        "poll_answer",
         "business_connection",
         "business_message",
         "edited_business_message",
@@ -47,7 +46,7 @@ export async function GET(request) {
       webhook_url: webhookUrl,
       ark_english_entry: true,
       private_ai: false,
-      quiz_answers: true,
+      quiz_answers: false,
       callback_queries: true,
       telegram: {
         url: info.url,
