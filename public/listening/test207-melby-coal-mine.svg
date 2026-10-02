@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 500" role="img" aria-labelledby="title desc">
+<title id="title">Melby Coal Mine</title><desc id="desc">Map for IELTS Listening Test 207, Questions 15 to 20.</desc>
+<style>
+text{font-family:Arial,Helvetica,sans-serif;fill:#25313b}.b{fill:none;stroke:#30363a;stroke-width:3}.w{fill:none;stroke:#8a9298;stroke-width:2;stroke-dasharray:7 5}.l{font-size:16}.s{font-size:13}.k{font-size:18;font-weight:700}.c{fill:white;stroke:#30363a;stroke-width:2}
+</style>
+<text x="380" y="28" text-anchor="middle" class="k">Melby Coal Mine</text>
+<g transform="translate(88 62)">
+<rect x="0" y="0" width="584" height="356" class="b"/>
+<text x="64" y="-10" class="s">N</text><path d="M69 -4v-28m0 0l-6 10m6-10l6 10M69-4l-10-6m10 6l10-6" class="b" stroke-width="1.5"/>
+<text x="48" y="-12" class="s">W</text><text x="82" y="-12" class="s">E</text><text x="66" y="13" class="s">S</text>
+
+<rect x="44" y="26" width="48" height="48" class="b"/><circle cx="68" cy="50" r="11" class="c"/><text x="68" y="56" text-anchor="middle" class="l">B</text>
+<rect x="44" y="96" width="190" height="68" class="b"/><line x1="110" y1="96" x2="110" y2="164" class="b"/><text x="77" y="126" text-anchor="middle" class="s">Engine</text><text x="77" y="143" text-anchor="middle" class="s">house</text><circle cx="176" cy="130" r="11" class="c"/><text x="176" y="136" text-anchor="middle" class="l">C</text>
+
+<rect x="44" y="204" width="68" height="156" class="b"/><circle cx="78" cy="282" r="11" class="c"/><text x="78" y="288" text-anchor="middle" class="l">A</text>
+
+<path d="M244 18h34v28h42v42h-76z" class="b"/><circle cx="262" cy="58" r="11" class="c"/><text x="262" y="64" text-anchor="middle" class="l">D</text>
+
+<path d="M278 136h46v58h70v48H278z" class="b"/><circle cx="302" cy="216" r="11" class="c"/><text x="302" y="222" text-anchor="middle" class="l">E</text>
+
+<rect x="388" y="34" width="144" height="108" class="b"/><circle cx="460" cy="88" r="11" class="c"/><text x="460" y="94" text-anchor="middle" class="l">H</text>
+
+<rect x="456" y="176" width="70" height="72" class="b"/><circle cx="491" cy="212" r="11" class="c"/><text x="491" y="218" text-anchor="middle" class="l">I</text>
+
+<path d="M234 260h66v100h-66z" class="b"/><circle cx="267" cy="316" r="11" class="c"/><text x="267" y="322" text-anchor="middle" class="l">F</text>
+<rect x="300" y="294" width="62" height="66" class="b"/><circle cx="331" cy="326" r="11" class="c"/><text x="331" y="332" text-anchor="middle" class="l">G</text>
+<rect x="362" y="294" width="76" height="66" class="b"/><text x="400" y="322" text-anchor="middle" class="s">Ticket</text><text x="400" y="340" text-anchor="middle" class="s">office</text>
+<rect x="438" y="282" width="104" height="78" class="b"/><text x="490" y="326" text-anchor="middle" class="s">Car park</text>
+<text x="336" y="278" text-anchor="middle" class="s">Main visitor centre</text>
+
+<path d="M112 222h54l48 38" class="w"/><path d="M166 222l54-58" class="w"/><path d="M394 242v52M412 242v52M491 248v34" class="w"/>
+<rect x="250" y="-2" width="154" height="48" fill="white" stroke="#5b6166"/><path d="M264 16h74" class="w"/><text x="346" y="20" class="s">Covered</text><text x="346" y="37" class="s">walkway</text>
+</g></svg>
