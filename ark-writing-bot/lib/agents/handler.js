@@ -5,7 +5,6 @@ import {
   stripBotMentions
 } from "./config.js";
 import { handleCheckerWritingSubmission } from "./checker-writing.js";
-import { handleQuizPollAnswer } from "./assignment-workflow-v2.js";
 import { runAgent } from "./openai.js";
 import { sendAgentMessage } from "./telegram.js";
 
@@ -15,11 +14,6 @@ function looksLikeAssignmentRouting(message) {
 }
 
 export async function handleAgentUpdate(agentKey, update) {
-  if (update?.poll_answer) {
-    if (agentKey === "teacher") await handleQuizPollAnswer(update);
-    return;
-  }
-
   const message = update?.message;
   if (!message?.chat?.id) return;
   if (message.from?.is_bot) return;

@@ -1,4 +1,5 @@
 const OPENAI_API = "https://api.openai.com/v1";
+import { MAX_REQUESTED_QUIZ_QUESTIONS, randomizeCorrectAnswerPositions, validateQuizQuestions } from "./material-standards.mjs";
 
 function apiKey() {
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is missing");
@@ -83,6 +84,7 @@ export async function runAgent(agentKey, instruction, context = "") {
   ].join("\n");
 
   const isQuiz = /\b(quiz|test|mcq|savol)\b/i.test(String(instruction || ""));
+  const isSpeakingMaterial = /\bspeaking\b/i.test(String(instruction || "")) && /PART 1|PART 2|PART 3/i.test(String(instruction || ""));
   const response = await fetch(`${OPENAI_API}/responses`, {
     method: "POST",
     headers: {
@@ -92,7 +94,7 @@ export async function runAgent(agentKey, instruction, context = "") {
     body: JSON.stringify({
       model: model(),
       reasoning: { effort: "none" },
-      max_output_tokens: isQuiz ? 3000 : 1000,
+      max_output_tokens: isQuiz ? 3000 : isSpeakingMaterial ? 3200 : 1000,
       input: [
         { role: "system", content: [{ type: "input_text", text: system }] },
         { role: "user", content: [{ type: "input_text", text: userText }] }
@@ -110,13 +112,14 @@ export async function runAgent(agentKey, instruction, context = "") {
 }
 
 export async function generateQuiz({ topic, level = "B1", count = 10, language = "English", instruction = "" } = {}) {
-  const safeCount = Math.max(1, Math.min(20, Number(count) || 10));
+  const safeCount = Math.max(1, Math.min(MAX_REQUESTED_QUIZ_QUESTIONS, Number(count) || 10));
   const system = `You are ARK Teacher creating a professional Telegram quiz.
 Return ONLY valid JSON. No markdown, no commentary.
 Create exactly ${safeCount} single-answer multiple-choice questions.
 Every question must have exactly four plausible options and exactly one unambiguous correct answer.
 Use the requested CEFR level consistently. Avoid repetitive sentence patterns and weak distractors.
 For grammar, mix affirmative, negative, questions, adverbs/time expressions and form contrasts when relevant.
+Distribute correct answers evenly across A, B, C and D, with no obvious repeating sequence. Never mark the same letter as correct for every question.
 For vocabulary, use contextual meaning rather than obvious dictionary matching.
 Each explanation must be short and useful to a learner.
 JSON shape:
@@ -146,23 +149,61 @@ correct_option_id must be an integer 0-3.`;
   const parsed = parseJson(outputText(await response.json()));
   const questions = Array.isArray(parsed?.questions) ? parsed.questions : [];
   if (questions.length !== safeCount) throw new Error(`Quiz generator returned ${questions.length}/${safeCount} questions`);
-  const normalized = questions.map((item, index) => {
-    const options = Array.isArray(item?.options) ? item.options.map(v => String(v || "").trim()) : [];
-    const correct = Number(item?.correct_option_id);
-    if (!String(item?.question || "").trim() || options.length !== 4 || options.some(v => !v) || !Number.isInteger(correct) || correct < 0 || correct > 3) {
-      throw new Error(`Invalid quiz question at position ${index + 1}`);
-    }
-    if (new Set(options.map(v => v.toLowerCase())).size !== 4) throw new Error(`Duplicate options at question ${index + 1}`);
-    return {
-      question: String(item.question).trim(),
-      options,
-      correct_option_id: correct,
-      explanation: String(item.explanation || "").trim()
-    };
-  });
+  const normalized = validateQuizQuestions(questions, safeCount).map(item => ({
+    question: item.question,
+    options: item.options,
+    correct_option_id: item.correct_option_id,
+    explanation: String(item.explanation || "").trim()
+  }));
   return {
     title: String(parsed?.title || `${topic} Quiz`).trim().slice(0, 120),
     level: String(parsed?.level || level).trim().slice(0, 20),
     questions: normalized
   };
+}
+
+export async function reviewQuizContent(quiz, instruction = "") {
+  const response = await fetch(`${OPENAI_API}/responses`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey()}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      model: model(),
+      reasoning: { effort: "medium" },
+      max_output_tokens: Math.max(1800, quiz.questions.length * 190),
+      input: [
+        {
+          role: "system",
+          content: [{ type: "input_text", text: [
+            "You are ARK Checker's strict academic editor for English multiple-choice quizzes.",
+            "Review every question independently for grammar, spelling, level fit, exactly one correct answer, and a valid explanation.",
+            "Fix small spelling/grammar errors in the question or options. Correct the answer index and explanation whenever needed.",
+            "Remove exact or near-duplicate questions. If a duplicate cannot be replaced with a clearly sound new question, set valid to false.",
+            "Return only valid JSON with this shape: {\"valid\":true,\"title\":\"...\",\"questions\":[{\"question\":\"...\",\"options\":[\"...\",\"...\",\"...\",\"...\"],\"correct_option_id\":0,\"explanation\":\"...\"}]}",
+            "Do not add markdown, comments, question numbering, or answer letters inside options."
+          ].join("\n") }]
+        },
+        {
+          role: "user",
+          content: [{ type: "input_text", text: JSON.stringify({ topic: instruction.slice(0, 700), title: quiz.title, level: quiz.level, questions: quiz.questions }) }]
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`ARK Checker quiz review failed (${response.status}): ${body.slice(0, 400)}`);
+  }
+  const reviewed = parseJson(outputText(await response.json()));
+  if (reviewed?.valid !== true) throw new Error("ARK Checker could not verify every quiz question");
+  const questions = randomizeCorrectAnswerPositions(validateQuizQuestions(reviewed.questions, quiz.questions.length)).map(item => ({
+    question: item.question,
+    options: item.options,
+    correct_option_id: item.correct_option_id,
+    explanation: String(item.explanation || "").trim()
+  }));
+  return { ...quiz, title: String(reviewed.title || quiz.title).trim().slice(0, 120), questions };
 }

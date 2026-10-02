@@ -93,11 +93,6 @@ export async function sendAgentHtml(agentKey, chatId, htmlText) {
   });
 }
 
-export async function sendAgentQuizPoll(agentKey, payload) {
-  const token = getToken(agentKey);
-  return callWithToken(token, "sendPoll", payload);
-}
-
 export async function sendAgentChatAction(agentKey, chatId, action = "typing") {
   const token = getToken(agentKey);
   return callWithToken(token, "sendChatAction", { chat_id: chatId, action });
@@ -146,7 +141,7 @@ export async function setupAgentWebhook(agentKey, webhookUrl, secretToken = null
   const token = getToken(agentKey);
   const payload = {
     url: webhookUrl,
-    allowed_updates: ["message", "poll_answer"],
+    allowed_updates: ["message"],
     drop_pending_updates: false
   };
   if (secretToken && /^[A-Za-z0-9_-]{1,256}$/.test(secretToken)) payload.secret_token = secretToken;

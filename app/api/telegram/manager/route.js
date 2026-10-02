@@ -3,11 +3,6 @@ import {
   isGroupMessage,
   isStaffChat
 } from "../../../../ark-writing-bot/lib/agents/config.js";
-import {
-  handleQuizPollAnswer,
-  handleStudentSubmission,
-  recordGroupMember
-} from "../../../../ark-writing-bot/lib/agents/assignment-workflow-v2.js";
 import { handleStaffManagerMessage } from "../../../../ark-writing-bot/lib/agents/manager.js";
 import { telegram } from "../../../../ark-writing-bot/lib/telegram.js";
 
@@ -238,41 +233,14 @@ async function handleRegistrationCallback(origin, update) {
   return false;
 }
 
-async function forwardToLegacy(origin, update) {
-  const headers = { "content-type": "application/json" };
-  const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
-  if (secret) headers["x-telegram-bot-api-secret-token"] = secret;
-
-  const response = await fetch(`${origin}/api/telegram`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(update)
-  });
-
-  if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`Legacy Teddy route failed (${response.status}): ${body.slice(0, 300)}`);
-  }
-}
-
 async function processManagerUpdate(origin, update) {
   if (update?.callback_query) {
-    const handled = await handleRegistrationCallback(origin, update);
-    if (handled) return;
-    await forwardToLegacy(origin, update);
-    return;
-  }
-
-  if (update?.poll_answer) {
-    await handleQuizPollAnswer(update);
+    await handleRegistrationCallback(origin, update);
     return;
   }
 
   const incoming = incomingFrom(update);
-  if (!incoming?.chatId) {
-    await forwardToLegacy(origin, update);
-    return;
-  }
+  if (!incoming?.chatId) return;
 
   const { message } = incoming;
   if (message.from?.is_bot || message.sender_business_bot) return;
@@ -283,13 +251,6 @@ async function processManagerUpdate(origin, update) {
   }
 
   if (isGroupMessage(message)) {
-    await recordGroupMember(message).catch(error => console.warn("Could not learn group member", error?.message || error));
-    const handled = await handleStudentSubmission(message).catch(error => {
-      console.error("Student submission workflow failed", error);
-      return false;
-    });
-    if (handled) return;
-
     // Student groups stay quiet by design. Ordinary chat, mentions and side conversations are ignored.
     return;
   }
@@ -299,11 +260,11 @@ async function processManagerUpdate(origin, update) {
     if (handled) return;
   }
 
-  await forwardToLegacy(origin, update);
+  // Unhandled private updates are intentionally ignored: Teddy only offers the ARK Web App here.
 }
 
 export async function GET() {
-  return Response.json({ ok: true, service: "Teddy Manager", ready: true, quiet_student_groups: true, assignment_tracking: true, ark_english_registration: true });
+  return Response.json({ ok: true, service: "Teddy Manager", ready: true, quiet_student_groups: true, assignment_tracking: false, quiz_polls: false, ark_english_registration: true });
 }
 
 export async function POST(request) {

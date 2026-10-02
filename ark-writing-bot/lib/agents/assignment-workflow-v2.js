@@ -1,11 +1,10 @@
-import PDFDocument from "pdfkit";
 import { sendDocument, sendMessage, telegram } from "../telegram.js";
-import { generateQuiz } from "./openai.js";
-import { sendAgentMessage, sendAgentQuizPoll } from "./telegram.js";
+import { generateQuiz, reviewQuizContent } from "./openai.js";
+import { formatSpoilerAnswerKey, parseRequestedQuestionCount } from "./material-standards.mjs";
+import { renderQuizPdf } from "./quiz-pdf.mjs";
 
 const STORE_URL = "https://svdigxqdivcmljirjwhk.supabase.co/functions/v1/ark-agent-store";
 const STAFF_TITLE = "ARK AI STAFF";
-const GROUP_TYPES = new Set(["group", "supergroup"]);
 const GENERIC_TARGET_TITLES = new Set(["test", "quiz", "group", "guruh", "homework", "vazifa"]);
 const TZ = "Asia/Tashkent";
 
@@ -28,8 +27,6 @@ async function store(action, payload = {}) {
 function clean(value = "") { return String(value || "").replace(/\s+/g, " ").trim(); }
 function norm(value = "") { return clean(value).toLowerCase().replace(/[ʻ’`]/g, "'").replace(/[^a-z0-9' ]+/g, " ").replace(/\s+/g, " ").trim(); }
 function html(value = "") { return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-function groupMessage(message) { return Boolean(message?.chat?.id && GROUP_TYPES.has(message.chat?.type)); }
-function displayName(user = {}) { return clean([user.first_name, user.last_name].filter(Boolean).join(" ")) || clean(user.username) || `Student ${user.id || ""}`.trim(); }
 
 function fileFromMessage(message = {}) {
   if (message.photo?.length) return { kind: "photo", fileId: message.photo[message.photo.length - 1]?.file_id || null };
@@ -73,28 +70,6 @@ function timePlan(text = "") {
   return { sendAt, deadlineAt, reminderAt };
 }
 
-function requestedPass(text = "", total = 10) {
-  const ratio = String(text).match(/(?:pass|o['‘]?tish|chegara)?\s*[:=\-]?\s*\b(\d{1,2})\s*\/\s*(\d{1,2})\b/i);
-  if (ratio && Number(ratio[2]) === total) return Math.min(total, Math.max(1, Number(ratio[1])));
-  const explicit = String(text).match(/(?:pass|o['‘]?tish|chegara)[^\d]{0,12}(\d{1,2})/i);
-  if (explicit) return Math.min(total, Math.max(1, Number(explicit[1])));
-  return Math.max(1, Math.ceil(total * 0.8));
-}
-
-function requestedCount(text = "", fallback = 10) {
-  const value = String(text);
-  for (const pattern of [
-    /\b(\d{1,2})\s*ta\s*(?:(?:A1|A2|B1|B2|C1|C2)\s*)?(?:quiz|test|savol)/i,
-    /\b(\d{1,2})\s*ta\b(?=[^\n,.]{0,24}\b(?:quiz|test|savol)\b)/i,
-    /(?:quiz|test|savol)[^\d]{0,16}(\d{1,2})\s*ta/i,
-    /\b(\d{1,2})\s*(?:questions?|savol)/i
-  ]) {
-    const m = value.match(pattern);
-    if (m) return Math.max(1, Math.min(20, Number(m[1])));
-  }
-  return fallback;
-}
-
 function requestedLevel(text = "") { const m = String(text).match(/\b(A1|A2|B1|B2|C1|C2)\b/i); return m ? m[1].toUpperCase() : "B1"; }
 function taskTitle(text = "", fallback = "Uyga vazifa") { return (String(text || "").split(/\n/).map(clean).find(Boolean) || fallback).replace(/(?:ielts|cefr|909|group|guruh)[^,.;]{0,20}(?:yubor|jo'nat|send).*/i, "").replace(/(?:deadline|gacha)\s*[:\-]?\s*\d{1,2}[:.]\d{2}.*/i, "").trim().slice(0, 120) || fallback; }
 function taskBody(text = "", targetTitle = "") { let value = String(text || "").trim(); if (targetTitle) value = value.replace(new RegExp(targetTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "ig"), ""); return value.replace(/\b(?:guruhga|groupga|guruhiga|groupiga)\s*(?:yubor|jo['‘]?nat|send)?\b/ig, "").replace(/\b(?:yubor|jo['‘]?nat|send)\b\s*(?:qil|ber)?/ig, "").replace(/\b(?:deadline|gacha)\b\s*[:\-]?\s*\d{1,2}[:.]\d{2}/ig, "").replace(/\b(?:ertaga|bugun)\s+soat\s+\d{1,2}[:.]\d{2}\s*(?:da)?/ig, "").replace(/\n{3,}/g, "\n\n").trim() || "Uyga vazifani bajaring va rasm yoki fayl ko'rinishida yuboring."; }
@@ -125,12 +100,6 @@ export async function matchTarget(text = "") {
   if (!scored.length) return { target: null, targets, ambiguous: false };
   if (scored.length > 1 && scored[0].score === scored[1].score) return { target: null, targets, ambiguous: true };
   return { target: scored[0].target, targets, ambiguous: false };
-}
-
-export async function recordGroupMember(message) {
-  if (!groupMessage(message) || !message?.from?.id || message.from.is_bot) return false;
-  await store("upsert_group_member", { chat_id: Number(message.chat.id), user: message.from });
-  return true;
 }
 
 async function sendAssignmentNow(assignment) {
@@ -175,7 +144,7 @@ function quizTopic(text = "") {
   return clean(String(text)
     .replace(/\b\d+\s*(?:guruh|group)(?:ga|iga)?\s*(?:uchun)?\b/ig, "")
     .replace(/\b\d+\s*ta\b/ig, "")
-    .replace(/\b(?:quiz|test|mcq|savol)\b/ig, "")
+    .replace(/\b(?:quiz|test|mcq|savol|pdf|a4)\b/ig, "")
     .replace(/\b(?:yaratib|yarat|tuz|tuzib|qil|tayyorla|ber|yubor|jo['‘]?nat)\w*\b/ig, "")
     .replace(/\b(?:A1|A2|B1|B2|C1|C2)\b/ig, "")
     .replace(/\b(?:guruhga|groupga|guruhiga|groupiga|guruh|group|uchun)\b/ig, "")
@@ -184,115 +153,37 @@ function quizTopic(text = "") {
     .replace(/\bpass\s*\d{1,2}\s*\/\s*\d{1,2}\b/ig, "")) || "English grammar";
 }
 
-async function quizPdf(quiz, passScore) {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 46, bufferPages: true, info: { Title: `${quiz.title} - ARK Education` } });
-    const chunks = [];
-    doc.on("data", chunk => chunks.push(chunk));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
-    doc.font("Helvetica-Bold").fontSize(17).text("ARK EDUCATION CENTRE", { align: "center" });
-    doc.moveDown(0.3).fontSize(15).text(clean(quiz.title), { align: "center" });
-    doc.moveDown(0.4).font("Helvetica").fontSize(10).text(`Questions: ${quiz.questions.length}   Pass: ${passScore}/${quiz.questions.length}`, { align: "center" });
-    doc.moveDown(1);
-    quiz.questions.forEach((q, index) => { if (doc.y > 700) doc.addPage(); doc.font("Helvetica-Bold").fontSize(11).text(`${index + 1}. ${clean(q.question)}`); doc.font("Helvetica").fontSize(10); q.options.forEach((option, optionIndex) => doc.text(`   ${String.fromCharCode(65 + optionIndex)}. ${clean(option)}`)); doc.moveDown(0.6); });
-    doc.addPage(); doc.font("Helvetica-Bold").fontSize(14).text("ANSWER KEY"); doc.moveDown(0.7).font("Helvetica").fontSize(10).text(quiz.questions.map((q, index) => `${index + 1}-${String.fromCharCode(65 + Number(q.correct_option_id || 0))}`).join("   ")); doc.end();
-  });
-}
-
-async function createQuizAssignment(incoming, target, quiz, passScore, plan) {
-  return (await store("insert_assignment", { assignment: { staff_chat_id: Number(incoming.chatId), target_id: target?.id || null, target_chat_id: Number(target?.chat_id || incoming.chatId), target_title: target?.title || STAFF_TITLE, created_by: Number(incoming.message?.from?.id || 0) || null, title: quiz.title, body: `${quiz.questions.length} ta interactive Telegram quiz`, assignment_type: "quiz", status: "scheduled", send_at: plan.sendAt, deadline_at: plan.deadlineAt, remind_at: plan.reminderAt, requires_submission: Boolean(target), total_items: quiz.questions.length, pass_score: passScore, payload: { questions: quiz.questions, level: quiz.level || null } } })).assignment;
-}
-
-async function sendQuizAssignmentNow(assignment, { specialistPreview = false } = {}) {
-  const questions = assignment.payload?.questions || [];
-  const chatId = Number(assignment.target_chat_id);
-  let header = null;
-  if (specialistPreview) await sendAgentMessage("teacher", chatId, `📚 ${assignment.title}\n${questions.length} ta savol • Pass ${assignment.pass_score}/${questions.length}`);
-  else header = await telegram("sendMessage", { chat_id: chatId, text: `📚 <b>${html(assignment.title)}</b>\n${questions.length} ta savol • <b>Pass ${assignment.pass_score}/${questions.length}</b>${assignment.deadline_at ? `\n⏰ Deadline: ${new Intl.DateTimeFormat("uz-UZ", { timeZone: TZ, hour: "2-digit", minute: "2-digit" }).format(new Date(assignment.deadline_at))}` : ""}`, parse_mode: "HTML" });
-  for (let i = 0; i < questions.length; i += 1) {
-    const q = questions[i];
-    const payload = { chat_id: chatId, question: clean(q.question).slice(0, 300), options: (q.options || []).slice(0, 4).map(option => clean(option).slice(0, 100)), type: "quiz", correct_option_id: Number(q.correct_option_id), explanation: clean(q.explanation || "").slice(0, 200), is_anonymous: specialistPreview };
-    const pollMessage = specialistPreview ? await sendAgentQuizPoll("teacher", payload) : await telegram("sendPoll", payload);
-    if (!specialistPreview && pollMessage?.poll?.id) await store("upsert_quiz_poll", { row: { assignment_id: assignment.id, question_no: i + 1, poll_id: pollMessage.poll.id, question: q.question, correct_option_id: Number(q.correct_option_id), points: 1 } });
-  }
-  const status = specialistPreview ? "preview" : "active";
-  const updated = (await store("update_assignment", { id: assignment.id, patch: { status, target_message_id: header?.message_id || null, updated_at: new Date().toISOString() } })).assignment;
-  if (!specialistPreview) await store("snapshot_members", { assignment: updated });
-  return updated;
-}
-
 export async function tryHandleQuizRequest(incoming) {
   const text = incoming?.message?.text || incoming?.message?.caption || "";
   if (!/\b(quiz|mcq|test)\b/i.test(text)) return false;
   if (/writing|essay|mock test|full mock/i.test(text) && !/grammar|vocab|present|past|future|article|preposition|pronoun|to be/i.test(text)) return false;
-  const count = requestedCount(text, 10);
+  const count = parseRequestedQuestionCount(text, 10);
   const level = requestedLevel(text);
-  const quiz = await generateQuiz({ topic: quizTopic(text), level, count, language: "English", instruction: text });
+  const draft = await generateQuiz({ topic: quizTopic(text), level, count, language: "English", instruction: text });
+  const quiz = await reviewQuizContent(draft, text);
   const total = quiz.questions.length;
-  const passScore = requestedPass(text, total);
-  const plan = timePlan(text);
-  const wantsPdf = /\bpdf\b/i.test(text);
-  const wantsGroup = /(guruh|group|yubor|jo['‘]?nat|send)/i.test(text);
+  const wantsGroup = /(guruh|group)/i.test(text) && /(yubor|jo['‘]?nat|send|tashla)/i.test(text);
   const matched = wantsGroup ? await matchTarget(text) : { target: null, targets: [], ambiguous: false };
   if (wantsGroup && !matched.target) {
     const names = matched.targets.slice(0, 8).map(item => `• ${item.title}`).join("\n");
     await sendMessage(incoming.chatId, `🧸 Qaysi guruhga yuboray?\n${names}`, incoming.businessConnectionId);
     return true;
   }
-  const assignment = await createQuizAssignment(incoming, matched.target, quiz, passScore, plan);
-  if (wantsPdf) {
-    const pdf = await quizPdf(quiz, passScore);
-    const destination = matched.target ? Number(matched.target.chat_id) : Number(incoming.chatId);
-    await sendDocument(destination, pdf, `${clean(quiz.title).replace(/[^a-z0-9]+/gi, "_").slice(0, 50) || "ARK_Quiz"}.pdf`, "ARK Education quiz worksheet");
-    await store("update_assignment", { id: assignment.id, patch: { status: matched.target ? "active" : "preview", updated_at: new Date().toISOString() } });
-    return true;
-  }
-  const sendNow = new Date(plan.sendAt).getTime() <= Date.now() + 30_000;
-  if (!matched.target) { await sendQuizAssignmentNow(assignment, { specialistPreview: true }); return true; }
-  if (sendNow) {
-    await sendQuizAssignmentNow(assignment);
-    await telegram("sendMessage", { chat_id: Number(incoming.chatId), text: `🧸 <b>${html(quiz.title)}</b> quizini ${html(matched.target.title)} guruhiga yubordim.\n<i>${total} ta savol, pass ${passScore}/${total}. Natijani o'zim yig'aman.</i>`, parse_mode: "HTML" });
-  } else {
-    const sendLabel = new Intl.DateTimeFormat("uz-UZ", { timeZone: TZ, hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" }).format(new Date(plan.sendAt));
-    await telegram("sendMessage", { chat_id: Number(incoming.chatId), text: `🧸 <b>${html(quiz.title)}</b> tayyor.\n<b>${html(matched.target.title)}</b> guruhiga <b>${html(sendLabel)}</b> ga rejaladim.\n<i>${total} ta savol • Pass ${passScore}/${total}. Vaqti kelganda o'zi yuboriladi.</i>`, parse_mode: "HTML" });
-  }
-  return true;
-}
-
-export async function handleStudentSubmission(message) {
-  if (!groupMessage(message) || message?.chat?.title === STAFF_TITLE || message?.from?.is_bot) return false;
-  await recordGroupMember(message);
-  const submission = fileFromMessage(message);
-  if (!submission || !["photo", "document"].includes(submission.kind)) return false;
-  const data = await store("get_active_assignments", { chat_id: Number(message.chat.id) });
-  const assignments = data.assignments || [];
-  if (!assignments.length) return false;
-  let assignment = null;
-  if (message.reply_to_message?.message_id) assignment = assignments.find(item => Number(item.target_message_id) === Number(message.reply_to_message.message_id)) || null;
-  if (!assignment && assignments.length === 1) assignment = assignments[0];
-  if (!assignment && message.caption) { const cap = norm(message.caption); assignment = assignments.find(item => cap.includes(norm(item.title))) || null; }
-  if (!assignment) {
-    await telegram("sendMessage", { chat_id: Number(message.chat.id), text: "⚙️ <b>Bu rasm qaysi vazifa uchun?</b>\n<i>Hozir bir nechta aktiv vazifa bor. Kerakli vazifa xabariga reply qilib qayta yuboring.</i>", parse_mode: "HTML", reply_to_message_id: message.message_id });
-    return true;
-  }
-  const now = new Date().toISOString();
-  const late = Boolean(assignment.deadline_at && new Date(now) > new Date(assignment.deadline_at));
-  const user = message.from;
-  await store("upsert_submission", { user, row: { assignment_id: assignment.id, chat_id: Number(message.chat.id), student_user_id: Number(user.id), student_name: displayName(user), username: user.username || null, telegram_message_id: Number(message.message_id), submission_kind: submission.kind, telegram_file_id: submission.fileId, caption: message.caption || null, status: "received", is_late: late, submitted_at: now, updated_at: now } });
-  await telegram("setMessageReaction", { chat_id: Number(message.chat.id), message_id: Number(message.message_id), reaction: [{ type: "emoji", emoji: late ? "👀" : "👍" }], is_big: false }).catch(() => {});
-  return true;
-}
-
-export async function handleQuizPollAnswer(update) {
-  const answer = update?.poll_answer;
-  if (!answer?.poll_id || !answer?.user?.id) return false;
-  const data = await store("find_quiz_poll", { poll_id: answer.poll_id });
-  const poll = data.poll;
-  if (!poll?.assignment_id) return false;
-  const selected = Array.isArray(answer.option_ids) && answer.option_ids.length ? Number(answer.option_ids[0]) : null;
-  const isCorrect = selected !== null && selected === Number(poll.correct_option_id);
-  const assignment = poll.ark_agent_assignments;
-  await store("upsert_quiz_answer", { user: answer.user, target_chat_id: assignment?.target_chat_id || null, row: { assignment_id: poll.assignment_id, student_user_id: Number(answer.user.id), question_no: Number(poll.question_no), selected_option_id: selected, is_correct: isCorrect, answered_at: new Date().toISOString() } });
+  const pdf = await renderQuizPdf(quiz);
+  const destination = matched.target ? Number(matched.target.chat_id) : Number(incoming.chatId);
+  const filename = `${clean(quiz.title).replace(/[^a-z0-9]+/gi, "_").slice(0, 50) || "ARK_Quiz"}.pdf`;
+  await sendDocument(destination, pdf, filename, `ARK Education • ${total} ta savol • A4`);
+  await telegram("sendMessage", {
+    chat_id: Number(incoming.chatId),
+    text: formatSpoilerAnswerKey(quiz),
+    parse_mode: "HTML",
+    disable_web_page_preview: true
+  });
+  await telegram("sendMessage", {
+    chat_id: Number(incoming.chatId),
+    text: matched.target
+      ? `🧸 ${quiz.title} PDFini ${matched.target.title} guruhiga yubordim.`
+      : `🧸 ${quiz.title} uchun A4 PDF tayyor. Javob kaliti yopiq spoilerda.`,
+  });
   return true;
 }

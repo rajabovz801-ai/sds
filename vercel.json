@@ -9,11 +9,5 @@
       "maxDuration": 60,
       "excludeFiles": "{ark-writing-bot/**,.github/**}"
     }
-  },
-  "crons": [
-    {
-      "path": "/api/daily-homework-report",
-      "schedule": "0 1 * * *"
-    }
-  ]
+  }
 }
