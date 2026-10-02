@@ -75,13 +75,10 @@ export default function ChallengeReading(){
    const res=await fetch("/api/challenge-reading?action=passage&day="+day+"&id="+encodeURIComponent(p.id),{cache:"no-store"});const obj=await res.json();if(!res.ok)throw new Error(obj.error||"Unable to open");
    setPassage(obj.passage);activeId.current=p.id;
    if(obj.completed){setResult(obj.completed);setReview(obj.review||null);setTimer(initialTimer)}
-   else if(isPreview.current){
-    const base=obj.timer||initialTimer,stamp=new Date().toISOString();
-    setTimer({...base,started_at:base.started_at||stamp,resumed_at:stamp,is_running:true});
-   }else{
-    const startRes=await fetch("/api/challenge-reading",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day,passage_id:p.id})});
-    const startObj=await startRes.json();if(!startRes.ok)throw new Error(startObj.error||"Could not start Reading timer");
-    setTimer(startObj.timer||obj.timer||initialTimer);
+   else{
+    // Opening Reading starts active-study tracking only. The 20-minute test timer
+    // remains under the student's Start/Pause control.
+    setTimer(obj.timer||initialTimer);
    }
   }catch(e){setError(String(e))}finally{setBusy(false)}
  }
