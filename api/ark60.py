@@ -212,13 +212,50 @@ def get_data(request:Request, action:str="health", day:int=1):
         return center
     if action=="leaderboard":
         user=require_student(request)
-        rows=db("POST","rpc/ark60_leaderboard_snapshot",payload={})
+        period=str(request.query_params.get("period","all")).strip().lower()
+        if period not in {"week","30d","all"}:
+            raise HTTPException(status_code=400,detail="Invalid leaderboard period")
+        local_today=today()
+        start_date=None
+        if period=="week":
+            start_date=local_today-timedelta(days=local_today.weekday())
+        elif period=="30d":
+            start_date=local_today-timedelta(days=29)
+        rows=db("POST","rpc/ark60_student_leaderboard_period",payload={"p_start":str(start_date) if start_date else None})
         board=rows if isinstance(rows,list) else []
+        presence=[]
+        try:
+            presence=db("GET","ark60_presence",{"select":"student_id,last_seen_at,last_interaction_at","limit":500})
+        except HTTPException:
+            presence=[]
+        pmap={x.get("student_id"):x for x in presence}
+        stamp=now()
         current=None
         for idx,item in enumerate(board):
             item["rank"]=idx+1
-            if item.get("student_id")==user["id"]:current=item
-        return {"leaderboard":board,"current":current,"preview":user.get("username")=="rustam7"}
+            p=pmap.get(item.get("student_id")) or {}
+            seen_age=10**9
+            interaction_age=10**9
+            try:
+                if p.get("last_seen_at"):
+                    seen_age=(stamp-datetime.fromisoformat(str(p.get("last_seen_at")).replace("Z","+00:00"))).total_seconds()
+                if p.get("last_interaction_at"):
+                    interaction_age=(stamp-datetime.fromisoformat(str(p.get("last_interaction_at")).replace("Z","+00:00"))).total_seconds()
+            except (ValueError,TypeError):
+                pass
+            status="offline"
+            if seen_age<=60:
+                status="online" if interaction_age<=90 else "idle"
+            item["status"]=status
+            if item.get("student_id")==user["id"]:
+                current=item
+        return {
+            "leaderboard":board,
+            "current":current,
+            "period":period,
+            "period_start":str(start_date) if start_date else None,
+            "preview":user.get("username")=="rustam7"
+        }
 
     if action=="day":
         user=require_student(request)
