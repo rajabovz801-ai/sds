@@ -71,6 +71,7 @@ function moduleHref(day:number,name:string){
  if(name==="Article")return "/day/"+day+"/article";
  if(name==="Vocabulary")return "/day/"+day+"/vocabulary";
  if(name==="Writing")return "/day/"+day+"/writing";
+ if(name==="Speaking")return "/day/"+day+"/speaking";
  return "/day/"+day;
 }
 

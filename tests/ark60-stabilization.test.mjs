@@ -590,6 +590,11 @@ test("dashboard and day page show later days locked until previous published wor
   assert.match(day,/action=me/);
 });
 
+test("dashboard Speaking shortcuts open the Speaking task instead of returning to the day hub",()=>{
+  const dashboard=read("app/dashboard/page.tsx");
+  assert.match(dashboard,/if\(name==="Speaking"\)return "\/day\/"\+day\+"\/speaking"/);
+});
+
 
 test("Reading keeps the 20-minute passage timer manual while active study time starts on open",()=>{
   const page=read("app/day/[day]/reading/page.tsx");
