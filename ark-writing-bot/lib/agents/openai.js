@@ -148,7 +148,14 @@ correct_option_id must be an integer 0-3.`;
   }
   const parsed = parseJson(outputText(await response.json()));
   const questions = Array.isArray(parsed?.questions) ? parsed.questions : [];
-  const normalized = validateQuizQuestions(selectRequestedQuestions(questions, safeCount), safeCount).map(item => ({
+  let checked;
+  try {
+    checked = validateQuizQuestions(selectRequestedQuestions(questions, safeCount), safeCount);
+  } catch (error) {
+    const repaired = await reviewQuizContent({ title: parsed?.title || `${topic} Quiz`, level, questions, expectedCount: safeCount }, `${user}\nValidation error: ${error.message}`);
+    checked = repaired.questions;
+  }
+  const normalized = checked.map(item => ({
     question: item.question,
     options: item.options,
     correct_option_id: item.correct_option_id,
@@ -161,7 +168,8 @@ correct_option_id must be an integer 0-3.`;
   };
 }
 
-export async function reviewQuizContent(quiz, instruction = "") {
+export async function reviewQuizContent(quiz, instruction = "", attempt = 0) {
+  const expectedCount = quiz.expectedCount || quiz.questions.length;
   const response = await fetch(`${OPENAI_API}/responses`, {
     method: "POST",
     headers: {
@@ -171,7 +179,7 @@ export async function reviewQuizContent(quiz, instruction = "") {
     body: JSON.stringify({
       model: model(),
       reasoning: { effort: "medium" },
-      max_output_tokens: Math.max(1800, quiz.questions.length * 190),
+      max_output_tokens: Math.max(2200, expectedCount * 330),
       input: [
         {
           role: "system",
@@ -179,7 +187,7 @@ export async function reviewQuizContent(quiz, instruction = "") {
             "You are ARK Checker's strict academic editor for English multiple-choice quizzes.",
             "Review every question independently for grammar, spelling, level fit, exactly one correct answer, and a valid explanation.",
             "Fix small spelling/grammar errors in the question or options. Correct the answer index and explanation whenever needed.",
-            "Remove exact or near-duplicate questions. If a duplicate cannot be replaced with a clearly sound new question, set valid to false.",
+            `Return exactly ${expectedCount} distinct questions. Replace exact or near-duplicates and malformed questions with sound new questions on the same topic and level. Never just delete them.`,
             "Return only valid JSON with this shape: {\"valid\":true,\"title\":\"...\",\"questions\":[{\"question\":\"...\",\"options\":[\"...\",\"...\",\"...\",\"...\"],\"correct_option_id\":0,\"explanation\":\"...\"}]}",
             "Do not add markdown, comments, question numbering, or answer letters inside options."
           ].join("\n") }]
@@ -196,9 +204,17 @@ export async function reviewQuizContent(quiz, instruction = "") {
     const body = await response.text();
     throw new Error(`ARK Checker quiz review failed (${response.status}): ${body.slice(0, 400)}`);
   }
-  const reviewed = parseJson(outputText(await response.json()));
-  if (reviewed?.valid !== true) throw new Error("ARK Checker could not verify every quiz question");
-  const questions = randomizeCorrectAnswerPositions(validateQuizQuestions(selectRequestedQuestions(reviewed.questions, quiz.questions.length), quiz.questions.length)).map(item => ({
+  let reviewed;
+  let validated;
+  try {
+    reviewed = parseJson(outputText(await response.json()));
+    if (reviewed?.valid !== true) throw new Error("ARK Checker could not verify every quiz question");
+    validated = validateQuizQuestions(selectRequestedQuestions(reviewed.questions, expectedCount), expectedCount);
+  } catch (error) {
+    if (attempt >= 1) throw error;
+    return reviewQuizContent(quiz, `${instruction.slice(0, 500)}\nPrevious review failed validation: ${error.message}. Repair this issue and return the complete quiz.`, attempt + 1);
+  }
+  const questions = randomizeCorrectAnswerPositions(validated).map(item => ({
     question: item.question,
     options: item.options,
     correct_option_id: item.correct_option_id,
