@@ -51,6 +51,7 @@ export function LeaderboardPanel({studentId}:{studentId:string}){
 
  useEffect(()=>{
   let live=true;
+  setRows([]);setMessage("");
   async function load(silent=false){
    if(!silent)setLoading(true);
    try{
@@ -59,7 +60,7 @@ export function LeaderboardPanel({studentId}:{studentId:string}){
     if(!r.ok)throw new Error(j.detail||"Could not load leaderboard.");
     if(live){setRows(j.leaderboard||[]);setMessage("")}
    }catch(e){
-    if(live&&!rows.length)setMessage(e instanceof Error?e.message:"Could not load leaderboard.");
+    if(live)setMessage(e instanceof Error?e.message:"Could not load leaderboard.");
    }finally{
     if(live&&!silent)setLoading(false);
    }
