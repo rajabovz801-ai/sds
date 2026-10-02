@@ -20,6 +20,8 @@ ADMIN_COOKIE = "ark60_admin"
 TZ = ZoneInfo("Asia/Tashkent")
 START = date(2026, 10, 1)
 END = date(2026, 11, 29)
+STUDENT_SESSION_DAYS = 365
+SESSION_REFRESH_WINDOW = timedelta(days=60)
 MODULES = {"reading","listening","article","vocabulary","writing","speaking"}
 TARGET_BANDS = {6.0,6.5,7.0,7.5,8.0,8.5,9.0}
 
@@ -112,6 +114,20 @@ def session_user(request):
     user=db("GET","ark60_students",{"select":"id,first_name,last_name,username,target_band,status,created_at,date_of_birth,gender,english_level,exam_date","id":"eq."+rows[0]["student_id"],"limit":1})
     return user[0] if user and user[0]["status"]=="active" else None
 
+def refresh_student_session(request,response,user):
+    token=request.cookies.get(COOKIE,"")
+    if not token:return
+    rows=db("GET","ark60_sessions",{"select":"student_id,expires_at,revoked_at","token_hash":"eq."+digest(token),"limit":1})
+    if not rows or rows[0].get("revoked_at") or rows[0].get("student_id")!=user.get("id"):return
+    expires=datetime.fromisoformat(rows[0]["expires_at"].replace("Z","+00:00"))
+    if expires-now()>SESSION_REFRESH_WINDOW:return
+    renewed=now()+timedelta(days=STUDENT_SESSION_DAYS)
+    try:
+        db("PATCH","ark60_sessions",params={"token_hash":"eq."+digest(token)},payload={"expires_at":renewed.isoformat()},prefer="return=minimal")
+    except HTTPException:
+        return
+    cookie(response,COOKIE,token,days=STUDENT_SESSION_DAYS)
+
 def admin_auth(request):
     token=request.cookies.get(ADMIN_COOKIE,"")
     if not token:return None
@@ -173,7 +189,7 @@ def day_unlocked_for_user(user,day_num):
     return True
 
 @app.get("/api/ark60")
-def get_data(request:Request, action:str="health", day:int=1):
+def get_data(request:Request,response:Response, action:str="health", day:int=1):
     if action=="health":
         return {"ok":True,"backend":"python-fastapi","database_configured":bool(os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY")),"database_host":SUPABASE_URL.split("/")[2],"admin_storage_ready":bool(db("GET","ark60_admins",{"select":"id","status":"eq.active","limit":1}))}
     if action=="username_available":
@@ -188,6 +204,7 @@ def get_data(request:Request, action:str="health", day:int=1):
         return {"valid":True,"available":free,"message":"Available" if free else "Username already taken"}
     if action=="me":
         user=require_student(request)
+        refresh_student_session(request,response,user)
         rows=db("POST","rpc/ark60_student_dashboard_summary",payload={"p_student":user["id"],"p_today":str(today())})
         summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
         preview=user.get("username")=="rustam7"
@@ -494,8 +511,8 @@ async def actions(request:Request,response:Response):
         if rows[0]["status"]!="active":
             raise HTTPException(status_code=403,detail="This account is not currently active.")
         token=secrets.token_urlsafe(40)
-        db("POST","ark60_sessions",payload={"token_hash":digest(token),"student_id":rows[0]["id"],"expires_at":(now()+timedelta(days=30)).isoformat()},prefer="return=minimal")
-        cookie(response,COOKIE,token)
+        db("POST","ark60_sessions",payload={"token_hash":digest(token),"student_id":rows[0]["id"],"expires_at":(now()+timedelta(days=STUDENT_SESSION_DAYS)).isoformat()},prefer="return=minimal")
+        cookie(response,COOKIE,token,days=STUDENT_SESSION_DAYS)
         response.delete_cookie(ADMIN_COOKIE,path="/")
         clear_limit(bucket)
         return {"ok":True,"role":"student","redirect":"/dashboard","username":rows[0]["username"]}

@@ -4,6 +4,8 @@ import {ArrowRight,BookOpen,CalendarDays,CheckCircle2,Eye,EyeOff,GraduationCap,L
 
 export default function Home(){
  const [mode,setMode]=useState<"register"|"login">("register");
+ const [sessionStatus,setSessionStatus]=useState<"checking"|"signed-out"|"error">("checking");
+ const [sessionCheckKey,setSessionCheckKey]=useState(0);
  const [target,setTarget]=useState("");
  const [showPassword,setShowPassword]=useState(false);
  const [message,setMessage]=useState("");
@@ -14,6 +16,25 @@ export default function Home(){
  const [busy,setBusy]=useState(false);
  const [registeredUsername,setRegisteredUsername]=useState("");
  const [usernameState,setUsernameState]=useState<"idle"|"checking"|"available"|"taken"|"invalid">("idle");
+ useEffect(()=>{
+  let active=true;
+  async function restoreSession(){
+   setSessionStatus("checking");
+   try{
+    const student=await fetch("/api/ark60?action=me",{credentials:"same-origin",cache:"no-store"});
+    if(student.ok){window.location.replace("/dashboard");return}
+    if(student.status!==401)throw new Error("Could not verify your saved session.");
+    const admin=await fetch("/api/ark60?action=admin_me",{credentials:"same-origin",cache:"no-store"});
+    if(admin.ok){window.location.replace("/admin");return}
+    if(admin.status!==401)throw new Error("Could not verify your saved session.");
+    if(active)setSessionStatus("signed-out");
+   }catch{
+    if(active)setSessionStatus("error");
+   }
+  }
+  void restoreSession();
+  return()=>{active=false};
+ },[sessionCheckKey]);
  useEffect(()=>{
   if(mode!=="register"){setUsernameState("idle");return}
   const value=username.trim().toLowerCase();
@@ -39,6 +60,7 @@ export default function Home(){
   }catch{setMessage("Unable to contact the server. Please try again.")}
   finally{setBusy(false)}
  }
+ if(sessionStatus!=="signed-out")return <main className="auth-v2"><section className="auth-v2-center"><div className="auth-v2-intro"><span className="auth-v2-label"><Sparkles size={15}/> THE 60-DAY IELTS CHALLENGE</span><h1>{sessionStatus==="checking"?"Welcome back.":"Your session could not be checked."}</h1><p role="status">{sessionStatus==="checking"?"Checking your saved session…":"Please check your connection and try again."}</p>{sessionStatus==="error"&&<button type="button" className="auth-v2-submit" onClick={()=>setSessionCheckKey(value=>value+1)}>Try again <ArrowRight size={18}/></button>}</div></section></main>;
  return <main className="auth-v2">
   <section className="auth-v2-center">
    <div className="auth-v2-intro"><span className="auth-v2-label"><Sparkles size={15}/> THE 60-DAY IELTS CHALLENGE</span><h1>Your IELTS journey<br/><span>starts here.</span></h1><p>Build consistency, track every hour of real study and follow your own 60-day pathway to a higher band.</p></div>
