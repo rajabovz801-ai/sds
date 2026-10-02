@@ -1,5 +1,6 @@
 "use client";
 import {useEffect} from "react";
+import StudentPresence from "./student-presence";
 
 type ModuleName="reading"|"article"|"vocabulary"|"writing"|"listening"|"speaking";
 
@@ -33,5 +34,5 @@ export default function StudyTimeHeartbeat({day,module}:{day:number;module:Modul
    for(const event of events)window.removeEventListener(event,markActive);
   };
  },[day,module]);
- return null;
+ return <StudentPresence area={(module[0].toUpperCase()+module.slice(1)) as "Reading"|"Listening"|"Article"|"Vocabulary"|"Writing"|"Speaking"} day={day}/>;
 }

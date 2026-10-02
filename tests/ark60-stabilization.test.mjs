@@ -577,11 +577,12 @@ test("dashboard and day page show later days locked until previous published wor
 });
 
 
-test("Reading auto-starts its server timer when an unfinished passage opens",()=>{
+test("Reading keeps the 20-minute passage timer manual while active study time starts on open",()=>{
   const page=read("app/day/[day]/reading/page.tsx");
   const openBlock=page.slice(page.indexOf("async function openPassage"),page.indexOf("async function submit",page.indexOf("async function openPassage")));
-  assert.match(openBlock,/action:"start"/);
-  assert.match(openBlock,/setTimer\(startObj\.timer/);
+  assert.doesNotMatch(openBlock,/action:"start"/);
+  assert.match(page,/async function setRunning/);
+  assert.match(page,/StudyTimeHeartbeat day=\{day\} module="reading"/);
 });
 
 test("Reading submit remains safe for students already using an old tab without a timer row",()=>{

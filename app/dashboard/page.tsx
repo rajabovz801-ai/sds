@@ -1,6 +1,7 @@
 "use client";
 
 import AnimatedBackButton from "../components/animated-back-button";
+import StudentPresence from "../components/student-presence";
 import {LeaderboardPanel,ProfilePanel,ProgressPanel,RewardModal,type HubStats} from "../components/challenge-hub-panels";
 import {useEffect,useMemo,useState} from "react";
 import {
@@ -184,7 +185,7 @@ export default function Dashboard(){
  if(!authChecked&&!stats)return <main className="empty-view"><div className="empty-icon"><Clock3 size={28}/></div><h1>Loading your challenge…</h1><p>Checking your account and course progress.</p></main>;
  if(authChecked&&!stats&&loadError)return <main className="empty-view"><div className="empty-icon"><CircleHelp size={28}/></div><h1>Could not load your dashboard</h1><p>{loadError}</p><button type="button" onClick={()=>window.location.reload()}>Try again</button></main>;
 
- return <div className={"learning-shell "+(theme==="dark"?"theme-dark":"theme-light")}>
+ return <div className={"learning-shell "+(theme==="dark"?"theme-dark":"theme-light")}><StudentPresence area="Dashboard"/>
   <aside className={"learning-sidebar "+(sidebar?"open":"")}>
    <div className="learning-brand learning-brand-minimal"><button className="mobile-close" aria-label="Close menu" onClick={()=>setSidebar(false)}><X size={18}/></button></div>
    <div className="side-overline">WORKSPACE</div>

@@ -1,5 +1,6 @@
 "use client";
 import AnimatedBackButton from "../../components/animated-back-button";
+import StudentPresence from "../../components/student-presence";
 import ChallengeSidebar from "../../components/challenge-sidebar";
 import Link from "next/link";
 import {useParams} from "next/navigation";
@@ -50,7 +51,7 @@ export default function DayPage(){
  const available=teacher||progressUnlocked(day,progress,today);
  const modules=sunday?[regular[1],regular[0],regular[4],regular[5]]:regular;
  const dateText=date.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
- return <main className="cd-day ch-layout">
+ return <main className="cd-day ch-layout"><StudentPresence area="Day" day={day}/>
   <ChallengeSidebar day={day} active="Day"/>
   <div className="ch-page">
   <header className="cd-day-top"><AnimatedBackButton href="/dashboard" ariaLabel="Back to dashboard"/><span className="cd-day-brand">ARK <b>EDUCATION</b><i>· 60 DAY CHALLENGE</i></span><span className="cd-day-top-end"><CalendarDays size={16}/> Day {String(day).padStart(2,"0")} / 60</span></header>
