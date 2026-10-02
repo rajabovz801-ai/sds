@@ -67,7 +67,7 @@ export default function VocabularyPage(){
     setAttempt(old=>old?{...old,score:x.score,answered:x.answered,status:x.status as Attempt["status"],answers:[...old.answers,{position:index+1,selected:choice,correct_index:x.correct_index,correct:x.correct}]}:old);
     setFeedback(null);lock.current=false;
     if(x.answered===20){setPanel("result");if(!preview)void load();}
-   },x.correct?700:1150);
+   },700);
   }catch(e){lock.current=false;setError(String(e))}
  }
  async function back(){
