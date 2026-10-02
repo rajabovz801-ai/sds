@@ -1,6 +1,6 @@
 import { sendDocument, sendMessage, telegram } from "../telegram.js";
 import { generateQuiz, reviewQuizContent } from "./openai.js";
-import { formatSpoilerAnswerKey, parseRequestedQuestionCount } from "./material-standards.mjs";
+import { formatSpoilerAnswerKey, parseRequestedQuestionCount, requestsExternalGroup } from "./material-standards.mjs";
 import { renderQuizPdf } from "./quiz-pdf.mjs";
 
 const STORE_URL = "https://svdigxqdivcmljirjwhk.supabase.co/functions/v1/ark-agent-store";
@@ -162,7 +162,7 @@ export async function tryHandleQuizRequest(incoming) {
   const draft = await generateQuiz({ topic: quizTopic(text), level, count, language: "English", instruction: text });
   const quiz = await reviewQuizContent(draft, text);
   const total = quiz.questions.length;
-  const wantsGroup = /(guruh|group)/i.test(text) && /(yubor|jo['‘]?nat|send|tashla)/i.test(text);
+  const wantsGroup = requestsExternalGroup(text);
   const matched = wantsGroup ? await matchTarget(text) : { target: null, targets: [], ambiguous: false };
   if (wantsGroup && !matched.target) {
     const names = matched.targets.slice(0, 8).map(item => `• ${item.title}`).join("\n");

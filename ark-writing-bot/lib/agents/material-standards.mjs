@@ -86,3 +86,8 @@ export function formatSpoilerAnswerKey(quiz) {
   const answers = questions.map((question, index) => `${index + 1}-${String.fromCharCode(65 + Number(question.correct_option_id))}`);
   return `🔐 Javoblar: <tg-spoiler>${answers.join(" • ")}</tg-spoiler>`;
 }
+
+export function requestsExternalGroup(text = "") {
+  const externalInstruction = String(text).replace(/\b(?:shu|ushbu|hozirgi|this|current)\s+(?:(?:staff|ai\s+staff)\s+)?(?:guruh|group|chat)(?:ga|iga)?\b/ig, "");
+  return /(guruh|group)/i.test(externalInstruction) && /(yubor|jo['‘]?nat|send|tashla)/i.test(externalInstruction);
+}
