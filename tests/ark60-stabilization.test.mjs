@@ -489,9 +489,9 @@ test("Day 2 Listening uses Test 207, supplied MP3, map, and official answer key"
   assert.match(migration,/IELTS Listening Test 207/);
   assert.match(migration,/TEST%20207\.mp3/);
   assert.match(migration,/test207-melby-coal-mine\.svg/);
-  assert.match(migration,/"15":\["F"\]/);
-  assert.match(migration,/"31":\["pollution"\]/);
-  assert.match(migration,/"25-26":\{"questions":\[25,26\],"correct":\["A","C"\]\}/);
+  assert.match(migration,/"15"\s*:\s*\[\s*"F"\s*\]/);
+  assert.match(migration,/"31"\s*:\s*\[\s*"pollution"\s*\]/);
+  assert.match(migration,/"25-26"\s*:\s*\{[\s\S]*?"questions"\s*:\s*\[\s*25\s*,\s*26\s*\][\s\S]*?"correct"\s*:\s*\[\s*"A"\s*,\s*"C"\s*\]/);
   assert.match(page,/block\.image_url/);
   assert.match(page,/String\(day\)\.padStart\(2,"0"\)/);
 });
