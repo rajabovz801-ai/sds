@@ -116,7 +116,46 @@ function attemptForClient(content:AnyObj,attempt:AnyObj|null){
 export async function GET(req:NextRequest){
  try{
   const url=new URL(req.url),action=url.searchParams.get("action")||"day";
-  const day=Number(url.searchParams.get("day")||DAY);
+  const requestedDay=Number(url.searchParams.get("day")||DAY);
+  const db=getServiceSupabase();
+
+  if(action==="admin_list"){
+   const admin=await getAdmin(req);if(!admin)return json({detail:"Admin sign-in required."},401);
+   const {data:allAttempts,error:allError}=await db.from("ark60_listening_attempts")
+    .select("id,student_id,day_number,status,submitted_at,elapsed_seconds,part_scores,score,band")
+    .eq("status","submitted").order("submitted_at",{ascending:false}).limit(500);
+   if(allError)throw allError;
+   const allRows=allAttempts||[];
+   const dayNumbers=[...new Set(allRows.map(r=>Number(r.day_number)).filter(Boolean))].sort((a,b)=>a-b);
+   const contentRows=dayNumbers.length?(await db.from("ark60_content").select("day_number,title").eq("module",MODULE).eq("status","published").in("day_number",dayNumbers)).data||[]:[];
+   const titleMap=new Map(contentRows.map((r:any)=>[Number(r.day_number),String(r.title||"Listening")]));
+   const requested=Number.isInteger(requestedDay)&&requestedDay>=1&&requestedDay<=60?requestedDay:(dayNumbers[0]||DAY);
+   const rows=allRows.filter(r=>Number(r.day_number)===requested);
+   const ids=[...new Set(allRows.map(r=>r.student_id))];
+   let students:any[]=[];
+   if(ids.length){const people=await db.from("ark60_students").select("id,first_name,last_name,username").in("id",ids);if(people.error)throw people.error;students=people.data||[]}
+   const byId=new Map(students.filter(s=>String(s.username||"").toLowerCase()!=="rustam7").map(s=>[s.id,s]));
+   const available_days=dayNumbers.map(day_number=>({
+    day_number,title:titleMap.get(day_number)||("Listening Day "+day_number),
+    submission_count:allRows.filter(r=>Number(r.day_number)===day_number&&byId.has(r.student_id)).length
+   })).filter(x=>x.submission_count>0);
+   return json({available_days,selected_day:requested,submissions:rows.filter(r=>byId.has(r.student_id)).map(r=>({...r,student:byId.get(r.student_id)}))});
+  }
+
+  if(action==="admin_detail"){
+   const admin=await getAdmin(req);if(!admin)return json({detail:"Admin sign-in required."},401);
+   const id=String(url.searchParams.get("id")||"");
+   const {data:attempt,error}=await db.from("ark60_listening_attempts").select("*").eq("id",id).eq("status","submitted").maybeSingle();
+   if(error||!attempt)return json({detail:"Listening result not found."},404);
+   const content=await getContent(Number(attempt.day_number));
+   if(!content)return json({detail:"Listening material has not been published yet."},404);
+   const {data:student}=await db.from("ark60_students").select("id,first_name,last_name,username").eq("id",attempt.student_id).maybeSingle();
+   if(String(student?.username||"").toLowerCase()==="rustam7")return json({detail:"Listening result not found."},404);
+   const graded=grade(content.payload,attempt.answers||{});
+   return json({submission:{...attempt,student,review:graded.review,content:{title:content.title,payload:safePayload(content.payload)}}});
+  }
+
+  const day=requestedDay;
   if(day!==DAY){
    if(action==="availability")return json({published:false});
    return json({detail:"Listening is not published for this day yet."},404);
@@ -124,28 +163,6 @@ export async function GET(req:NextRequest){
   const content=await getContent(day);
   if(action==="availability")return json({published:!!content,title:content?.title||""});
   if(!content)return json({detail:"Listening material has not been published yet."},404);
-  const db=getServiceSupabase();
-
-  if(action==="admin_list"){
-   const admin=await getAdmin(req);if(!admin)return json({detail:"Admin sign-in required."},401);
-   const {data,error}=await db.from("ark60_listening_attempts").select("id,student_id,day_number,status,submitted_at,elapsed_seconds,part_scores,score,band").eq("status","submitted").order("submitted_at",{ascending:false}).limit(400);
-   if(error)throw error;
-   const rows=data||[],ids=[...new Set(rows.map(r=>r.student_id))];
-   let students:any[]=[];
-   if(ids.length){const s=await db.from("ark60_students").select("id,first_name,last_name,username").in("id",ids);if(s.error)throw s.error;students=s.data||[]}
-   const byId=new Map(students.filter(s=>String(s.username||"").toLowerCase()!=="rustam7").map(s=>[s.id,s]));
-   return json({submissions:rows.filter(r=>byId.has(r.student_id)).map(r=>({...r,student:byId.get(r.student_id)}))});
-  }
-  if(action==="admin_detail"){
-   const admin=await getAdmin(req);if(!admin)return json({detail:"Admin sign-in required."},401);
-   const id=String(url.searchParams.get("id")||"");
-   const {data:attempt,error}=await db.from("ark60_listening_attempts").select("*").eq("id",id).eq("status","submitted").maybeSingle();
-   if(error||!attempt)return json({detail:"Listening result not found."},404);
-   const {data:student}=await db.from("ark60_students").select("id,first_name,last_name,username").eq("id",attempt.student_id).maybeSingle();
-   if(String(student?.username||"").toLowerCase()==="rustam7")return json({detail:"Listening result not found."},404);
-   const graded=grade(content.payload,attempt.answers||{});
-   return json({submission:{...attempt,student,review:graded.review,content:{title:content.title,payload:safePayload(content.payload)}}});
-  }
 
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
   if(!(await isDayUnlocked(day,student)))return json({detail:"This Listening task is not available yet."},403);
