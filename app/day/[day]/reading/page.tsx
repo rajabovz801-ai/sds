@@ -1,6 +1,7 @@
 "use client";
 import AnimatedBackButton from "../../../components/animated-back-button";
 import ChallengeSidebar from "../../../components/challenge-sidebar";
+import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {useParams} from "next/navigation";
 import {useEffect,useRef,useState} from "react";
 import {BookOpen,CheckCircle2,LockKeyhole,ChevronRight,Clock3,Highlighter,Send,Play,Pause,Maximize2,Minimize2,Eraser} from "lucide-react";
@@ -101,6 +102,7 @@ export default function ChallengeReading(){
  const rows=passage?.text.replace(/\\n\\n/g,"\n\n").split(/\n\s*\n/).filter(p=>p.trim().length>8)||[];
  async function continueAfterReview(){const next=items.find(p=>p.ordinal===2);if(passage?.ordinal===1&&next&&!next.locked){await openPassage(next)}else await goBack()}
  return <main className={"cr-shell "+(!passage?"cr-overview":"")}>
+  {passage&&!result&&<StudyTimeHeartbeat day={day} module="reading"/>}
   {!passage&&<ChallengeSidebar day={day} active="Reading"/>}
   <header className="cr-header">
    <div className="cr-head-start">{passage?<AnimatedBackButton onClick={goBack} ariaLabel="Back to passages"/>:<AnimatedBackButton href={"/day/"+day} ariaLabel="Back to study day"/>}</div>
