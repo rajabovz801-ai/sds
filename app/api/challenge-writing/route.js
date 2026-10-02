@@ -109,26 +109,46 @@ export async function GET(request) {
   if (action === "admin_list") {
     const admin = await adminFromRequest(request);
     if (!admin) return json({ detail: "Admin sign-in required." }, 401);
-    const { data: submissions, error } = await supabase
+    const cutoff = new Date(Date.now() - 72*60*60*1000).toISOString();
+    const requestedDay = Number(url.searchParams.get("day") || 0);
+    let query = supabase
       .from("ark60_submissions")
       .select("id,student_id,day_number,payload,submitted_at,band,review_status,review_feedback,reviewed_at")
       .eq("module", "writing")
+      .gte("submitted_at", cutoff)
       .order("submitted_at", { ascending: false })
       .limit(500);
+    if (Number.isInteger(requestedDay) && requestedDay >= 1 && requestedDay <= 60) query = query.eq("day_number", requestedDay);
+    const { data: submissions, error } = await query;
     if (error) return json({ detail: "Could not load writing submissions." }, 500);
     const ids = [...new Set((submissions || []).map((row) => row.student_id))];
+    const days = [...new Set((submissions || []).map((row) => row.day_number))];
     let students = [];
+    let studyRows = [];
     if (ids.length) {
-      const result = await supabase.from("ark60_students").select("id,first_name,last_name,username").in("id", ids);
-      students = result.data || [];
+      const [peopleResult, studyResult] = await Promise.all([
+        supabase.from("ark60_students").select("id,first_name,last_name,username").in("id", ids),
+        days.length
+          ? supabase.from("ark60_study_sessions").select("student_id,day_number,active_seconds").eq("module","writing").in("student_id",ids).in("day_number",days)
+          : Promise.resolve({data:[]})
+      ]);
+      students = peopleResult.data || [];
+      studyRows = studyResult.data || [];
     }
-    const people = new Map(students.map((s) => [s.id, s]));
-    return json({
-      admin,
-      submissions: (submissions || [])
-        .filter((row) => String(people.get(row.student_id)?.username || "").toLowerCase() !== PREVIEW_USERNAME)
-        .map((row) => ({ ...row, student: people.get(row.student_id) || null })),
-    });
+    const people = new Map(students.map((student) => [student.id, student]));
+    const active = new Map();
+    for (const row of studyRows) {
+      const key = row.student_id + ":" + row.day_number;
+      active.set(key, (active.get(key) || 0) + Number(row.active_seconds || 0));
+    }
+    const rows = (submissions || [])
+      .filter((row) => String(people.get(row.student_id)?.username || "").toLowerCase() !== PREVIEW_USERNAME)
+      .map((row) => ({
+        ...row,
+        active_writing_seconds: active.get(row.student_id + ":" + row.day_number) || 0,
+        student: people.get(row.student_id) || null
+      }));
+    return json({ admin, submissions: rows });
   }
 
   if (action === "notifications") {
