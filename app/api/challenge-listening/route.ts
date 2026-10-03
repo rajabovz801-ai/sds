@@ -170,6 +170,7 @@ export async function GET(req:NextRequest){
   }
   const content=await getContent(day);
   if(action==="availability")return json({published:!!content,title:content?.title||""});
+  if(day===4)return json({detail:"Use the Full Mock flow for Day 4."},409);
   if(!content)return json({detail:"Listening material has not been published yet."},404);
 
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
@@ -189,6 +190,7 @@ export async function POST(req:NextRequest){
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
   const body=await req.json().catch(()=>null);if(!body||typeof body!=="object")return json({detail:"Invalid request body."},400);
   const day=Number(body.day||DAY);if(!Number.isInteger(day)||day<1||day>60||!(await isDayUnlocked(day,student)))return json({detail:"This Listening task is unavailable."},403);
+  if(day===4)return json({detail:"Use the Full Mock flow for Day 4."},409);
   const content=await getContent(day);if(!content)return json({detail:"Listening material has not been published yet."},404);
   const action=String(body.action||"");
   const db=getServiceSupabase();
