@@ -67,7 +67,7 @@
 .aa-mark-menu button{width:35px;height:32px;display:grid;place-items:center;cursor:pointer;border:0;background:#fff;border-radius:7px}
 .aa-mark-menu button:hover{background:#f7f5fd}.aa-mark-menu i{display:block;width:23px;height:19px;border-radius:4px}
 .aa-mark-menu .yellow{background:#ffe785}.aa-mark-menu .green{background:#b5f0cd}
-::highlight(aa-yellow){background:#ffe785;color:inherit}::highlight(aa-green){background:#b5f0cd;color:inherit}
+
 .aa-mobile-tabs{display:none}.aa-loading{margin:60px auto;max-width:420px;padding:28px;border-radius:14px;background:#fff;border:1px solid #e9e7f0;text-align:center}
 @keyframes aa-pop{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:850px){

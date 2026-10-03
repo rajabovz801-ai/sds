@@ -2,4 +2,4 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 export const metadata:Metadata={title:"ARK IELTS · 60 Day Challenge",description:"ARK Education IELTS 60-day learning platform",robots:{index:false,follow:false}};
 export const viewport:Viewport={width:"device-width",initialScale:1,viewportFit:"cover"};
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body>{children}</body></html>}
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><head><link rel="stylesheet" href="/ark-highlight-api.css"/></head><body>{children}</body></html>}
