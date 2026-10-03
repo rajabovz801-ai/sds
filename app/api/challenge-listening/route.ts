@@ -34,7 +34,7 @@ function buildChoiceMap(payload:AnyObj){
    }else if(block.kind==="matching"){
     const allowed=new Set(Object.keys(block.choices||{}));
     for(const q of block.items||[])map.set(Number(q.q),allowed);
-   }else if(block.kind==="choose_two"){
+   }else if(block.kind==="choose_two"||block.kind==="choose_many"){
     const allowed=new Set(Object.keys(block.options||{}));
     for(const q of block.questions||[])map.set(Number(q),allowed);
    }
