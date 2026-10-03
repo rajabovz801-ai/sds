@@ -1,0 +1,4 @@
+/* Native CSS Custom Highlight API rules are kept outside Next's CSS transform. */
+::highlight(aa-yellow){background:#ffe785;color:inherit}
+::highlight(aa-green){background:#b5f0cd;color:inherit}
+::highlight(ark-listening-yellow){background:#ffe58a;color:inherit}

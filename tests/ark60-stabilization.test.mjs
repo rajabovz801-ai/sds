@@ -518,7 +518,8 @@ test("Listening restores readable exam typography and boxed gap-fill fields",()=
 test("Listening uses the same native highlight engine as the working Reading test",()=>{
   const reading=read("app/day/[day]/reading/page.tsx");
   const page=read("app/day/[day]/listening/page.tsx");
-  const css=read("app/day/[day]/listening/listening.css");
+  const css=read("public/ark-highlight-api.css");
+  const layout=read("app/layout.tsx");
   assert.match(reading,/window\.CSS\?\.highlights/);
   assert.match(reading,/new Highlight\(/);
   assert.match(page,/window\.CSS\?\.highlights/);
@@ -528,7 +529,8 @@ test("Listening uses the same native highlight engine as the working Reading tes
   assert.match(page,/onMouseUp=\{showHighlightMenu\}/);
   assert.match(page,/onTouchEnd=\{\(\)=>setTimeout\(showHighlightMenu,100\)\}/);
   assert.match(page,/\.ls-qnum,input,textarea,select,button,\.ls-bottom-nav,\.ls-topbar/);
-  assert.match(css,/::highlight\(ark-listening-yellow\)\{[\s\S]*background:#ffe58a;[\s\S]*color:inherit;/);
+  assert.match(layout,/\/ark-highlight-api\.css/);
+  assert.match(css,/::highlight\(ark-listening-yellow\)\{[\s\S]*background:#ffe58a;?[\s\S]*color:inherit/);
 });
 
 

@@ -191,10 +191,7 @@
 }
 
 /* Native CSS Custom Highlight API: paints text only, never changes DOM geometry. */
-::highlight(listening-yellow){
- background:#fff176;
- color:inherit;
-}
+
 .ls-highlight,
 .ls-highlight-yellow,
 .ls-highlight-mint{background:transparent!important}
@@ -299,7 +296,7 @@
  line-height:inherit!important;
  box-shadow:none!important;
 }
-::highlight(listening-yellow){background:transparent;color:inherit}
+
 .ls-highlight-yellow,.ls-highlight-mint{background:transparent!important}
 
 @media(max-width:720px){
@@ -367,10 +364,7 @@
 
 
 /* Reading-parity highlight: same native engine and paint rule as the working Reading test. */
-::highlight(ark-listening-yellow){
- background:#ffe58a;
- color:inherit;
-}
+
 
 /* Keep the active Listening paper genuinely left aligned on desktop. */
 .ls-instruction,
