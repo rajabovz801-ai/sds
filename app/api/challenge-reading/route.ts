@@ -80,6 +80,7 @@ export async function GET(req:NextRequest){
  const rows=await catalogue(day);const attempts=user.username===previewName?[]:await completed(String(user.id),day);
  if(action==="list")return NextResponse.json({day,preview:user.username===previewName,passages:rows.filter((r:J)=>r.status==="published").map((r:J)=>({id:r.id,ordinal:r.ordinal,title:r.title,completed:attempts.find((a:J)=>a.passage_id===r.id)||null,locked:r.ordinal===2&&user.username!==previewName&&!attempts.some((a:J)=>a.ordinal===1)})),draft_count:rows.filter((r:J)=>r.status==="draft").length});
  if(action!=="passage")return err("Unknown action",404);
+ if(day===4)return err("Use the Full Mock flow for Day 4.",409);
  const id=url.searchParams.get("id")||"";if(!idValid(id))return err("Invalid passage");
  const meta=rows.find((r:J)=>r.id===id&&r.status==="published");if(!meta)return err("Passage not published",404);
  if(meta.ordinal===2&&user.username!==previewName&&!attempts.some((a:J)=>a.ordinal===1))return err("Finish the first passage to unlock this one",403);
@@ -103,6 +104,7 @@ export async function POST(req:NextRequest){
  const origin=req.headers.get("origin");if(origin&&origin!==new URL(req.url).origin)return err("Invalid origin",403);
  const user=await viewer(req);if(!user)return err("Please sign in",401);
  const b=await req.json();const day=Number(b.day),id=String(b.passage_id||"");
+ if(day===4)return err("Use the Full Mock flow for Day 4.",409);
  if(!(await isDayUnlocked(day,user as any))||!idValid(id))return err("Invalid day or passage",403);
  const row=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,questions,answer_key,analysis,status&id=eq."+id+"&day_number=eq."+day+"&status=eq.published&limit=1"))[0];
  if(!row)return err("Passage unavailable",404);
