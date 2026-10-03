@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760" role="img" aria-labelledby="t d">
+<title id="t">Store plan — Volume 10 Test 2</title>
+<desc id="d">Electronics store plan used for Listening Questions 1–3, with locations A to F and the example Keyboards at B.</desc>
+<rect width="1000" height="760" fill="#fff"/>
+<text x="28" y="42" font-family="Arial,sans-serif" font-size="25" font-style="italic">Keyboards</text>
+<text x="330" y="42" font-family="Arial,sans-serif" font-size="25" font-style="italic">……B……</text>
+<g transform="translate(75 120)" stroke="#222" stroke-width="3" fill="none">
+  <path d="M40 185H300V70H495V88H590V70H820V485H555V455H425V485H40Z" fill="#fde5e8" stroke="#bc5264" stroke-width="20"/>
+  <path d="M40 185H300V70H495V88H590V70H820V485H555V455H425V485H40Z" fill="#fff8ef" stroke="#222" stroke-width="3"/>
+  <rect x="65" y="205" width="90" height="105"/><text x="101" y="264" fill="#111" stroke="none" font-family="Arial" font-size="24" font-weight="700">E</text>
+  <rect x="65" y="310" width="90" height="94"/><text x="101" y="366" fill="#111" stroke="none" font-family="Arial" font-size="24" font-weight="700">D</text>
+  <rect x="65" y="404" width="205" height="62"/><text x="81" y="431" fill="#111" stroke="none" font-family="Arial" font-size="18" font-weight="700">VIDEO</text><text x="81" y="453" fill="#111" stroke="none" font-family="Arial" font-size="18" font-weight="700">RECORDERS</text>
+  <rect x="155" y="205" width="170" height="84"/><text x="196" y="256" fill="#111" stroke="none" font-family="Arial" font-size="20" font-weight="700">VIDEOS</text>
+  <rect x="270" y="404" width="145" height="62"/><text x="336" y="443" fill="#111" stroke="none" font-family="Arial" font-size="24" font-weight="700">C</text>
+  <rect x="320" y="90" width="178" height="68"/><text x="399" y="133" fill="#111" stroke="none" font-family="Arial" font-size="24" font-weight="700">F</text>
+  <rect x="705" y="82" width="95" height="125"/><text x="727" y="151" fill="#111" stroke="none" font-family="Arial" font-size="20" font-weight="700">TVs</text>
+  <rect x="705" y="207" width="95" height="112"/><text x="744" y="270" fill="#111" stroke="none" font-family="Arial" font-size="24" font-weight="700">A</text>
+  <rect x="705" y="319" width="95" height="147"/><text x="744" y="397" fill="#111" stroke="none" font-family="Arial" font-size="24" font-weight="700">B</text>
+  <rect x="610" y="165" width="44" height="165"/><text x="634" y="244" fill="#111" stroke="none" font-family="Arial" font-size="18" font-weight="700" transform="rotate(90 634 244)">CDs</text>
+  <text x="445" y="280" text-anchor="middle" fill="#111" stroke="none" font-family="Arial" font-size="28" font-weight="700">SALES</text>
+  <text x="445" y="312" text-anchor="middle" fill="#111" stroke="none" font-family="Arial" font-size="28" font-weight="700">AREA</text>
+  <path d="M510 100V58" stroke="#222" stroke-width="3"/><path d="M500 70L510 58l10 12" stroke="#222" stroke-width="3"/>
+  <text x="510" y="38" text-anchor="middle" fill="#111" stroke="none" font-family="Arial" font-size="18" font-weight="700">To</text>
+  <text x="510" y="58" text-anchor="middle" fill="#111" stroke="none" font-family="Arial" font-size="18" font-weight="700">Stockroom</text>
+  <path d="M445 485V444" stroke="#222" stroke-width="3"/><path d="M435 456L445 444l10 12" stroke="#222" stroke-width="3"/>
+  <text x="445" y="510" text-anchor="middle" fill="#111" stroke="none" font-family="Arial" font-size="18" font-weight="700">Entrance</text>
+  <text x="445" y="565" text-anchor="middle" fill="#111" stroke="none" font-family="Arial" font-size="27" font-weight="700">STREET</text>
+  <path d="M570 455l-32-32M570 455v30" stroke="#222" stroke-width="3"/>
+  <path d="M590 88l-32-32M590 88v-18" stroke="#222" stroke-width="3"/>
+  <rect x="565" y="485" width="95" height="20" fill="#fff" stroke="#222"/><rect x="300" y="485" width="70" height="20" fill="#fff" stroke="#222"/>
+</g>
+<g transform="translate(760 625)" font-family="Arial,sans-serif">
+ <rect width="205" height="105" fill="#fff6f7" stroke="#222" stroke-width="2"/>
+ <text x="130" y="28" font-size="18" font-weight="700">Key</text>
+ <path d="M28 25l34 34" stroke="#222" stroke-width="3"/><text x="130" y="55" font-size="16">Doors</text>
+ <rect x="24" y="70" width="55" height="13" fill="#fff" stroke="#222" stroke-width="2"/><text x="130" y="83" font-size="16">Windows</text>
+</g>
+</svg>
