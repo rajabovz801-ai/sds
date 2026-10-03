@@ -40,8 +40,12 @@ export const isPreview=(s:Student)=>s.username.toLowerCase()==="rustam7";
 export function todayInTashkent(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tashkent",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
 export function isDayOpen(n:number,user:Student){
  if(!Number.isInteger(n)||n<1||n>60)return false;
+ if(isPreview(user))return true;
+ // Day 4 is the live Full Mock event: 10:00 Asia/Tashkent on 4 Oct 2026 = 05:00 UTC.
+ // Keep direct section URLs locked before the event start, not only the calendar UI.
+ if(n===4&&Date.now()<Date.UTC(2026,9,4,5,0,0))return false;
  const iso=new Date(Date.UTC(2026,9,n)).toISOString().slice(0,10);
- return isPreview(user)||iso<=todayInTashkent();
+ return iso<=todayInTashkent();
 }
 export async function isDayUnlocked(n:number,user:Student){
  if(!isDayOpen(n,user))return false;
