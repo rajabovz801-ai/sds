@@ -34,8 +34,7 @@ const regular:ModuleCard[]=[
 const mockModules:ModuleCard[]=[
  {name:"Listening",detail:"4 sections · 40 questions",icon:Headphones,tone:"blue",time:"~30 min"},
  {name:"Reading",detail:"3 passages · 40 questions",icon:BookOpen,tone:"purple",time:"60 min"},
- {name:"Writing",detail:"Task 1 + Task 2",icon:PenLine,tone:"orange",time:"60 min"},
- {name:"Speaking",detail:"Parts 1–3 · recorded",icon:Mic,tone:"pink",time:"11–14 min"}
+ {name:"Writing",detail:"Task 1 + Task 2",icon:PenLine,tone:"orange",time:"60 min"}
 ];
 
 const format=(date:Date,opt:Intl.DateTimeFormatOptions)=>date.toLocaleDateString("en-GB",{timeZone:"UTC",...opt});
