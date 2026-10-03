@@ -34,8 +34,7 @@ const regular:ModuleCard[]=[
 const mockModules:ModuleCard[]=[
  {name:"Listening",detail:"4 sections · 40 questions",icon:Headphones,tone:"blue",time:"~30 min"},
  {name:"Reading",detail:"3 passages · 40 questions",icon:BookOpen,tone:"purple",time:"60 min"},
- {name:"Writing",detail:"Task 1 + Task 2",icon:PenLine,tone:"orange",time:"60 min"},
- {name:"Speaking",detail:"Parts 1–3 · recorded",icon:Mic,tone:"pink",time:"11–14 min"}
+ {name:"Writing",detail:"Task 1 + Task 2",icon:PenLine,tone:"orange",time:"60 min"}
 ];
 
 const format=(date:Date,opt:Intl.DateTimeFormatOptions)=>date.toLocaleDateString("en-GB",{timeZone:"UTC",...opt});
@@ -43,10 +42,11 @@ function tashkentDate(){
  return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tashkent",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 }
 function unlocked(d:Day,today:string){return d.date.toISOString().slice(0,10)<=today}
-function progressUnlocked(day:number,stats:StudentStats|null,today:string){
+function progressUnlocked(day:number,stats:StudentStats|null,today:string,now=Date.now()){
  const target=DAYS[day-1];
  if(!target||!stats)return false;
  if(stats.preview)return true;
+ if(day===4&&now<Date.UTC(2026,9,4,5,0,0))return false;
  if(!unlocked(target,today))return false;
  for(let prior=1;prior<day;prior+=1){
   const required=stats.required_by_day?.[String(prior)]||[];
@@ -66,6 +66,7 @@ function modulesFor(day:Day){
  }:x);
 }
 function moduleHref(day:number,name:string){
+ if(day===4)return "/day/4/mock";
  if(name==="Reading")return "/day/"+day+"/reading";
  if(name==="Listening")return "/day/"+day+"/listening";
  if(name==="Article")return "/day/"+day+"/article";
@@ -77,6 +78,7 @@ function moduleHref(day:number,name:string){
 
 export default function Dashboard(){
  const [today,setToday]=useState("2026-09-30");
+ const [clock,setClock]=useState(Date.now());
  const [selected,setSelected]=useState(1);
  const [view,setView]=useState("Dashboard");
  const [sidebar,setSidebar]=useState(false);
@@ -122,7 +124,7 @@ export default function Dashboard(){
  useEffect(()=>{localStorage.setItem("ark60-theme",theme)},[theme]);
 
  useEffect(()=>{
-  const tick=()=>setToday(tashkentDate());
+  const tick=()=>{setToday(tashkentDate());setClock(Date.now())};
   tick();
   const id=window.setInterval(tick,60000);
   return()=>window.clearInterval(id);
@@ -168,10 +170,10 @@ export default function Dashboard(){
  const planRequired=stats?.required_by_day?.[String(planDayNumber)]||[];
  const planModules=modulesFor(planDay).filter(x=>planRequired.includes(x.name.toLowerCase()));
  const planDone=stats?planRequired.filter(module=>stats.completed.some(x=>x.day_number===planDayNumber&&x.module===module)).length:0;
- const planLive=progressUnlocked(planDayNumber,stats,today);
+ const planLive=progressUnlocked(planDayNumber,stats,today,clock);
 
  const chosen=DAYS[selected-1];
- const live=progressUnlocked(chosen.n,stats,today);
+ const live=progressUnlocked(chosen.n,stats,today,clock);
  const chosenRequired=stats?.required_by_day?.[String(chosen.n)]||[];
  const display=useMemo(()=>modulesFor(chosen),[chosen]);
  const moduleReady=(name:string)=>chosenRequired.includes(name.toLowerCase());
@@ -268,7 +270,7 @@ export default function Dashboard(){
          const required=stats?.required_by_day?.[String(d.n)]||[];
          const cells=modulesFor(d);
          return <button key={d.n} className={"cal-cell "+(d.mock?"sunday ":"")+(selected===d.n?"selected ":"")+(today===d.date.toISOString().slice(0,10)?"is-today ":"")} onClick={()=>setSelected(d.n)} aria-label={"Day "+d.n+" "+format(d.date,{day:"numeric",month:"long"})+(d.mock?" Full Mock":"")}>
-          <span className="cal-upper"><span>Day {d.n}</span>{progressUnlocked(d.n,stats,today)?<CheckCircle2 size={11}/>:<LockKeyhole size={11}/>}</span>
+          <span className="cal-upper"><span>Day {d.n}</span>{progressUnlocked(d.n,stats,today,clock)?<CheckCircle2 size={11}/>:<LockKeyhole size={11}/>}</span>
           <b>{format(d.date,{day:"numeric",month:"short"})}</b>
           <div className="cal-dots">{cells.map((m,i)=><i key={i} className={required.includes(m.name.toLowerCase())?m.tone:"muted"}/>)}</div>
           {d.mock&&<small className="mock-label">FULL MOCK</small>}
