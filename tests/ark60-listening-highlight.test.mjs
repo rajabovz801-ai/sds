@@ -26,6 +26,6 @@ test("Listening highlight fix does not alter answer autosave or submission flow"
  assert.ok(daily.includes('queueSave(next)'));
  assert.ok(daily.includes('action:"save"'));
  assert.ok(daily.includes('action:"submit"'));
- assert.ok(mock.includes('action:"save_listening"'));
+ assert.ok(mock.includes('action:"save_"+kind'));
  assert.ok(mock.includes('action:"submit_listening"'));
 });
