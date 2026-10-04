@@ -90,36 +90,111 @@ function gradeReading(passages:Obj[],answers:Record<string,string>){
 function roundHalf(v:number){return Math.round(v*2)/2}
 function overall3(l:number,r:number,w:number){return roundHalf((l+r+w)/3)}
 
+const WRITING_SCHEMA={
+ type:"object",
+ additionalProperties:false,
+ properties:{
+  task1:{
+   type:"object",additionalProperties:false,
+   properties:{
+    task_achievement:{type:"number"},
+    coherence_cohesion:{type:"number"},
+    lexical_resource:{type:"number"},
+    grammar:{type:"number"},
+    band:{type:"number"},
+    feedback:{type:"string"}
+   },
+   required:["task_achievement","coherence_cohesion","lexical_resource","grammar","band","feedback"]
+  },
+  task2:{
+   type:"object",additionalProperties:false,
+   properties:{
+    task_response:{type:"number"},
+    coherence_cohesion:{type:"number"},
+    lexical_resource:{type:"number"},
+    grammar:{type:"number"},
+    band:{type:"number"},
+    feedback:{type:"string"}
+   },
+   required:["task_response","coherence_cohesion","lexical_resource","grammar","band","feedback"]
+  },
+  writing_band:{type:"number"},
+  summary:{type:"string"}
+ },
+ required:["task1","task2","writing_band","summary"]
+};
+
+function responseOutputText(obj:any){
+ if(typeof obj?.output_text==="string"&&obj.output_text.trim())return obj.output_text.trim();
+ return (Array.isArray(obj?.output)?obj.output:[])
+  .flatMap((item:any)=>Array.isArray(item?.content)?item.content:[])
+  .filter((part:any)=>part?.type==="output_text"&&typeof part?.text==="string")
+  .map((part:any)=>part.text)
+  .join("")
+  .trim();
+}
+function clampBand(v:any){return roundHalf(Math.max(0,Math.min(9,Number(v)||0)))}
+function normalizeAssessment(parsed:any){
+ const out={...parsed,task1:{...(parsed?.task1||{})},task2:{...(parsed?.task2||{})}};
+ for(const k of ["task_achievement","coherence_cohesion","lexical_resource","grammar","band"])out.task1[k]=clampBand(out.task1[k]);
+ for(const k of ["task_response","coherence_cohesion","lexical_resource","grammar","band"])out.task2[k]=clampBand(out.task2[k]);
+ out.writing_band=roundHalf((Number(out.task1.band)+Number(out.task2.band)*2)/3);
+ out.task1.feedback=String(out.task1.feedback||"").slice(0,1200);
+ out.task2.feedback=String(out.task2.feedback||"").slice(0,1200);
+ out.summary=String(out.summary||"").slice(0,1600);
+ return out;
+}
+
 async function gradeWriting(task1:string,task2:string,content:Obj){
  const key=process.env.OPENAI_API_KEY||"";
  if(!key)return {ok:false,error:"OpenAI API key is not configured yet."};
  const model=process.env.OPENAI_WRITING_MODEL||"gpt-5-mini";
  const tasks=Array.isArray(content.tasks)?content.tasks:[];
  const t1=tasks[0]||{},t2=tasks[1]||{};
- const prompt=`You are an IELTS Academic Writing examiner. Assess both responses using official IELTS-style band descriptors. Be strict and evidence-based.
-Task 1 prompt:
+ const prompt=`You are an IELTS Academic Writing examiner. Assess both responses using IELTS Academic Writing band descriptors. Be strict, consistent and evidence-based.
+
+TASK 1 PROMPT:
 ${t1.prompt||""}
-Student Task 1:
+
+STUDENT TASK 1:
 ${task1}
 
-Task 2 prompt:
+TASK 2 PROMPT:
 ${t2.prompt||""}
-Student Task 2:
+
+STUDENT TASK 2:
 ${task2}
 
-Return ONLY valid JSON with this exact structure:
-{"task1":{"task_achievement":number,"coherence_cohesion":number,"lexical_resource":number,"grammar":number,"band":number,"feedback":"short feedback"},"task2":{"task_response":number,"coherence_cohesion":number,"lexical_resource":number,"grammar":number,"band":number,"feedback":"short feedback"},"writing_band":number,"summary":"short overall feedback"}
-All bands must be from 0 to 9 in 0.5 increments. Task 2 contributes twice as much as Task 1 to writing_band.`;
- const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{Authorization:"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({model,input:prompt,max_output_tokens:1600})});
- if(!response.ok)return {ok:false,error:"AI assessment request failed ("+response.status+")."};
+Score each criterion and each task from 0 to 9 in 0.5 increments. Task 2 contributes twice as much as Task 1 to the final Writing band. Keep feedback concise and useful.`;
+ const response=await fetch("https://api.openai.com/v1/responses",{
+  method:"POST",
+  headers:{Authorization:"Bearer "+key,"Content-Type":"application/json"},
+  body:JSON.stringify({
+   model,
+   input:prompt,
+   max_output_tokens:1800,
+   text:{format:{type:"json_schema",name:"ielts_writing_assessment",strict:true,schema:WRITING_SCHEMA}}
+  })
+ });
+ if(!response.ok){
+  console.error("writing AI request failed",response.status,await response.text().catch(()=>""));
+  return {ok:false,error:"AI assessment request failed ("+response.status+")."};
+ }
  const obj=await response.json();
- const text=String(obj.output_text||obj.output?.flatMap((x:any)=>x.content||[]).find((x:any)=>x.type==="output_text")?.text||"").trim();
+ const text=responseOutputText(obj);
+ if(!text){
+  console.error("writing AI empty output",obj?.status,obj?.incomplete_details||null);
+  return {ok:false,error:"AI assessment returned no result."};
+ }
  try{
-  const parsed=JSON.parse(text.replace(/^\`\`\`json\s*/i,"").replace(/\`\`\`$/,"").trim());
-  const band=roundHalf(Math.max(0,Math.min(9,Number(parsed.writing_band)||0)));
-  return {ok:true,band,assessment:parsed,model};
- }catch{return {ok:false,error:"AI assessment returned an invalid format."}}
+  const assessment=normalizeAssessment(JSON.parse(text));
+  return {ok:true,band:assessment.writing_band,assessment,model};
+ }catch(e){
+  console.error("writing AI parse failed",String(e),text.slice(0,500));
+  return {ok:false,error:"AI assessment returned an invalid format."};
+ }
 }
+
 async function attempt(studentId:string){
  const db=getServiceSupabase();const {data,error}=await db.from("ark60_mock_attempts").select("*").eq("student_id",studentId).eq("day_number",DAY).maybeSingle();if(error)throw error;return data;
 }
@@ -173,6 +248,49 @@ async function mirrorCompletion(row:Obj,src:Obj){
  await db.from("ark60_submissions").upsert({student_id:row.student_id,day_number:DAY,module:"writing",payload:{source:"full_mock",task_type:"full_mock",task1_answer:row.writing_task1,task2_answer:row.writing_task2,assessment:row.writing_assessment,duration_seconds:row.writing_elapsed_seconds},band:row.writing_band,review_status:"reviewed",review_feedback:String(row.writing_assessment?.summary||"AI assessed"),reviewed_at:now},{onConflict:"student_id,day_number,module"});
 }
 
+function retryCount(error:any){
+ const m=String(error||"").match(/^retry:(\d+):/);
+ return m?Number(m[1]):0;
+}
+async function completeWriting(row:Obj,assessed:any,src:Obj){
+ const db=getServiceSupabase(),now=new Date().toISOString();
+ const upd=await db.from("ark60_mock_attempts").update({
+  stage:"completed",status:"completed",
+  writing_band:assessed.band,writing_assessment:assessed.assessment,
+  grading_error:null,completed_at:now,updated_at:now
+ }).eq("id",row.id).select("*").single();
+ if(upd.error)throw upd.error;
+ await mirrorCompletion(upd.data,src);
+ return upd.data;
+}
+async function retryFailedAssessments(src:Obj,limit=2){
+ const db=getServiceSupabase();
+ const q=await db.from("ark60_mock_attempts").select("*")
+  .eq("day_number",DAY).eq("stage","assessing").not("grading_error","is",null)
+  .order("updated_at",{ascending:true}).limit(8);
+ if(q.error)throw q.error;
+ const candidates=(q.data||[]).filter((row:any)=>String(row.grading_error||"")!=="retrying"&&retryCount(row.grading_error)<3).slice(0,limit);
+ await Promise.all(candidates.map(async(row:any)=>{
+  const currentError=String(row.grading_error||"");
+  const nextTry=retryCount(currentError)+1;
+  const claim=await db.from("ark60_mock_attempts")
+   .update({grading_error:"retrying",updated_at:new Date().toISOString()})
+   .eq("id",row.id).eq("stage","assessing").eq("grading_error",currentError)
+   .select("*").maybeSingle();
+  if(claim.error||!claim.data)return;
+  const assessed=await gradeWriting(String(row.writing_task1||""),String(row.writing_task2||""),src.writing.payload);
+  if(assessed.ok){
+   await completeWriting(claim.data,assessed,src);
+  }else{
+   await db.from("ark60_mock_attempts").update({
+    grading_error:"retry:"+nextTry+":"+assessed.error,
+    updated_at:new Date().toISOString()
+   }).eq("id",row.id).eq("stage","assessing");
+  }
+ }));
+}
+
+
 export async function GET(req:NextRequest){
  try{
   const url=new URL(req.url),action=url.searchParams.get("action")||"state";
@@ -181,6 +299,7 @@ export async function GET(req:NextRequest){
   const admin=action.startsWith("admin_")?await getAdmin(req):null;
   if(action.startsWith("admin_")){
    if(!admin)return json({detail:"Admin sign-in required."},401);
+   if(src&&action==="admin_list")await retryFailedAssessments(src,2);
    const db=getServiceSupabase();
    const {data,error}=await db.from("ark60_mock_attempts").select("*").eq("day_number",DAY).order("updated_at",{ascending:false});
    if(error)throw error;
@@ -192,7 +311,11 @@ export async function GET(req:NextRequest){
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
   if(!src)return json({detail:"Full Mock materials are not published yet."},404);
   if(!(await isDayOpen(DAY,student)))return json({detail:"Full Mock opens at 10:00 Uzbekistan time.",opens_at:"2026-10-04T10:00:00+05:00"},403);
-  const preview=isPreview(student),row=preview?null:await attempt(student.id);
+  const preview=isPreview(student);let row=preview?null:await attempt(student.id);
+  if(!preview&&row?.stage==="assessing"&&row?.grading_error&&String(row.grading_error)!=="retrying"&&retryCount(row.grading_error)<3){
+   await retryFailedAssessments(src,1);
+   row=await attempt(student.id);
+  }
   return json({preview,day:DAY,content:{listening:{title:src.listening.title,payload:safeListening(src.listening.payload)},reading:src.reading.map(safeReading),writing:{title:src.writing.title,payload:safeWriting(src.writing.payload)}},mock:stateForClient(row,preview)});
  }catch(e){console.error("mock GET",e);return json({detail:"Could not load Full Mock."},500)}
 }
@@ -265,10 +388,10 @@ export async function POST(req:NextRequest){
     await db.from("ark60_mock_attempts").update({stage:"assessing",status:"assessing",writing_task1:task1,writing_task2:task2,writing_elapsed_seconds:elapsed,writing_submitted_at:now,grading_error:assessed.error,updated_at:now}).eq("id",row.id);
     return json({ok:true,stage:"assessing",detail:"Writing submitted. AI assessment is waiting for configuration."},202);
    }
-   const upd=await db.from("ark60_mock_attempts").update({stage:"completed",status:"completed",writing_task1:task1,writing_task2:task2,writing_elapsed_seconds:elapsed,writing_submitted_at:now,writing_band:assessed.band,writing_assessment:assessed.assessment,grading_error:null,completed_at:now,updated_at:now}).eq("id",row.id).select("*").single();
-   if(upd.error)throw upd.error;
-   await mirrorCompletion(upd.data,src);
-   return json({ok:true,stage:"completed",result:stateForClient(upd.data,false).result});
+   const saved=await db.from("ark60_mock_attempts").update({writing_task1:task1,writing_task2:task2,writing_elapsed_seconds:elapsed,writing_submitted_at:now,updated_at:now}).eq("id",row.id).select("*").single();
+   if(saved.error)throw saved.error;
+   const completed=await completeWriting(saved.data,assessed,src);
+   return json({ok:true,stage:"completed",result:stateForClient(completed,false).result});
   }
   return json({detail:"Unknown Full Mock action."},400);
  }catch(e){console.error("mock POST",e);return json({detail:"Could not update Full Mock."},500)}

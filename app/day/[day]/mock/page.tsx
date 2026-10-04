@@ -41,6 +41,7 @@ export default function FullMockPage(){
  useEffect(()=>{if(stage==="reading"&&rRemaining===0&&!busy)void submitReading(true)},[stage,rRemaining,busy]);
  useEffect(()=>{if(stage!=="writing")return;const id=window.setInterval(()=>setWRemaining(v=>Math.max(0,v-1)),1000);return()=>window.clearInterval(id)},[stage]);
  useEffect(()=>{if(stage==="writing"&&wRemaining===0&&!busy)void submitWriting(true)},[stage,wRemaining,busy]);
+ useEffect(()=>{if(stage!=="assessing")return;let active=true;const check=async()=>{try{const r=await fetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!active||!r.ok)return;if(obj?.mock?.stage==="completed"){setResult(obj.mock.result);setStage("completed");setMessage("")}}catch{}};void check();const id=window.setInterval(check,5000);return()=>{active=false;window.clearInterval(id)}},[stage,day]);
 
  function queueSave(kind:"listening"|"reading"|"writing",payload:any){
   if(saveRef.current)window.clearTimeout(saveRef.current);
