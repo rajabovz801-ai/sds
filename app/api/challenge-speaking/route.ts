@@ -7,7 +7,7 @@ export const dynamic="force-dynamic";
 export const maxDuration=60;
 
 const BUCKET="ark60-speaking-audio";
-const SPEAKING_DAYS=new Set([1,2,3]);
+const SPEAKING_DAYS=new Set([1,2,3,5]);
 const MAX_AUDIO_BYTES=8*1024*1024;
 const ALLOWED_MIME=new Set(["audio/webm","audio/mp4","audio/ogg"]);
 type AnyRow=Record<string,any>;
@@ -135,7 +135,7 @@ export async function GET(req:NextRequest){
   const student=await getStudent(req);
   if(!student)return json({detail:"Please sign in."},401);
   const day=validDay(url.searchParams.get("day"));
-  if(!day)return json({detail:"Speaking is available only on Day 1, Day 2 and Day 3."},404);
+  if(!day)return json({detail:"Speaking is not available for this day."},404);
   if(!(await isDayUnlocked(day,student)))return json({detail:"This Speaking task is not available yet."},403);
   const content=await getContent(day);if(!content)return json({detail:"Speaking material has not been published yet."},404);
   if(isPreview(student))return json({content,attempt:null,preview:true});
