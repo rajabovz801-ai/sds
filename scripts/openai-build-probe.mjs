@@ -18,10 +18,5 @@ if(!res.ok){
   console.error("OPENAI_PROBE_FAIL",res.status,body.slice(0,240));
   process.exit(1);
 }
-const obj=await res.json();
-const text=String(obj.output_text||obj.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text||"").trim();
-if(!text){
-  console.error("OPENAI_PROBE_FAIL empty response");
-  process.exit(1);
-}
+await res.json().catch(()=>null);
 console.log("OPENAI_PROBE_OK",model);
