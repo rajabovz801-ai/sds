@@ -93,7 +93,7 @@ function overall3(l:number,r:number,w:number){return roundHalf((l+r+w)/3)}
 async function gradeWriting(task1:string,task2:string,content:Obj){
  const key=process.env.OPENAI_API_KEY||"";
  if(!key)return {ok:false,error:"OpenAI API key is not configured yet."};
- const model=process.env.OPENAI_WRITING_MODEL||"gpt-6-luna";
+ const model=process.env.OPENAI_WRITING_MODEL||"gpt-5-mini";
  const tasks=Array.isArray(content.tasks)?content.tasks:[];
  const t1=tasks[0]||{},t2=tasks[1]||{};
  const prompt=`You are an IELTS Academic Writing examiner. Assess both responses using official IELTS-style band descriptors. Be strict and evidence-based.
