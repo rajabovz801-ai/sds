@@ -24,7 +24,7 @@ test("Reading and Writing use one 60 minute countdown each",()=>{
  assert.ok(page.includes("useState(3600)"));
  assert.ok(page.includes("reading_remaining||3600"));
  assert.ok(page.includes("writing_remaining||3600"));
- assert.ok(page.includes("One shared 60-minute timer"));
+ assert.ok(page.includes("60 minutes total"));
 });
 
 test("Section results remain hidden until final mock result",()=>{
