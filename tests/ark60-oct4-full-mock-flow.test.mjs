@@ -37,7 +37,7 @@ test("Section results remain hidden until final mock result",()=>{
 
 test("Writing grading uses server-only OpenAI configuration and no client API key",()=>{
  assert.ok(api.includes("process.env.OPENAI_API_KEY"));
- assert.ok(api.includes('process.env.OPENAI_WRITING_MODEL||"gpt-6-luna"'));
+ assert.ok(api.includes('process.env.OPENAI_WRITING_MODEL||"gpt-5-mini"'));
  assert.ok(api.includes("https://api.openai.com/v1/responses"));
  assert.ok(!page.includes("OPENAI_API_KEY"));
 });
