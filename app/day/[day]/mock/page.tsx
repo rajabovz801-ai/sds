@@ -148,6 +148,7 @@ export default function FullMockPage(){
    </nav>
   </>}
   {message&&<div className="mock-floating-message">{message}</div>}
+  <style jsx global>{`::highlight(ark-mock-yellow){background:#ffe58a;color:inherit}`}</style>
  </main>;
 
  if(stage==="reading"){
