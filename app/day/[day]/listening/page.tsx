@@ -4,7 +4,7 @@ import AnimatedBackButton from "../../../components/animated-back-button";
 import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {useParams,useRouter} from "next/navigation";
 import {Fragment,useCallback,useEffect,useMemo,useRef,useState} from "react";
-import {Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Headphones,LockKeyhole,Maximize2,Minimize2,RefreshCcw,Send,Volume2,XCircle} from "lucide-react";
+import {Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Eraser,Headphones,LockKeyhole,Maximize2,Minimize2,RefreshCcw,Send,Volume2,XCircle} from "lucide-react";
 import "./listening.css";
 
 type Token=string|{q:number};
@@ -129,13 +129,21 @@ export default function ListeningPage(){
    y:Math.max(66,rect.top-54)
   });
  }
- function applyHighlight(){
+ function applyHighlight(shade:"yellow"|"erase"="yellow"){
   const range=selectionRangeRef.current;
   const highlights=window.CSS?.highlights;
   if(!range||!highlights){setMessage("Please use an updated Chrome, Edge or Safari for text highlighting.");return}
   const key="ark-listening-yellow";
-  const old=highlights.get(key);
-  highlights.set(key,old?new Highlight(...Array.from(old),range.cloneRange()):new Highlight(range.cloneRange()));
+  if(shade==="erase"){
+   const old=highlights.get(key);
+   if(old){
+    const keep=Array.from(old).filter(r=>!(r instanceof Range&&r.compareBoundaryPoints(Range.END_TO_START,range)>0&&r.compareBoundaryPoints(Range.START_TO_END,range)<0));
+    if(keep.length)highlights.set(key,new Highlight(...keep));else highlights.delete(key);
+   }
+  }else{
+   const old=highlights.get(key);
+   highlights.set(key,old?new Highlight(...Array.from(old),range.cloneRange()):new Highlight(range.cloneRange()));
+  }
   window.getSelection()?.removeAllRanges();
   selectionRangeRef.current=null;
   setHighlightPopup(null);
@@ -274,7 +282,7 @@ export default function ListeningPage(){
      {currentSection?.blocks?.map((b:any,i:number)=>renderBlock(b,i))}
     </section>
    </div>
-   {highlightPopup&&!reviewMode&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button className="yellow" onClick={applyHighlight} type="button"><span/> Highlight</button></div>}
+   {highlightPopup&&!reviewMode&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button className="yellow" onClick={()=>applyHighlight("yellow")} type="button"><span/> Highlight</button><button onClick={()=>applyHighlight("erase")} type="button"><Eraser size={15}/> Remove</button></div>}
    <nav className="ls-bottom-nav">
     <button className="ls-arrow" disabled={currentQuestion<=1} onClick={()=>goQuestion(currentQuestion-1)}><ChevronLeft size={17}/></button>
     <div className="ls-number-groups">{[1,2,3,4].map(s=><div className={section===s?"active":""} key={s}><span>SECTION {s}</span><div>{Array.from({length:10},(_,i)=>(s-1)*10+i+1).map(q=>{const st=answerStatus(review,q);return <button key={q} className={(currentQuestion===q?"current ":"")+(answers[String(q)]?"answered ":"")+(reviewMode&&st?st.status:"")} onClick={()=>goQuestion(q)}>{q}</button>})}</div></div>)}</div>
@@ -282,5 +290,6 @@ export default function ListeningPage(){
     <button className="ls-arrow" disabled={currentQuestion>=40} onClick={()=>goQuestion(currentQuestion+1)}><ChevronRight size={17}/></button>
    </nav>
   </>}
+  <style jsx global>{`::highlight(ark-listening-yellow){background:#ffe58a;color:inherit}`}</style>
  </main>;
 }
