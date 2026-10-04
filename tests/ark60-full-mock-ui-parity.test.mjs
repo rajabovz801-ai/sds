@@ -16,7 +16,7 @@ test("Full Mock Listening keeps the accepted Section 1-4 question navigator",()=
 test("Full Mock Reading uses daily CDI structure and Part 1-3 bottom navigation",()=>{
  for(const cls of ['className="cr-instructions"','className="cr-mobile-tabs"','className="cr-split"','className="cr-pane cr-passage"','className="cr-pane cr-questions"','className="cr-footer mock-reading-footer"'])assert.ok(page.includes(cls),cls);
  assert.ok(page.includes("PART {part}"));
- assert.ok(page.includes("Times New Roman"));
+ assert.ok(css.includes("Times New Roman"));
 });
 
 test("Full Mock Reading highlight uses non-reflow native Highlight API",()=>{
