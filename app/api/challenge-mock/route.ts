@@ -138,7 +138,7 @@ function normalizeAssessment(parsed:any){
  const out={...parsed,task1:{...(parsed?.task1||{})},task2:{...(parsed?.task2||{})}};
  for(const k of ["task_achievement","coherence_cohesion","lexical_resource","grammar","band"])out.task1[k]=clampBand(out.task1[k]);
  for(const k of ["task_response","coherence_cohesion","lexical_resource","grammar","band"])out.task2[k]=clampBand(out.task2[k]);
- out.writing_band=clampBand(out.writing_band);
+ out.writing_band=roundHalf((Number(out.task1.band)+Number(out.task2.band)*2)/3);
  out.task1.feedback=String(out.task1.feedback||"").slice(0,1200);
  out.task2.feedback=String(out.task2.feedback||"").slice(0,1200);
  out.summary=String(out.summary||"").slice(0,1600);
