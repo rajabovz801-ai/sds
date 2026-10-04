@@ -151,12 +151,12 @@ export default function AdminPage(){
 
 
  const sections=useMemo(()=>[
-  {name:"Overview",icon:LayoutDashboard},{name:"Reading results",icon:BookOpen},{name:"Listening results",icon:Headphones},{name:"Requests",icon:UserPlus},{name:"Students",icon:Users},{name:"Writing inbox",icon:FileText},{name:"Speaking inbox",icon:Mic},{name:"Leaderboard",icon:Trophy},{name:"Study time",icon:Clock3},
+  {name:"Overview",icon:LayoutDashboard},{name:"Reading results",icon:BookOpen},{name:"Listening results",icon:Headphones},{name:"Full Mock results",icon:ChartNoAxesCombined},{name:"Requests",icon:UserPlus},{name:"Students",icon:Users},{name:"Writing inbox",icon:FileText},{name:"Speaking inbox",icon:Mic},{name:"Leaderboard",icon:Trophy},{name:"Study time",icon:Clock3},
   ...(admin?.role==="super_admin"?[{name:"Admins",icon:UserCog}]:[])
  ],[admin?.role]);
  const liveById=useMemo(()=>new Map(liveRows.map(row=>[row.student_id,row])),[liveRows]);
  const chosen=courseDays[selected-1];
- const items=chosen.mock?[contentModules[1],contentModules[0],contentModules[4],contentModules[5]]:contentModules;
+ const items=chosen.mock?[contentModules[1],contentModules[0],contentModules[4]]:contentModules;
  const moduleState=contentState?.day===selected?contentState.modules:{};
  const selectedStates=items.map(item=>moduleState[item.name]?.status||"Missing");
  const overallContentStatus=selectedStates.length&&selectedStates.every(x=>x==="Published")?"Published":selectedStates.some(x=>x!=="Missing")?"In progress":"Missing";
@@ -178,7 +178,7 @@ export default function AdminPage(){
   <aside className={"learning-sidebar "+(mobile?"open":"")}>
    <div className="learning-brand learning-brand-minimal"><button className="mobile-close" onClick={()=>setMobile(false)} aria-label="Close navigation"><X size={18}/></button></div>
    <div className="side-overline">MANAGEMENT</div>
-   <nav className="learning-nav">{sections.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{if(name==="Reading results"){window.location.assign("/admin/reading");return;}if(name==="Listening results"){window.location.assign("/admin/listening");return;}if(name==="Writing inbox"){window.location.assign("/admin/writing");return;}if(name==="Speaking inbox"){window.location.assign("/admin/speaking");return;}setView(name);setMobile(false)}}><Icon size={18} strokeWidth={1.8}/><span>{name}</span>{name==="Requests"&&!!dashboard?.pending_requests&&<span className="request-sidebar-count">{dashboard.pending_requests}</span>}{name==="Writing inbox"&&!!dashboard?.pending_writing&&<span className="request-sidebar-count">{dashboard.pending_writing}</span>}{name==="Speaking inbox"&&!!dashboard?.pending_speaking&&<span className="request-sidebar-count">{dashboard.pending_speaking}</span>}{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
+   <nav className="learning-nav">{sections.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{if(name==="Reading results"){window.location.assign("/admin/reading");return;}if(name==="Listening results"){window.location.assign("/admin/listening");return;}if(name==="Full Mock results"){window.location.assign("/admin/mock");return;}if(name==="Writing inbox"){window.location.assign("/admin/writing");return;}if(name==="Speaking inbox"){window.location.assign("/admin/speaking");return;}setView(name);setMobile(false)}}><Icon size={18} strokeWidth={1.8}/><span>{name}</span>{name==="Requests"&&!!dashboard?.pending_requests&&<span className="request-sidebar-count">{dashboard.pending_requests}</span>}{name==="Writing inbox"&&!!dashboard?.pending_writing&&<span className="request-sidebar-count">{dashboard.pending_writing}</span>}{name==="Speaking inbox"&&!!dashboard?.pending_speaking&&<span className="request-sidebar-count">{dashboard.pending_speaking}</span>}{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom"><button className="back-login" onClick={logout}><LogOut size={15}/> Log out</button><div className="user-tile"><span className="user-avatar">{admin.display_name.slice(0,2).toUpperCase()}</span><div><b>{admin.display_name}</b><small>{admin.role==="super_admin"?"Super Admin":"Admin"}</small></div></div></div>
   </aside>
   {mobile&&<button className="sidebar-overlay" onClick={()=>setMobile(false)} aria-label="Close navigation"/>}
