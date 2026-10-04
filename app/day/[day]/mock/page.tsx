@@ -1,7 +1,7 @@
 "use client";
 import {useParams,useRouter} from "next/navigation";
 import {useEffect,useMemo,useRef,useState} from "react";
-import {BookOpen,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Headphones,Highlighter,LockKeyhole,Maximize2,Minimize2,PenLine,Send,ShieldCheck,Volume2} from "lucide-react";
+import {BookOpen,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Headphones,Eraser,Highlighter,LockKeyhole,Maximize2,Minimize2,PenLine,Send,ShieldCheck,Volume2} from "lucide-react";
 import AnimatedBackButton from "../../../components/animated-back-button";
 import "../listening/listening.css";
 import "../writing/writing.css";
@@ -25,11 +25,11 @@ export default function FullMockPage(){
  const {day:slug}=useParams<{day:string}>();const day=Number(slug)||4;const router=useRouter();
  const [data,setData]=useState<MockData|null>(null),[stage,setStage]=useState<Stage>("not_started"),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
  const [full,setFull]=useState(false);
- const [listeningStarted,setListeningStarted]=useState(false),[audioState,setAudioState]=useState<"idle"|"playing"|"ended"|"resume">("idle"),[lSection,setLSection]=useState(1),[lAnswers,setLAnswers]=useState<Record<string,string>>({}),[lElapsed,setLElapsed]=useState(0);
- const [rPassage,setRPassage]=useState(1),[rAnswers,setRAnswers]=useState<Record<string,string>>({}),[rRemaining,setRRemaining]=useState(3600);
+ const [listeningStarted,setListeningStarted]=useState(false),[audioState,setAudioState]=useState<"idle"|"playing"|"ended"|"resume">("idle"),[lSection,setLSection]=useState(1),[lCurrentQuestion,setLCurrentQuestion]=useState(1),[lAnswers,setLAnswers]=useState<Record<string,string>>({}),[lElapsed,setLElapsed]=useState(0);
+ const [rPassage,setRPassage]=useState(1),[rTab,setRTab]=useState<"passage"|"questions">("passage"),[rAnswers,setRAnswers]=useState<Record<string,string>>({}),[rRemaining,setRRemaining]=useState(3600);
  const [wTask,setWTask]=useState<1|2>(1),[w1,setW1]=useState(""),[w2,setW2]=useState(""),[wRemaining,setWRemaining]=useState(3600);
  const [result,setResult]=useState<any>(null),[previewListening,setPreviewListening]=useState<any>(null),[previewReading,setPreviewReading]=useState<any>(null);
- const audioRef=useRef<HTMLAudioElement>(null),saveRef=useRef<number|null>(null),selectionRef=useRef<Range|null>(null);
+ const audioRef=useRef<HTMLAudioElement>(null),saveRef=useRef<number|null>(null),selectionRef=useRef<Range|null>(null),questionsRef=useRef<HTMLDivElement>(null);
  const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
  const paperRef=useRef<HTMLDivElement>(null);
 
@@ -46,25 +46,25 @@ export default function FullMockPage(){
   if(saveRef.current)window.clearTimeout(saveRef.current);
   saveRef.current=window.setTimeout(()=>{void fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save_"+kind,...payload})}).catch(()=>{})},500);
  }
- function setL(q:number,value:string){setLAnswers(prev=>{const next={...prev,[String(q)]:value};queueSave("listening",{answers:next,elapsed_seconds:lElapsed});return next})}
+ function setL(q:number,value:string){setLCurrentQuestion(q);setLSection(Math.ceil(q/10));setLAnswers(prev=>{const next={...prev,[String(q)]:value};queueSave("listening",{answers:next,elapsed_seconds:lElapsed});return next})}
  function toggleMulti(block:any,letter:string){
   const qs=(block.questions||[]).map(Number),max=Math.max(1,Math.min(qs.length,Number(block.max_selections||2)));
   const selected=qs.map((q:number)=>lAnswers[String(q)]).filter(Boolean);
   const next=selected.includes(letter)?selected.filter((x:string)=>x!==letter):selected.length<max?[...selected,letter]:selected;
-  const copy={...lAnswers};qs.forEach((q:number,i:number)=>copy[String(q)]=next[i]||"");setLAnswers(copy);queueSave("listening",{answers:copy,elapsed_seconds:lElapsed});
+  const copy={...lAnswers};qs.forEach((q:number,i:number)=>copy[String(q)]=next[i]||"");setLCurrentQuestion(qs[0]||1);setLSection(Math.ceil((qs[0]||1)/10));setLAnswers(copy);queueSave("listening",{answers:copy,elapsed_seconds:lElapsed});
  }
  function setR(q:number,value:string){setRAnswers(prev=>{const next={...prev,[String(q)]:value};queueSave("reading",{answers:next});return next})}
  function setWriting(which:1|2,value:string){if(which===1)setW1(value);else setW2(value);queueSave("writing",{task1:which===1?value:w1,task2:which===2?value:w2})}
 
  async function startMock(){
-  setBusy(true);setMessage("");try{const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start"})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Full Mock.");setStage("listening");document.documentElement.requestFullscreen?.().catch(()=>{})}catch(e){setMessage(e instanceof Error?e.message:"Could not start Full Mock.")}finally{setBusy(false)}
+  setBusy(true);setMessage("");try{const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start"})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Full Mock.");setStage("listening");setLSection(1);setLCurrentQuestion(1);document.documentElement.requestFullscreen?.().catch(()=>{})}catch(e){setMessage(e instanceof Error?e.message:"Could not start Full Mock.")}finally{setBusy(false)}
  }
  async function startListening(){
   setListeningStarted(true);setAudioState("playing");try{await audioRef.current?.play()}catch{setAudioState("resume")}
  }
  async function submitListening(){
   if(busy)return;if(!window.confirm("Submit Listening and continue to Reading? You cannot return to this section."))return;
-  setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_listening",answers:lAnswers,elapsed_seconds:lElapsed})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit Listening.");audioRef.current?.pause();if(obj.hidden_result)setPreviewListening(obj.hidden_result);setRRemaining(Number(obj.reading_remaining||3600));setStage("reading");setRPassage(1)}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Listening.")}finally{setBusy(false)}
+  setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_listening",answers:lAnswers,elapsed_seconds:lElapsed})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit Listening.");audioRef.current?.pause();if(obj.hidden_result)setPreviewListening(obj.hidden_result);setRRemaining(Number(obj.reading_remaining||3600));setStage("reading");setRPassage(1);setRTab("passage")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Listening.")}finally{setBusy(false)}
  }
  async function submitReading(auto=false){
   if(busy)return;if(!auto&&!window.confirm("Submit Reading and continue to Writing? You cannot return to Reading."))return;
@@ -77,22 +77,41 @@ export default function FullMockPage(){
  }
  async function toggleFull(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{}}
  function showHighlight(){
-  const sel=window.getSelection();if(!sel||sel.isCollapsed||!sel.rangeCount)return;const r=sel.getRangeAt(0);if(!paperRef.current?.contains(r.commonAncestorContainer))return;const rect=r.getBoundingClientRect();selectionRef.current=r.cloneRange();setHighlightPopup({x:Math.min(innerWidth-110,Math.max(110,rect.left+rect.width/2)),y:Math.max(65,rect.top-50)});
+  const sel=window.getSelection();if(!sel||sel.isCollapsed||!sel.rangeCount)return;
+  const r=sel.getRangeAt(0);
+  const insidePaper=paperRef.current?.contains(r.commonAncestorContainer)||questionsRef.current?.contains(r.commonAncestorContainer);
+  if(!insidePaper)return;
+  const nodeEl=(node:Node)=>node instanceof Element?node:node.parentElement;
+  const forbidden="input,textarea,select,button,.ls-qnum,.cr-number,.cr-question-head b,.ls-bottom-nav,.cr-footer";
+  if(nodeEl(r.startContainer)?.closest(forbidden)||nodeEl(r.endContainer)?.closest(forbidden))return;
+  const rect=r.getBoundingClientRect();selectionRef.current=r.cloneRange();
+  setHighlightPopup({x:Math.min(innerWidth-112,Math.max(112,rect.left+rect.width/2)),y:Math.max(66,rect.top-54)});
  }
- function applyHighlight(){
-  const r=selectionRef.current,h=window.CSS?.highlights;if(!r||!h)return;const old=h.get("ark-mock-yellow");h.set("ark-mock-yellow",old?new Highlight(...Array.from(old),r.cloneRange()):new Highlight(r.cloneRange()));window.getSelection()?.removeAllRanges();selectionRef.current=null;setHighlightPopup(null);
+ function applyHighlight(shade:"yellow"|"erase"="yellow"){
+  const range=selectionRef.current,h=window.CSS?.highlights;if(!range||!h)return;
+  const key="ark-mock-yellow";
+  if(shade==="erase"){
+   const old=h.get(key);if(old){const keep=Array.from(old).filter(r=>!(r instanceof Range&&r.compareBoundaryPoints(Range.END_TO_START,range)>0&&r.compareBoundaryPoints(Range.START_TO_END,range)<0));if(keep.length)h.set(key,new Highlight(...keep));else h.delete(key)}
+  }else{
+   const old=h.get(key);h.set(key,old?new Highlight(...Array.from(old),range.cloneRange()):new Highlight(range.cloneRange()));
+  }
+  window.getSelection()?.removeAllRanges();selectionRef.current=null;setHighlightPopup(null);
+ }
+ function goLQuestion(q:number){
+  const next=Math.max(1,Math.min(40,q));setLCurrentQuestion(next);setLSection(Math.ceil(next/10));
+  setTimeout(()=>document.getElementById("listen-q-"+next)?.scrollIntoView({behavior:"smooth",block:"center"}),30);
  }
 
  const lp=data?.content.listening.payload,currentSection=lp?.sections?.find((x:any)=>Number(x.number)===lSection);
  const passage=data?.content.reading.find(p=>p.ordinal===rPassage);
  const writing=data?.content.writing.payload,tasks=writing?.tasks||[],task=tasks[wTask-1];
 
- function gap(q:number){return <span className="ls-gap-wrap" id={"mock-lq-"+q}><span className="ls-qnum">{q}</span><input value={lAnswers[String(q)]||""} onChange={e=>setL(q,e.target.value)} aria-label={"Question "+q}/></span>}
+ function gap(q:number){return <span className="ls-gap-wrap" id={"listen-q-"+q}><span className="ls-qnum">{q}</span><input value={lAnswers[String(q)]||""} onChange={e=>setL(q,e.target.value)} aria-label={"Question "+q}/></span>}
  function tokens(items:Token[]){return items.map((x,i)=>typeof x==="string"?<span key={i}>{x}</span>:<span key={i}>{gap(x.q)}</span>)}
  function renderL(block:any,idx:number){
   if(block.kind==="notes")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em><strong>{block.word_limit}</strong></div><div className="ls-notes-sheet"><h2>{block.title}</h2><ul>{block.items.map((it:Token[],i:number)=><li key={i}>{tokens(it)}</li>)}</ul></div></section>;
-  if(block.kind==="matching")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em><strong>{block.word_limit}</strong></div>{block.title&&<h2 className="ls-source-title">{block.title}</h2>}{block.image_url&&<div className="ls-map-image-wrap"><img src={block.image_url} alt={block.image_alt||"Listening visual"}/></div>}{!block.hide_choices&&<div className="ls-choice-box">{Object.entries(block.choices||{}).map(([k,v])=><p key={k}><b>{k}</b><span>{String(v)}</span></p>)}</div>}<div className="ls-match-list">{(block.items||[]).map((it:any)=><div className="ls-match" key={it.q}><span className="ls-qnum static">{it.q}</span><b>{it.text}</b><select value={lAnswers[String(it.q)]||""} onChange={e=>setL(it.q,e.target.value)}><option value="">Choose</option>{Object.keys(block.choices||{}).map(k=><option key={k}>{k}</option>)}</select></div>)}</div></section>;
-  if(block.kind==="mcq")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em></div>{block.title&&<h2 className="ls-source-title">{block.title}</h2>}<div>{(block.questions||[]).map((q:any)=><article className="ls-mcq" key={q.q}><div className="ls-q-title"><span className="ls-qnum static">{q.q}</span><b>{q.text}</b></div><div className="ls-options">{Object.entries(q.options||{}).map(([letter,text])=><label className="ls-option" key={letter}><input type="radio" name={"mq"+q.q} checked={lAnswers[String(q.q)]===letter} onChange={()=>setL(q.q,letter)}/><b>{letter}</b><span>{String(text)}</span></label>)}</div></article>)}</div></section>;
+  if(block.kind==="matching")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em><strong>{block.word_limit}</strong></div>{block.title&&<h2 className="ls-source-title">{block.title}</h2>}{block.image_url&&<div className="ls-map-image-wrap"><img src={block.image_url} alt={block.image_alt||"Listening visual"}/></div>}{!block.hide_choices&&<div className="ls-choice-box">{Object.entries(block.choices||{}).map(([k,v])=><p key={k}><b>{k}</b><span>{String(v)}</span></p>)}</div>}<div className="ls-match-list">{(block.items||[]).map((it:any)=><div className="ls-match" id={"listen-q-"+it.q} key={it.q}><span className="ls-qnum static">{it.q}</span><b>{it.text}</b><select value={lAnswers[String(it.q)]||""} onChange={e=>setL(it.q,e.target.value)}><option value="">Choose</option>{Object.keys(block.choices||{}).map(k=><option key={k}>{k}</option>)}</select></div>)}</div></section>;
+  if(block.kind==="mcq")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em></div>{block.title&&<h2 className="ls-source-title">{block.title}</h2>}<div>{(block.questions||[]).map((q:any)=><article className="ls-mcq" id={"listen-q-"+q.q} key={q.q}><div className="ls-q-title"><span className="ls-qnum static">{q.q}</span><b>{q.text}</b></div><div className="ls-options">{Object.entries(q.options||{}).map(([letter,text])=><label className="ls-option" key={letter}><input type="radio" name={"mq"+q.q} checked={lAnswers[String(q.q)]===letter} onChange={()=>setL(q.q,letter)}/><b>{letter}</b><span>{String(text)}</span></label>)}</div></article>)}</div></section>;
   if(block.kind==="choose_two"||block.kind==="choose_many"){
    const qs=(block.questions||[]).map(Number),selected=qs.map((q:number)=>lAnswers[String(q)]).filter(Boolean);
    return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em></div><div className="ls-two"><h3>{block.question}</h3><div>{Object.entries(block.options||{}).map(([letter,text])=><label className="ls-check" key={letter}><input type="checkbox" checked={selected.includes(letter)} onChange={()=>toggleMulti(block,letter)}/><b>{letter}</b><span>{String(text)}</span></label>)}</div></div></section>
@@ -101,10 +120,12 @@ export default function FullMockPage(){
   return null;
  }
  function renderRQ(q:Q){
-  if(q.type==="gap")return <div className="cr-question cr-gap-question" key={q.number}><div className="cr-question-row"><span className="cr-number">{q.number}</span><p>{q.text}</p></div><input className="cr-gap-input" value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)} placeholder="Answer"/></div>;
-  if(q.type==="tfng")return <div className="cr-question" key={q.number}><div className="cr-question-row"><span className="cr-number">{q.number}</span><p>{q.text}</p></div><select value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}><option value="">Choose</option>{(q.options||[]).map(o=><option key={o}>{o}</option>)}</select></div>;
-  return <div className="cr-question" key={q.number}><div className="cr-question-row"><span className="cr-number">{q.number}</span><p>{q.text}</p></div><div className="cr-mcq-options">{(q.options||[]).map(o=>{const v=optionValue(o);return <label key={o}><input type="radio" name={"rq"+q.number} checked={rAnswers[String(q.number)]===v} onChange={()=>setR(q.number,v)}/><span>{o}</span></label>})}</div></div>;
+  if(q.type==="select")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><select className="cr-gap cr-select" aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}><option value="">Select your answer</option>{(q.options||[]).map(opt=><option key={opt} value={optionValue(opt)}>{opt}</option>)}</select></div>;
+  if(q.type==="tfng")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><div className="cr-options">{(q.options?.length?q.options:["TRUE","FALSE","NOT GIVEN"]).map(opt=><label key={opt}><input type="radio" checked={rAnswers[String(q.number)]===opt} onChange={()=>setR(q.number,opt)}/><span className="cr-radio"/>{opt}</label>)}</div></div>;
+  if(q.type==="mcq")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><div className="cr-options">{(q.options||[]).map(opt=>{const v=optionValue(opt);return <label key={opt}><input type="radio" checked={rAnswers[String(q.number)]===v} onChange={()=>setR(q.number,v)}/><span className="cr-radio"/>{opt}</label>})}</div></div>;
+  return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><input className="cr-gap" type="text" placeholder="Your answer" autoComplete="off" spellCheck={false} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}/></div>;
  }
+
 
  if(loading)return <main className="mock-loading"><span>ARK EDUCATION</span><b>Preparing Full Mock…</b></main>;
  if(!data)return <main className="mock-loading"><span>FULL MOCK</span><b>{message||"Mock unavailable."}</b><button onClick={()=>router.push("/dashboard")}>Back to dashboard</button></main>;
@@ -118,27 +139,47 @@ export default function FullMockPage(){
    {audioState==="resume"&&<div className="ls-resume-banner"><Volume2 size={16}/><div><b>Audio needs permission</b><span>Resume from the current mock position.</span></div><button onClick={()=>audioRef.current?.play().then(()=>setAudioState("playing")).catch(()=>{})}>Resume audio</button></div>}
    <section className="ls-instruction"><div><b>{currentSection?.label}</b><span>{currentSection?.range}</span></div><span className="ls-save-state">Answers auto-save</span></section>
    <div className="ls-workspace"><section className="ls-question-paper" ref={paperRef} onMouseUp={showHighlight}>{currentSection?.blocks?.map((b:any,i:number)=>renderL(b,i))}</section></div>
-   {highlightPopup&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}}><button className="yellow" onMouseDown={e=>e.preventDefault()} onClick={applyHighlight}><span/> Highlight</button></div>}
-   <nav className="ls-bottom-nav"><button className="ls-arrow" disabled={lSection<=1} onClick={()=>setLSection(v=>Math.max(1,v-1))}><ChevronLeft size={17}/></button><div className="mock-l-sections">{[1,2,3,4].map(s=><button key={s} className={lSection===s?"active":""} onClick={()=>setLSection(s)}>SECTION {s}</button>)}</div><button className="ls-arrow" disabled={lSection>=4} onClick={()=>setLSection(v=>Math.min(4,v+1))}><ChevronRight size={17}/></button><button className="mock-submit-section" disabled={busy} onClick={submitListening}><Send size={15}/> Submit Listening</button></nav>
+   {highlightPopup&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()}><button className="yellow" onClick={()=>applyHighlight("yellow")}><span/> Highlight</button><button onClick={()=>applyHighlight("erase")}><Eraser size={15}/> Remove</button></div>}
+   <nav className="ls-bottom-nav">
+    <button className="ls-arrow" disabled={lCurrentQuestion<=1} onClick={()=>goLQuestion(lCurrentQuestion-1)}><ChevronLeft size={17}/></button>
+    <div className="ls-number-groups">{[1,2,3,4].map(sec=><div className={lSection===sec?"active":""} key={sec}><span>SECTION {sec}</span><div>{Array.from({length:10},(_,i)=>(sec-1)*10+i+1).map(q=><button key={q} className={(lCurrentQuestion===q?"current ":"")+(lAnswers[String(q)]?"answered":"")} onClick={()=>goLQuestion(q)}>{q}</button>)}</div></div>)}</div>
+    <button className="ls-submit" disabled={busy} onClick={submitListening}>{busy?"Submitting…":"Submit Listening"} <Send size={15}/></button>
+    <button className="ls-arrow" disabled={lCurrentQuestion>=40} onClick={()=>goLQuestion(lCurrentQuestion+1)}><ChevronRight size={17}/></button>
+   </nav>
   </>}
   {message&&<div className="mock-floating-message">{message}</div>}
  </main>;
 
- if(stage==="reading")return <main className="cr-shell mock-reading-shell">
-  <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div><div className="cr-head-end"><strong>FULL MOCK · READING</strong><button className="cr-fullscreen" onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
-  <div className="mock-reading-tabs">{data.content.reading.map(p=><button key={p.id} className={rPassage===p.ordinal?"active":""} onClick={()=>setRPassage(p.ordinal)}>PASSAGE {p.ordinal}</button>)}</div>
-  <div className="cr-workspace mock-reading-workspace">
-   <section className="cr-passage" ref={paperRef} onMouseUp={showHighlight}><div className="cr-passage-head"><small>READING PASSAGE {passage?.ordinal}</small><h1>{passage?.title}</h1></div><div className="cr-passage-text">{passage?.text.split(/\n\s*\n/).filter(Boolean).map((p,i)=><p key={i}>{p}</p>)}</div></section>
-   <section className="cr-questions"><div className="cr-questions-head"><small>QUESTIONS</small><h2>{passage?.questions[0]?.number}–{passage?.questions.at(-1)?.number}</h2></div>{passage?.questions.map(renderRQ)}</section>
-  </div>
-  {highlightPopup&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}}><button className="yellow" onMouseDown={e=>e.preventDefault()} onClick={applyHighlight}><span/> Highlight</button></div>}
-  <footer className="mock-reading-footer"><div>{data.content.reading.map(p=><button key={p.ordinal} className={rPassage===p.ordinal?"active":""} onClick={()=>setRPassage(p.ordinal)}>Passage {p.ordinal}</button>)}</div><button disabled={busy} onClick={()=>submitReading(false)}><Send size={16}/> Submit Reading</button></footer>
-  {message&&<div className="mock-floating-message">{message}</div>}
- </main>;
+ if(stage==="reading"){
+  const groups:(Q[])[]=[];
+  for(const q of passage?.questions||[]){const last=groups[groups.length-1];if(!last||last[0]?.instruction!==q.instruction)groups.push([q]);else last.push(q)}
+  const partAnswered=(passage?.questions||[]).filter(q=>rAnswers[String(q.number)]).length;
+  const totalAnswered=Object.values(rAnswers).filter(Boolean).length;
+  return <main className="cr-shell mock-reading-shell">
+   <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div></div><div className="cr-head-end"><span className="cr-head-practice">FULL MOCK · PART {String(rPassage).padStart(2,"0")}</span><button className="cr-fullscreen" onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
+   <div className="cr-instructions"><div><small>FULL MOCK · IELTS READING</small><h1>{passage?.title}</h1><p>3 passages <span>·</span> 40 questions <span>·</span> one 60-minute countdown</p></div><div className="cr-tools"><span className="cr-highlight-guide"><Highlighter size={15}/> Select text for yellow highlight</span></div></div>
+   <div className="cr-mobile-tabs"><button className={rTab==="passage"?"active":""} onClick={()=>setRTab("passage")}>Passage</button><button className={rTab==="questions"?"active":""} onClick={()=>setRTab("questions")}>Questions</button></div>
+   <div className="cr-split">
+    <section style={{display:rTab==="questions"?"var(--cr-hide-passage)":"block"}} className="cr-pane cr-passage" ref={paperRef} onMouseUp={showHighlight} onTouchEnd={()=>setTimeout(showHighlight,100)}><h2>{passage?.title}</h2>{passage?.text.split(/\n\s*\n/).filter(Boolean).map((p,i)=><p key={i}>{p}</p>)}</section>
+    <section style={{display:rTab==="passage"?"var(--cr-hide-questions)":"block"}} className="cr-pane cr-questions" ref={questionsRef} onMouseUp={showHighlight} onTouchEnd={()=>setTimeout(showHighlight,100)}>
+     {groups.map((group,gi)=><section className="cr-qgroup" key={gi}><div className="cr-qgroup-head"><h3>Questions {group[0].number}{group.length>1?"–"+group[group.length-1].number:""}</h3>{group[0].instruction&&<p>{group[0].instruction}</p>}</div>{group.map(renderRQ)}</section>)}
+    </section>
+   </div>
+   {highlightPopup&&<div className="cr-highlight-menu" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()}><button aria-label="Yellow highlight" onClick={()=>applyHighlight("yellow")}><i className="swatch yellow"/></button><span className="cr-menu-sep"/><button aria-label="Remove highlight" onClick={()=>applyHighlight("erase")}><Eraser size={17}/></button></div>}
+   <footer className="cr-footer mock-reading-footer">
+    <div className="mock-part-nav">{[1,2,3].map(part=><button key={part} className={rPassage===part?"active":""} onClick={()=>{setRPassage(part);setRTab("passage")}}>PART {part}</button>)}</div>
+    <div className="cr-number-strip" aria-label="Question navigation">{(passage?.questions||[]).map(q=><button key={q.number} className={rAnswers[String(q.number)]?"answered":""} onClick={()=>{setRTab("questions");setTimeout(()=>document.getElementById("question-"+q.number)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}>{q.number}</button>)}</div>
+    <span className="cr-answer-count">{totalAnswered+" / 40 answered"}</span>
+    <button className="cr-submit" disabled={busy} onClick={()=>submitReading(false)}><Send size={15}/> {busy?"Submitting…":"Submit Reading"}</button>
+   </footer>
+   {message&&<div className="mock-floating-message">{message}</div>}
+   <style jsx global>{`::highlight(ark-mock-yellow){background:#ffe58a;color:inherit}`}</style>
+  </main>
+ }
 
  if(stage==="writing")return <main className="writing-shell mock-writing-shell">
   <header className="writing-topbar"><div className="writing-back-slot"><LockKeyhole size={17}/></div><div className="writing-top-center"><span>FULL MOCK</span><b>Writing</b></div><div className="writing-top-meta"><strong className={wRemaining<=300?"urgent":""}><Clock3 size={16}/>{fmt(wRemaining)}</strong><button className="writing-fullscreen" onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
-  <section className="writing-toolbar"><div><button className={"writing-task-chip mock-task-tab "+(wTask===1?"active":"")} onClick={()=>setWTask(1)}>Task 1 · {words(w1)} words</button><button className={"writing-task-chip mock-task-tab "+(wTask===2?"active":"")} onClick={()=>setWTask(2)}>Task 2 · {words(w2)} words</button></div><div className="writing-controls"><span className="mock-writing-shared">One shared 60-minute timer</span><button className="submit" disabled={busy||!w1.trim()||!w2.trim()} onClick={()=>submitWriting(false)}><Send size={16}/>{busy?"Submitting…":"Submit Writing"}</button></div></section>
+  <section className="writing-toolbar"><div className="mock-writing-tabs"><button className={"writing-task-chip "+(wTask===1?"active":"")} onClick={()=>setWTask(1)}>Writing Task 1 <b>{words(w1)}</b></button><button className={"writing-task-chip "+(wTask===2?"active":"")} onClick={()=>setWTask(2)}>Writing Task 2 <b>{words(w2)}</b></button><span className="writing-rule">Task 1 + Task 2 · 60 minutes total</span></div><div className="writing-controls"><button className="submit" disabled={busy||!w1.trim()||!w2.trim()} onClick={()=>submitWriting(false)}><Send size={16}/>{busy?"Submitting…":"Submit Writing"}</button></div></section>
   <div className="writing-stage">
    <section className="writing-task-pane"><div className="writing-pane-head"><span>QUESTION</span><b>{task.label}</b></div><div className="writing-paper"><p className="writing-time-note">Recommended: about {Math.round(Number(task.recommended_seconds||0)/60)} minutes.</p>{wTask===2&&<p className="writing-topic-note">Write about the following topic:</p>}<div className="writing-prompt">{task.prompt}</div>{task.visual?.kind==="table"&&<div className="mock-writing-table-wrap"><table className="mock-writing-table"><thead><tr>{task.visual.headers.map((h:string)=><th key={h}>{h}</th>)}</tr></thead><tbody>{task.visual.rows.map((row:string[],i:number)=><tr key={i}>{row.map((c,j)=><td key={j}>{c}</td>)}</tr>)}</tbody></table></div>}{(task.instructions||[]).map((x:string,i:number)=><p className="writing-instruction" key={i}>{x}</p>)}<p className="writing-min">Write at least {task.min_words} words.</p></div></section>
    <section className="writing-answer-pane"><div className="writing-pane-head"><span>YOUR ANSWER</span><div><b>{words(wTask===1?w1:w2)} words</b><i className={words(wTask===1?w1:w2)>=task.min_words?"ok":""}>{words(wTask===1?w1:w2)>=task.min_words?"Minimum reached":"Keep writing"}</i></div></div><div className="writing-editor-wrap"><textarea value={wTask===1?w1:w2} onChange={e=>setWriting(wTask,e.target.value)} spellCheck={false} placeholder={"Type "+task.label+" here…"}/></div><div className="writing-editor-footer"><span><ShieldCheck size={14}/> Draft auto-saved</span><span>{fmt(wRemaining)} remaining</span></div></section>
