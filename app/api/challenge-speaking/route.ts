@@ -7,13 +7,12 @@ export const dynamic="force-dynamic";
 export const maxDuration=60;
 
 const BUCKET="ark60-speaking-audio";
-const SPEAKING_DAYS=new Set([1,2,3,5]);
 const MAX_AUDIO_BYTES=8*1024*1024;
 const ALLOWED_MIME=new Set(["audio/webm","audio/mp4","audio/ogg"]);
 type AnyRow=Record<string,any>;
 
 function json(data:any,status=200){return NextResponse.json(data,{status,headers:{"Cache-Control":"private, no-store"}})}
-function validDay(raw:any){const n=Number(raw);return Number.isInteger(n)&&SPEAKING_DAYS.has(n)?n:null}
+function validDay(raw:any){const n=Number(raw);return Number.isInteger(n)&&n>=1&&n<=60?n:null}
 function pad(n:number){return String(n).padStart(2,"0")}
 function safeExt(mime:string){return mime==="audio/mp4"?"m4a":mime==="audio/ogg"?"ogg":"webm"}
 function contentQuestionList(payload:any){
