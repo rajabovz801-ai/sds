@@ -54,8 +54,8 @@ test("Full Mock runtime stores partial work and three section scores",()=>{
  assert.ok(runtime.includes("unique(student_id,day_number)"));
 });
 
-test("All 4 Oct mock cards use one sequenced route and Speaking stays absent",()=>{
- assert.ok(dashboard.includes('if(day===4)return "/day/4/mock"'));
+test("All Sunday mock cards use one sequenced route and Speaking stays absent",()=>{
+ assert.ok(dashboard.includes('if(DAYS[day-1]?.mock)return "/day/"+day+"/mock"'));
  assert.ok(day.includes('const href=sunday?"/day/"+day+"/mock"'));
  const mockStart=dashboard.indexOf("const mockModules");
  const mockEnd=dashboard.indexOf("];",mockStart);
