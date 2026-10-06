@@ -15,6 +15,8 @@ type Attempt={
 const when=(v:string|null)=>v?new Date(v).toLocaleString("en-GB",{timeZone:"Asia/Tashkent",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"—";
 const band=(v:number|null)=>v===null||v===undefined?"—":Number(v).toFixed(1);
 const overall=(r:Attempt)=>r.listening_band!=null&&r.reading_band!=null&&r.writing_band!=null?Math.round(((Number(r.listening_band)+Number(r.reading_band)+Number(r.writing_band))/3)*2)/2:null;
+const MOCK_DAYS=Array.from({length:60},(_,i)=>i+1).filter(day=>new Date(Date.UTC(2026,9,day)).getUTCDay()===0);
+const mockDate=(day:number,short=false)=>new Date(Date.UTC(2026,9,day)).toLocaleDateString("en-GB",{timeZone:"UTC",day:"numeric",month:short?"short":"long"});
 const status=(r:Attempt)=>{
  if(r.stage==="completed")return {label:"Completed",tone:"done"};
  if(r.stage==="assessing")return {label:"AI assessing",tone:"ai"};
@@ -24,11 +26,12 @@ const status=(r:Attempt)=>{
 };
 
 export default function AdminFullMock(){
+ const [day,setDay]=useState(4);
  const [rows,setRows]=useState<Attempt[]>([]),[loading,setLoading]=useState(true),[message,setMessage]=useState(""),[query,setQuery]=useState(""),[selected,setSelected]=useState<Attempt|null>(null),[lastUpdated,setLastUpdated]=useState("");
  async function load(silent=false){
   if(!silent)setLoading(true);setMessage("");
   try{
-   const res=await fetch("/api/challenge-mock?action=admin_list",{credentials:"same-origin",cache:"no-store"});
+   const res=await fetch("/api/challenge-mock?action=admin_list&day="+day,{credentials:"same-origin",cache:"no-store"});
    const obj=await res.json();
    if(res.status===401){window.location.assign("/admin");return}
    if(!res.ok)throw new Error(obj.detail||"Could not load Full Mock results.");
@@ -38,16 +41,16 @@ export default function AdminFullMock(){
   }catch(e){setMessage(e instanceof Error?e.message:"Could not contact the server.")}
   finally{if(!silent)setLoading(false)}
  }
- useEffect(()=>{void load();const id=window.setInterval(()=>{if(document.visibilityState==="visible")void load(true)},5000);const focus=()=>void load(true);window.addEventListener("focus",focus);return()=>{window.clearInterval(id);window.removeEventListener("focus",focus)}},[]);
+ useEffect(()=>{setRows([]);setSelected(null);void load();const id=window.setInterval(()=>{if(document.visibilityState==="visible")void load(true)},5000);const focus=()=>void load(true);window.addEventListener("focus",focus);return()=>{window.clearInterval(id);window.removeEventListener("focus",focus)}},[day]);
  const visible=useMemo(()=>{const q=query.trim().toLowerCase();return rows.filter(r=>!q||((r.student?.first_name||"")+" "+(r.student?.last_name||"")+" "+(r.student?.username||"")).toLowerCase().includes(q))},[rows,query]);
  const completed=rows.filter(r=>r.stage==="completed").length;
  const readingDone=rows.filter(r=>r.reading_score!=null).length;
  const listeningDone=rows.filter(r=>r.listening_score!=null).length;
  return <main className="ma-shell">
-  <header className="ma-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>4 OCT · FULL MOCK RESULTS</span></div><button onClick={()=>load()} disabled={loading}><RefreshCcw size={15}/> Refresh</button></header>
-  <section className="ma-hero"><div><small>LIVE ADMIN RESULTS</small><h1>4 October Full Mock</h1><p>Listening and Reading appear as soon as each section is submitted. Writing appears after AI assessment. Students still see scores only after the full mock is complete.</p></div><div className="ma-live"><i/><span>Auto refresh · 5s</span><b>{lastUpdated||"--:--:--"}</b></div></section>
+  <header className="ma-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>{mockDate(day,true).toUpperCase()} · FULL MOCK RESULTS</span></div><button onClick={()=>load()} disabled={loading}><RefreshCcw size={15}/> Refresh</button></header>
+  <section className="ma-hero"><div><small>LIVE ADMIN RESULTS</small><h1>{mockDate(day)} Full Mock</h1><p>Listening and Reading appear as soon as each section is submitted. Writing appears after AI assessment. Students still see scores only after the full mock is complete.</p></div><div className="ma-live"><i/><span>Auto refresh · 5s</span><b>{lastUpdated||"--:--:--"}</b></div></section>
   <section className="ma-kpis"><article><Headphones/><span>LISTENING SUBMITTED</span><b>{listeningDone}</b></article><article><BookOpen/><span>READING SUBMITTED</span><b>{readingDone}</b></article><article><CheckCircle2/><span>FULLY COMPLETED</span><b>{completed}</b></article><article><UserRound/><span>STARTED MOCK</span><b>{rows.length}</b></article></section>
-  <section className="ma-toolbar"><div><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search student…"/></div><span>4 OCTOBER · DAY 04</span></section>
+  <section className="ma-toolbar"><div><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search student…"/></div><span className="ma-day-picker"><select aria-label="Full Mock day" value={day} onChange={e=>setDay(Number(e.target.value))}>{MOCK_DAYS.map(d=><option key={d} value={d}>Day {String(d).padStart(2,"0")} · {mockDate(d,true)}</option>)}</select><b>{mockDate(day).toUpperCase()} · DAY {String(day).padStart(2,"0")}</b></span></section>
   {message&&<p className="ma-message">{message}</p>}
   <section className="ma-table-wrap">
    <div className="ma-table-head"><div><small>SECTION-BY-SECTION RESULTS</small><h2>Student progress and scores</h2></div><span>{visible.length} students</span></div>
@@ -65,7 +68,7 @@ export default function AdminFullMock(){
    </tbody></table></div>
   </section>
   {selected&&<div className="ma-modal-bg" onMouseDown={e=>{if(e.target===e.currentTarget)setSelected(null)}}><section className="ma-modal">
-   <header><div><small>4 OCT · FULL MOCK</small><h2>{selected.student?selected.student.first_name+" "+selected.student.last_name:"Student"}</h2><p>@{selected.student?.username||"student"} · Started {when(selected.started_at)}</p></div><button onClick={()=>setSelected(null)}><X size={18}/></button></header>
+   <header><div><small>{mockDate(day,true).toUpperCase()} · FULL MOCK</small><h2>{selected.student?selected.student.first_name+" "+selected.student.last_name:"Student"}</h2><p>@{selected.student?.username||"student"} · Started {when(selected.started_at)}</p></div><button onClick={()=>setSelected(null)}><X size={18}/></button></header>
    <div className="ma-modal-body">
     <div className="ma-section-card"><div><Headphones/><h3>Listening</h3></div><strong>{selected.listening_score!=null?selected.listening_score+"/40":"Not submitted"}</strong><span>{selected.listening_band!=null?"Band "+band(selected.listening_band):"—"}</span>{selected.listening_part_scores&&<small>Sections: {selected.listening_part_scores.join(" · ")}</small>}</div>
     <div className="ma-section-card"><div><BookOpen/><h3>Reading</h3></div><strong>{selected.reading_score!=null?selected.reading_score+"/40":"Not submitted"}</strong><span>{selected.reading_band!=null?"Band "+band(selected.reading_band):"—"}</span>{selected.reading_part_scores&&<small>Parts: {selected.reading_part_scores.join(" · ")}</small>}</div>
