@@ -225,9 +225,11 @@ function remaining(started:string|null,limit:number){
  if(!started)return limit;return Math.max(0,limit-Math.floor((Date.now()-Date.parse(started))/1000));
 }
 function stateForClient(row:Obj|null,preview:boolean){
- if(preview||!row)return {stage:"not_started",status:"ready",reading_remaining:3600,writing_remaining:3600};
+ if(preview||!row)return {stage:"not_started",status:"ready",listening_started_at:null,listening_elapsed_seconds:0,reading_remaining:3600,writing_remaining:3600};
  return {
   stage:row.stage,status:row.status,
+  listening_started_at:row.listening_started_at||null,
+  listening_elapsed_seconds:Number(row.listening_elapsed_seconds||0),
   reading_remaining:remaining(row.reading_started_at,3600),
   writing_remaining:remaining(row.writing_started_at,3600),
   listening_answers:row.stage==="listening"?row.listening_answers:{},
@@ -361,6 +363,19 @@ export async function POST(req:NextRequest){
    if(preview)return json({ok:true,preview:true,stage:"listening"});
    const row=await ensureAttempt(student.id,day);return json({ok:true,stage:row.stage});
   }
+  if(action==="start_listening"){
+   const stamp=new Date().toISOString();
+   if(preview)return json({ok:true,preview:true,started_at:stamp});
+   const row=await ensureAttempt(student.id,day);
+   if(row.stage!=="listening")return json({detail:"Listening is already submitted."},409);
+   if(row.listening_started_at)return json({ok:true,resumed:true,started_at:row.listening_started_at});
+   const started=await db.from("ark60_mock_attempts").update({listening_started_at:stamp,updated_at:stamp})
+    .eq("id",row.id).is("listening_started_at",null).select("listening_started_at").maybeSingle();
+   if(started.error)throw started.error;
+   if(started.data?.listening_started_at)return json({ok:true,started_at:started.data.listening_started_at});
+   const current=await ensureAttempt(student.id,day);
+   return json({ok:true,resumed:true,started_at:current.listening_started_at||stamp});
+  }
   if(action==="save_listening"){
    if(preview)return json({ok:true,preview:true});
    const row=await ensureAttempt(student.id,day);if(row.stage!=="listening")return json({detail:"Listening is already submitted."},409);
@@ -372,8 +387,10 @@ export async function POST(req:NextRequest){
    const answers=sanitizeListening(src.listening.payload,body.answers),graded=gradeListening(src.listening.payload,answers);
    if(preview)return json({ok:true,preview:true,stage:"reading",reading_remaining:3600,hidden_result:graded});
    const row=await ensureAttempt(student.id,day);if(row.stage!=="listening")return json({detail:"Listening is already submitted."},409);
+   if(!row.listening_started_at)return json({detail:"Start Listening before submitting."},409);
    const now=new Date().toISOString();
-   const {error}=await db.from("ark60_mock_attempts").update({stage:"reading",listening_answers:answers,listening_score:graded.score,listening_band:graded.band,listening_part_scores:graded.part_scores,listening_elapsed_seconds:Math.max(0,Number(body.elapsed_seconds)||0),listening_submitted_at:now,reading_started_at:now,updated_at:now}).eq("id",row.id);if(error)throw error;
+   const listeningElapsed=Math.max(0,Math.floor((Date.now()-Date.parse(row.listening_started_at))/1000));
+   const {error}=await db.from("ark60_mock_attempts").update({stage:"reading",listening_answers:answers,listening_score:graded.score,listening_band:graded.band,listening_part_scores:graded.part_scores,listening_elapsed_seconds:listeningElapsed,listening_submitted_at:now,reading_started_at:now,updated_at:now}).eq("id",row.id);if(error)throw error;
    return json({ok:true,stage:"reading",reading_remaining:3600});
   }
   if(action==="save_reading"){
