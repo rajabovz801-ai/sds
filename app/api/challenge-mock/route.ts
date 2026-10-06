@@ -419,7 +419,8 @@ export async function POST(req:NextRequest){
   }
   if(action==="submit_writing"){
    const task1=String(body.task1||"").trim().slice(0,25000),task2=String(body.task2||"").trim().slice(0,25000);
-   if(!task1||!task2)return json({detail:"Complete both Writing tasks before submitting."},400);
+   const auto=body.auto===true;
+   if((!task1||!task2)&&!auto)return json({detail:"Complete both Writing tasks before submitting."},400);
    const assessed=await gradeWriting(task1,task2,src.writing.payload);
    if(preview){
     if(!assessed.ok)return json({ok:false,preview:true,grading_unavailable:true,detail:assessed.error},503);
