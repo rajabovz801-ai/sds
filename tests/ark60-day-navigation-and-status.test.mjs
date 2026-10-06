@@ -49,3 +49,15 @@ test("Custom Highlight API rules load from a stylesheet that bypasses Next CSS p
   assert.match(css,/::highlight\(aa-green\)/);
   assert.match(css,/::highlight\(ark-listening-yellow\)/);
 });
+
+test("Reading and Writing schedules continue through the full 60-day challenge",()=>{
+  const plan=read("lib/ark60-reading-plan.ts");
+  const day=read("app/day/[day]/page.tsx");
+  const writing=read("app/api/challenge-writing/route.js");
+  assert.match(plan,/day > 60/);
+  assert.match(plan,/isSunday\(day\)/);
+  assert.match(plan,/regularDayIndex/);
+  assert.match(day,/Array\.from\(\{length:60\}/);
+  assert.match(writing,/Array\.from\(\{ length: 60 \}/);
+  assert.match(writing,/getUTCDay\(\) !== 0/);
+});
