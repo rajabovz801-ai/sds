@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
 import AnimatedBackButton from "../../components/animated-back-button";
-import {CheckCircle2,Clock3,FileText,RefreshCcw,Search,Send,UserRound} from "lucide-react";
+import {CheckCircle2,Clock3,FileText,RefreshCcw,Search,Send,UserRound,Sparkles} from "lucide-react";
 import "./writing-admin.css";
 
 type Row={id:string;day_number:number;payload:any;submitted_at:string;band:number|null;review_status:string;review_feedback?:string|null;reviewed_at?:string|null;active_writing_seconds?:number;student:{first_name:string;last_name:string;username:string}|null};
@@ -14,7 +14,7 @@ function expiry(value:string){const ms=Date.parse(value)+72*60*60*1000-Date.now(
 export default function AdminWriting(){
  const [rows,setRows]=useState<Row[]>([]),[loading,setLoading]=useState(true),[message,setMessage]=useState("");
  const [query,setQuery]=useState(""),[filter,setFilter]=useState<"pending"|"checked"|"all">("pending"),[day,setDay]=useState<number|0>(0);
- const [selectedId,setSelectedId]=useState(""),[bands,setBands]=useState<Record<string,string>>({}),[feedback,setFeedback]=useState<Record<string,string>>({}),[busy,setBusy]=useState("");
+ const [selectedId,setSelectedId]=useState(""),[bands,setBands]=useState<Record<string,string>>({}),[feedback,setFeedback]=useState<Record<string,string>>({}),[busy,setBusy]=useState(""),[aiBusy,setAiBusy]=useState(false);
 
  async function load(){
   setLoading(true);setMessage("");
@@ -50,9 +50,33 @@ export default function AdminWriting(){
   }catch(e){setMessage(e instanceof Error?e.message:"Could not contact the server.")}finally{setBusy("")}
  }
 
+ async function aiGrade(row:Row){
+  setBusy("ai-"+row.id);setMessage("");
+  try{
+   const res=await fetch("/api/challenge-writing",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"ai_grade",id:row.id})});
+   const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"AI assessment failed.");
+   await load();
+  }catch(e){setMessage(e instanceof Error?e.message:"Could not contact the server.")}finally{setBusy("")}
+ }
+
+ async function aiGradePending(){
+  setAiBusy(true);setMessage("");
+  try{
+   let total=0;
+   for(let i=0;i<10;i++){
+    const res=await fetch("/api/challenge-writing",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"ai_grade_pending",limit:8})});
+    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not run AI assessment.");
+    total+=Number(obj.graded||0);
+    if(Number(obj.processed||0)===0)break;
+   }
+   setMessage(total?("AI checked "+total+" pending Writing submissions. Review and approve the suggested scores."):"No unchecked Writing submissions were found.");
+   await load();
+  }catch(e){setMessage(e instanceof Error?e.message:"Could not contact the server.")}finally{setAiBusy(false)}
+ }
+
  return <main className="wa-shell">
   <header className="wa-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>WRITING INBOX</span></div><button onClick={load}><RefreshCcw size={15}/> Refresh</button></header>
-  <section className="wa-hero"><div><small>72-HOUR TEACHER INBOX</small><h1>Writing submissions</h1><p>Review student work in a compact inbox. Active Writing Time is tracked separately from the optional task timer.</p></div><div className="wa-kpis"><span><b>{pending}</b> Pending</span><span><b>{rows.length-pending}</b> Checked</span><span><b>{rows.length}</b> In inbox</span></div></section>
+  <section className="wa-hero"><div><small>72-HOUR TEACHER INBOX</small><h1>Writing submissions</h1><p>Every new essay is AI-assessed first. The suggested band, criteria and corrections stay pending until a teacher reviews and approves them.</p><button className="wa-ai-all" disabled={aiBusy||pending===0} onClick={aiGradePending}><Sparkles size={14}/>{aiBusy?"Checking pending Writing…":"AI check pending"}</button></div><div className="wa-kpis"><span><b>{pending}</b> Pending</span><span><b>{rows.length-pending}</b> Checked</span><span><b>{rows.length}</b> In inbox</span></div></section>
 
   <section className="wa-days"><button className={day===0?"active":""} onClick={()=>setDay(0)}><span>ALL</span><b>{rows.length}</b><small>current inbox</small></button>{days.map(d=><button key={d} className={day===d?"active":""} onClick={()=>setDay(d)}><span>DAY {String(d).padStart(2,"0")}</span><b>{dayDate(d)}</b><small>{rows.filter(r=>r.day_number===d).length} submissions</small></button>)}</section>
 
@@ -65,8 +89,9 @@ export default function AdminWriting(){
    <div className="wa-detail">{!selected?<div className="wa-empty"><FileText size={28}/><b>Select a Writing submission</b><p>The response metrics and grading controls will appear here.</p></div>:<>
     <div className="wa-detail-head"><div><small>DAY {String(selected.day_number).padStart(2,"0")} · {String(selected.payload?.task_type||"WRITING").toUpperCase()}</small><h2>{selected.student?selected.student.first_name+" "+selected.student.last_name:"Student"}</h2><p>@{selected.student?.username||"student"} · Submitted {when(selected.submitted_at)} · {expiry(selected.submitted_at)}</p></div><span className={"wa-state "+(selected.review_status==="reviewed"?"done":"wait")}>{selected.review_status==="reviewed"?<CheckCircle2 size={13}/>:<Clock3 size={13}/>} {selected.review_status==="reviewed"?"Checked":"Pending review"}</span></div>
     <div className="wa-metrics"><span><small>WORDS</small><b>{selected.payload?.word_count??"—"}</b></span><span><small>Active Writing Time</small><b>{dur(Number(selected.active_writing_seconds||0))}</b></span><span><small>Task Timer Used</small><b>{dur(Number(selected.payload?.duration_seconds||0))}</b></span><span><small>SUBMITTED</small><b>{when(selected.submitted_at)}</b></span></div>
-    <div className="wa-actions"><a href={"/api/challenge-writing?action=pdf&id="+selected.id} target="_blank" rel="noreferrer"><FileText size={15}/> Open PDF</a></div>
-    <div className="wa-review"><label><span>IELTS Band</span><select value={bands[selected.id]||""} onChange={e=>setBands(v=>({...v,[selected.id]:e.target.value}))}><option value="">Select</option>{Array.from({length:19},(_,i)=>i/2).map(v=><option key={v} value={v}>{v.toFixed(1)}</option>)}</select></label><label className="feedback"><span>Teacher feedback <i>optional</i></span><textarea value={feedback[selected.id]||""} onChange={e=>setFeedback(v=>({...v,[selected.id]:e.target.value}))} placeholder="Short teacher feedback for the student…"/></label><button disabled={busy===selected.id||!bands[selected.id]} onClick={()=>grade(selected)}>{busy===selected.id?"Saving…":selected.review_status==="reviewed"?"Update result":"Save score"}<Send size={15}/></button></div>
+    <div className="wa-actions"><a href={"/api/challenge-writing?action=pdf&id="+selected.id} target="_blank" rel="noreferrer"><FileText size={15}/> Open assessment PDF</a>{!selected.payload?.ai_assessment&&<button disabled={busy==="ai-"+selected.id} onClick={()=>aiGrade(selected)}><Sparkles size={15}/>{busy==="ai-"+selected.id?"Checking…":"Run AI check"}</button>}</div>
+    {selected.payload?.ai_assessment&&<div className="wa-ai-card"><div className="wa-ai-head"><span><Sparkles size={15}/> AI SUGGESTION</span><b>Band {Number(selected.payload.ai_assessment.band??selected.band??0).toFixed(1)}</b><em>Teacher approval required</em></div><div className="wa-ai-scores"><span><small>{selected.payload?.task_type==="task1"?"TASK ACHIEVEMENT":"TASK RESPONSE"}</small><b>{Number(selected.payload.ai_assessment.task_criterion??0).toFixed(1)}</b></span><span><small>COHERENCE</small><b>{Number(selected.payload.ai_assessment.coherence_cohesion??0).toFixed(1)}</b></span><span><small>LEXICAL</small><b>{Number(selected.payload.ai_assessment.lexical_resource??0).toFixed(1)}</b></span><span><small>GRAMMAR</small><b>{Number(selected.payload.ai_assessment.grammar??0).toFixed(1)}</b></span></div><p>{selected.payload.ai_assessment.summary}</p>{Array.isArray(selected.payload.ai_assessment.errors)&&selected.payload.ai_assessment.errors.length>0&&<div className="wa-errors"><b>Key corrections</b>{selected.payload.ai_assessment.errors.map((e:any,i:number)=><article key={i}><strong>{i+1}. {e.category||"Correction"}</strong><span><i>Original</i>{e.original}</span><span><i>Better</i>{e.correction}</span>{e.explanation&&<small>{e.explanation}</small>}</article>)}</div>}</div>}
+    <div className="wa-review"><label><span>Teacher final band</span><select value={bands[selected.id]||""} onChange={e=>setBands(v=>({...v,[selected.id]:e.target.value}))}><option value="">Select</option>{Array.from({length:19},(_,i)=>i/2).map(v=><option key={v} value={v}>{v.toFixed(1)}</option>)}</select></label><label className="feedback"><span>Teacher feedback <i>editable before publishing</i></span><textarea value={feedback[selected.id]||""} onChange={e=>setFeedback(v=>({...v,[selected.id]:e.target.value}))} placeholder="Review the AI feedback, edit it if needed, then approve…"/></label><button disabled={busy===selected.id||!bands[selected.id]} onClick={()=>grade(selected)}>{busy===selected.id?"Saving…":selected.review_status==="reviewed"?"Update published result":"Approve & publish"}<Send size={15}/></button></div>
    </>}</div>
   </section>
  </main>;
