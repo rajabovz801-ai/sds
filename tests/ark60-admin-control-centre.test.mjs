@@ -37,7 +37,9 @@ test("Writing admin separates active Writing time from task timer",()=>{
   const api=read("app/api/challenge-writing/route.js");
   const admin=read("app/admin/writing/page.tsx");
   assert.match(api,/active_writing_seconds/);
-  assert.match(api,/72\*60\*60\*1000/);
+  assert.match(api,/ark60_study_sessions/);
+  assert.match(api,/ark60_writing_visits/);
+  assert.match(api,/writing_visits/);
   assert.match(admin,/Active Writing Time/);
   assert.match(admin,/Task Timer Used/);
 });
