@@ -22,6 +22,7 @@ export default function WritingPage(){
  const [data,setData]=useState<ApiData|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState("");
  const [answer,setAnswer]=useState(""),[started,setStarted]=useState(false),[paused,setPaused]=useState(false),[remaining,setRemaining]=useState(0),[sending,setSending]=useState(false),[message,setMessage]=useState(""),[fullScreen,setFullScreen]=useState(false);
  const timerRef=useRef<number|null>(null),draftSaveRef=useRef<number|null>(null),lastDraftSyncRef=useRef(0),lastTick=useRef(Date.now());
+ const visitIdRef=useRef<string|null>(null),visitBusyRef=useRef(false);
  const storageKey=data?.draft_scope?`ark60-writing-${data.draft_scope}-day-${day}`:"";
 
  useEffect(()=>{let live=true;(async()=>{setLoading(true);setError("");try{const r=await fetch(`/api/challenge-writing?day=${day}`,{credentials:"same-origin",cache:"no-store"});const obj:ApiData=await r.json();if(!r.ok)throw new Error((obj as any).detail||"Writing task could not be loaded.");if(!live)return;setData(obj);const duration=Number(obj.content?.payload?.duration_seconds||0);setRemaining(duration);setAnswer("");setStarted(false);setPaused(false);
@@ -41,6 +42,45 @@ export default function WritingPage(){
      }else if(Number.isFinite(Number(saved.remaining)))setRemaining(Math.max(0,Number(saved.remaining)));
     }
    }}catch(e){if(live)setError(e instanceof Error?e.message:"Writing task could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day]);
+
+ useEffect(()=>{
+  if(!data||data.submission||data.preview)return;
+  let disposed=false;
+  async function enterVisit(){
+   if(disposed||visitBusyRef.current||visitIdRef.current||document.visibilityState!=="visible")return;
+   visitBusyRef.current=true;
+   try{
+    const res=await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"writing_visit_enter",day})});
+    const obj=await res.json().catch(()=>({}));
+    if(!disposed&&res.ok&&obj?.visit?.id)visitIdRef.current=String(obj.visit.id);
+   }catch{}finally{visitBusyRef.current=false}
+  }
+  function leaveVisit(reason:"hidden"|"pagehide"|"unload"){
+   const visitId=visitIdRef.current;
+   if(!visitId)return;
+   visitIdRef.current=null;
+   try{
+    void fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"writing_visit_leave",day,visit_id:visitId,reason}),keepalive:true});
+   }catch{}
+  }
+  const onVisibility=()=>{if(document.visibilityState==="hidden")leaveVisit("hidden");else void enterVisit()};
+  const onPageHide=()=>leaveVisit("pagehide");
+  document.addEventListener("visibilitychange",onVisibility);
+  window.addEventListener("pagehide",onPageHide);
+  void enterVisit();
+  const ping=window.setInterval(()=>{
+   const visitId=visitIdRef.current;
+   if(!visitId||document.visibilityState!=="visible")return;
+   void fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"writing_visit_ping",day,visit_id:visitId}),keepalive:true}).catch(()=>{});
+  },30000);
+  return()=>{
+   disposed=true;
+   window.clearInterval(ping);
+   document.removeEventListener("visibilitychange",onVisibility);
+   window.removeEventListener("pagehide",onPageHide);
+   leaveVisit("unload");
+  };
+ },[day,data?.submission,data?.preview]);
 
  useEffect(()=>{
   if(!data||data.submission||!storageKey)return;
@@ -72,8 +112,13 @@ export default function WritingPage(){
  function begin(){if(remaining<=0)return;setStarted(true);setPaused(false);lastTick.current=Date.now()}
  function togglePause(){if(remaining<=0)return;setPaused(v=>!v);lastTick.current=Date.now()}
  async function toggleFullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{}}
- async function goBack(){try{if(document.fullscreenElement)await document.exitFullscreen()}catch{}router.push("/day/"+day)}
- async function submit(auto=false){if(!data||sending||data.submission)return;if(!answer.trim()){if(!auto)setMessage("Write your response before submitting.");return}if(!auto&&!window.confirm("Submit this Writing response? You will not be able to edit it afterwards."))return;setSending(true);setMessage("");try{const r=await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,answer,duration_seconds:used})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit your response.");if(draftSaveRef.current)window.clearTimeout(draftSaveRef.current);try{if(storageKey)localStorage.removeItem(storageKey)}catch{};setData(prev=>prev?{...prev,submission:obj.submission,draft:null}:prev);setPaused(true);setMessage(obj.preview?"Preview completed. Nothing was saved to student results.":"Your response has been submitted. Your result will be available soon.")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit your response.")}finally{setSending(false)}}
+ async function goBack(){
+  const visitId=visitIdRef.current;visitIdRef.current=null;
+  if(visitId){try{await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"writing_visit_leave",day,visit_id:visitId,reason:"back"}),keepalive:true})}catch{}}
+  try{if(document.fullscreenElement)await document.exitFullscreen()}catch{}
+  router.push("/day/"+day)
+ }
+ async function submit(auto=false){if(!data||sending||data.submission)return;if(!answer.trim()){if(!auto)setMessage("Write your response before submitting.");return}if(!auto&&!window.confirm("Submit this Writing response? You will not be able to edit it afterwards."))return;setSending(true);setMessage("");try{const r=await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,answer,duration_seconds:used})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit your response.");visitIdRef.current=null;if(draftSaveRef.current)window.clearTimeout(draftSaveRef.current);try{if(storageKey)localStorage.removeItem(storageKey)}catch{};setData(prev=>prev?{...prev,submission:obj.submission,draft:null}:prev);setPaused(true);setMessage(obj.preview?"Preview completed. Nothing was saved to student results.":"Your response has been submitted. Your result will be available soon.")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit your response.")}finally{setSending(false)}}
 
  if(loading)return <main className="writing-loading"><span>ARK EDUCATION</span><b>Loading Writing task…</b></main>;
  if(error||!data)return <main className="writing-loading"><span>ARK EDUCATION</span><b>{error||"Writing task unavailable."}</b><Link href={`/day/${day}`}>Back to Day {day}</Link></main>;
