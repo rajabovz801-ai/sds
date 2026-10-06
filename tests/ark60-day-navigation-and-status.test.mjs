@@ -61,3 +61,11 @@ test("Reading and Writing schedules continue through the full 60-day challenge",
   assert.match(writing,/Array\.from\(\{ length: 60 \}/);
   assert.match(writing,/getUTCDay\(\) !== 0/);
 });
+
+test("Writing card stays locked until that day's Writing material is actually published",()=>{
+  const day=read("app/day/[day]/page.tsx");
+  assert.match(day,/challenge-writing\?action=availability&day=/);
+  assert.match(day,/setPublishedWriting/);
+  assert.match(day,/name==="Writing"&&WRITING_DAYS\.has\(day\)&&publishedWriting/);
+  assert.match(day,/\["Reading","Article","Vocabulary","Speaking","Listening","Writing"\]/);
+});
