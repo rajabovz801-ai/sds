@@ -66,7 +66,7 @@ function modulesFor(day:Day){
  }:x);
 }
 function moduleHref(day:number,name:string){
- if(day===4)return "/day/4/mock";
+ if(DAYS[day-1]?.mock)return "/day/"+day+"/mock";
  if(name==="Reading")return "/day/"+day+"/reading";
  if(name==="Listening")return "/day/"+day+"/listening";
  if(name==="Article")return "/day/"+day+"/article";
