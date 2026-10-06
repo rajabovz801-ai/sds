@@ -267,10 +267,13 @@ test("calendar dots reflect published module requirements",()=>{
 });
 
 
-test("Speaking is published only for Days 1 to 3 and uses the exact supplied source text",()=>{
+test("Speaking availability is driven by published day content and preserves the supplied source text",()=>{
   const api=read("app/api/challenge-speaking/route.ts");
   const migration=read("supabase/migrations/20260930_ark60_speaking_days_1_3.sql");
-  assert.match(api,/SPEAKING_DAYS=new Set\(\[1,2,3\]\)/);
+  assert.match(api,/function validDay\(raw:any\)/);
+  assert.match(api,/getContent\(day\)/);
+  assert.match(api,/published:!!content/);
+  assert.doesNotMatch(api,/SPEAKING_DAYS=new Set/);
   assert.match(migration,/Do you think you spend too much time on social media\?/);
   assert.match(migration,/What do people often do on social media\?/);
   assert.match(migration,/Describe an occasion when you got up extremely early\./);
