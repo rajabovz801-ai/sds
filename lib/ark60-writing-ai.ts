@@ -98,7 +98,7 @@ export async function gradeArk60Writing(input:{day:number;task_type:string;promp
     "Score every criterion from 0 to 9 in 0.5 increments and give a suggested task band.",
     "The first criterion is "+criterion+".",
     "Be evidence-based. Do not inflate the score. Do not punish the same language error twice.",
-    "Identify 6-12 of the most useful specific mistakes when possible. For each, quote the student's wording, give a corrected version, classify the error, and briefly explain it.",
+    "Identify 5-8 of the most useful specific mistakes when possible. For each, quote the student's wording, give a corrected version, classify the error, and briefly explain it.",
     "If the response is below the minimum word count, reflect that in "+criterion+".",
     taskType==="task1"?"For Task 1, judge overview, key features, comparisons and data accuracy. Use the supplied exact chart data when available.":"For Task 2, judge whether all parts of the prompt are addressed, position is clear, ideas are developed and supported.",
     "",
@@ -121,7 +121,7 @@ export async function gradeArk60Writing(input:{day:number;task_type:string;promp
     body:JSON.stringify({
       model,
       input:prompt,
-      max_output_tokens:2600,
+      max_output_tokens:8000,
       text:{format:{type:"json_schema",name:"ark60_daily_writing_assessment",strict:true,schema:DAILY_WRITING_SCHEMA}}
     })
   });
