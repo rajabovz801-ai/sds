@@ -37,3 +37,14 @@ test("Dashboard and direct module routes recognize recurring Sunday mocks",()=>{
   assert.match(reading,/isMockDay\(day\)/);
   assert.match(backend,/available=\["listening","reading","writing"\] if d\.weekday\(\)==6/);
 });
+
+test("Full Mock Listening start is persisted so reload cannot replay from zero",()=>{
+  const api=read("app/api/challenge-mock/route.ts");
+  const page=read("app/day/[day]/mock/page.tsx");
+  assert.match(api,/action==="start_listening"/);
+  assert.match(api,/listening_started_at/);
+  assert.match(api,/Start Listening before submitting/);
+  assert.match(page,/action:"start_listening",day/);
+  assert.match(page,/Date\.now\(\)-Date\.parse\(lStartedAt\)/);
+  assert.match(page,/audio\.currentTime=offset/);
+});
