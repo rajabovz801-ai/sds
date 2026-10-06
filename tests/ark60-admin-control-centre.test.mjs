@@ -52,3 +52,12 @@ test("Speaking inbox keeps cleanup and filters expired rows",()=>{
   assert.match(cleanup,/audio_expired:true/);
   assert.match(cleanup,/BUCKET="ark60-speaking-audio"/);
 });
+
+test("Reading admin discovers published result days instead of stopping at Day 17",()=>{
+  const api=read("app/api/challenge-reading/route.ts");
+  const admin=read("app/admin/reading/page.tsx");
+  assert.match(api,/available_days:availableDays/);
+  assert.match(admin,/availableDays/);
+  assert.match(admin,/dayDate\(d\.day_number\)/);
+  assert.doesNotMatch(admin,/const days=\[1,2,3,5,6,7,8,9,10,12,13,14,15,16,17\]/);
+});
