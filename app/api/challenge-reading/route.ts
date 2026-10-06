@@ -67,11 +67,14 @@ export async function GET(req:NextRequest){
   const rows=await db("ark60_reading_attempts","GET","select=student_id,day_number,ordinal,score,total,elapsed_seconds,submitted_at,passage_id,answers&day_number=eq."+day+"&order=submitted_at.desc");
   const students=await db("ark60_students","GET","select=id,first_name,last_name,username&status=eq.active&limit=2000");
   const passages=await catalogue(day);
+  const allPublished=await db("ark60_reading_passages","GET","select=day_number,status&status=eq.published&order=day_number.asc");
+  const availableDays=[...new Set(allPublished.map((p:J)=>Number(p.day_number)).filter((n:number)=>Number.isInteger(n)&&n>=1&&n<=60))]
+   .map(day_number=>({day_number,passage_count:allPublished.filter((p:J)=>Number(p.day_number)===day_number).length}));
   const details=await db("ark60_reading_passages","GET","select=id,questions,answer_key,analysis&day_number=eq."+day);
   const users=new Map(students.map((s:J)=>[s.id,s]));
   const source=new Map(details.map((p:J)=>[p.id,p]));
   const realRows=rows.filter((a:J)=>String((users.get(a.student_id) as J|undefined)?.username||"").toLowerCase()!==previewName);
-  return NextResponse.json({day,passages,attempts:realRows.map((a:J)=>({...a,student:users.get(a.student_id)||null,
+  return NextResponse.json({day,available_days:availableDays,passages,attempts:realRows.map((a:J)=>({...a,student:users.get(a.student_id)||null,
     review:source.get(a.passage_id)?reviewFor(source.get(a.passage_id) as J,a):null,
     answers:undefined
   }))});
