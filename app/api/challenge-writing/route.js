@@ -111,15 +111,13 @@ export async function GET(request) {
   if (action === "admin_list") {
     const admin = await adminFromRequest(request);
     if (!admin) return json({ detail: "Admin sign-in required." }, 401);
-    const cutoff = new Date(Date.now() - 72*60*60*1000).toISOString();
     const requestedDay = Number(url.searchParams.get("day") || 0);
     let query = supabase
       .from("ark60_submissions")
       .select("id,student_id,day_number,payload,submitted_at,band,review_status,review_feedback,reviewed_at")
       .eq("module", "writing")
-      .gte("submitted_at", cutoff)
       .order("submitted_at", { ascending: false })
-      .limit(500);
+      .limit(1000);
     if (Number.isInteger(requestedDay) && requestedDay >= 1 && requestedDay <= 60) query = query.eq("day_number", requestedDay);
     const { data: submissions, error } = await query;
     if (error) return json({ detail: "Could not load writing submissions." }, 500);
