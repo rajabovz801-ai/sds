@@ -3,9 +3,11 @@ import crypto from "node:crypto";
 import PDFDocument from "pdfkit";
 import { getServiceSupabase } from "@/lib/supabase/server";
 import { isDayUnlocked } from "@/lib/ark60-content-auth";
+import { assessArk60Submission, assessArk60SubmissionById, gradePendingArk60WritingBatch } from "@/lib/ark60-writing-ai";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 const STUDENT_COOKIE = "ark60_session";
 const ADMIN_COOKIE = "ark60_admin";
@@ -205,9 +207,43 @@ export async function GET(request) {
     doc.moveDown(1);
     doc.font("Helvetica-Bold").fontSize(12).text("Student response");
     doc.moveDown(0.35).font("Helvetica").fontSize(10.5).text(String(payload.answer || ""), { lineGap: 4, align: "left" });
+
+    const ai = payload.ai_assessment || null;
+    if (ai) {
+      const criterionLabel = payload.task_type === "task1" ? "Task Achievement" : "Task Response";
+      doc.moveDown(1.2).font("Helvetica-Bold").fontSize(13).fillColor("#111").text("AI assessment - teacher review required");
+      doc.moveDown(0.35).font("Helvetica-Bold").fontSize(11).text(`Suggested Band: ${Number(ai.band ?? submission.band ?? 0).toFixed(1)}`);
+      doc.moveDown(0.45).font("Helvetica").fontSize(9.5);
+      doc.text(`${criterionLabel}: ${Number(ai.task_criterion ?? 0).toFixed(1)}    Coherence & Cohesion: ${Number(ai.coherence_cohesion ?? 0).toFixed(1)}`);
+      doc.text(`Lexical Resource: ${Number(ai.lexical_resource ?? 0).toFixed(1)}    Grammar: ${Number(ai.grammar ?? 0).toFixed(1)}`);
+      if (ai.summary) {
+        doc.moveDown(0.7).font("Helvetica-Bold").fontSize(10.5).text("Assessment summary");
+        doc.moveDown(0.2).font("Helvetica").fontSize(9.5).text(String(ai.summary), { lineGap: 3 });
+      }
+      const strengths = Array.isArray(ai.strengths) ? ai.strengths : [];
+      if (strengths.length) {
+        doc.moveDown(0.7).font("Helvetica-Bold").fontSize(10.5).text("Strengths");
+        doc.moveDown(0.2).font("Helvetica").fontSize(9.3);
+        strengths.forEach((item, index) => doc.text(`${index + 1}. ${String(item)}`, { lineGap: 2 }));
+      }
+      const errors = Array.isArray(ai.errors) ? ai.errors : [];
+      if (errors.length) {
+        doc.moveDown(0.8).font("Helvetica-Bold").fontSize(10.5).text("Specific corrections");
+        errors.forEach((item, index) => {
+          doc.moveDown(0.4).font("Helvetica-Bold").fontSize(9.4).text(`${index + 1}. ${String(item.category || "Correction")}`);
+          doc.font("Helvetica").fontSize(9.2).text(`Original: ${String(item.original || "")}`, { lineGap: 2 });
+          doc.text(`Correction: ${String(item.correction || "")}`, { lineGap: 2 });
+          if (item.explanation) doc.text(`Why: ${String(item.explanation)}`, { lineGap: 2 });
+        });
+      }
+    }
+    doc.moveDown(1.2).font("Helvetica-Bold").fontSize(12).text("Teacher decision");
     if (submission.review_status === "reviewed") {
-      doc.moveDown(1.2).font("Helvetica-Bold").fontSize(12).text(`Band: ${submission.band ?? "—"}`);
-      if (submission.review_feedback) doc.moveDown(0.35).font("Helvetica").fontSize(10.5).text(`Feedback: ${submission.review_feedback}`, { lineGap: 3 });
+      doc.moveDown(0.35).font("Helvetica-Bold").fontSize(11).text(`Final Band: ${submission.band ?? "-"}`);
+      if (submission.review_feedback) doc.moveDown(0.35).font("Helvetica").fontSize(10).text(`Teacher feedback: ${submission.review_feedback}`, { lineGap: 3 });
+      doc.moveDown(0.25).font("Helvetica").fontSize(8.5).fillColor("#555").text("Status: reviewed and approved by teacher");
+    } else {
+      doc.moveDown(0.35).font("Helvetica").fontSize(9.5).fillColor("#555").text("Status: pending teacher review. The AI score above is a suggestion, not the final published result.");
     }
     doc.end();
     await finished;
@@ -314,6 +350,23 @@ export async function POST(request) {
     return json({ ok: true, saved: true, updated_at: data?.updated_at || null });
   }
 
+  if (action === "ai_grade") {
+    const admin = await adminFromRequest(request);
+    if (!admin) return json({ detail: "Admin sign-in required." }, 401);
+    const id = String(body.id || "");
+    if (!id) return json({ detail: "Submission id is required." }, 400);
+    const result = await assessArk60SubmissionById(id);
+    if (!result.ok) return json({ detail: result.error || "AI assessment failed." }, 503);
+    return json({ ok: true, result });
+  }
+
+  if (action === "ai_grade_pending") {
+    const admin = await adminFromRequest(request);
+    if (!admin) return json({ detail: "Admin sign-in required." }, 401);
+    const result = await gradePendingArk60WritingBatch(Number(body.limit || 8));
+    return json({ ok: true, ...result });
+  }
+
   if (action === "grade") {
     const admin = await adminFromRequest(request);
     if (!admin) return json({ detail: "Admin sign-in required." }, 401);
@@ -375,7 +428,7 @@ export async function POST(request) {
   const { data, error } = await supabase
     .from("ark60_submissions")
     .insert({ student_id: student.id, day_number: day, module: "writing", payload, review_status: "pending" })
-    .select("id,submitted_at,review_status,payload")
+    .select("id,student_id,day_number,module,submitted_at,review_status,payload")
     .maybeSingle();
   if (error) {
     if (String(error.code) === "23505") return json({ detail: "You have already submitted this Writing task." }, 409);
@@ -386,5 +439,12 @@ export async function POST(request) {
     .delete()
     .eq("student_id", student.id)
     .eq("day_number", day);
-  return json({ ok: true, submission: data });
+
+  let ai_result = null;
+  try {
+    ai_result = data ? await assessArk60Submission(data) : null;
+  } catch (e) {
+    console.error("Daily Writing AI assessment failed after submit", e);
+  }
+  return json({ ok: true, submission: data, ai_result });
 }
