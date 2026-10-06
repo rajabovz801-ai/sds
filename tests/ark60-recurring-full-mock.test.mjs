@@ -56,3 +56,11 @@ test("Full Mock admin can switch between all Sunday result days",()=>{
   assert.match(admin,/value=\{day\}/);
   assert.doesNotMatch(admin,/4 OCTOBER|4 October Full Mock|DAY 04/);
 });
+
+test("Full Mock Writing timer can submit incomplete answers at zero",()=>{
+  const api=read("app/api/challenge-mock/route.ts");
+  const page=read("app/day/[day]/mock/page.tsx");
+  assert.match(page,/action:"submit_writing",day,task1:w1,task2:w2,auto/);
+  assert.match(api,/const auto=body\.auto===true/);
+  assert.match(api,/\(!task1\|\|!task2\)&&!auto/);
+});
