@@ -663,3 +663,12 @@ test("Listening admin shows every submitted attempt with its attempt number",()=
   assert.match(admin,/Attempt \{selected\.attempt_number\}/);
   assert.match(admin,/>Attempts</);
 });
+
+test("current and past challenge days require every scheduled module even if an upload is missing",()=>{
+  const migration=read("supabase/migrations/20261006_ark60_strict_current_day_requirements.sql");
+  assert.match(migration,/planned_required as/);
+  assert.match(migration,/p_today-date '2026-10-01'/);
+  assert.match(migration,/array\['listening','reading','writing'\]/);
+  assert.match(migration,/array\['reading','listening','article','vocabulary','writing','speaking'\]/);
+  assert.match(migration,/published_required as/);
+});
