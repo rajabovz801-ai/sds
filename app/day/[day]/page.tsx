@@ -7,7 +7,7 @@ import Link from "next/link";
 import {useParams} from "next/navigation";
 import {useEffect,useState} from "react";
 import {BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,ChevronRight,LockKeyhole,CalendarDays,Clock3,ShieldCheck,Coins} from "lucide-react";
-const WRITING_DAYS=new Set([1,2,3,5,6,7,8,9,10,12,13,14,15,16,17]);
+const WRITING_DAYS=new Set(Array.from({length:60},(_,i)=>i+1).filter(day=>new Date(Date.UTC(2026,9,day)).getUTCDay()!==0));
 function writingType(day:number){const ordered=[...WRITING_DAYS].sort((a,b)=>a-b);return ordered.indexOf(day)%2===0?"Task 1":"Task 2"}
 const regular=[
  {name:"Reading",description:"Two IELTS CDI passage practices",icon:BookOpen,tone:"purple"},
