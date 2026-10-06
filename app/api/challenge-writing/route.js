@@ -125,15 +125,20 @@ export async function GET(request) {
     const days = [...new Set((submissions || []).map((row) => row.day_number))];
     let students = [];
     let studyRows = [];
+    let visitRows = [];
     if (ids.length) {
-      const [peopleResult, studyResult] = await Promise.all([
+      const [peopleResult, studyResult, visitResult] = await Promise.all([
         supabase.from("ark60_students").select("id,first_name,last_name,username").in("id", ids),
         days.length
           ? supabase.from("ark60_study_sessions").select("student_id,day_number,active_seconds").eq("module","writing").in("student_id",ids).in("day_number",days)
+          : Promise.resolve({data:[]}),
+        days.length
+          ? supabase.from("ark60_writing_visits").select("id,student_id,day_number,entered_at,last_seen_at,left_at,exit_reason").in("student_id",ids).in("day_number",days).order("entered_at",{ascending:true})
           : Promise.resolve({data:[]})
       ]);
       students = peopleResult.data || [];
       studyRows = studyResult.data || [];
+      visitRows = visitResult.data || [];
     }
     const people = new Map(students.map((student) => [student.id, student]));
     const active = new Map();
@@ -141,11 +146,24 @@ export async function GET(request) {
       const key = row.student_id + ":" + row.day_number;
       active.set(key, (active.get(key) || 0) + Number(row.active_seconds || 0));
     }
+    const visits = new Map();
+    for (const visit of visitRows) {
+      const key = visit.student_id + ":" + visit.day_number;
+      if (!visits.has(key)) visits.set(key, []);
+      visits.get(key).push({
+        id: visit.id,
+        entered_at: visit.entered_at,
+        last_seen_at: visit.last_seen_at,
+        left_at: visit.left_at,
+        exit_reason: visit.exit_reason
+      });
+    }
     const rows = (submissions || [])
       .filter((row) => String(people.get(row.student_id)?.username || "").toLowerCase() !== PREVIEW_USERNAME)
       .map((row) => ({
         ...row,
         active_writing_seconds: active.get(row.student_id + ":" + row.day_number) || 0,
+        writing_visits: visits.get(row.student_id + ":" + row.day_number) || [],
         student: people.get(row.student_id) || null
       }));
     return json({ admin, submissions: rows });
@@ -305,6 +323,80 @@ export async function POST(request) {
   try { body = await request.json(); } catch { return json({ detail: "Invalid request." }, 400); }
   const action = String(body.action || "");
 
+  if (action === "writing_visit_enter") {
+    const student = await studentFromRequest(request);
+    if (!student) return json({ detail: "Please sign in." }, 401);
+    const day = validDay(body.day);
+    if (!day) return json({ detail: "No daily Writing task is scheduled for this day." }, 400);
+    if (!(await isDayUnlocked(day, student))) return json({ detail: "This Writing task is not available yet." }, 403);
+    const content = await getContent(day);
+    if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
+    if (student.username === PREVIEW_USERNAME) return json({ ok: true, preview: true, visit: null });
+
+    const { data: existing } = await supabase
+      .from("ark60_submissions")
+      .select("id")
+      .eq("student_id", student.id)
+      .eq("day_number", day)
+      .eq("module", "writing")
+      .maybeSingle();
+    if (existing) return json({ ok: true, submitted: true, visit: null });
+
+    const stamp = new Date().toISOString();
+    await supabase
+      .from("ark60_writing_visits")
+      .update({ left_at: stamp, last_seen_at: stamp, exit_reason: "reenter" })
+      .eq("student_id", student.id)
+      .eq("day_number", day)
+      .is("left_at", null);
+
+    const { data: visit, error } = await supabase
+      .from("ark60_writing_visits")
+      .insert({ student_id: student.id, day_number: day, entered_at: stamp, last_seen_at: stamp })
+      .select("id,entered_at")
+      .maybeSingle();
+    if (error || !visit) return json({ detail: "Could not start Writing visit tracking." }, 500);
+    return json({ ok: true, visit });
+  }
+
+  if (action === "writing_visit_ping") {
+    const student = await studentFromRequest(request);
+    if (!student) return json({ detail: "Please sign in." }, 401);
+    const day = validDay(body.day);
+    const visitId = String(body.visit_id || "");
+    if (!day || !visitId) return json({ detail: "Invalid Writing visit." }, 400);
+    if (student.username === PREVIEW_USERNAME) return json({ ok: true, preview: true });
+    const stamp = new Date().toISOString();
+    await supabase
+      .from("ark60_writing_visits")
+      .update({ last_seen_at: stamp })
+      .eq("id", visitId)
+      .eq("student_id", student.id)
+      .eq("day_number", day)
+      .is("left_at", null);
+    return json({ ok: true });
+  }
+
+  if (action === "writing_visit_leave") {
+    const student = await studentFromRequest(request);
+    if (!student) return json({ detail: "Please sign in." }, 401);
+    const day = validDay(body.day);
+    const visitId = String(body.visit_id || "");
+    if (!day || !visitId) return json({ detail: "Invalid Writing visit." }, 400);
+    if (student.username === PREVIEW_USERNAME) return json({ ok: true, preview: true });
+    const allowedReasons = new Set(["hidden","pagehide","back","unload","unknown"]);
+    const reason = allowedReasons.has(String(body.reason || "")) ? String(body.reason) : "unknown";
+    const stamp = new Date().toISOString();
+    await supabase
+      .from("ark60_writing_visits")
+      .update({ left_at: stamp, last_seen_at: stamp, exit_reason: reason })
+      .eq("id", visitId)
+      .eq("student_id", student.id)
+      .eq("day_number", day)
+      .is("left_at", null);
+    return json({ ok: true });
+  }
+
   if (action === "draft") {
     const student = await studentFromRequest(request);
     if (!student) return json({ detail: "Please sign in." }, 401);
@@ -437,6 +529,15 @@ export async function POST(request) {
     .delete()
     .eq("student_id", student.id)
     .eq("day_number", day);
+
+  if (data?.submitted_at) {
+    await supabase
+      .from("ark60_writing_visits")
+      .update({ left_at: data.submitted_at, last_seen_at: data.submitted_at, exit_reason: "submit" })
+      .eq("student_id", student.id)
+      .eq("day_number", day)
+      .is("left_at", null);
+  }
 
   let ai_result = null;
   try {
