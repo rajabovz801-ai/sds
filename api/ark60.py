@@ -281,7 +281,7 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         d=START+timedelta(days=day-1)
         if not day_unlocked_for_user(user,day):
             raise HTTPException(status_code=403,detail="Finish all required tasks from earlier days first")
-        available=["listening","reading","writing","speaking"] if d.weekday()==6 else ["reading","listening","article","vocabulary","writing","speaking"]
+        available=["listening","reading","writing"] if d.weekday()==6 else ["reading","listening","article","vocabulary","writing","speaking"]
         rows=db("GET","ark60_content",{"select":"module,title,payload","day_number":"eq."+str(day),"status":"eq.published","limit":6})
         return {"day":day,"date":str(d),"mock":d.weekday()==6,"modules":available,"published":rows,"preview":user.get("username")=="rustam7"}
     if action=="admin_me":
