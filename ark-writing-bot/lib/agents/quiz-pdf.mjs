@@ -1,13 +1,23 @@
 import PDFDocument from "pdfkit";
 import { MAX_QUESTIONS_PER_SHEET } from "./material-standards.mjs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const FONT_DIR = join(HERE, "../../assets/latin-modern");
+const FONTS = {
+  regular: join(FONT_DIR, "LatinModernRoman-Regular.otf"),
+  bold: join(FONT_DIR, "LatinModernRoman-Bold.otf"),
+  italic: join(FONT_DIR, "LatinModernRoman-Italic.otf")
+};
 
 function drawHeader(doc, quiz) {
   const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-  doc.font("Times-Bold").fontSize(10).text("ARK EDUCATION CENTRE", { align: "center", characterSpacing: 0.8 });
+  doc.font("LatinModernBold").fontSize(10).text("ARK EDUCATION CENTRE", { align: "center", characterSpacing: 0.8 });
   doc.moveDown(0.25);
-  doc.font("Times-Bold").fontSize(17).text(String(quiz.title || "English Test"), { align: "center", lineGap: 1 });
+  doc.font("LatinModernBold").fontSize(17).text(String(quiz.title || "English Test"), { align: "center", lineGap: 1 });
   doc.moveDown(0.25);
-  doc.font("Times-Roman").fontSize(10.5).text(`${quiz.questions.length} ta savol${quiz.level ? `  •  ${quiz.level}` : ""}`, { align: "center" });
+  doc.font("LatinModern").fontSize(10.5).text(`${quiz.questions.length} ta savol${quiz.level ? `  •  ${quiz.level}` : ""}`, { align: "center" });
   doc.moveDown(0.45);
   doc.moveTo(doc.page.margins.left, doc.y).lineTo(doc.page.margins.left + width, doc.y).lineWidth(0.7).strokeColor("#333333").stroke();
   return doc.y + 12;
@@ -20,9 +30,9 @@ function questionMetrics(doc, question, index, width, scale = 1) {
   const questionStyle = { width, lineGap: 0.5 };
   const optionStyle = { width, lineGap: 0.1 };
 
-  doc.font("Times-Bold").fontSize(13 * scale);
+  doc.font("LatinModernBold").fontSize(13 * scale);
   const questionHeight = doc.heightOfString(questionText, questionStyle);
-  doc.font("Times-Roman").fontSize(11.7 * scale);
+  doc.font("LatinModern").fontSize(11.7 * scale);
   const optionHeight = doc.heightOfString(optionsText, optionStyle);
   const blockHeight = questionHeight + 2.5 + optionHeight;
   return { questionText, optionsText, questionStyle, optionStyle, questionHeight, optionHeight, blockHeight };
@@ -32,9 +42,9 @@ function drawQuestion(doc, question, index, x, width, y, pageBottom, extraGap = 
   const { questionText, optionsText, questionStyle, optionStyle, questionHeight, optionHeight, blockHeight } = questionMetrics(doc, question, index, width, scale);
   if (y + blockHeight > pageBottom) return null;
 
-  doc.font("Times-Bold").fontSize(13 * scale).text(questionText, x, y, questionStyle);
+  doc.font("LatinModernBold").fontSize(13 * scale).text(questionText, x, y, questionStyle);
   let currentY = y + questionHeight + 1.2;
-  doc.font("Times-Roman").fontSize(11.7 * scale);
+  doc.font("LatinModern").fontSize(11.7 * scale);
   doc.text(optionsText, x + 4, currentY, optionStyle);
   currentY += optionHeight;
   return currentY + 1.3 + extraGap;
@@ -45,6 +55,9 @@ export async function renderQuizPdf(quiz) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: "A4", margins: { top: 36, right: 42, bottom: 38, left: 42 }, bufferPages: true, info: { Title: `${quiz.title || "English Test"} - ARK Education` } });
     const chunks = [];
+    doc.registerFont("LatinModern", FONTS.regular);
+    doc.registerFont("LatinModernBold", FONTS.bold);
+    doc.registerFont("LatinModernItalic", FONTS.italic);
     doc.on("data", chunk => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
@@ -105,7 +118,7 @@ export async function renderQuizPdf(quiz) {
     const range = doc.bufferedPageRange();
     for (let page = range.start; page < range.start + range.count; page += 1) {
       doc.switchToPage(page);
-      doc.font("Times-Italic").fontSize(9).fillColor("#555555");
+      doc.font("LatinModernItalic").fontSize(9).fillColor("#555555");
       doc.text(`ARK EDUCATION CENTRE  •  ${page + 1} / ${range.count}`, 42, doc.page.height - 54, { width: doc.page.width - 84, align: "center", lineBreak: false });
     }
     doc.end();
@@ -118,23 +131,26 @@ export async function renderMaterialPdf(title, content) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: "A4", margins: { top: 42, right: 48, bottom: 42, left: 48 }, bufferPages: true, info: { Title: `${title || "ARK Education"} - ARK Education` } });
     const chunks = [];
+    doc.registerFont("LatinModern", FONTS.regular);
+    doc.registerFont("LatinModernBold", FONTS.bold);
+    doc.registerFont("LatinModernItalic", FONTS.italic);
     doc.on("data", chunk => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
     const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-    doc.font("Times-Bold").fontSize(10.5).text("ARK EDUCATION CENTRE", { align: "center", characterSpacing: 0.8 });
+    doc.font("LatinModernBold").fontSize(10.5).text("ARK EDUCATION CENTRE", { align: "center", characterSpacing: 0.8 });
     doc.moveDown(0.4);
-    doc.font("Times-Bold").fontSize(17).text(String(title || "English Learning Material"), { align: "center" });
+    doc.font("LatinModernBold").fontSize(17).text(String(title || "English Learning Material"), { align: "center" });
     doc.moveDown(0.5);
     doc.moveTo(doc.page.margins.left, doc.y).lineTo(doc.page.margins.left + width, doc.y).lineWidth(0.7).strokeColor("#333333").stroke();
     doc.moveDown(0.8);
-    doc.font("Times-Roman").fontSize(13).fillColor("#111111").text(body, { width, lineGap: 4, paragraphGap: 7, align: "left" });
+    doc.font("LatinModern").fontSize(13).fillColor("#111111").text(body, { width, lineGap: 4, paragraphGap: 7, align: "left" });
 
     const range = doc.bufferedPageRange();
     for (let page = range.start; page < range.start + range.count; page += 1) {
       doc.switchToPage(page);
-      doc.font("Times-Italic").fontSize(9).fillColor("#555555");
+      doc.font("LatinModernItalic").fontSize(9).fillColor("#555555");
       doc.text(`ARK EDUCATION CENTRE  •  ${page + 1} / ${range.count}`, 48, doc.page.height - 56, { width: doc.page.width - 96, align: "center", lineBreak: false });
     }
     doc.end();
