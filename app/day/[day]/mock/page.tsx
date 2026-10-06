@@ -13,7 +13,7 @@ type Passage={id:string;ordinal:number;title:string;text:string;questions:Q[];qu
 type MockData={
  preview:boolean;day:number;
  content:{listening:{title:string;payload:any};reading:Passage[];writing:{title:string;payload:any}};
- mock:{stage:Stage;status:string;reading_remaining:number;writing_remaining:number;listening_answers?:Record<string,string>;reading_answers?:Record<string,string>;writing_task1?:string;writing_task2?:string;result?:any}
+ mock:{stage:Stage;status:string;listening_started_at?:string|null;listening_elapsed_seconds?:number;reading_remaining:number;writing_remaining:number;listening_answers?:Record<string,string>;reading_answers?:Record<string,string>;writing_task1?:string;writing_task2?:string;result?:any}
 };
 type Token=string|{q:number};
 
@@ -27,7 +27,7 @@ export default function FullMockPage(){
  const mockDateText=mockDate.toLocaleDateString("en-GB",{day:"numeric",month:"long",timeZone:"UTC"}).toUpperCase();
  const [data,setData]=useState<MockData|null>(null),[stage,setStage]=useState<Stage>("not_started"),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
  const [full,setFull]=useState(false);
- const [listeningStarted,setListeningStarted]=useState(false),[audioState,setAudioState]=useState<"idle"|"playing"|"ended"|"resume">("idle"),[lSection,setLSection]=useState(1),[lCurrentQuestion,setLCurrentQuestion]=useState(1),[lAnswers,setLAnswers]=useState<Record<string,string>>({}),[lElapsed,setLElapsed]=useState(0);
+ const [listeningStarted,setListeningStarted]=useState(false),[lStartedAt,setLStartedAt]=useState(""),[audioState,setAudioState]=useState<"idle"|"playing"|"ended"|"resume">("idle"),[lSection,setLSection]=useState(1),[lCurrentQuestion,setLCurrentQuestion]=useState(1),[lAnswers,setLAnswers]=useState<Record<string,string>>({}),[lElapsed,setLElapsed]=useState(0);
  const [rPassage,setRPassage]=useState(1),[rTab,setRTab]=useState<"passage"|"questions">("passage"),[rAnswers,setRAnswers]=useState<Record<string,string>>({}),[rRemaining,setRRemaining]=useState(3600);
  const [wTask,setWTask]=useState<1|2>(1),[w1,setW1]=useState(""),[w2,setW2]=useState(""),[wRemaining,setWRemaining]=useState(3600);
  const [result,setResult]=useState<any>(null),[previewListening,setPreviewListening]=useState<any>(null),[previewReading,setPreviewReading]=useState<any>(null);
@@ -36,9 +36,23 @@ export default function FullMockPage(){
  const paperRef=useRef<HTMLDivElement>(null);
 
  useEffect(()=>{const f=()=>setFull(!!document.fullscreenElement);document.addEventListener("fullscreenchange",f);return()=>document.removeEventListener("fullscreenchange",f)},[]);
- useEffect(()=>{let live=true;(async()=>{setLoading(true);try{const r=await fetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Full Mock could not be loaded.");if(!live)return;setData(obj);setStage(obj.mock.stage);setLAnswers(obj.mock.listening_answers||{});setRAnswers(obj.mock.reading_answers||{});setW1(obj.mock.writing_task1||"");setW2(obj.mock.writing_task2||"");setRRemaining(Number(obj.mock.reading_remaining||3600));setWRemaining(Number(obj.mock.writing_remaining||3600));setResult(obj.mock.result||null)}catch(e){if(live)setMessage(e instanceof Error?e.message:"Full Mock could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day]);
+ useEffect(()=>{let live=true;(async()=>{setLoading(true);try{const r=await fetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Full Mock could not be loaded.");if(!live)return;setData(obj);setStage(obj.mock.stage);setLAnswers(obj.mock.listening_answers||{});setLStartedAt(obj.mock.listening_started_at||"");setListeningStarted(Boolean(obj.mock.listening_started_at));setLElapsed(Number(obj.mock.listening_elapsed_seconds||0));setRAnswers(obj.mock.reading_answers||{});setW1(obj.mock.writing_task1||"");setW2(obj.mock.writing_task2||"");setRRemaining(Number(obj.mock.reading_remaining||3600));setWRemaining(Number(obj.mock.writing_remaining||3600));setResult(obj.mock.result||null)}catch(e){if(live)setMessage(e instanceof Error?e.message:"Full Mock could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day]);
 
- useEffect(()=>{if(stage!=="listening"||!listeningStarted)return;const id=window.setInterval(()=>setLElapsed(v=>v+1),1000);return()=>window.clearInterval(id)},[stage,listeningStarted]);
+ useEffect(()=>{if(stage!=="listening"||!listeningStarted||!lStartedAt)return;const tick=()=>setLElapsed(Math.max(0,Math.floor((Date.now()-Date.parse(lStartedAt))/1000)));tick();const id=window.setInterval(tick,1000);return()=>window.clearInterval(id)},[stage,listeningStarted,lStartedAt]);
+ useEffect(()=>{
+  if(stage!=="listening"||!listeningStarted||!lStartedAt||!audioRef.current)return;
+  const audio=audioRef.current;
+  const resume=async()=>{
+   const offset=Math.max(0,(Date.now()-Date.parse(lStartedAt))/1000);
+   try{
+    if(Number.isFinite(audio.duration)&&audio.duration>0&&offset>=audio.duration){audio.currentTime=audio.duration;setAudioState("ended");return}
+    if(Number.isFinite(offset)&&offset>0)audio.currentTime=offset;
+    await audio.play();setAudioState("playing");
+   }catch{setAudioState("resume")}
+  };
+  if(audio.readyState>=1)void resume();else audio.addEventListener("loadedmetadata",resume,{once:true});
+  return()=>audio.removeEventListener("loadedmetadata",resume);
+ },[stage,listeningStarted,lStartedAt]);
  useEffect(()=>{if(stage!=="reading")return;const id=window.setInterval(()=>setRRemaining(v=>Math.max(0,v-1)),1000);return()=>window.clearInterval(id)},[stage]);
  useEffect(()=>{if(stage==="reading"&&rRemaining===0&&!busy)void submitReading(true)},[stage,rRemaining,busy]);
  useEffect(()=>{if(stage!=="writing")return;const id=window.setInterval(()=>setWRemaining(v=>Math.max(0,v-1)),1000);return()=>window.clearInterval(id)},[stage]);
@@ -63,7 +77,12 @@ export default function FullMockPage(){
   setBusy(true);setMessage("");try{const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Full Mock.");setStage("listening");setLSection(1);setLCurrentQuestion(1);document.documentElement.requestFullscreen?.().catch(()=>{})}catch(e){setMessage(e instanceof Error?e.message:"Could not start Full Mock.")}finally{setBusy(false)}
  }
  async function startListening(){
-  setListeningStarted(true);setAudioState("playing");try{await audioRef.current?.play()}catch{setAudioState("resume")}
+  if(busy)return;setBusy(true);setMessage("");
+  try{
+   const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start_listening",day})});
+   const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Listening.");
+   setLStartedAt(obj.started_at||new Date().toISOString());setListeningStarted(true);setAudioState("idle");
+  }catch(e){setMessage(e instanceof Error?e.message:"Could not start Listening.")}finally{setBusy(false)}
  }
  async function submitListening(){
   if(busy)return;if(!window.confirm("Submit Listening and continue to Reading? You cannot return to this section."))return;
@@ -138,7 +157,7 @@ export default function FullMockPage(){
  if(stage==="listening")return <main className="ls-shell mock-section-shell">
   <audio ref={audioRef} preload="auto" src={lp.audio_url} onPlay={()=>setAudioState("playing")} onEnded={()=>setAudioState("ended")} onPause={()=>{if(listeningStarted&&audioState==="playing"){audioRef.current?.play().catch(()=>setAudioState("resume"))}}}/>
   <header className="ls-topbar"><div className="ls-back"><LockKeyhole size={17}/></div><div className="ls-top-title">FULL MOCK · LISTENING</div><div className="ls-top-actions">{listeningStarted&&<span className={"ls-audio-state "+audioState}><Volume2 size={14}/>{audioState==="ended"?"Audio finished":"Audio once only"} <i>{fmt(lElapsed)}</i></span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
-  {!listeningStarted?<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>FULL MOCK · SECTION 1 OF 3</small><h1>Listening</h1><p>40 questions · 4 sections. The recording plays once and cannot be paused or replayed.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Playback</span></div></div><button onClick={startListening}><Headphones size={17}/> Start Listening</button></section>:<>
+  {!listeningStarted?<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>FULL MOCK · SECTION 1 OF 3</small><h1>Listening</h1><p>40 questions · 4 sections. The recording plays once and cannot be paused or replayed.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Playback</span></div></div><button disabled={busy} onClick={startListening}><Headphones size={17}/> {busy?"Starting…":"Start Listening"}</button></section>:<>
    {audioState==="resume"&&<div className="ls-resume-banner"><Volume2 size={16}/><div><b>Audio needs permission</b><span>Resume from the current mock position.</span></div><button onClick={()=>audioRef.current?.play().then(()=>setAudioState("playing")).catch(()=>{})}>Resume audio</button></div>}
    <section className="ls-instruction"><div><b>{currentSection?.label}</b><span>{currentSection?.range}</span></div><span className="ls-save-state">Answers auto-save</span></section>
    <div className="ls-workspace"><section className="ls-question-paper" ref={paperRef} onMouseUp={showHighlight}>{currentSection?.blocks?.map((b:any,i:number)=>renderL(b,i))}</section></div>
