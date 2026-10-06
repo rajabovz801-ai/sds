@@ -9,6 +9,7 @@ type AnyObj=Record<string,any>;
 const DAY=1;
 const MODULE="listening";
 const MAX_BODY=30000;
+function isMockDay(day:number){return Number.isInteger(day)&&day>=1&&day<=60&&new Date(Date.UTC(2026,9,day)).getUTCDay()===0}
 
 const json=(data:any,status=200)=>NextResponse.json(data,{status,headers:{"Cache-Control":"private, no-store"}});
 function norm(v:any){return String(v??"").normalize("NFKC").trim().toLowerCase().replace(/[’‘]/g,"'").replace(/[.,!?;:]+$/g,"").replace(/\s+/g," ")}
@@ -170,7 +171,7 @@ export async function GET(req:NextRequest){
   }
   const content=await getContent(day);
   if(action==="availability")return json({published:!!content,title:content?.title||""});
-  if(day===4)return json({detail:"Use the Full Mock flow for Day 4."},409);
+  if(isMockDay(day))return json({detail:"Use the Full Mock flow for this Sunday."},409);
   if(!content)return json({detail:"Listening material has not been published yet."},404);
 
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
@@ -190,7 +191,7 @@ export async function POST(req:NextRequest){
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
   const body=await req.json().catch(()=>null);if(!body||typeof body!=="object")return json({detail:"Invalid request body."},400);
   const day=Number(body.day||DAY);if(!Number.isInteger(day)||day<1||day>60||!(await isDayUnlocked(day,student)))return json({detail:"This Listening task is unavailable."},403);
-  if(day===4)return json({detail:"Use the Full Mock flow for Day 4."},409);
+  if(isMockDay(day))return json({detail:"Use the Full Mock flow for this Sunday."},409);
   const content=await getContent(day);if(!content)return json({detail:"Listening material has not been published yet."},404);
   const action=String(body.action||"");
   const db=getServiceSupabase();
