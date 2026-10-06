@@ -48,3 +48,11 @@ test("Full Mock Listening start is persisted so reload cannot replay from zero",
   assert.match(page,/Date\.now\(\)-Date\.parse\(lStartedAt\)/);
   assert.match(page,/audio\.currentTime=offset/);
 });
+
+test("Full Mock admin can switch between all Sunday result days",()=>{
+  const admin=read("app/admin/mock/page.tsx");
+  assert.match(admin,/MOCK_DAYS/);
+  assert.match(admin,/admin_list&day="\+day/);
+  assert.match(admin,/value=\{day\}/);
+  assert.doesNotMatch(admin,/4 OCTOBER|4 October Full Mock|DAY 04/);
+});
