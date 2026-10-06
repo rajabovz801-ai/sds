@@ -23,7 +23,7 @@ test("failed Writing assessments self-heal without losing saved essays",()=>{
 
 test("admin polling retries failed assessments in small batches",()=>{
  assert.ok(api.includes('action==="admin_list"'));
- assert.ok(api.includes("retryFailedAssessments(src,2)"));
+ assert.ok(api.includes("retryFailedAssessments(src,day,2)"));
 });
 
 test("student assessing screen polls until result is completed",()=>{
