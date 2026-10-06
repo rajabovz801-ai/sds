@@ -1,6 +1,20 @@
 -- ARK IELTS 60-Day Challenge: Day 06 Speaking
 -- Published for 6 October 2026. Idempotent and safe to re-run.
 
+-- Day 01-03 initially used a narrow day-number check. Keep fresh installs
+-- consistent with production so Speaking works across the full 60-day challenge.
+alter table if exists public.ark60_speaking_attempts
+  drop constraint if exists ark60_speaking_attempts_day_number_check;
+alter table if exists public.ark60_speaking_attempts
+  add constraint ark60_speaking_attempts_day_number_check
+  check (day_number between 1 and 60);
+
+alter table if exists public.ark60_speaking_answers
+  drop constraint if exists ark60_speaking_answers_day_number_check;
+alter table if exists public.ark60_speaking_answers
+  add constraint ark60_speaking_answers_day_number_check
+  check (day_number between 1 and 60);
+
 insert into public.ark60_content(day_number,module,title,status,payload,published_at,updated_at)
 values (
   6,
