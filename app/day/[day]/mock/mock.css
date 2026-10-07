@@ -108,3 +108,21 @@
 @media(max-width:900px){
  .mock-writing-tabs .writing-rule{display:none}
 }
+
+/* 60 Day Challenge — blue primary actions */
+.mock-loading,.mock-assessing,.mock-entry,.mock-result-page{background:#f6f8fc;color:#142338}
+.mock-entry-card>button,.mock-result-card>button,.mock-assessing button:not(.ark-back-control),
+.mock-reading-shell .cr-submit{
+  background:#3478f6;border-color:#3478f6;color:#fff;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease
+}
+.mock-entry-card>button:hover,.mock-result-card>button:hover,.mock-assessing button:not(.ark-back-control):hover,
+.mock-reading-shell .cr-submit:hover:not(:disabled){
+  background:#2563eb;border-color:#2563eb;box-shadow:0 4px 10px rgba(52,120,246,.2)
+}
+.mock-entry-card>button:focus-visible,.mock-result-card>button:focus-visible,.mock-assessing button:focus-visible,
+.mock-reading-shell .cr-submit:focus-visible{
+  outline:3px solid rgba(52,120,246,.3);outline-offset:2px
+}
+.mock-reading-shell .mock-part-nav button.active{background:#3478f6;border-color:#3478f6;color:#fff}
+

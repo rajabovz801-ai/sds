@@ -406,3 +406,18 @@
 .ls-map-image-wrap{display:flex;justify-content:center;align-items:center;margin:12px 0 16px;padding:12px;background:#fff;border:1px solid #dfe5ea;border-radius:10px;overflow:auto}
 .ls-map-image-wrap img{display:block;width:min(100%,760px);height:auto;max-height:520px;object-fit:contain}
 @media(max-width:700px){.ls-map-image-wrap{padding:8px;margin:10px 0 12px}.ls-map-image-wrap img{width:100%;max-height:none}}
+
+/* 60 Day Challenge — blue primary actions */
+.ls-shell{background:#f6f8fc;color:#142338}
+.ls-start-card>button,.ls-result-actions button:not(.ghost),.ls-submit,.ls-resume-banner button{
+  background:#3478f6;border-color:#3478f6;color:#fff;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease
+}
+.ls-start-card>button:hover,.ls-result-actions button:not(.ghost):hover,.ls-submit:hover:not(:disabled),.ls-resume-banner button:hover{
+  background:#2563eb;border-color:#2563eb;box-shadow:0 4px 10px rgba(52,120,246,.2)
+}
+.ls-start-card>button:focus-visible,.ls-result-actions button:focus-visible,.ls-submit:focus-visible,.ls-resume-banner button:focus-visible{
+  outline:3px solid rgba(52,120,246,.3);outline-offset:2px
+}
+.ls-submit:disabled{background:#e8edf5;border-color:#e8edf5;color:#8a98aa}
+

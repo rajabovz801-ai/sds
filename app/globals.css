@@ -1397,3 +1397,56 @@ button.user-tile>svg{color:#8290a0;flex:none}
 .learning-shell.theme-dark .lb-board .lb-podium-card.rank-3::after{background:#3c2b25;color:#d2a58a;border-color:#5e4638}
 .learning-shell.theme-dark .progress-v2 .module-progress-list,
 .learning-shell.theme-dark .progress-v2 .hub-kpis article{box-shadow:none}
+
+/* 60 Day Challenge — light blue palette and primary actions */
+.learning-shell{
+  --ark-blue:#3478f6;
+  --ark-blue-hover:#2563eb;
+  --ark-blue-soft:#eaf2ff;
+  --ark-bg:#f6f8fc;
+  --ark-border:#e3e9f1;
+  background:#f6f8fc;
+}
+.learning-main{background:linear-gradient(180deg,#fff 0,#f9fbfe 38%,#f6f8fc 100%)}
+.learning-sidebar{border-right-color:#e3e9f1}
+.learning-nav button:hover{background:#eaf2ff;color:#1d4f9b}
+.learning-nav button.active{background:#142b4a;color:#fff;box-shadow:0 3px 10px rgba(20,43,74,.14)}
+.learning-nav button.active svg{color:#cfe0ff}
+.learning-topbar{border-bottom-color:#e3e9f1}
+.kpi-card,.calendar-panel,.detail-panel,.detail-item,.bottom-insights article{border-color:#e3e9f1}
+.kpi-card.kpi-highlight{background:linear-gradient(125deg,#fff,#f3f7ff);border-color:#dce7f8}
+.kpi-card.kpi-highlight>svg{color:#3478f6;background:#eaf2ff}
+.month-switch button.selected{color:#2563eb}
+.cal-cell:hover{border-color:#9ab9f5}
+.cal-cell.selected{border-color:#3478f6;background:#eaf2ff;box-shadow:0 0 0 2px rgba(52,120,246,.08)}
+.cal-cell.selected .cal-upper,.cal-cell.selected .cal-upper svg{color:#2563eb}
+.detail-panel{background:#f8faff}
+.detail-btn:not(:disabled),
+.task-action.can-open,
+.today-panel-footer button:not(.ghost):not(.danger):not(.ark-back-control),
+.profile-actions button:not(.ghost):not(.danger),
+.reward-claim:not(:disabled),
+.learning-shell .empty-view button:not(.ark-back-control):not(.ghost):not(.danger){
+  background:#3478f6;color:#fff;border-color:#3478f6;
+  box-shadow:0 3px 8px rgba(52,120,246,.16);
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease
+}
+.detail-btn:hover:not(:disabled),
+.task-action.can-open:hover,
+.today-panel-footer button:not(.ghost):not(.danger):not(.ark-back-control):hover,
+.profile-actions button:not(.ghost):not(.danger):hover,
+.reward-claim:hover:not(:disabled),
+.learning-shell .empty-view button:not(.ark-back-control):not(.ghost):not(.danger):hover{
+  background:#2563eb;color:#fff;border-color:#2563eb;
+  box-shadow:0 5px 12px rgba(52,120,246,.22);transform:translateY(-1px)
+}
+.learning-shell :is(.detail-btn,.task-action.can-open,.today-panel-footer button:not(.ghost):not(.danger):not(.ark-back-control),.profile-actions button:not(.ghost):not(.danger),.reward-claim:not(:disabled),.empty-view button:not(.ark-back-control):not(.ghost):not(.danger)):focus-visible{
+  outline:3px solid rgba(52,120,246,.3);outline-offset:2px
+}
+.learning-shell .detail-btn:disabled{background:#e8edf5;color:#8a98aa;border-color:#e8edf5;box-shadow:none;transform:none}
+.learning-shell .ark-back-control,
+.learning-shell button.ghost,
+.learning-shell button.danger,
+.learning-shell .cal-cell,
+.learning-shell .learning-nav button{box-shadow:none}
+
