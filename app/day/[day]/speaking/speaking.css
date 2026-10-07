@@ -74,3 +74,18 @@
  .sp-intro-parts{grid-template-columns:1fr}
  .sp-preview-banner{justify-content:flex-start;text-align:left}
 }
+
+/* 60 Day Challenge — blue primary actions */
+.sp-shell{background:#f6f8fc;color:#142338}
+.sp-start,.sp-submit,.sp-complete>button,.sp-record-btn,.sp-part-footer button:not(.ghost),.sp-prep button{
+  background:#3478f6;border-color:#3478f6;color:#fff;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease
+}
+.sp-start:hover,.sp-submit:hover:not(:disabled),.sp-complete>button:hover,.sp-record-btn:hover,.sp-part-footer button:not(.ghost):hover:not(:disabled),.sp-prep button:hover{
+  background:#2563eb;border-color:#2563eb;box-shadow:0 4px 10px rgba(52,120,246,.2)
+}
+.sp-start:focus-visible,.sp-submit:focus-visible,.sp-complete>button:focus-visible,.sp-record-btn:focus-visible,.sp-part-footer button:focus-visible,.sp-prep button:focus-visible{
+  outline:3px solid rgba(52,120,246,.3);outline-offset:2px
+}
+.sp-part-footer button.ghost{background:#fff;border-color:#e3e9f1;color:#53677c}
+

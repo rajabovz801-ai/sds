@@ -102,3 +102,18 @@
  .writing-finish section{padding:28px 20px}
  .writing-result-strip{grid-template-columns:1fr}
 }
+
+/* 60 Day Challenge — blue primary actions */
+.writing-shell{background:#f6f8fc;color:#142338}
+.writing-controls button.primary,.writing-controls button.submit{
+  background:#3478f6;border-color:#3478f6;color:#fff;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease
+}
+.writing-controls button.primary:hover:not(:disabled),.writing-controls button.submit:hover:not(:disabled){
+  background:#2563eb;border-color:#2563eb;box-shadow:0 4px 10px rgba(52,120,246,.2)
+}
+.writing-controls button.primary:focus-visible,.writing-controls button.submit:focus-visible{
+  outline:3px solid rgba(52,120,246,.3);outline-offset:2px
+}
+.writing-controls button.ghost{background:#fff;border-color:#d4dce7;color:#56667a}
+

@@ -189,3 +189,17 @@
  .vv-study h1{font-size:29px}
  .vv-word-prompt h1{font-size:36px}
 }
+
+/* 60 Day Challenge — blue primary actions */
+.vv-shell{background:#f6f8fc;color:#142338}
+.vv-unit-actions .vv-start,.vv-study-actions .vv-purple,.vv-result-actions .vv-purple{
+  background:#3478f6;border-color:#3478f6;color:#fff;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease
+}
+.vv-unit-actions .vv-start:hover:not(:disabled),.vv-study-actions .vv-purple:hover:not(:disabled),.vv-result-actions .vv-purple:hover:not(:disabled){
+  background:#2563eb;border-color:#2563eb;box-shadow:0 4px 10px rgba(52,120,246,.2)
+}
+.vv-unit-actions .vv-start:focus-visible,.vv-study-actions .vv-purple:focus-visible,.vv-result-actions .vv-purple:focus-visible{
+  outline:3px solid rgba(52,120,246,.3);outline-offset:2px
+}
+
