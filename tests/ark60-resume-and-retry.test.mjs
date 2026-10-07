@@ -33,3 +33,17 @@ test("resume card remains usable on narrow screens",()=>{
   assert.match(css,/@media\(max-width:700px\)[\s\S]*\.resume-card/);
   assert.match(css,/min-height:44px/);
 });
+
+test("resume helper accepts only same-site challenge paths for days 1 through 60",async()=>{
+  const helperPath=new URL("../lib/ark60-resume.ts",import.meta.url);
+  assert.ok(fs.existsSync(helperPath),"challenge resume validator exists");
+  const {createChallengeResume,isChallengeResumePath,parseChallengeResume}=await import("../lib/ark60-resume.ts");
+  assert.equal(isChallengeResumePath("/day/7/reading"),true);
+  assert.equal(isChallengeResumePath("/day/61/reading"),false);
+  assert.equal(isChallengeResumePath("/admin"),false);
+  assert.equal(isChallengeResumePath("//evil.example/day/7"),false);
+  assert.equal(createChallengeResume("/day/7/listening","Reading",123),null);
+  const location=createChallengeResume("/day/7/reading","Reading",123);
+  assert.deepEqual(parseChallengeResume(JSON.stringify(location)),location);
+  assert.equal(parseChallengeResume("{bad json"),null);
+});
