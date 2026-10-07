@@ -1450,3 +1450,265 @@ button.user-tile>svg{color:#8290a0;flex:none}
 .learning-shell .cal-cell,
 .learning-shell .learning-nav button{box-shadow:none}
 
+
+/* ARK IELTS — readable, calm site-wide palette */
+:root{
+  --ark-canvas:#F4F7FB;
+  --ark-surface:#FFFFFF;
+  --ark-border:#DFE6EF;
+  --ark-ink:#142338;
+  --ark-muted:#53657A;
+  --ark-navy:#17304F;
+  --ark-blue:#2563EB;
+  --ark-blue-hover:#1D4ED8;
+  --ark-blue-soft:#EAF2FF;
+}
+.auth-v2{
+  background:radial-gradient(circle at 82% 18%,#EDF4FF 0,transparent 28%),radial-gradient(circle at 8% 78%,#F0F5FC 0,transparent 29%),var(--ark-canvas);
+  color:var(--ark-ink);
+}
+.learning-shell:not(.theme-dark){background:var(--ark-canvas);color:var(--ark-ink)}
+.auth-v2,.learning-shell,.aa-shell,.ls-shell,.mock-entry,.mock-result-page,.sp-shell,.vv-shell,.writing-shell,.la-shell,.ma-shell,.sa-shell,.wa-shell,.nt-shell{font-size:14px}
+
+/* Shared primary actions: blue, readable, and keyboard-visible. */
+.learning-shell:not(.theme-dark) :is(.detail-btn,.task-action.can-open,.today-panel-footer button:not(.ghost):not(.danger):not(.ark-back-control),.profile-actions button:not(.ghost):not(.danger),.reward-claim:not(:disabled),.empty-view button:not(.ark-back-control):not(.ghost):not(.danger),.cd-day-open){
+  background:#2563EB;color:#fff;border-color:#2563EB
+}
+.learning-shell:not(.theme-dark) :is(.detail-btn,.task-action.can-open,.today-panel-footer button:not(.ghost):not(.danger):not(.ark-back-control),.profile-actions button:not(.ghost):not(.danger),.reward-claim:not(:disabled),.empty-view button:not(.ark-back-control):not(.ghost):not(.danger),.cd-day-open):hover:not(:disabled){
+  background:#1D4ED8;color:#fff;border-color:#1D4ED8
+}
+.learning-shell:not(.theme-dark) :is(.detail-btn,.task-action.can-open,.today-panel-footer button:not(.ghost):not(.danger):not(.ark-back-control),.profile-actions button:not(.ghost):not(.danger),.reward-claim:not(:disabled),.empty-view button:not(.ark-back-control):not(.ghost):not(.danger),.cd-day-open):focus-visible{
+  outline:3px solid rgba(37,99,235,.32);outline-offset:2px
+}
+/* Rewards keep their gold accents; correct and incorrect answer states keep their own colors. */
+
+/* Keep labels and utility text readable at 12px or larger. */
+.auth-v2-logo small{font-size:12px!important}
+.auth-v2-top-right{font-size:12px!important}
+.auth-v2-label{font-size:12px!important}
+.auth-v2-kicker{font-size:12px!important}
+.auth-v2-card-head p{font-size:12px!important}
+.auth-v2-form label{font-size:12px!important}
+.auth-v2-form label>small{font-size:12px!important}
+.auth-v2-notice{font-size:12px!important}
+.auth-v2-divider{font-size:12px!important}
+.auth-v2-disclaimer{font-size:12px!important}
+.auth-v2-benefits strong{font-size:12px!important}
+.auth-v2-benefits small{font-size:12px!important}
+.auth-v2-footer{font-size:12px!important}
+.learning-brand small{font-size:12px!important}
+.side-overline{font-size:12px!important}
+.learning-nav.small button{font-size:12px!important}
+.side-promo b{font-size:12px!important}
+.side-promo p{font-size:12px!important}
+.back-login{font-size:12px!important}
+.user-avatar{font-size:12px!important}
+.user-tile b{font-size:12px!important}
+.user-tile small{font-size:12px!important}
+.topbar-status{font-size:12px!important}
+.time-chip{font-size:12px!important}
+.coins-chip{font-size:12px!important}
+.time-chip small{font-size:12px!important}
+.profile-chip{font-size:12px!important}
+.profile-chip span{font-size:12px!important}
+.section-eyebrow{font-size:12px!important}
+.page-heading p{font-size:12px!important}
+.date-badge{font-size:12px!important}
+.kpi-card span{font-size:12px!important}
+.kpi-card small{font-size:12px!important}
+.panel-title-row p{font-size:12px!important}
+.month-switch button{font-size:12px!important}
+.weekday-row span{font-size:12px!important}
+.cal-upper{font-size:12px!important}
+.cal-cell>b{font-size:12px!important}
+.mock-label{font-size:12px!important}
+.calendar-legend>span{font-size:12px!important}
+.detail-overline{font-size:12px!important}
+.detail-status{font-size:12px!important}
+.day-details-top>p{font-size:12px!important}
+.detail-subhead{font-size:12px!important}
+.task-copy strong{font-size:12px!important}
+.task-copy small{font-size:12px!important}
+.task-copy>span{font-size:12px!important}
+.task-action{font-size:12px!important}
+.day-detail-footer span{font-size:12px!important}
+.day-detail-footer b{font-size:12px!important}
+.detail-btn{font-size:12px!important}
+.bottom-insights b{font-size:12px!important}
+.bottom-insights p{font-size:12px!important}
+.topbar-right .time-chip{font-size:12px!important}
+.admin-inline-btn{font-size:12px!important}
+.admin-day-strip button span{font-size:12px!important}
+.admin-day-strip button small{font-size:12px!important}
+.admin-shortcuts button b{font-size:12px!important}
+.admin-upload-card p{font-size:12px!important}
+.admin-upload-card span{font-size:12px!important}
+.ark-wordmark-subtitle{font-size:12px!important}
+.learning-brand .ark-wordmark-subtitle{font-size:12px!important}
+.day-inline-date{font-size:12px!important}
+.admin-login-heading small{font-size:12px!important}
+.admin-role-head small{font-size:12px!important}
+.admin-login-heading p{font-size:12px!important}
+.admin-login-form label{font-size:12px!important}
+.admin-auth-message{font-size:12px!important}
+.admin-role-head p{font-size:12px!important}
+.admin-create-form label{font-size:12px!important}
+.admin-create-form input{font-size:12px!important}
+.admin-create-form>p{font-size:12px!important}
+.admin-create-form>button{font-size:12px!important}
+.admin-list-avatar{font-size:12px!important}
+.admin-list-row b{font-size:12px!important}
+.admin-list-row small{font-size:12px!important}
+.admin-list-row em{font-size:12px!important}
+.admin-list-row>button{font-size:12px!important}
+.request-sidebar-count{font-size:12px!important}
+.requests-summary p{font-size:12px!important}
+.requests-summary>button{font-size:12px!important}
+.student-request-head p{font-size:12px!important}
+.request-reload{font-size:12px!important}
+.request-tabs button{font-size:12px!important}
+.request-message{font-size:12px!important}
+.request-avatar{font-size:12px!important}
+.request-entry-identity small{font-size:12px!important}
+.request-status{font-size:12px!important}
+.request-entry-review label{font-size:12px!important}
+.request-entry-review textarea{font-size:12px!important}
+.request-entry-actions button{font-size:12px!important}
+.request-entry-history{font-size:12px!important}
+.request-empty p{font-size:12px!important}
+.username-status{font-size:12px!important}
+.student-admin-head p{font-size:12px!important}
+.student-admin-head>span{font-size:12px!important}
+.student-admin-message{font-size:12px!important}
+.student-admin-avatar{font-size:12px!important}
+.student-admin-name b{font-size:12px!important}
+.student-admin-name small{font-size:12px!important}
+.student-admin-meta span{font-size:12px!important}
+.student-admin-meta b{font-size:12px!important}
+.student-status{font-size:12px!important}
+.student-delete-btn{font-size:12px!important}
+.student-admin-empty p{font-size:12px!important}
+.cd-day-brand i{font-size:12px!important}
+.cd-day-kicker{font-size:12px!important}
+.cd-day-status{font-size:12px!important}
+.cd-day-meta{font-size:12px!important}
+.cd-day-list-head span{font-size:12px!important}
+.cd-day-sequence{font-size:12px!important}
+.cd-day-copy p{font-size:12px!important}
+.cd-day-open{font-size:12px!important}
+.cd-day-unavailable{font-size:12px!important}
+.cd-day-brand{font-size:12px!important}
+.ark-back-control{font-size:12px!important}
+.cr-admin header a.ark-back-control{font-size:12px!important}
+.cr-footer button.ark-back-control{font-size:12px!important}
+.ra-footer button.ark-back-control{font-size:12px!important}
+.empty-view button.ark-back-control{font-size:12px!important}
+.cr-review-loading button.ark-back-control{font-size:12px!important}
+.ark-back-control .ark-back-label{font-size:12px!important}
+.cd-day-more{font-size:12px!important}
+.cd-day-hero-metric>span{font-size:12px!important}
+.cd-day-hero-metric small{font-size:12px!important}
+.cd-day-hero-metric em{font-size:12px!important}
+.ch-sidebar-brand>span:last-child{font-size:12px!important}
+.ch-sidebar-label{font-size:12px!important}
+.ch-soon{font-size:12px!important}
+.ch-sidebar-bottom>p{font-size:12px!important}
+.ch-sidebar-bottom>span{font-size:12px!important}
+.cd-day-error{font-size:12px!important}
+.cd-day .cd-day-brand{font-size:12px!important}
+.cd-day .cd-day-top-end{font-size:12px!important}
+.cd-day .cd-day-kicker{font-size:12px!important}
+.cd-day-date-badge{font-size:12px!important}
+.cd-day-stat span{font-size:12px!important}
+.cd-day-stat small{font-size:12px!important}
+.cd-day .cd-day-list-head span{font-size:12px!important}
+.cd-day .cd-day-sequence{font-size:12px!important}
+.cd-day .cd-day-copy p{font-size:12px!important}
+.cd-day .cd-day-open{font-size:12px!important}
+.cd-day .cd-day-unavailable{font-size:12px!important}
+.ch-mobile-nav a{font-size:12px!important}
+.reward-day small{font-size:12px!important}
+.reward-message{font-size:12px!important}
+.reward-earn small{font-size:12px!important}
+.reward-history-head{font-size:12px!important}
+.reward-history b{font-size:12px!important}
+.reward-history small{font-size:12px!important}
+.reward-history>p{font-size:12px!important}
+.hub-heading small{font-size:12px!important}
+.hub-heading p{font-size:12px!important}
+.hub-empty p{font-size:12px!important}
+.leader-tabs button{font-size:12px!important}
+.leader-person small{font-size:12px!important}
+.leader-row>div>span{font-size:12px!important}
+.leader-row>div>b{font-size:12px!important}
+.hub-kpis span{font-size:12px!important}
+.hub-kpis b small{font-size:12px!important}
+.module-progress-list>div>b{font-size:12px!important}
+.profile-main-copy i{font-size:12px!important}
+.profile-summary span{font-size:12px!important}
+.profile-bonus-note{font-size:12px!important}
+.profile-section>h3{font-size:12px!important}
+.profile-actions span{font-size:12px!important}
+.profile-signout button{font-size:12px!important}
+.sidebar-reward-btn b{font-size:12px!important}
+.sidebar-reward-btn small{font-size:12px!important}
+.admin-live-metrics header p{font-size:12px!important}
+.admin-live-metrics header button{font-size:12px!important}
+.admin-metric-row.head{font-size:12px!important}
+.admin-metric-row>span strong{font-size:12px!important}
+.admin-metric-row>span small{font-size:12px!important}
+.admin-metric-row>strong{font-size:12px!important}
+.admin-metric-empty{font-size:12px!important}
+.reward-modal>p{font-size:12px!important}
+.reward-earn b{font-size:12px!important}
+.profile-main-copy p{font-size:12px!important}
+.profile-fields label>span{font-size:12px!important}
+.profile-fields input{font-size:12px!important}
+.profile-fields select{font-size:12px!important}
+.profile-name-grid small{font-size:12px!important}
+.profile-actions button{font-size:12px!important}
+.profile-account-card>div:first-child b{font-size:12px!important}
+.profile-account-card>div:first-child small{font-size:12px!important}
+.task-coin-badge{font-size:12px!important}
+.cd-coin-badge{font-size:12px!important}
+.dashboard-live-warning{font-size:12px!important}
+.today-panel-head p{font-size:12px!important}
+.today-progress span{font-size:12px!important}
+.today-empty b{font-size:12px!important}
+.today-empty p{font-size:12px!important}
+.today-panel-footer>span{font-size:12px!important}
+.today-panel-footer button{font-size:12px!important}
+.topbar-section{font-size:12px!important}
+.admin-bell>span{font-size:12px!important}
+.admin-live-activity header p{font-size:12px!important}
+.admin-notification-panel header p{font-size:12px!important}
+.live-summary span{font-size:12px!important}
+.live-summary button{font-size:12px!important}
+.admin-notification-panel header button{font-size:12px!important}
+.live-row{font-size:12px!important}
+.live-row.head{font-size:12px!important}
+.live-student b{font-size:12px!important}
+.live-student small{font-size:12px!important}
+.live-empty{font-size:12px!important}
+.admin-notification-list b{font-size:12px!important}
+.admin-notification-list small{font-size:12px!important}
+.admin-notification-list em{font-size:12px!important}
+.lb-period-tabs button{font-size:12px!important}
+.lb-rank-badge{font-size:12px!important}
+.lb-podium-card>p{font-size:12px!important}
+.lb-podium-metrics small{font-size:12px!important}
+.lb-status{font-size:12px!important}
+.lb-table-head{font-size:12px!important}
+.lb-table-rank{font-size:12px!important}
+.lb-mini-avatar{font-size:12px!important}
+.lb-table-person b{font-size:12px!important}
+.lb-table-person small{font-size:12px!important}
+.lb-table-row>strong{font-size:12px!important}
+.lb-current-row{font-size:12px!important}
+.lb-current-row>div strong{font-size:12px!important}
+.lb-current-row>div small{font-size:12px!important}
+.lb-live-strip{font-size:12px!important}
+.lb-live-strip b{font-size:12px!important}
+.lb-board .lb-rank-badge{font-size:12px!important}
+.lb-board .lb-podium-metrics b{font-size:12px!important}
+.lb-board .lb-podium-metrics small{font-size:12px!important}

@@ -352,6 +352,35 @@ export default function ChallengeReading(){
    .cr-shell:not(.cr-overview) .cr-gap{font-size:16px;max-width:calc(100% - 40px)}
    .cr-shell:not(.cr-overview) .cr-options label{font-size:14px}
   }
-`}</style>
+`}
+  /* Site design update: readable exam text and clear blue controls. */
+  .cr-shell{background:#F4F7FB;color:#142338}
+  .cr-shell.cr-overview{background:#F4F7FB}
+  .cr-shell:not(.cr-overview) .cr-split{background:#F4F7FB}
+  .cr-shell:not(.cr-overview) .cr-pane{background:#fff;border-color:#DFE6EF}
+  .cr-shell:not(.cr-overview) .cr-question-head span{font-size:16px!important;line-height:1.75}
+  .cr-shell:not(.cr-overview) .cr-options label{font-size:16px!important;line-height:1.6}
+  .cr-shell:not(.cr-overview) .cr-passage{font-size:16px!important;line-height:1.85}
+  .cr-shell:not(.cr-overview) .cr-qgroup-head p{font-size:14px!important}
+  .cr-shell:not(.cr-overview) .cr-instructions p{font-size:14px!important}
+  .cr-shell:not(.cr-overview) .cr-play,.cr-shell:not(.cr-overview) .cr-submit,
+  .cr-shell.cr-overview .cr-tile button{background:#2563EB;border-color:#2563EB;color:#fff;font-size:14px}
+  .cr-shell:not(.cr-overview) .cr-play:hover:not(:disabled),.cr-shell:not(.cr-overview) .cr-submit:hover:not(:disabled),
+  .cr-shell.cr-overview .cr-tile button:hover:not(:disabled){background:#1D4ED8;border-color:#1D4ED8}
+  .cr-shell .cr-highlight-menu .yellow{background:#ffe58a}
+  .cr-shell:not(.cr-overview) .cr-number-strip button.answered{background:#e9f5eb;border-color:#a8d1b5;color:#245b40}
+  .cr-shell .cr-number-strip button{font-size:12px}
+  .cr-shell .cr-footer-label,.cr-shell .cr-answer-count{font-size:12px}
+  .cr-shell .cr-tile p,.cr-shell .cr-tile small,.cr-shell .cr-state{font-size:12px!important}
+  @media(max-width:800px){
+    .cr-shell:not(.cr-overview) .cr-question-head span{font-size:16px!important}
+    .cr-shell:not(.cr-overview) .cr-options label{font-size:16px!important}
+    .cr-shell:not(.cr-overview) .cr-qgroup-head p,.cr-shell:not(.cr-overview) .cr-instructions p{font-size:14px!important}
+    .cr-shell .cr-head-center strong{font-size:12px}
+    .cr-shell .cr-play,.cr-shell .cr-pause,.cr-shell .cr-submit,.cr-shell .cr-mobile-tabs button{font-size:12px}
+    .cr-shell .cr-tile button{font-size:12px}
+  }
+
+</style>
  </main>;
 }

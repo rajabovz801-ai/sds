@@ -203,3 +203,35 @@
   outline:3px solid rgba(52,120,246,.3);outline-offset:2px
 }
 
+
+
+/* Calm canvas and clear type scale — visual-only overrides. */
+.vv-shell{background:#F4F7FB;color:#142338}
+.vv-shell :is(.vv-unit-actions button,.vv-study-actions button,.vv-result-actions button){background:#2563EB;color:#fff;border-color:#2563EB}.vv-shell :is(.vv-unit-actions button,.vv-study-actions button,.vv-result-actions button):hover:not(:disabled){background:#1D4ED8}
+
+/* Keep labels and utility text readable at 12px or larger. */
+.vv-brand{font-size:12px!important}
+.vv-brand span{font-size:12px!important}
+.vv-top-tag{font-size:12px!important}
+.vv-eyebrow{font-size:12px!important}
+.vv-intro-chips span{font-size:12px!important}
+.vv-intro-stat>span{font-size:12px!important}
+.vv-intro-stat>small{font-size:12px!important}
+.vv-group-heading p{font-size:12px!important}
+.vv-group-status{font-size:12px!important}
+.vv-unit-badge{font-size:12px!important}
+.vv-unit-sub{font-size:12px!important}
+.vv-unit-score{font-size:12px!important}
+.vv-unit-actions button{font-size:12px!important}
+.vv-study-grid article>div>span{font-size:12px!important}
+.vv-study-grid em{font-size:12px!important}
+.vv-study-grid p{font-size:12px!important}
+.vv-study-actions button{font-size:12px!important}
+.vv-result-actions button{font-size:12px!important}
+.vv-quiz-count{font-size:12px!important}
+.vv-quiz-badges>span{font-size:12px!important}
+.vv-quiz-badges>b{font-size:12px!important}
+.vv-word-prompt>span{font-size:12px!important}
+.vv-quiz-bottom{font-size:12px!important}
+.vv-result-scores span{font-size:12px!important}
+.vv-study h1 span{font-size:12px!important}

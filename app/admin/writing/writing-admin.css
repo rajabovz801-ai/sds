@@ -17,3 +17,54 @@
 .wa-ai-all{margin-top:12px;height:34px;border:1px solid #d5c2aa;background:#fffaf4;color:#8a5a28;border-radius:8px;padding:0 11px;display:inline-flex;align-items:center;gap:6px;font-size:9px;font-weight:900;cursor:pointer}.wa-ai-all:disabled{opacity:.45;cursor:not-allowed}.wa-actions{display:flex;gap:8px;align-items:center}.wa-actions button{display:inline-flex;align-items:center;gap:6px;height:34px;border-radius:8px;border:1px solid #d6dee5;background:#fff;color:#3a5269;padding:0 12px;font-size:9px;font-weight:850;cursor:pointer}.wa-actions button:disabled{opacity:.45;cursor:not-allowed}.wa-ai-card{margin:0;border-bottom:1px solid #edf0f2;background:#fcfaf7;padding:16px 18px}.wa-ai-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.wa-ai-head span{display:flex;align-items:center;gap:6px;font-size:8px;letter-spacing:.1em;font-weight:900;color:#9a6329}.wa-ai-head b{font-size:17px;color:#1f3850}.wa-ai-head em{font-size:8px;font-style:normal;color:#8b96a1;background:#fff;border:1px solid #e2e6ea;border-radius:999px;padding:4px 7px}.wa-ai-scores{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:12px 0}.wa-ai-scores span{background:#fff;border:1px solid #e3e7ea;border-radius:8px;padding:9px 10px}.wa-ai-scores small{display:block;font-size:7px;letter-spacing:.07em;color:#8b97a3;font-weight:900}.wa-ai-scores b{display:block;margin-top:3px;font-size:14px;color:#304a62}.wa-ai-card>p{margin:0;color:#52677b;font-size:10px;line-height:1.6}.wa-errors{margin-top:13px;display:grid;gap:7px}.wa-errors>b{font-size:9px;color:#334c63}.wa-errors article{border:1px solid #e2e6e9;background:#fff;border-radius:8px;padding:9px 10px;display:grid;gap:5px}.wa-errors article strong{font-size:8.5px;color:#805629}.wa-errors article span{font-size:9px;color:#455a6d;line-height:1.45}.wa-errors article span i{display:inline-block;font-style:normal;font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#929da7;margin-right:7px}.wa-errors article small{font-size:8.5px;color:#748392;line-height:1.45}@media(max-width:700px){.wa-ai-scores{grid-template-columns:repeat(2,minmax(0,1fr))}.wa-actions{flex-wrap:wrap}}
 
 .wa-access-log{padding:15px 18px;border-bottom:1px solid #edf0f2;background:#fff}.wa-access-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.wa-access-head small{display:block;font-size:7px;letter-spacing:.1em;color:#9a672e;font-weight:900}.wa-access-head h3{margin:4px 0 0;font-size:13px;color:#253e56}.wa-access-head>span{font-size:8px;font-weight:900;color:#6f7f8e;background:#f1f4f6;border-radius:999px;padding:5px 8px}.wa-access-empty{margin-top:11px;border:1px dashed #d9e0e5;border-radius:9px;padding:12px;color:#7a8998;font-size:9px;line-height:1.5;background:#fbfcfd}.wa-access-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:12px}.wa-access-summary span{border:1px solid #e2e7eb;background:#fbfcfd;border-radius:8px;padding:8px 9px}.wa-access-summary small{display:block;font-size:6.5px;letter-spacing:.08em;color:#8d99a5;font-weight:900}.wa-access-summary b{display:block;margin-top:3px;font-size:10px;color:#314a62}.wa-access-timeline{margin-top:12px;display:grid;gap:7px}.wa-visit{display:grid;gap:5px}.wa-visit-line{display:grid;grid-template-columns:28px minmax(120px,1fr) 18px minmax(120px,1fr) auto;gap:8px;align-items:center;border:1px solid #e1e6ea;background:#fff;border-radius:9px;padding:9px 10px}.wa-visit-no{width:24px;height:24px;border-radius:7px;background:#fff3e7;color:#986127;display:grid;place-items:center;font-size:8px;font-weight:900}.wa-visit-line>div{display:grid;gap:1px}.wa-visit-line small{font-size:6.5px;letter-spacing:.08em;color:#8e9aa5;font-weight:900}.wa-visit-line b{font-size:11px;color:#253f57}.wa-visit-line em{font-size:7.5px;color:#8a96a2;font-style:normal}.wa-visit-line>strong{color:#a8b0b8;text-align:center}.wa-inside{font-size:8px;font-weight:900;color:#3e6a54;background:#edf7f0;border-radius:999px;padding:5px 7px;white-space:nowrap}.wa-away{margin-left:36px;border-left:2px dotted #d8dee4;padding:4px 0 4px 10px;font-size:8px;color:#7a8896}.wa-away b{color:#9a6329}.wa-submit-mark{display:flex;align-items:center;gap:8px;margin-top:2px;padding:9px 10px;border-radius:8px;background:#f4faf6;border:1px solid #dcece1}.wa-submit-mark span{font-size:7px;font-weight:900;letter-spacing:.1em;color:#3e7650}.wa-submit-mark b{font-size:9px;color:#284b36}@media(max-width:900px){.wa-access-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.wa-visit-line{grid-template-columns:28px 1fr 14px 1fr}.wa-inside{grid-column:2/5;justify-self:start}}@media(max-width:600px){.wa-access-log{padding:13px}.wa-access-summary{grid-template-columns:1fr 1fr}.wa-visit-line{grid-template-columns:26px 1fr}.wa-visit-line>strong{display:none}.wa-visit-line>div:nth-of-type(2){grid-column:2}.wa-inside{grid-column:2}.wa-away{margin-left:30px}}
+
+
+/* Calm canvas and clear type scale — visual-only overrides. */
+.wa-shell{background:#F4F7FB;color:#142338}
+
+/* Keep labels and utility text readable at 12px or larger. */
+.wa-top>div span{font-size:12px!important}
+.wa-top>button{font-size:12px!important}
+.wa-hero small{font-size:12px!important}
+.wa-hero p{font-size:12px!important}
+.wa-kpis span{font-size:12px!important}
+.wa-days span{font-size:12px!important}
+.wa-days b{font-size:12px!important}
+.wa-days small{font-size:12px!important}
+.wa-message{font-size:12px!important}
+.wa-person b{font-size:12px!important}
+.wa-person small{font-size:12px!important}
+.wa-person em{font-size:12px!important}
+.wa-state{font-size:12px!important}
+.wa-empty p{font-size:12px!important}
+.wa-detail-head small{font-size:12px!important}
+.wa-detail-head p{font-size:12px!important}
+.wa-metrics small{font-size:12px!important}
+.wa-metrics b{font-size:12px!important}
+.wa-actions a{font-size:12px!important}
+.wa-review label>span{font-size:12px!important}
+.wa-review button{font-size:12px!important}
+.wa-ai-all{font-size:12px!important}
+.wa-actions button{font-size:12px!important}
+.wa-ai-head span{font-size:12px!important}
+.wa-ai-head em{font-size:12px!important}
+.wa-ai-scores small{font-size:12px!important}
+.wa-ai-card>p{font-size:12px!important}
+.wa-errors>b{font-size:12px!important}
+.wa-errors article strong{font-size:12px!important}
+.wa-errors article span{font-size:12px!important}
+.wa-errors article span i{font-size:12px!important}
+.wa-errors article small{font-size:12px!important}
+.wa-access-head small{font-size:12px!important}
+.wa-access-head>span{font-size:12px!important}
+.wa-access-empty{font-size:12px!important}
+.wa-access-summary small{font-size:12px!important}
+.wa-access-summary b{font-size:12px!important}
+.wa-visit-no{font-size:12px!important}
+.wa-visit-line small{font-size:12px!important}
+.wa-visit-line b{font-size:12px!important}
+.wa-visit-line em{font-size:12px!important}
+.wa-inside{font-size:12px!important}
+.wa-away{font-size:12px!important}
+.wa-submit-mark span{font-size:12px!important}
+.wa-submit-mark b{font-size:12px!important}

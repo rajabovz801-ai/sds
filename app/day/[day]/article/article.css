@@ -434,3 +434,39 @@
   outline:3px solid rgba(52,120,246,.3);outline-offset:2px
 }
 
+
+
+/* Calm canvas and clear type scale — visual-only overrides. */
+.aa-shell{background:#F4F7FB;color:#142338}.aa-reader,.aa-content,.aa-workspace{background:#fff}
+.aa-shell .aa-finish-cta{background:#2563EB;color:#fff;border-color:#2563EB}.aa-shell .aa-finish-cta:hover{background:#1D4ED8;border-color:#1D4ED8}
+
+/* Keep labels and utility text readable at 12px or larger. */
+.aa-brand{font-size:12px!important}
+.aa-brand em{font-size:12px!important}
+.aa-day{font-size:12px!important}
+.aa-kicker{font-size:12px!important}
+.aa-hero-meta{font-size:12px!important}
+.aa-progress-label{font-size:12px!important}
+.aa-reader-top{font-size:12px!important}
+.aa-reader-top span:last-child{font-size:12px!important}
+.aa-pages button{font-size:12px!important}
+.aa-original{font-size:12px!important}
+.aa-callout-head{font-size:12px!important}
+.aa-reader-nav button{font-size:12px!important}
+.aa-reader-nav a{font-size:12px!important}
+.aa-vocab-head p{font-size:12px!important}
+.aa-words .aa-index{font-size:12px!important}
+.aa-words small{font-size:12px!important}
+.aa-words em{font-size:12px!important}
+.aa-side-footer p{font-size:12px!important}
+.aa-side-footer a{font-size:12px!important}
+.aa-definition em{font-size:12px!important}
+.aa-mobile-tabs button{font-size:12px!important}
+.aa-reader-page-title{font-size:12px!important}
+.aa-highlight-hint{font-size:12px!important}
+.aa-finish-note{font-size:12px!important}
+.aa-work-title .aa-kicker{font-size:12px!important}
+.aa-finish-cta{font-size:12px!important}
+.aa-work-vocab{font-size:12px!important}
+.aa-topic-art>span{font-size:12px!important}
+.aa-section-topic span{font-size:12px!important}
