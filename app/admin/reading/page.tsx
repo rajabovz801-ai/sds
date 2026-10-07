@@ -90,7 +90,7 @@ export default function ReadingAdmin(){
  }
 
  /* Keep Reading admin text and report controls comfortably readable. */
- .cr-admin{font-size:15px}
+ .cr-admin{font-size:14px}
  .cr-admin-top>strong,.cr-admin-top>strong em,.cr-a-heading small,.cr-a-heading p,
  .cr-a-days button span,.cr-a-days button small,.cr-a-stats small,
  .cr-a-table-head span,.cr-a-table-head>strong,.cr-a-table th,.cr-a-table td,
