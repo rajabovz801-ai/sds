@@ -83,16 +83,22 @@ export default function ListeningPage(){
   if(!started||!payload?.audio_url||!audioRef.current)return;
   const audio=audioRef.current;
   const resume=async()=>{
-   const offset=Math.max(0,(Date.now()-Date.parse(startedAt))/1000);
    try{
-    if(Number.isFinite(audio.duration)&&audio.duration>0&&offset>=audio.duration){audio.currentTime=audio.duration;setAudioStatus("ended");return}
-    if(Number.isFinite(offset)&&offset>0)audio.currentTime=offset;
+    // Audio playback must follow the media element itself, not the wall-clock age
+    // of the Listening attempt. A learner may return to an in-progress attempt
+    // after autoplay was blocked or the tab was suspended; using startedAt as
+    // the audio position incorrectly marked the recording as already finished.
+    if(audio.ended){
+     audio.currentTime=0;
+    }
     await audio.play();setAudioStatus("playing");
-   }catch{setAudioStatus("resume")}
+   }catch{
+    setAudioStatus("resume");
+   }
   };
   if(audio.readyState>=1)void resume();else audio.addEventListener("loadedmetadata",resume,{once:true});
   return()=>audio.removeEventListener("loadedmetadata",resume);
- },[started,payload?.audio_url,startedAt]);
+ },[started,payload?.audio_url]);
 
  useEffect(()=>()=>{if(saveTimer.current)window.clearTimeout(saveTimer.current)},[]);
 
@@ -183,11 +189,10 @@ export default function ListeningPage(){
  }
 
  async function resumeAudio(){
-  const audio=audioRef.current;if(!audio||!startedAt)return;
-  const offset=Math.max(0,(Date.now()-Date.parse(startedAt))/1000);
+  const audio=audioRef.current;if(!audio)return;
   try{
-   if(Number.isFinite(audio.duration)&&audio.duration>0&&offset>=audio.duration){setAudioStatus("ended");return}
-   audio.currentTime=offset;await audio.play();setAudioStatus("playing");
+   if(audio.ended)audio.currentTime=0;
+   await audio.play();setAudioStatus("playing");
   }catch{setMessage("Your browser blocked audio playback. Tap Resume audio again.")}
  }
  function queueSave(next:Record<string,string>){
@@ -267,7 +272,7 @@ export default function ListeningPage(){
 
  return <main className={"ls-shell "+(reviewMode?"reviewing":"")}>
   <StudyTimeHeartbeat day={day} module="listening"/>
-  <audio ref={audioRef} preload="auto" src={payload.audio_url} onPlay={()=>setAudioStatus("playing")} onEnded={()=>setAudioStatus("ended")} onPause={()=>{if(startedRef.current&&audioStatus==="playing"){audioRef.current?.play().catch(()=>setAudioStatus("resume"))}}}/>
+  <audio ref={audioRef} preload="auto" src={payload.audio_url} onPlay={()=>setAudioStatus("playing")} onEnded={()=>setAudioStatus("ended")} onError={()=>{if(startedRef.current){setAudioStatus("resume");setMessage("Audio could not start. Tap Resume audio to try again.")}}} onPause={()=>{if(startedRef.current&&audioStatus==="playing"){audioRef.current?.play().catch(()=>setAudioStatus("resume"))}}}/>
   <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">DAY {String(day).padStart(2,"0")} · LISTENING</div><div className="ls-top-actions">{started&&!reviewMode&&<span className={"ls-audio-state "+audioStatus}><Volume2 size={14}/>{audioStatus==="ended"?"Audio finished":audioStatus==="resume"?"Audio needs resume":"Audio once only"} {started&&<i>{secLabel(elapsed)}</i>}</span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
 
   {!started&&!reviewMode&&<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>DAY {String(day).padStart(2,"0")} · IELTS LISTENING</small><h1>Full Listening Practice</h1><p>40 questions · 4 sections. The recording plays once and cannot be paused or replayed.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Audio playback</span></div></div>{data.preview&&<div className="ls-preview">Preview mode · result and coin will not be saved.</div>}<button onClick={startTest}><Headphones size={17}/> Start Listening</button></section>}
