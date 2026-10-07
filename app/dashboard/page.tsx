@@ -4,6 +4,7 @@ import AnimatedBackButton from "../components/animated-back-button";
 import StudentPresence from "../components/student-presence";
 import {LeaderboardPanel,ProfilePanel,ProgressPanel,RewardModal,type HubStats} from "../components/challenge-hub-panels";
 import {useEffect,useMemo,useState} from "react";
+import {CHALLENGE_RESUME_STORAGE_KEY,parseChallengeResume,type ChallengeResume} from "../../lib/ark60-resume";
 import {
  LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,
  LockKeyhole,Clock3,ChevronRight,Menu,X,Bell,CircleHelp,CheckCircle2,Sun,Moon,Coins,ShieldCheck
@@ -86,6 +87,8 @@ export default function Dashboard(){
  const [stats,setStats]=useState<StudentStats|null>(null);
  const [authChecked,setAuthChecked]=useState(false);
  const [loadError,setLoadError]=useState("");
+ const [retryCount,setRetryCount]=useState(0);
+ const [resumeLocation,setResumeLocation]=useState<ChallengeResume|null>(null);
  const [rewardOpen,setRewardOpen]=useState(false);
  const [theme,setTheme]=useState<"light"|"dark">("light");
  const [typedWelcome,setTypedWelcome]=useState("");
@@ -115,13 +118,16 @@ export default function Dashboard(){
   document.addEventListener("visibilitychange",onVisible);
   const id=window.setInterval(()=>{if(document.visibilityState==="visible")void refresh()},300000);
   return()=>{mounted=false;window.clearInterval(id);window.removeEventListener("focus",onVisible);document.removeEventListener("visibilitychange",onVisible)};
- },[]);
+ },[retryCount]);
 
  useEffect(()=>{
   const saved=localStorage.getItem("ark60-theme");
   setTheme(saved==="dark"?"dark":"light");
  },[]);
  useEffect(()=>{localStorage.setItem("ark60-theme",theme)},[theme]);
+ useEffect(()=>{
+  try{setResumeLocation(parseChallengeResume(localStorage.getItem(CHALLENGE_RESUME_STORAGE_KEY)))}catch{setResumeLocation(null)}
+ },[]);
 
  useEffect(()=>{
   const tick=()=>{setToday(tashkentDate());setClock(Date.now())};
@@ -186,7 +192,7 @@ export default function Dashboard(){
  const visible=month==="all"?DAYS:DAYS.filter(x=>month==="oct"?x.date.getUTCMonth()===9:x.date.getUTCMonth()===10);
 
  if(!authChecked&&!stats)return <main className="empty-view"><div className="empty-icon"><Clock3 size={28}/></div><h1>Loading your challenge…</h1><p>Checking your account and course progress.</p></main>;
- if(authChecked&&!stats&&loadError)return <main className="empty-view"><div className="empty-icon"><CircleHelp size={28}/></div><h1>Could not load your dashboard</h1><p>{loadError}</p><button type="button" onClick={()=>window.location.reload()}>Try again</button></main>;
+ if(authChecked&&!stats&&loadError)return <main className="empty-view"><div className="empty-icon"><CircleHelp size={28}/></div><h1>Could not load your dashboard</h1><p>{loadError}</p><button type="button" onClick={()=>setRetryCount(value=>value+1)}>Try again</button></main>;
 
  return <div className={"learning-shell "+(theme==="dark"?"theme-dark":"theme-light")}><StudentPresence area="Dashboard"/>
   <aside className={"learning-sidebar "+(sidebar?"open":"")}>
@@ -215,7 +221,7 @@ export default function Dashboard(){
    </header>
 
    <main className={"learning-content workspace-"+view.toLowerCase().replaceAll(" ","-")}>
-    {loadError&&stats&&<div role="status" className="dashboard-live-warning">{loadError} Live stats may be temporarily out of date.</div>}
+    {loadError&&stats&&<div role="status" className="dashboard-live-warning"><span>{loadError} Live stats may be temporarily out of date.</span><button type="button" className="dashboard-inline-retry" onClick={()=>setRetryCount(value=>value+1)}>Retry</button></div>}
 
     {view==="Dashboard"?<>
      <div className="page-heading dashboard-heading">
@@ -234,6 +240,15 @@ export default function Dashboard(){
       <div className="kpi-card"><div><span>STUDY TIME</span><b>{stats?duration(stats.today_seconds):"—"}</b><small>{stats?"Total "+duration(stats.active_seconds):"Starts after sign-in"}</small></div><Clock3 size={22}/></div>
       <div className="kpi-card kpi-highlight"><div><span>COINS</span><b>{stats?.coins??0}</b><small>Earn +1 for each completed task</small></div><Coins size={23}/></div>
      </div>
+
+     {resumeLocation&&<section className="resume-card" aria-label="Continue your last lesson">
+      <div className="resume-card__copy">
+       <span className="resume-card__eyebrow"><Clock3 size={13}/> SAVED ON THIS DEVICE</span>
+       <h2>Continue your last lesson</h2>
+       <p>Day {String(resumeLocation.day).padStart(2,"0")} · {resumeLocation.area==="Day"?"Daily plan":resumeLocation.area}</p>
+      </div>
+      <a className="resume-card__action" href={resumeLocation.href}>Continue <ChevronRight size={16}/></a>
+     </section>}
 
      <section className="today-panel">
       <div className="today-panel-head">

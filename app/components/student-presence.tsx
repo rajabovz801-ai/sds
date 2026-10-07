@@ -1,13 +1,18 @@
 "use client";
 import {useEffect,useRef} from "react";
+import {CHALLENGE_RESUME_STORAGE_KEY,createChallengeResume} from "../../lib/ark60-resume";
 
-type Area="Dashboard"|"Day"|"Notifications"|"Reading"|"Listening"|"Article"|"Vocabulary"|"Writing"|"Speaking";
+type Area="Dashboard"|"Day"|"Notifications"|"Reading"|"Listening"|"Article"|"Vocabulary"|"Writing"|"Speaking"|"Mock";
 
 export default function StudentPresence({area,day=null}:{area:Area;day?:number|null}){
  const lastInteraction=useRef(Date.now());
  useEffect(()=>{
   let stopped=false,inFlight=false;
   const mark=()=>{lastInteraction.current=Date.now()};
+  try{
+   const resume=createChallengeResume(window.location.pathname,area);
+   if(resume)localStorage.setItem(CHALLENGE_RESUME_STORAGE_KEY,JSON.stringify(resume));
+  }catch{}
   async function pulse(){
    if(stopped||inFlight||document.visibilityState!=="visible")return;
    inFlight=true;
