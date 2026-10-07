@@ -248,7 +248,7 @@ export default function Dashboard(){
        <p>Day {String(resumeLocation.day).padStart(2,"0")} · {resumeLocation.area==="Day"?"Daily plan":resumeLocation.area}</p>
       </div>
       <a className="resume-card__action" href={resumeLocation.href}>Continue <ChevronRight size={16}/></a>
-     </section>
+     </section>}
 
      <section className="today-panel">
       <div className="today-panel-head">
