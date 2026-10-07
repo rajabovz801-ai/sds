@@ -4,20 +4,20 @@
 /* Calm canvas and clear type scale — visual-only overrides. */
 .ma-shell{background:#F4F7FB;color:#142338}
 
-/* Keep labels and utility text readable at 12px or larger. */
-.ma-top>div b{font-size:12px!important}
-.ma-top>div span{font-size:12px!important}
-.ma-hero small{font-size:12px!important}
-.ma-live{font-size:12px!important}
-.ma-kpis span{font-size:12px!important}
-.ma-toolbar>span{font-size:12px!important}
-.ma-table-head small{font-size:12px!important}
-.ma-table-head>span{font-size:12px!important}
-.ma-overflow th{font-size:12px!important}
-.ma-overflow td small{font-size:12px!important}
-.ma-status{font-size:12px!important}
-.ma-modal>header small{font-size:12px!important}
-.ma-modal>header p{font-size:12px!important}
-.ma-section-card>span{font-size:12px!important}
-.ma-writing-answers article b{font-size:12px!important}
-.ma-grade-error{font-size:12px!important}
+/* Keep labels and utility text readable at 13px or larger. */
+.ma-top>div b{font-size:13px!important}
+.ma-top>div span{font-size:13px!important}
+.ma-hero small{font-size:13px!important}
+.ma-live{font-size:13px!important}
+.ma-kpis span{font-size:13px!important}
+.ma-toolbar>span{font-size:13px!important}
+.ma-table-head small{font-size:13px!important}
+.ma-table-head>span{font-size:13px!important}
+.ma-overflow th{font-size:13px!important}
+.ma-overflow td small{font-size:13px!important}
+.ma-status{font-size:13px!important}
+.ma-modal>header small{font-size:13px!important}
+.ma-modal>header p{font-size:13px!important}
+.ma-section-card>span{font-size:13px!important}
+.ma-writing-answers article b{font-size:13px!important}
+.ma-grade-error{font-size:13px!important}

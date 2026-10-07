@@ -22,49 +22,49 @@
 /* Calm canvas and clear type scale — visual-only overrides. */
 .wa-shell{background:#F4F7FB;color:#142338}
 
-/* Keep labels and utility text readable at 12px or larger. */
-.wa-top>div span{font-size:12px!important}
-.wa-top>button{font-size:12px!important}
-.wa-hero small{font-size:12px!important}
-.wa-hero p{font-size:12px!important}
-.wa-kpis span{font-size:12px!important}
-.wa-days span{font-size:12px!important}
-.wa-days b{font-size:12px!important}
-.wa-days small{font-size:12px!important}
-.wa-message{font-size:12px!important}
-.wa-person b{font-size:12px!important}
-.wa-person small{font-size:12px!important}
-.wa-person em{font-size:12px!important}
-.wa-state{font-size:12px!important}
-.wa-empty p{font-size:12px!important}
-.wa-detail-head small{font-size:12px!important}
-.wa-detail-head p{font-size:12px!important}
-.wa-metrics small{font-size:12px!important}
-.wa-metrics b{font-size:12px!important}
-.wa-actions a{font-size:12px!important}
-.wa-review label>span{font-size:12px!important}
-.wa-review button{font-size:12px!important}
-.wa-ai-all{font-size:12px!important}
-.wa-actions button{font-size:12px!important}
-.wa-ai-head span{font-size:12px!important}
-.wa-ai-head em{font-size:12px!important}
-.wa-ai-scores small{font-size:12px!important}
-.wa-ai-card>p{font-size:12px!important}
-.wa-errors>b{font-size:12px!important}
-.wa-errors article strong{font-size:12px!important}
-.wa-errors article span{font-size:12px!important}
-.wa-errors article span i{font-size:12px!important}
-.wa-errors article small{font-size:12px!important}
-.wa-access-head small{font-size:12px!important}
-.wa-access-head>span{font-size:12px!important}
-.wa-access-empty{font-size:12px!important}
-.wa-access-summary small{font-size:12px!important}
-.wa-access-summary b{font-size:12px!important}
-.wa-visit-no{font-size:12px!important}
-.wa-visit-line small{font-size:12px!important}
-.wa-visit-line b{font-size:12px!important}
-.wa-visit-line em{font-size:12px!important}
-.wa-inside{font-size:12px!important}
-.wa-away{font-size:12px!important}
-.wa-submit-mark span{font-size:12px!important}
-.wa-submit-mark b{font-size:12px!important}
+/* Keep labels and utility text readable at 13px or larger. */
+.wa-top>div span{font-size:13px!important}
+.wa-top>button{font-size:13px!important}
+.wa-hero small{font-size:13px!important}
+.wa-hero p{font-size:13px!important}
+.wa-kpis span{font-size:13px!important}
+.wa-days span{font-size:13px!important}
+.wa-days b{font-size:13px!important}
+.wa-days small{font-size:13px!important}
+.wa-message{font-size:13px!important}
+.wa-person b{font-size:13px!important}
+.wa-person small{font-size:13px!important}
+.wa-person em{font-size:13px!important}
+.wa-state{font-size:13px!important}
+.wa-empty p{font-size:13px!important}
+.wa-detail-head small{font-size:13px!important}
+.wa-detail-head p{font-size:13px!important}
+.wa-metrics small{font-size:13px!important}
+.wa-metrics b{font-size:13px!important}
+.wa-actions a{font-size:13px!important}
+.wa-review label>span{font-size:13px!important}
+.wa-review button{font-size:13px!important}
+.wa-ai-all{font-size:13px!important}
+.wa-actions button{font-size:13px!important}
+.wa-ai-head span{font-size:13px!important}
+.wa-ai-head em{font-size:13px!important}
+.wa-ai-scores small{font-size:13px!important}
+.wa-ai-card>p{font-size:13px!important}
+.wa-errors>b{font-size:13px!important}
+.wa-errors article strong{font-size:13px!important}
+.wa-errors article span{font-size:13px!important}
+.wa-errors article span i{font-size:13px!important}
+.wa-errors article small{font-size:13px!important}
+.wa-access-head small{font-size:13px!important}
+.wa-access-head>span{font-size:13px!important}
+.wa-access-empty{font-size:13px!important}
+.wa-access-summary small{font-size:13px!important}
+.wa-access-summary b{font-size:13px!important}
+.wa-visit-no{font-size:13px!important}
+.wa-visit-line small{font-size:13px!important}
+.wa-visit-line b{font-size:13px!important}
+.wa-visit-line em{font-size:13px!important}
+.wa-inside{font-size:13px!important}
+.wa-away{font-size:13px!important}
+.wa-submit-mark span{font-size:13px!important}
+.wa-submit-mark b{font-size:13px!important}
