@@ -88,5 +88,13 @@ export default function ReadingAdmin(){
   .cr-a-stats>div{min-height:95px;padding:11px 8px}.cr-a-stats svg{width:17px;height:17px}.cr-a-stats small{font-size:9px}.cr-a-stats strong{font-size:18px;word-break:break-word}
   .cr-a-table{padding:13px 10px}.cr-a-table-head{flex-wrap:wrap;gap:8px}.cr-a-table-head h2{font-size:13px}
  }
-`}</style></main>;
+
+ /* Keep Reading admin text and report controls comfortably readable. */
+ .cr-admin{font-size:15px}
+ .cr-admin-top>strong,.cr-admin-top>strong em,.cr-a-heading small,.cr-a-heading p,
+ .cr-a-days button span,.cr-a-days button small,.cr-a-stats small,
+ .cr-a-table-head span,.cr-a-table-head>strong,.cr-a-table th,.cr-a-table td,
+ .cr-a-table td small,.cr-answer-detail,.cr-detail-head span,.cr-detail-head p,
+ .cr-detail-scroll table,.cr-detail-scroll th,.cr-detail-status{font-size:13px!important}
+ `}</style></main>;
 }

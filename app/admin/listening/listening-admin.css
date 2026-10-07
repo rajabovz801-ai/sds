@@ -3,30 +3,30 @@
 /* Calm canvas and clear type scale — visual-only overrides. */
 .la-shell{background:#F4F7FB;color:#142338}
 
-/* Keep labels and utility text readable at 12px or larger. */
-.la-top>div span{font-size:12px!important}
-.la-top>span{font-size:12px!important}
-.la-hero small{font-size:12px!important}
-.la-hero p{font-size:12px!important}
-.la-summary span{font-size:12px!important}
-.la-days span{font-size:12px!important}
-.la-days b{font-size:12px!important}
-.la-days small{font-size:12px!important}
-.la-no-days{font-size:12px!important}
-.la-toolbar button{font-size:12px!important}
-.la-message{font-size:12px!important}
-.la-person b{font-size:12px!important}
-.la-person small{font-size:12px!important}
-.la-score b{font-size:12px!important}
-.la-score small{font-size:12px!important}
-.la-empty p{font-size:12px!important}
-.la-detail-head small{font-size:12px!important}
-.la-detail-head p{font-size:12px!important}
-.la-total span{font-size:12px!important}
-.la-total small{font-size:12px!important}
-.la-parts span{font-size:12px!important}
-.la-parts b{font-size:12px!important}
-.la-num{font-size:12px!important}
-.la-copy small{font-size:12px!important}
-.la-copy>div span{font-size:12px!important}
-.la-copy>div b{font-size:12px!important}
+/* Keep labels and utility text readable at 13px or larger. */
+.la-top>div span{font-size:13px!important}
+.la-top>span{font-size:13px!important}
+.la-hero small{font-size:13px!important}
+.la-hero p{font-size:13px!important}
+.la-summary span{font-size:13px!important}
+.la-days span{font-size:13px!important}
+.la-days b{font-size:13px!important}
+.la-days small{font-size:13px!important}
+.la-no-days{font-size:13px!important}
+.la-toolbar button{font-size:13px!important}
+.la-message{font-size:13px!important}
+.la-person b{font-size:13px!important}
+.la-person small{font-size:13px!important}
+.la-score b{font-size:13px!important}
+.la-score small{font-size:13px!important}
+.la-empty p{font-size:13px!important}
+.la-detail-head small{font-size:13px!important}
+.la-detail-head p{font-size:13px!important}
+.la-total span{font-size:13px!important}
+.la-total small{font-size:13px!important}
+.la-parts span{font-size:13px!important}
+.la-parts b{font-size:13px!important}
+.la-num{font-size:13px!important}
+.la-copy small{font-size:13px!important}
+.la-copy>div span{font-size:13px!important}
+.la-copy>div b{font-size:13px!important}

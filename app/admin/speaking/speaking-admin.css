@@ -18,32 +18,32 @@
 /* Calm canvas and clear type scale — visual-only overrides. */
 .sa-shell{background:#F4F7FB;color:#142338}
 
-/* Keep labels and utility text readable at 12px or larger. */
-.sa-top>div span{font-size:12px!important}
-.sa-top>button{font-size:12px!important}
-.sa-hero small{font-size:12px!important}
-.sa-hero p{font-size:12px!important}
-.sa-kpis span{font-size:12px!important}
-.sa-days span{font-size:12px!important}
-.sa-days b{font-size:12px!important}
-.sa-days small{font-size:12px!important}
-.sa-message{font-size:12px!important}
-.sa-person b{font-size:12px!important}
-.sa-person small{font-size:12px!important}
-.sa-person em{font-size:12px!important}
-.sa-status{font-size:12px!important}
-.sa-expiry{font-size:12px!important}
-.sa-empty p{font-size:12px!important}
-.sa-detail-head small{font-size:12px!important}
-.sa-detail-head p{font-size:12px!important}
-.sa-detail-head button{font-size:12px!important}
-.sa-parts>section>header span{font-size:12px!important}
-.sa-parts>section>header b{font-size:12px!important}
-.sa-answer small{font-size:12px!important}
-.sa-player span{font-size:12px!important}
-.sa-cue small{font-size:12px!important}
-.sa-cue li{font-size:12px!important}
-.sa-review label>span{font-size:12px!important}
-.sa-review button{font-size:12px!important}
-.sa-expired-box b{font-size:12px!important}
-.sa-expired-box p{font-size:12px!important}
+/* Keep labels and utility text readable at 13px or larger. */
+.sa-top>div span{font-size:13px!important}
+.sa-top>button{font-size:13px!important}
+.sa-hero small{font-size:13px!important}
+.sa-hero p{font-size:13px!important}
+.sa-kpis span{font-size:13px!important}
+.sa-days span{font-size:13px!important}
+.sa-days b{font-size:13px!important}
+.sa-days small{font-size:13px!important}
+.sa-message{font-size:13px!important}
+.sa-person b{font-size:13px!important}
+.sa-person small{font-size:13px!important}
+.sa-person em{font-size:13px!important}
+.sa-status{font-size:13px!important}
+.sa-expiry{font-size:13px!important}
+.sa-empty p{font-size:13px!important}
+.sa-detail-head small{font-size:13px!important}
+.sa-detail-head p{font-size:13px!important}
+.sa-detail-head button{font-size:13px!important}
+.sa-parts>section>header span{font-size:13px!important}
+.sa-parts>section>header b{font-size:13px!important}
+.sa-answer small{font-size:13px!important}
+.sa-player span{font-size:13px!important}
+.sa-cue small{font-size:13px!important}
+.sa-cue li{font-size:13px!important}
+.sa-review label>span{font-size:13px!important}
+.sa-review button{font-size:13px!important}
+.sa-expired-box b{font-size:13px!important}
+.sa-expired-box p{font-size:13px!important}
