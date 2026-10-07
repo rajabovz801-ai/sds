@@ -421,3 +421,48 @@
 }
 .ls-submit:disabled{background:#e8edf5;border-color:#e8edf5;color:#8a98aa}
 
+
+
+/* Calm canvas and clear type scale — visual-only overrides. */
+.ls-shell{background:#F4F7FB;color:#142338}.ls-topbar,.ls-start-card,.ls-result-card{background:#fff}
+.ls-shell :is(.ls-start-card>button,.ls-result-actions button:not(.ghost),.ls-submit,.ls-resume-banner button){background:#2563EB;border-color:#2563EB;color:#fff}.ls-shell :is(.ls-start-card>button,.ls-result-actions button:not(.ghost),.ls-submit,.ls-resume-banner button):hover:not(:disabled){background:#1D4ED8;border-color:#1D4ED8}
+
+/* Keep labels and utility text readable at 12px or larger. */
+.ls-top-title{font-size:12px!important}
+.ls-back .ark-back-label{font-size:12px!important}
+.ls-audio-state{font-size:12px!important}
+.ls-start-card>small{font-size:12px!important}
+.ls-start-meta span{font-size:12px!important}
+.ls-preview{font-size:12px!important}
+.ls-start-card>button{font-size:12px!important}
+.ls-resume-banner b{font-size:12px!important}
+.ls-resume-banner span{font-size:12px!important}
+.ls-resume-banner button{font-size:12px!important}
+.ls-message{font-size:12px!important}
+.ls-instruction b{font-size:12px!important}
+.ls-instruction span{font-size:12px!important}
+.ls-section-heading b{font-size:12px!important}
+.ls-block-head b{font-size:12px!important}
+.ls-block-head strong{font-size:12px!important}
+.ls-qnum{font-size:12px!important}
+.ls-inline-review{font-size:12px!important}
+.ls-option span{font-size:12px!important}
+.ls-choice-box p{font-size:12px!important}
+.ls-match>b{font-size:12px!important}
+.ls-match select{font-size:12px!important}
+.ls-review-line{font-size:12px!important}
+.ls-check span{font-size:12px!important}
+.ls-note-group>p{font-size:12px!important}
+.ls-note-group li{font-size:12px!important}
+.ls-number-groups>div>span{font-size:12px!important}
+.ls-number-groups button{font-size:12px!important}
+.ls-submit{font-size:12px!important}
+.ls-result-card>small{font-size:12px!important}
+.ls-band{font-size:12px!important}
+.ls-section-scores span{font-size:12px!important}
+.ls-result-card>p{font-size:12px!important}
+.ls-result-actions button{font-size:12px!important}
+.ls-start-card>p{font-size:12px!important}
+.ls-save-state{font-size:12px!important}
+.ls-qnum.static{font-size:12px!important}
+.ls-selection-popup button{font-size:12px!important}

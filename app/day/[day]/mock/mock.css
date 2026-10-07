@@ -126,3 +126,25 @@
 }
 .mock-reading-shell .mock-part-nav button.active{background:#3478f6;border-color:#3478f6;color:#fff}
 
+
+
+/* Calm canvas and clear type scale — visual-only overrides. */
+.mock-entry,.mock-result-page{background:#F4F7FB;color:#142338}
+.mock-entry :is(.mock-entry-card>button,.mock-result-card>button):not(:disabled){background:#2563EB;color:#fff;border-color:#2563EB}.mock-entry :is(.mock-entry-card>button,.mock-result-card>button):hover:not(:disabled){background:#1D4ED8}
+
+/* Keep labels and utility text readable at 12px or larger. */
+.mock-entry-top>span{font-size:12px!important}
+.mock-entry-card>small{font-size:12px!important}
+.mock-result-card>small{font-size:12px!important}
+.mock-writing-tabs .writing-task-chip b{font-size:12px!important}
+.mock-result-grid article span{font-size:12px!important}
+.mock-entry-top>b{font-size:12px!important}
+.mock-l-sections button{font-size:12px!important}
+.mock-reading-shell .cr-head-practice{font-size:12px!important}
+.mock-reading-shell .cr-instructions small{font-size:12px!important}
+.mock-reading-shell .cr-instructions p{font-size:12px!important}
+.mock-reading-shell .cr-highlight-guide{font-size:12px!important}
+.mock-reading-shell .mock-part-nav button{font-size:12px!important}
+.mock-reading-shell .cr-answer-count{font-size:12px!important}
+.mock-reading-shell .cr-submit{font-size:12px!important}
+.mock-reading-shell .cr-mobile-tabs button{font-size:12px!important}

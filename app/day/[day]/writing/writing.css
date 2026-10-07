@@ -117,3 +117,16 @@
 }
 .writing-controls button.ghost{background:#fff;border-color:#d4dce7;color:#56667a}
 
+
+
+/* Calm canvas and clear type scale — visual-only overrides. */
+.writing-shell{background:#F4F7FB;color:#142338}
+
+/* Keep labels and utility text readable at 12px or larger. */
+.writing-top-center span{font-size:12px!important}
+.writing-task-chip{font-size:12px!important}
+.writing-pane-head>span{font-size:12px!important}
+.writing-answer-pane .writing-pane-head i{font-size:12px!important}
+.writing-editor-footer{font-size:12px!important}
+.writing-finish small{font-size:12px!important}
+.writing-result-strip span{font-size:12px!important}

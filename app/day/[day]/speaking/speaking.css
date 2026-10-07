@@ -89,3 +89,55 @@
 }
 .sp-part-footer button.ghost{background:#fff;border-color:#e3e9f1;color:#53677c}
 
+
+
+/* Calm canvas and clear type scale — visual-only overrides. */
+.sp-shell{background:#F4F7FB;color:#142338}
+.sp-shell :is(.sp-start,.sp-submit,.sp-complete>button){background:#2563EB;color:#fff;border-color:#2563EB}.sp-shell :is(.sp-start,.sp-submit,.sp-complete>button):hover:not(:disabled){background:#1D4ED8}
+
+/* Keep labels and utility text readable at 12px or larger. */
+.sp-topbar>div span{font-size:12px!important}
+.sp-progress span{font-size:12px!important}
+.sp-progress span b{font-size:12px!important}
+.sp-message{font-size:12px!important}
+.sp-intro>small{font-size:12px!important}
+.sp-review>small{font-size:12px!important}
+.sp-complete>small{font-size:12px!important}
+.sp-intro-parts b{font-size:12px!important}
+.sp-intro-parts span{font-size:12px!important}
+.sp-mic-check{font-size:12px!important}
+.sp-mic-check button{font-size:12px!important}
+.sp-start{font-size:12px!important}
+.sp-submit{font-size:12px!important}
+.sp-complete>button{font-size:12px!important}
+.sp-preview-note{font-size:12px!important}
+.sp-part-head small{font-size:12px!important}
+.sp-part-head p{font-size:12px!important}
+.sp-q-number{font-size:12px!important}
+.sp-record-btn{font-size:12px!important}
+.sp-stop-btn{font-size:12px!important}
+.sp-preview-row button{font-size:12px!important}
+.sp-recording-live strong{font-size:12px!important}
+.sp-recording-live span{font-size:12px!important}
+.sp-inline-error{font-size:12px!important}
+.sp-saved-row>span{font-size:12px!important}
+.sp-part-footer>span{font-size:12px!important}
+.sp-part-footer button{font-size:12px!important}
+.sp-cue h3{font-size:12px!important}
+.sp-prep small{font-size:12px!important}
+.sp-prep button{font-size:12px!important}
+.sp-prep-live{font-size:12px!important}
+.sp-prep-done{font-size:12px!important}
+.sp-notes>span{font-size:12px!important}
+.sp-review-grid b{font-size:12px!important}
+.sp-review-grid span{font-size:12px!important}
+.sp-review-back{font-size:12px!important}
+.sp-result-state b{font-size:12px!important}
+.sp-result-state p{font-size:12px!important}
+.sp-expired{font-size:12px!important}
+.sp-topbar>div b{font-size:12px!important}
+.sp-topbar .sp-top-title span{font-size:12px!important}
+.sp-back .ark-back-label{font-size:12px!important}
+.sp-progress span em{font-size:12px!important}
+.sp-preview-banner{font-size:12px!important}
+.sp-intro>p{font-size:12px!important}
