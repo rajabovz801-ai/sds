@@ -249,13 +249,13 @@ export default function SpeakingPage(){
  const prepReady=prepStarted&&prepRemaining<=0;
  const submitted=data.attempt?.status==="submitted"||stage==="complete";
 
- return <main className="sp-shell">
+ return <main className={"sp-shell "+(stage==="intro"?"sp-shell--intro":"")}>
   <StudyTimeHeartbeat day={day} module="speaking"/>
   <header className="sp-topbar"><AnimatedBackButton className="sp-back" onClick={goBack} ariaLabel="Back to study day"/><div className="sp-top-title"><span>DAY {pad(day)} · FULL SPEAKING</span></div><button className="sp-full" onClick={toggleFullscreen} aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} title={fullScreen?"Exit fullscreen":"Fullscreen"}>{fullScreen?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></header>
 
   <div className="sp-progress"><span className={stage==="intro"||stage==="part1"?"active":p1Done?"done":""}><em>{p1Done?<Check size={11}/>:"01"}</em><b>Part 1</b></span><i/><span className={stage==="part2"?"active":p2Done?"done":""}><em>{p2Done?<Check size={11}/>:"02"}</em><b>Part 2</b></span><i/><span className={stage==="part3"?"active":p3Done?"done":""}><em>{p3Done?<Check size={11}/>:"03"}</em><b>Part 3</b></span><i/><span className={stage==="review"||stage==="complete"?"active":""}><em>04</em><b>Review</b></span></div>
 
-  <section className="sp-content">
+  <section className={"sp-content "+(stage==="intro"?"sp-content--intro":"")}>
    {message&&<div className="sp-message">{message}<button onClick={()=>setMessage("")}>×</button></div>}
 
    {stage==="intro"&&<div className="sp-intro">

@@ -466,3 +466,23 @@
 .ls-save-state{font-size:12px!important}
 .ls-qnum.static{font-size:12px!important}
 .ls-selection-popup button{font-size:12px!important}
+
+/* Center the Listening introduction in the same balanced, responsive start frame. */
+.ls-shell--intro{min-height:100dvh;display:flex;flex-direction:column}
+.ls-shell--intro .ls-topbar{flex:none}
+.ls-shell--intro .ls-start-card{width:min(640px,calc(100% - 32px));margin:auto;padding:30px clamp(22px,4vw,38px);border-radius:18px;box-shadow:0 16px 44px rgba(24,45,70,.07)}
+.ls-shell--intro .ls-start-icon{width:52px;height:52px;margin-bottom:13px}
+.ls-shell--intro .ls-start-card h1{font-size:32px}
+.ls-shell--intro .ls-start-card>p{font-size:14px;line-height:1.7}
+.ls-shell--intro .ls-start-meta{max-width:500px;width:100%;margin:22px auto 15px}
+.ls-shell--intro .ls-start-card>button{width:min(340px,100%);height:46px;margin:12px auto 0;border-radius:9px}
+@media(max-width:720px){
+ .ls-shell--intro .ls-start-card{width:calc(100% - 24px);padding:24px 17px}
+ .ls-shell--intro .ls-start-card h1{font-size:27px}
+ .ls-shell--intro .ls-start-card>p{font-size:13px}
+ .ls-shell--intro .ls-start-meta{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+}
+@media(max-width:430px){
+ .ls-shell--intro .ls-start-card{padding:21px 13px}
+ .ls-shell--intro .ls-start-meta{grid-template-columns:1fr}
+}
