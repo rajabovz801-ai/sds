@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 
 type Day={n:number,date:Date,mock:boolean};
+import {RewardAvatar,RewardDecoration,cosmeticCSS,type CosmeticState} from "../components/reward-style";
+
 type StudentStats=HubStats;
 type ModuleCard={name:string;detail:string;icon:typeof BookOpen;tone:string;time:string};
 
@@ -194,14 +196,14 @@ export default function Dashboard(){
  if(!authChecked&&!stats)return <main className="empty-view"><div className="empty-icon"><Clock3 size={28}/></div><h1>Loading your challenge…</h1><p>Checking your account and course progress.</p></main>;
  if(authChecked&&!stats&&loadError)return <main className="empty-view"><div className="empty-icon"><CircleHelp size={28}/></div><h1>Could not load your dashboard</h1><p>{loadError}</p><button type="button" onClick={()=>setRetryCount(value=>value+1)}>Try again</button></main>;
 
- return <div className={"learning-shell "+(theme==="dark"?"theme-dark":"theme-light")}><StudentPresence area="Dashboard"/>
+ return <div style={cosmeticCSS(stats?.student.cosmetics)} className={"learning-shell "+(theme==="dark"?"theme-dark":"theme-light")+(stats?.student.cosmetics?.theme?" has-workspace-theme":"")}><StudentPresence area="Dashboard"/>
   <aside className={"learning-sidebar "+(sidebar?"open":"")}>
    <div className="learning-brand learning-brand-minimal"><button className="mobile-close" aria-label="Close menu" onClick={()=>setSidebar(false)}><X size={18}/></button></div>
    <div className="side-overline">WORKSPACE</div>
    <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom">
-    <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><span><Coins size={16}/></span><div><b>Daily reward</b><small>Build your 7-day coin streak</small></div><ChevronRight size={14}/></button>
-    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><span className="user-avatar">{initials}</span><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
+    <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><span><Coins size={16}/></span><div><b>Daily reward</b><small>Grow your reward collection</small></div><ChevronRight size={14}/></button>
+    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
    </div>
   </aside>
 
@@ -225,7 +227,7 @@ export default function Dashboard(){
 
     {view==="Dashboard"?<>
      <div className="page-heading dashboard-heading">
-      <div className="hero-landscape" aria-hidden="true"/>
+      <div className="hero-landscape" aria-hidden="true">{stats?.student.cosmetics?.unlocked?.decorations&&<RewardDecoration theme={stats.student.cosmetics.theme}/>}</div>
       <div className="hero-copy">
        <div className="section-eyebrow"><span className="rocket-mark">✦</span> YOUR IELTS JOURNEY <span className="eyebrow-line"/></div>
        <h1 className="typewriter-title" aria-label={stats?"Welcome, "+stats.student.first_name+".":"Welcome."}><span aria-hidden="true">{typedWelcome||" "}</span>{typing&&<i className="typewriter-caret" aria-hidden="true"/>}</h1>
@@ -313,10 +315,10 @@ export default function Dashboard(){
      </div>
 
      <section className="bottom-insights"><article><div className="insight-icon"><ShieldCheck size={20}/></div><div><b>Calendar-based access</b><p>Each day unlocks at 00:00 Uzbekistan time. Previous unfinished days remain available.</p></div></article><article><div className="insight-icon"><Clock3 size={20}/></div><div><b>Active study tracking</b><p>Only visible, recently active supported study time is recorded.</p></div></article></section>
-    </>:view==="Leaderboard"&&stats?<LeaderboardPanel studentId={stats.student.id}/>:view==="Progress"&&stats?<ProgressPanel stats={stats} completedDays={completedDays}/>:view==="Profile"&&stats?<ProfilePanel stats={stats} onStudent={student=>setStats(prev=>prev?{...prev,student:{...prev.student,...student}}:prev)} onCoins={coins=>setStats(prev=>prev?{...prev,coins}:prev)} onLogout={exit}/>:<section className="empty-view"><div className="empty-icon"><Bell size={31}/></div><h1>{view}</h1><p>This section is not available yet.</p><AnimatedBackButton onClick={()=>setView("Dashboard")} ariaLabel="Back to dashboard"/></section>}
+    </>:view==="Leaderboard"&&stats?<LeaderboardPanel studentId={stats.student.id} cosmetics={stats.student.cosmetics} preview={stats.preview}/>:view==="Progress"&&stats?<ProgressPanel stats={stats} completedDays={completedDays}/>:view==="Profile"&&stats?<ProfilePanel stats={stats} onStudent={student=>setStats(prev=>prev?{...prev,student:{...prev.student,...student}}:prev)} onCoins={coins=>setStats(prev=>prev?{...prev,coins}:prev)} onLogout={exit}/>:<section className="empty-view"><div className="empty-icon"><Bell size={31}/></div><h1>{view}</h1><p>This section is not available yet.</p><AnimatedBackButton onClick={()=>setView("Dashboard")} ariaLabel="Back to dashboard"/></section>}
    </main>
   </div>
 
-  <RewardModal open={rewardOpen} onClose={()=>setRewardOpen(false)} onBalance={coins=>setStats(prev=>prev?{...prev,coins}:prev)}/>
+  <RewardModal onStyle={(cosmetics:CosmeticState)=>setStats(prev=>prev?{...prev,student:{...prev.student,cosmetics}}:prev)} open={rewardOpen} onClose={()=>setRewardOpen(false)} onBalance={coins=>setStats(prev=>prev?{...prev,coins}:prev)}/>
  </div>;
 }

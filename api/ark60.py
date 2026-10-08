@@ -13,6 +13,8 @@ from urllib.error import HTTPError, URLError
 from zoneinfo import ZoneInfo
 from fastapi import FastAPI, Request, Response, HTTPException
 
+from lib.ark60_rewards import reward_for_day, unlocks, style_allowed
+
 app = FastAPI(title="ARK IELTS 60-day API", version="1.1.0")
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL", "https://svdigxqdivcmljirjwhk.supabase.co").rstrip("/")
 COOKIE = "ark60_session"
@@ -62,6 +64,28 @@ def db(method, endpoint, params=None, payload=None, prefer=None):
         raise HTTPException(status_code=502, detail="Database operation failed")
     except (URLError,TimeoutError):
         raise HTTPException(status_code=503, detail="Database temporarily unavailable")
+
+def reward_progress(user):
+    if user.get("username") == "rustam7":
+        return 60
+    rows = db("GET", "ark60_daily_rewards", {"select":"id", "student_id":"eq."+user["id"], "limit":60})
+    return len(rows)
+
+def cosmetic_state(user, count=None):
+    count = reward_progress(user) if count is None else count
+    rows = db("GET", "ark60_cosmetics", {"select":"theme,avatar,badge", "student_id":"eq."+user["id"], "limit":1})
+    state = rows[0] if rows else {"theme":None,"avatar":None,"badge":None}
+    state["unlocked"] = unlocks(count)
+    return state
+
+def enrich_reward(center, user):
+    count = int(center.get("claimed_days") or 0)
+    center["cosmetics"] = cosmetic_state(user, count)
+    center["next_reward"] = reward_for_day(center.get("next_day") or 1)
+    center["next_amount"] = center["next_reward"]["amount"]
+    center["today_reward"] = reward_for_day(count) if count else None
+    center["catalog"] = [reward_for_day(n) for n in range(1,61)]
+    return center
 
 def digest(value):
     return hashlib.sha256(value.encode()).hexdigest()
@@ -209,7 +233,7 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
         preview=user.get("username")=="rustam7"
         return {
-            "student":user,
+            "student":{**user,"cosmetics":cosmetic_state(user)},
             "active_seconds":0 if preview else int(summary.get("active_seconds") or 0),
             "today_seconds":0 if preview else int(summary.get("today_seconds") or 0),
             "by_module":({m:0 for m in sorted(MODULES)} if preview else (summary.get("by_module") or {m:0 for m in sorted(MODULES)})),
@@ -222,11 +246,13 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         user=require_student(request)
         preview=user.get("username")=="rustam7"
         if preview:
-            return {"balance":0,"claimed_today":False,"today_amount":0,"streak_day":0,"next_amount":1,"history":[],"preview":True}
-        rows=db("POST","rpc/ark60_reward_center",payload={"p_student":user["id"],"p_today":str(today())})
+            try: demo_day=max(1,min(60,int(request.query_params.get("demo_day",8))))
+            except (ValueError,TypeError): demo_day=8
+            return enrich_reward({"balance":0,"claimed_today":False,"today_amount":0,"streak_day":demo_day-1,"claimed_days":demo_day-1,"next_day":demo_day,"history":[],"preview":True},user)
+        rows=db("POST","rpc/ark60_reward_center_v2",payload={"p_student":user["id"],"p_today":str(today())})
         center=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
         center["preview"]=False
-        return center
+        return enrich_reward(center,user)
     if action=="leaderboard":
         user=require_student(request)
         period=str(request.query_params.get("period","all")).strip().lower()
@@ -245,6 +271,10 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
             presence=db("GET","ark60_presence",{"select":"student_id,last_seen_at,last_interaction_at","limit":500})
         except HTTPException:
             presence=[]
+        styles=db("GET","ark60_cosmetics",{"select":"student_id,theme,avatar,badge","limit":500})
+        style_map={x["student_id"]:x for x in styles}
+        for item in board:
+            item["cosmetics"]=style_map.get(item.get("student_id"),{})
         pmap={x.get("student_id"):x for x in presence}
         stamp=now()
         current=None
@@ -530,10 +560,23 @@ async def actions(request:Request,response:Response):
     if action=="claim_daily_reward":
         user=require_student(request)
         if user.get("username")=="rustam7":
-            return {"ok":True,"claimed":True,"preview":True,"streak_day":1,"amount":1,"balance":0,"next_amount":2}
-        rows=db("POST","rpc/ark60_claim_daily_reward",payload={"p_student":user["id"],"p_today":str(today())})
+            try: day=max(1,min(60,int(data.get("demo_day",8))))
+            except (ValueError,TypeError): day=8
+            gift=reward_for_day(day)
+            return enrich_reward({"ok":True,"claimed":True,"preview":True,"claimed_today":True,"today_amount":gift["amount"],"streak_day":day,"claimed_days":day,"amount":gift["amount"],"balance":0,"next_day":min(60,day+1),"history":[]},user)
+        rows=db("POST","rpc/ark60_claim_daily_reward_v2",payload={"p_student":user["id"],"p_today":str(today())})
         reward=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
-        return reward
+        return enrich_reward(reward,user)
+    if action=="apply_reward_style":
+        user=require_student(request)
+        count=reward_progress(user)
+        theme=data.get("theme") or None
+        avatar=data.get("avatar") or None
+        badge=data.get("badge") or None
+        if not style_allowed(count,theme,avatar) or (badge is not None and badge not in unlocks(count)["badges"]):
+            raise HTTPException(status_code=403,detail="Claim the matching reward before applying this style.")
+        db("POST","ark60_cosmetics",params={"on_conflict":"student_id"},payload={"student_id":user["id"],"theme":theme,"avatar":avatar,"badge":badge,"updated_at":now().isoformat()},prefer="resolution=merge-duplicates,return=minimal")
+        return {"ok":True,"cosmetics":cosmetic_state(user,count),"preview":user.get("username")=="rustam7"}
     if action=="update_profile":
         user=require_student(request)
         first=str(data.get("first_name","")).strip()
