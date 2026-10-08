@@ -76,7 +76,7 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
   return()=>{live=false;window.clearInterval(id);document.removeEventListener("visibilitychange",refresh)};
  },[period]);
 
- const sorted=useMemo(()=>rows.slice().sort((a,b)=>b.coins-a.coins||b.active_seconds-a.active_seconds||a.full_name.localeCompare(b.full_name)),[rows]);
+ const sorted=useMemo(()=>rows.map(row=>row.student_id===studentId?{...row,cosmetics:cosmetics||row.cosmetics}:row).sort((a,b)=>b.coins-a.coins||b.active_seconds-a.active_seconds||a.full_name.localeCompare(b.full_name)),[rows,studentId,cosmetics]);
  const top=sorted.slice(0,3);
  const table=sorted.slice(3,10);
  const current=sorted.find(row=>row.student_id===studentId);
@@ -120,7 +120,7 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
     </div>)}
    </div>}
 
-   {current&&current.rank>10&&<div className="lb-current-row"><span>Your rank</span><b>#{current.rank}</b><div><strong>{current.full_name}</strong><small>@{current.username}</small></div><span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span></div>}
+   {current&&current.rank>10&&<div className={"lb-current-row "+(current.cosmetics?.theme?"has-reward-theme":"")} style={cosmeticCSS(current.cosmetics)}><span>Your rank</span><b>#{current.rank}</b><div><RewardAvatar className="lb-mini-avatar" avatar={current.cosmetics?.avatar} initials={initials(current)}/><span><strong>{current.full_name} <ThemeMark theme={current.cosmetics?.theme}/></strong><small>@{current.username}</small></span></div><span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span></div>}
   </>:<div className="hub-empty"><Trophy size={28}/><b>No leaderboard activity in this period yet.</b><p>Earn coins or record active study time to appear here.</p></div>}
   </div>
  </section>;
