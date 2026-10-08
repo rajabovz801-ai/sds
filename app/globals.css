@@ -1747,8 +1747,16 @@ button.user-tile>svg{color:#8290a0;flex:none}
 .reward-avatar img{width:100%;height:100%;object-fit:contain;object-position:center bottom;display:block}
 .theme-mark{color:var(--reward-accent,#b16f45);display:inline-block;vertical-align:middle;flex-shrink:0}
 .reward-name-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:5px 9px;border-radius:8px;background:#f4f6f7;color:var(--reward-accent,#536b7b);margin-top:6px}
-.has-workspace-theme .page-heading .hero-landscape{background-image:linear-gradient(90deg,rgba(255,255,255,.12),rgba(255,255,255,.04)),var(--reward-cover);background-size:cover;background-position:center}
-.has-workspace-theme .learning-nav button.active{border-color:var(--reward-accent);color:var(--reward-accent)}
+.has-workspace-theme .dashboard-heading{border:1px solid #e2e8ee;border-radius:16px;padding:24px;min-height:156px;background:#f8fafc}
+.has-workspace-theme .workspace-dashboard .dashboard-heading .hero-landscape{inset:0;width:100%;height:100%;opacity:1;background-image:linear-gradient(90deg,#f8fafc 0%,#f8fafc 48%,#f8fafcf2 62%,#f8fafc40 85%,#f8fafc10 100%),var(--reward-cover);background-size:cover;background-position:center;border-radius:inherit}
+.has-workspace-theme .dashboard-heading .hero-copy{max-width:72%;min-width:0}
+.has-workspace-theme .dashboard-heading h1{white-space:normal;overflow-wrap:anywhere}
+.has-workspace-theme .dashboard-heading .section-eyebrow,.has-workspace-theme .dashboard-heading .rocket-mark,.has-workspace-theme .date-badge svg{color:var(--reward-accent)}
+.has-workspace-theme .dashboard-heading .eyebrow-line{background:var(--reward-accent)}
+.has-workspace-theme .dashboard-heading .hero-landscape>.reward-decoration{right:20px;bottom:10px;width:48px;height:48px;opacity:.85}
+.has-workspace-theme .dashboard-heading .date-badge{align-self:flex-start}
+.has-workspace-theme .learning-nav button.active{border-color:var(--reward-accent);color:#fff;background:#142b4b}
+.has-workspace-theme .learning-nav button.active svg{color:#fff}
 .has-workspace-theme .sidebar-reward-btn>span,.has-workspace-theme .coins-chip{color:var(--reward-accent)}
 .profile-hero-card.has-reward-theme{overflow:hidden;border-color:#e2e7eb;background:#fff;position:relative}
 .profile-scene-cover{grid-column:1/-1;height:190px;margin:-24px -24px 0;background-image:var(--reward-cover);background-size:cover;background-position:center 50%}
@@ -1788,19 +1796,36 @@ button.user-tile>svg{color:#8290a0;flex:none}
 .reward-page-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0 18px;color:#7b8997;font-size:11px}.reward-page-nav button{border:0;background:#f1f5f7;padding:7px 10px;border-radius:7px;color:#456476;font-size:11px;cursor:pointer}.reward-page-nav button:disabled{opacity:.4;cursor:default}
 .reward-demo-controls{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid #dae7f3;border-radius:12px;padding:12px;background:#f5f9ff;margin-bottom:18px}.reward-demo-controls>span{flex:1}.reward-demo-controls b{font-size:12px;color:#32648c}.reward-demo-controls small{display:block;font-size:10px;line-height:1.5;margin-top:3px;color:#69809a}.reward-demo-controls label{font-size:10px;color:#65829a}.reward-demo-controls select{display:block;border:1px solid #cfdde9;border-radius:7px;background:#fff;padding:5px;font-size:12px;margin-top:4px}.reward-demo-controls button{border:1px solid #cfdde9;background:#fff;border-radius:7px;padding:8px;font-size:11px;color:#597590;cursor:pointer}
 .reward-modal-extended .style-collection{padding:18px}.reward-modal-extended .style-live-preview{text-align:left}
-.lb-board .lb-podium-card.has-reward-theme{background-image:linear-gradient(180deg,#ffffffb0,#fffffff0 70%),var(--reward-cover);background-size:cover;background-position:center;border-color:#d9e3e9}
+.lb-board .lb-podium-card.has-reward-theme{background-image:linear-gradient(180deg,#ffffff12 0%,#ffffff40 26%,#fffffff2 48%,#ffffff 74%),var(--reward-cover);background-size:cover;background-position:center;border-color:#d9e3e9}
 .lb-table-row.has-reward-theme{background-image:linear-gradient(90deg,#fffffff0,#ffffffd9),var(--reward-cover);background-size:cover;background-position:center}
-.lb-podium-card.has-reward-theme .reward-avatar{border-radius:20px;background:#eef3f4;box-shadow:0 0 0 3px #ffffffcf}
+.lb-board .lb-podium-card.has-reward-theme .reward-avatar{border-radius:20px;background:#203d52;color:#fff;border-color:#fff;box-shadow:0 0 0 3px #ffffffcf}
+.lb-board .lb-podium-card.has-reward-theme .reward-avatar:has(img){background:#e6edf1}
+.lb-board .lb-podium-card.has-reward-theme h2{overflow-wrap:anywhere}
 .lb-table-person .theme-mark{width:15px;height:15px}.lb-podium-card h2 .theme-mark{width:17px;height:17px}
 .demo-leaderboard-card{display:flex;gap:14px;align-items:center;padding:24px;border:1px solid #d6e2ec;border-radius:14px;margin:0 0 18px;background-image:linear-gradient(90deg,#fffffff0,#ffffffb0),var(--reward-cover);background-size:cover;background-position:center}.demo-leaderboard-card>.reward-avatar{width:65px;height:65px;border-radius:16px;background:#e6eef2;border:3px solid #fff}.demo-leaderboard-card>div{flex:1}.demo-leaderboard-card b{font-size:17px}.demo-leaderboard-card small{display:block;margin-top:5px;font-size:12px;color:#6a8093}
 .learning-shell.theme-dark .style-collection,.learning-shell.theme-dark .profile-hero-card.has-reward-theme{background:#142331;border-color:#2f4354;color:#e4edf4}
 .learning-shell.theme-dark .style-collection-heading p,.learning-shell.theme-dark .collection-subheading small{color:#a1b3c2}
 .learning-shell.theme-dark .theme-choice,.learning-shell.theme-dark .avatar-choice-grid button,.learning-shell.theme-dark .badge-choice-grid button{background:#1c3041;color:#d7e6f1;border-color:#395064}
 .learning-shell.theme-dark .profile-hero-card.has-reward-theme .profile-summary>div{background:#1b3040;border-color:#344858}
-.learning-shell.theme-dark .lb-board .lb-podium-card.has-reward-theme,.learning-shell.theme-dark .lb-table-row.has-reward-theme{background-image:linear-gradient(180deg,#132635bb,#132635f0 80%),var(--reward-cover)}
+.learning-shell.theme-dark .lb-board .lb-podium-card.has-reward-theme,.learning-shell.theme-dark .lb-table-row.has-reward-theme{background-image:linear-gradient(180deg,#13263520 0%,#13263560 26%,#132635f5 48%,#132635 74%),var(--reward-cover)}
 .learning-shell.theme-dark .demo-leaderboard-card{background-image:linear-gradient(90deg,#132635ed,#132635af),var(--reward-cover)}
 @media(max-width:600px){.style-collection{padding:16px}.theme-choice-grid{gap:7px}.theme-choice img{height:72px}.theme-choice>span{padding:9px 7px 0;gap:5px;font-size:12px}.theme-choice small{padding:5px 7px 0;font-size:10px}.avatar-choice-grid{gap:6px}.avatar-choice-grid img{width:58px;height:65px}.avatar-choice-grid small{font-size:9px}.collection-subheading{align-items:flex-start;flex-direction:column;gap:4px}.profile-scene-cover{height:155px;margin:-17px -17px 0}.profile-hero-card.has-reward-theme .profile-big-avatar{width:72px;height:72px;margin-top:-36px}.reward-modal-extended{padding:23px 14px}.reward-modal-extended>h2{font-size:23px}.reward-modal-extended .reward-week{overflow-x:auto;grid-template-columns:repeat(7,minmax(66px,1fr));padding-bottom:7px}.reward-demo-controls{flex-wrap:wrap;gap:8px}.reward-demo-controls>span{flex-basis:100%}.style-live-preview{padding:14px;gap:9px}.style-live-preview>.reward-avatar{width:52px;height:52px}.style-live-preview small{font-size:10px}.reward-page-nav span{font-size:10px;text-align:center}.demo-leaderboard-card{padding:16px}.demo-leaderboard-card small{font-size:11px}}
 .reward-decoration{display:block;object-fit:contain;pointer-events:none}.profile-scene-cover{position:relative}.profile-scene-cover>.reward-decoration{position:absolute;bottom:14px;right:22px;width:78px;height:78px;filter:drop-shadow(0 3px 8px #16314418)}.style-live-preview .reward-decoration.style-decor{position:absolute;right:16px;bottom:10px;width:70px;height:70px;opacity:.95}.has-workspace-theme .hero-landscape>.reward-decoration{position:absolute;right:25px;bottom:10px;width:90px;height:90px}
 .profile-hero-card.has-reward-theme .profile-big-avatar{color:#294d67}
 .learning-shell.theme-dark .style-preview-cover{background-image:linear-gradient(90deg,#142331f2 0%,#142331d6 42%,#14233138 100%),var(--reward-cover)}.learning-shell.theme-dark .style-live-preview small,.learning-shell.theme-dark .theme-choice small{color:#b1c4d4}.learning-shell.theme-dark .profile-hero-card.has-reward-theme .profile-summary b{color:#a7d4df}
 .lb-current-row>div{display:flex;align-items:center;gap:10px}.lb-current-row>div>span{min-width:0}.lb-current-row.has-reward-theme{background-image:linear-gradient(90deg,#fffffff0,#ffffffd9),var(--reward-cover);background-size:cover;background-position:center}.learning-shell.theme-dark .lb-current-row.has-reward-theme{background-image:linear-gradient(90deg,#132635ed,#132635d9),var(--reward-cover)}
+
+/* Shared scenic heading layout at every theme and viewport. */
+.learning-shell.theme-dark.has-workspace-theme .dashboard-heading{background:#142331;border-color:#2f4354}
+.learning-shell.theme-dark.has-workspace-theme .workspace-dashboard .dashboard-heading .hero-landscape{filter:none;opacity:1;background-image:linear-gradient(90deg,#142331 0%,#142331 48%,#142331f2 62%,#14233160 85%,#14233130 100%),var(--reward-cover)}
+.learning-shell.theme-dark.has-workspace-theme .dashboard-heading .section-eyebrow,.learning-shell.theme-dark.has-workspace-theme .dashboard-heading .rocket-mark,.learning-shell.theme-dark.has-workspace-theme .date-badge svg{color:#b7d9e2}
+.learning-shell.theme-dark .lb-board .lb-podium-card.has-reward-theme .reward-avatar{background:#203d52;color:#fff}
+.demo-leaderboard-card>.reward-avatar{color:#294d67}
+@media(max-width:800px){
+ .has-workspace-theme .dashboard-heading{padding:20px;gap:16px;flex-wrap:wrap}
+ .has-workspace-theme .dashboard-heading .hero-copy{max-width:100%;width:100%}
+ .has-workspace-theme .workspace-dashboard .dashboard-heading .hero-landscape{background-image:linear-gradient(90deg,#f8fafcf5 0%,#f8fafcf2 65%,#f8fafcc9 100%),var(--reward-cover)}
+ .learning-shell.theme-dark.has-workspace-theme .workspace-dashboard .dashboard-heading .hero-landscape{background-image:linear-gradient(90deg,#142331f5 0%,#142331f2 65%,#142331d9 100%),var(--reward-cover)}
+ .has-workspace-theme .dashboard-heading .date-badge{padding:10px 12px}
+ .has-workspace-theme .hero-landscape>.reward-decoration{display:none}
+}
