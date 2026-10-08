@@ -6,11 +6,11 @@ BADGE_DAYS = (10, 14, 21, 28, 35, 42, 49, 56, 60)
 def reward_for_day(day):
     day = max(1, min(60, int(day)))
     if day == 8:
-        kind, amount, label = 'theme', 0, 'Theme collection'
+        kind, amount, label = 'theme', 0, 'Theme & avatar collection'
     elif day == 11:
         kind, amount, label = 'decoration', 0, 'Matching decorations'
     elif day == 13:
-        kind, amount, label = 'avatar', 0, 'Avatar collection'
+        kind, amount, label = 'theme', 0, 'Night Sky theme'
     elif day in BADGE_DAYS:
         kind, amount, label = 'badge', 0, 'Study badge' if day == 10 else str(day) + '-day badge'
     else:
@@ -20,8 +20,8 @@ def reward_for_day(day):
 
 def unlocks(claimed_days):
     count = max(0, int(claimed_days))
-    return {'themes': list(THEMES) if count >= 8 else [],
-            'avatars': list(AVATARS) if count >= 13 else [],
+    return {'themes': (list(THEMES) + (['night-sky'] if count >= 13 else [])) if count >= 8 else [],
+            'avatars': list(AVATARS) if count >= 8 else [],
             'decorations': count >= 11,
             'badges': ['day-' + str(n) for n in BADGE_DAYS if count >= n]}
 

@@ -1,16 +1,16 @@
 # Daily reward collection
 
-Reward progress counts successful daily claims and does not reset unlocked items after a missed day. Historical coins and reward dates are preserved. Students with eight historical claims immediately own the theme collection, even when their old stored streak was capped at seven. A theme is applied only when the student chooses one and presses **Apply style**.
+Reward progress counts successful daily claims and does not reset unlocked items after a missed day. Historical coins and reward dates are preserved. Students with eight historical claims immediately own the theme and avatar collection, even when their old stored streak was capped at seven. A theme is applied only when the student chooses one and presses **Apply style**.
 
 | Reward day | Gift |
 | --- | --- |
 | 1–7 | Existing +1 through +7 coins |
-| 8 | Dawn, Ocean and Forest theme collection |
+| 8 | Dawn, Ocean and Forest themes + all three cartoon avatars |
 | 9 | +3 coins |
 | 10 | Name badge |
 | 11 | Matching PNG decorations |
 | 12 | +5 coins |
-| 13 | Cartoon avatars: boy, girl, navy hijab |
+| 13 | Night Sky theme + matching moon/stars ornament |
 | 14, 21, 28, 35, 42, 49, 56, 60 | Milestone badges |
 | Other later days | +3 or +5 coins |
 
@@ -28,7 +28,7 @@ Built-in image generation produced the PNG assets in `public/images/rewards/`:
 - `boy.png`, `girl.png`, `girl-hijab.png`: clearly stylized 3D cartoon characters with rounded proportions, expressive eyes and navy clothing, transparent background; no photographic portraits.
 - `dawn-decor.png`, `ocean-decor.png`, `forest-decor.png`: isolated sunrise/mountain, wave and botanical objects with soft matte shading, transparent background.
 
-Covers are optimized to 1024 pixels wide; avatars to 320 pixels; ornaments to 192 pixels. All nine assets total approximately 1 MB; avatar/ornament alpha channels are preserved.
+Covers are optimized to 1024 pixels wide; avatars to 320 pixels; ornaments to 192 pixels. The original nine assets total approximately 1 MB; avatar/ornament alpha channels are preserved.
 
 ## Database and authorization
 
@@ -36,9 +36,11 @@ Covers are optimized to 1024 pixels wide; avatars to 320 pixels; ornaments to 19
 
 ## Verification
 
-- Nine Python reward/API tests pass (catalog, historical eighth claim, locked-item rejection, authenticated saving, demo isolation).
+- Thirteen Python reward/API tests pass (catalog, historical eighth claim, locked-item rejection, authenticated saving, demo isolation).
 - `npm run typecheck`, production build and `git diff --check` pass.
 - Database transaction checks passed for day 8 theme with no coin increment, repeated claim, day 9 coins, day 10 badge, and continuation after a missed day. All synthetic test records were rolled back.
-- Production-build browser smoke checks with API fixtures passed: day 8 claim and theme apply, profile/leaderboard display, day 13 cartoon avatar apply, reload persistence, mobile layout without horizontal overflow, and dark-mode rendering. A normal student at rank 11 also updates theme and avatar immediately after Apply, without another leaderboard fetch.
+- Production-build browser smoke checks with API fixtures passed: day 8 claim and theme apply, profile/leaderboard display, day 8 cartoon avatar apply and day 13 Night Sky unlock, reload persistence, mobile layout without horizontal overflow, and dark-mode rendering. A normal student at rank 11 also updates theme and avatar immediately after Apply, without another leaderboard fetch.
 - Read-only check of Ruhshona on 2026-10-08 returned eight claims, next day nine and an unchanged 76-coin balance.
 - Full Node suite: 163/168 pass. The same five failures were independently reproduced on unchanged commit `6fafb41`: `day plan and Reading picker use one shared passage schedule`; `Listening persists in-progress answers and resumes one-time audio from server start time`; `30 question quiz PDF fits one A4 sheet in two columns`; `60 question quiz PDF uses exactly two A4 sheets with 30 questions per sheet`; `short quiz PDF uses one A4 page`. The first two are outdated source-shape assertions; the PDF tests report existing `Unknown font format`. No unrelated production code was changed for these failures.
+
+Night Sky assets: `night-sky.png` is a calm navy starry sky over moonlit mountains and water; `night-sky-decor.png` is an isolated silver crescent and stars with transparent alpha. Avatar availability is derived from historical claim count, so existing day-8 students need no additional Claim.

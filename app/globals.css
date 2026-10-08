@@ -1776,7 +1776,7 @@ button.user-tile>svg{color:#8290a0;flex:none}
 .style-live-preview>div:not(.style-preview-cover){position:relative;z-index:1}
 .style-live-preview b{display:block;font-size:16px}.style-live-preview small{display:block;font-size:12px;margin-top:5px;color:#64798d}
 .style-live-preview .style-decor{position:absolute;right:22px;bottom:18px;width:44px;height:44px;opacity:.5}
-.theme-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.theme-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
 .theme-choice{border:1px solid #dfe6eb;border-radius:12px;padding:0 0 12px;background:#fff;overflow:hidden;text-align:left;color:#263c50;cursor:pointer}
 .theme-choice.selected{border-color:var(--reward-accent,#6089a1);box-shadow:0 0 0 2px #567b8b20}
 .theme-choice:disabled{opacity:.6;cursor:not-allowed}

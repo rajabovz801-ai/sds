@@ -48,17 +48,19 @@ class RewardAPITests(unittest.TestCase):
         with patch.object(ark60,'db',self.database):
             result=ark60.get_data(self.request,Response(),action='reward_center')
         self.assertEqual(result['cosmetics']['unlocked']['themes'],['dawn','ocean','forest'])
+        self.assertEqual(result['cosmetics']['unlocked']['avatars'],['boy','girl','girl-hijab'])
         self.assertEqual(result['balance'],35)
         self.assertEqual(result['next_reward']['day'],9)
         self.assertEqual(self.writes,[])
     def test_demo_claim_does_not_write_rewards_or_coins(self):
         self.username='rustam7'
         result=self.post({'action':'claim_daily_reward','demo_day':13})
-        self.assertEqual(result['today_reward']['kind'],'avatar')
+        self.assertEqual(result['today_reward']['label'],'Night Sky theme')
         self.assertEqual(result['cosmetics']['unlocked']['avatars'],['boy','girl','girl-hijab'])
         self.assertEqual(result['balance'],0)
         self.assertEqual(self.writes,[])
     def test_locked_avatar_cannot_be_applied_by_posting_directly(self):
+        self.days=7
         with self.assertRaises(HTTPException) as error:
             self.post({'action':'apply_reward_style','theme':'forest','avatar':'girl'})
         self.assertEqual(error.exception.status_code,403)
@@ -87,6 +89,16 @@ class RewardAPITests(unittest.TestCase):
         self.assertEqual(result['leaderboard'][0]['cosmetics']['theme'],'forest')
         self.assertEqual(result['leaderboard'][0]['cosmetics']['avatar'],'girl')
         self.assertIn('no-store',response.headers.get('cache-control',''))
+    def test_existing_eight_claims_can_apply_avatar_without_claiming_again(self):
+        result=self.post({'action':'apply_reward_style','theme':'forest','avatar':'girl'})
+        self.assertEqual(result['cosmetics']['avatar'],'girl')
+        self.assertEqual([endpoint for endpoint,_ in self.writes],['ark60_cosmetics'])
+    def test_night_sky_is_locked_until_thirteenth_claim(self):
+        with self.assertRaises(HTTPException):
+            self.post({'action':'apply_reward_style','theme':'night-sky','avatar':'girl'})
+        self.days=13
+        result=self.post({'action':'apply_reward_style','theme':'night-sky','avatar':'girl'})
+        self.assertEqual(result['cosmetics']['theme'],'night-sky')
     def test_body_cannot_enable_demo_for_real_student(self):
         with patch.object(ark60,'db',self.database):
             self.request.query_params={'demo_day':'60'}
