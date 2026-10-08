@@ -65,8 +65,11 @@ def db(method, endpoint, params=None, payload=None, prefer=None):
     except (URLError,TimeoutError):
         raise HTTPException(status_code=503, detail="Database temporarily unavailable")
 
+def reward_demo_allowed(user):
+    return user.get("username") in {"rustam7", "rustam_usmonov_4f42fb15"}
+
 def reward_progress(user):
-    if user.get("username") == "rustam7":
+    if reward_demo_allowed(user):
         return 60
     rows = db("GET", "ark60_daily_rewards", {"select":"id", "student_id":"eq."+user["id"], "limit":60})
     return len(rows)
@@ -214,6 +217,7 @@ def day_unlocked_for_user(user,day_num):
 
 @app.get("/api/ark60")
 def get_data(request:Request,response:Response, action:str="health", day:int=1):
+    response.headers["Cache-Control"] = "private, no-store, max-age=0"
     if action=="health":
         return {"ok":True,"backend":"python-fastapi","database_configured":bool(os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY")),"database_host":SUPABASE_URL.split("/")[2],"admin_storage_ready":bool(db("GET","ark60_admins",{"select":"id","status":"eq.active","limit":1}))}
     if action=="username_available":
@@ -244,7 +248,7 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         }
     if action=="reward_center":
         user=require_student(request)
-        preview=user.get("username")=="rustam7"
+        preview=reward_demo_allowed(user)
         if preview:
             try: demo_day=max(1,min(60,int(request.query_params.get("demo_day",8))))
             except (ValueError,TypeError): demo_day=8
@@ -559,7 +563,7 @@ async def actions(request:Request,response:Response):
         return {"ok":True}
     if action=="claim_daily_reward":
         user=require_student(request)
-        if user.get("username")=="rustam7":
+        if reward_demo_allowed(user):
             try: day=max(1,min(60,int(data.get("demo_day",8))))
             except (ValueError,TypeError): day=8
             gift=reward_for_day(day)
@@ -576,7 +580,7 @@ async def actions(request:Request,response:Response):
         if not style_allowed(count,theme,avatar) or (badge is not None and badge not in unlocks(count)["badges"]):
             raise HTTPException(status_code=403,detail="Claim the matching reward before applying this style.")
         db("POST","ark60_cosmetics",params={"on_conflict":"student_id"},payload={"student_id":user["id"],"theme":theme,"avatar":avatar,"badge":badge,"updated_at":now().isoformat()},prefer="resolution=merge-duplicates,return=minimal")
-        return {"ok":True,"cosmetics":cosmetic_state(user,count),"preview":user.get("username")=="rustam7"}
+        return {"ok":True,"cosmetics":cosmetic_state(user,count),"preview":reward_demo_allowed(user)}
     if action=="update_profile":
         user=require_student(request)
         first=str(data.get("first_name","")).strip()

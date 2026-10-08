@@ -71,9 +71,10 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
   }
   void load();
   const refresh=()=>{if(document.visibilityState==="visible")void load(true)};
-  const id=window.setInterval(refresh,60000);
+  const id=window.setInterval(refresh,10000);
+  window.addEventListener("focus",refresh);
   document.addEventListener("visibilitychange",refresh);
-  return()=>{live=false;window.clearInterval(id);document.removeEventListener("visibilitychange",refresh)};
+  return()=>{live=false;window.clearInterval(id);window.removeEventListener("focus",refresh);document.removeEventListener("visibilitychange",refresh)};
  },[period]);
 
  const sorted=useMemo(()=>rows.map(row=>row.student_id===studentId?{...row,cosmetics:cosmetics||row.cosmetics}:row).sort((a,b)=>b.coins-a.coins||b.active_seconds-a.active_seconds||a.full_name.localeCompare(b.full_name)),[rows,studentId,cosmetics]);

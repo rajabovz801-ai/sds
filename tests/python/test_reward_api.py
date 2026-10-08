@@ -29,7 +29,12 @@ class RewardAPITests(unittest.TestCase):
             return [{'id':'student-test','username':self.username,'status':'active','first_name':'Test','last_name':'Student','target_band':8}]
         if endpoint=='ark60_daily_rewards':
             return [{'id':str(i)} for i in range(self.days)]
+        if endpoint=='rpc/ark60_student_leaderboard_period':
+            return [{'student_id':'other-student','full_name':'Other Student','username':'other','coins':40,'active_seconds':120}]
+        if endpoint=='ark60_presence': return []
         if endpoint=='ark60_cosmetics':
+            if params and params.get('select','').startswith('student_id'):
+                return [{'student_id':'other-student','theme':'forest','avatar':'girl','badge':None}]
             if method=='POST':self.saved={key:payload[key] for key in ('theme','avatar','badge')};return []
             return [dict(self.saved)]
         if endpoint=='rpc/ark60_reward_center_v2':
@@ -63,6 +68,25 @@ class RewardAPITests(unittest.TestCase):
         result=self.post({'action':'apply_reward_style','theme':'forest','avatar':'girl-hijab','badge':'day-10'})
         self.assertEqual(result['cosmetics']['avatar'],'girl-hijab')
         self.assertEqual(self.writes[0][1]['student_id'],'student-test')
+    def test_second_rustam_account_can_try_demo_without_real_reward_write(self):
+        self.username='rustam_usmonov_4f42fb15'
+        self.request.query_params={'demo_day':'13'}
+        with patch.object(ark60,'db',self.database):
+            result=ark60.get_data(self.request,Response(),action='reward_center')
+        self.assertTrue(result['preview'])
+        self.assertEqual(result['next_day'],13)
+        result=self.post({'action':'claim_daily_reward','demo_day':13})
+        self.assertTrue(result['preview'])
+        self.assertEqual(self.writes,[])
+        result=self.post({'action':'apply_reward_style','theme':'ocean','avatar':'boy'})
+        self.assertEqual(result['cosmetics']['avatar'],'boy')
+    def test_other_viewer_receives_public_styles_without_cached_response(self):
+        response=Response()
+        with patch.object(ark60,'db',self.database):
+            result=ark60.get_data(self.request,response,action='leaderboard')
+        self.assertEqual(result['leaderboard'][0]['cosmetics']['theme'],'forest')
+        self.assertEqual(result['leaderboard'][0]['cosmetics']['avatar'],'girl')
+        self.assertIn('no-store',response.headers.get('cache-control',''))
     def test_body_cannot_enable_demo_for_real_student(self):
         with patch.object(ark60,'db',self.database):
             self.request.query_params={'demo_day':'60'}
