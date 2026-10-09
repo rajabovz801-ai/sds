@@ -1938,12 +1938,14 @@ button.user-tile>svg{color:#8290a0;flex:none}
 }
 @media(max-width:380px){.progress-v2 .hub-kpis{grid-template-columns:1fr}.progress-v2 .hub-kpis article{min-height:94px}}
 /* Award frame reserves all artwork space before the student's name. */
-.lb-award-row{position:relative;display:block;width:116px;height:130px;min-height:130px;flex:none;margin:0 auto}
+.lb-award-row{position:relative;display:block;width:116px;height:134px;min-height:134px;flex:none;margin:0 auto}
 .lb-board .lb-award-row .lb-avatar{position:absolute;top:28px;left:50%;transform:translateX(-50%)}
-.lb-board .lb-award-row .lb-crown{position:absolute;top:0;left:50%;transform:translateX(-50%);width:38px;height:24px;margin:0}
+.lb-board .lb-award-row .lb-crown{position:absolute;top:0;left:50%;transform:translateX(calc(-50% - 2px));width:38px;height:24px;margin:0}
 .lb-crown-space{display:none}
-.lb-award-row .rank-medal{position:absolute;top:94px;left:50%;transform:translateX(-50%);width:38px;height:36px;margin:0}
-.lb-award-row .rank-medal>b{font-size:16px;padding-bottom:7px}
+.lb-award-row .rank-medal{position:absolute;top:98px;left:50%;transform:translateX(-50%);width:38px;height:36px;margin:0}
+/* Gold artwork has an asymmetric ribbon: align its circular face, not its canvas. */
+.lb-award-row .rank-medal-1>.workspace-art{transform:translateX(-3px)}
+.lb-award-row .rank-medal>b{position:absolute;inset:0 0 auto;display:grid;place-items:center;height:28px;font-size:16px;line-height:1;padding:0;font-variant-numeric:lining-nums}
 
 /* Presence stays in normal flow below the username, outside award artwork. */
 .lb-board .lb-podium-card>.lb-podium-status{position:static;display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:7px 0 0;padding:0;background:transparent;font-size:12px!important;line-height:18px;min-height:18px}

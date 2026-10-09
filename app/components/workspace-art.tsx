@@ -10,5 +10,5 @@ export function WorkspaceArt({name,className=""}:{name:string;className?:string}
 }
 
 export function RankMedal({rank}:{rank:number}){
- return <span className="rank-medal" aria-label={"Rank "+rank}><WorkspaceArt name={rank===1?"medal-gold":rank===2?"medal-silver":"medal-bronze"}/><b>{rank}</b></span>;
+ return <span className={"rank-medal rank-medal-"+rank} aria-label={"Rank "+rank}><WorkspaceArt name={rank===1?"medal-gold":rank===2?"medal-silver":"medal-bronze"}/><b>{rank}</b></span>;
 }
