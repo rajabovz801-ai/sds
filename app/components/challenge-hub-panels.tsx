@@ -106,8 +106,8 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
      <RankMedal rank={row.rank}/></div>
      <h2>{row.full_name}{row.cosmetics?.badge&&<Award size={14} aria-label={row.cosmetics.badge}/>}</h2>
      <p>@{row.username}{row.student_id===studentId?" · You":""}</p>
+     <span className={"lb-status lb-podium-status "+row.status}><i aria-hidden="true"/>{statusLabel(row.status)}</span>
      <div className="lb-podium-metrics"><span><Coins size={15}/><b>{row.coins}</b><small>Coins</small></span><span><Clock3 size={15}/><b>{fmt(row.active_seconds)}</b><small>Study time</small></span></div>
-     <span className={"lb-status lb-avatar-status "+row.status} aria-label={statusLabel(row.status)} title={statusLabel(row.status)}><i/></span>
     </article>)}
    </div>
 

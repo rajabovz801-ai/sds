@@ -1858,16 +1858,12 @@ button.user-tile>svg{color:#8290a0;flex:none}
 .rank-medal:not(:has(.workspace-art)){border-radius:50%;background:#e6d1a4}
 .lb-board .lb-podium-card h2,.lb-board .lb-podium-card.rank-1 h2{font-size:15px;white-space:normal;line-height:1.35;margin:7px 0 3px}
 .lb-board .lb-podium-metrics{margin-top:12px;padding-top:10px}
-.lb-avatar-status{position:absolute!important;top:87px;left:calc(50% - 39px);background:#fff;border-radius:50%;padding:3px}
-.lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:97px}
-.lb-avatar-status i{margin:0;width:7px;height:7px}
 .learning-shell.theme-dark .workspace-dashboard .dashboard-heading{background:#142331;border-color:#2f4354}
 .learning-shell.theme-dark .sidebar-profile-tile.has-reward-theme:before{background-image:linear-gradient(90deg,#122131b9,#122131f5 70%),var(--reward-cover)}
 .learning-shell.theme-dark .demo-leaderboard-card{background-color:#142331}
 .learning-shell.theme-dark .lb-board .lb-podium-card,.learning-shell.theme-dark .lb-board .lb-podium-card.has-reward-theme{background:#132635;background-image:none}
 .learning-shell.theme-dark .lb-card-cover{background-color:#203647}
 .learning-shell.theme-dark .lb-podium-card.has-reward-theme .lb-card-cover{background-image:linear-gradient(#13263525,#13263565),var(--reward-cover)}
-.learning-shell.theme-dark .lb-avatar-status{background:#132635}
 @media(max-width:1000px){
  .progress-v2 .hub-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
  .workspace-dashboard .dashboard-heading .hero-copy{max-width:65%}
@@ -1911,7 +1907,6 @@ button.user-tile>svg{color:#8290a0;flex:none}
 .rank-medal>b{font-size:18px;padding-bottom:8px}
 .lb-board .lb-podium-card h2,.lb-board .lb-podium-card.rank-1 h2{margin-top:4px}
 .lb-board .lb-podium-metrics{margin-top:8px;padding-top:8px}
-.lb-board .lb-avatar-status,.lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:97px;margin:0}
 .module-task-art{width:36px;height:36px}
 .task-copy{min-width:0}
 .workspace-60-day-plan .plan-heading{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:18px;align-items:center}
@@ -1929,16 +1924,12 @@ button.user-tile>svg{color:#8290a0;flex:none}
  .module-task-art{width:32px;height:32px}
  .lb-board .lb-podium-card,.lb-board .lb-podium-card.rank-1{padding:12px}
  .lb-board .lb-podium-card:not(.rank-1):before{display:none}
- .lb-board .lb-avatar-status{top:64px}
- .lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:101px}
 }
 .lb-award-row{display:flex;align-items:center;justify-content:center;gap:12px;max-width:100%;min-height:70px}
 .lb-crown-space{width:38px;flex:none}
 .lb-board .lb-award-row .lb-crown{margin:0}
 .lb-award-row .rank-medal{margin:0;flex:none}
 .lb-board .lb-podium-card:not(.rank-1):before{display:none}
-.lb-board .lb-avatar-status,.lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:67px;left:calc(50% - 35px)}
-@media(max-width:640px){.lb-board .lb-avatar-status,.lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:65px}}
 @media(max-width:640px){
  .progress-v2 .hub-kpis article{grid-template-columns:minmax(0,1fr) 40px;row-gap:8px}
  .progress-v2 .hub-kpis article>span{grid-column:1/-1;grid-row:1;overflow-wrap:normal;word-break:normal}
@@ -1953,5 +1944,11 @@ button.user-tile>svg{color:#8290a0;flex:none}
 .lb-crown-space{display:none}
 .lb-award-row .rank-medal{position:absolute;top:62px;left:calc(50% + 17px);width:40px;height:43px;margin:0}
 .lb-award-row .rank-medal>b{font-size:17px;padding-bottom:8px}
-.lb-board .lb-avatar-status,.lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:87px;left:calc(50% - 35px)}
-@media(max-width:640px){.lb-board .lb-avatar-status,.lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:85px}}
+
+/* Presence stays in normal flow below the username, outside award artwork. */
+.lb-board .lb-podium-card>.lb-podium-status{position:static;display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:7px 0 0;padding:0;background:transparent;font-size:12px!important;line-height:18px;min-height:18px}
+.lb-podium-status i{display:block;width:7px;height:7px;flex:none;margin:0}
+.lb-board .lb-podium-status.offline{color:#637284}
+.learning-shell.theme-dark .lb-board .lb-podium-status.offline{color:#a8b7c6}
+.learning-shell.theme-dark .lb-board .lb-podium-status.online{color:#77d39c}
+.learning-shell.theme-dark .lb-board .lb-podium-status.idle{color:#e5bc75}
