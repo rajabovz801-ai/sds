@@ -65,7 +65,7 @@
 .cr-shell:not(.cr-overview) .cr-passage p{
   margin:0 0 16px;
   color:#172d44;
-  font:400 16px/1.62 "Times New Roman",Times,serif!important;
+  font:400 17px/1.6 "Times New Roman",Times,serif!important;
   text-align:left;
   white-space:pre-line;
   overflow-wrap:break-word;
@@ -200,7 +200,7 @@
   border-radius:6px;
   color:#283d52;
   cursor:pointer;
-  font:400 15px/1.45 Arial,Helvetica,sans-serif!important;
+  font:400 16px/1.5 Arial,Helvetica,sans-serif!important;
   overflow-wrap:break-word;
 }
 .cr-shell:not(.cr-overview) .cr-options label:hover{
@@ -258,6 +258,7 @@
 }
 @media(max-width:420px){
   .cr-shell:not(.cr-overview) .cr-question-head .cr-inline-gap{width:96px!important;max-width:96px!important}
+  .cr-shell:not(.cr-overview) .cr-passage p{font-size:16px!important}
   .cr-shell:not(.cr-overview) .cr-question-head>span{font-size:15px!important}
-  .cr-shell:not(.cr-overview) .cr-options label{font-size:14px!important}
+  .cr-shell:not(.cr-overview) .cr-options label{font-size:15px!important}
 }
