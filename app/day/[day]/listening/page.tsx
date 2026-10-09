@@ -36,6 +36,8 @@ export default function ListeningPage(){
  const [result,setResult]=useState<Result|null>(null);
  const [review,setReview]=useState<ReviewItem[]|null>(null);
  const [reviewMode,setReviewMode]=useState(false);
+  const [confirmSubmit,setConfirmSubmit]=useState(false);
+  const confirmCancelRef=useRef<HTMLButtonElement|null>(null);
  const [full,setFull]=useState(false);
  const [submitting,setSubmitting]=useState(false);
  const [elapsed,setElapsed]=useState(0);
@@ -49,6 +51,14 @@ export default function ListeningPage(){
  const payload=data?.content.payload;
  const sections=payload?.sections||[];
  const currentSection=sections.find((s:any)=>Number(s.number)===section);
+  const answeredCount=Object.values(answers).filter(v=>String(v).trim().length>0).length;
+  useEffect(()=>{
+   if(!confirmSubmit)return;
+   confirmCancelRef.current?.focus();
+   const onEscape=(event:KeyboardEvent)=>{if(event.key==="Escape"&&!submitting)setConfirmSubmit(false)};
+   window.addEventListener("keydown",onEscape);
+   return ()=>window.removeEventListener("keydown",onEscape);
+  },[confirmSubmit,submitting]);
 
  const load=useCallback(async()=>{
   setLoading(true);setMessage("");
@@ -221,15 +231,15 @@ export default function ListeningPage(){
   setCurrentQuestion(qs[0]);setAnswers(copy);queueSave(copy);
  }
  async function submit(){
-  if(!window.confirm("Submit your Listening answers?\n\nYou will see your score and answer review after submission."))return;
+  if(submitting||!attemptId||result)return;
   if(saveTimer.current)window.clearTimeout(saveTimer.current);
   setSubmitting(true);setMessage("");
   try{
    const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,attempt_id:attemptId,answers,elapsed_seconds:elapsed})});
    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not submit Listening.");
-   setResult(obj.result);setReview(obj.review);setReviewMode(false);setStarted(false);startedRef.current=false;
+   setResult(obj.result);setReview(obj.review);setReviewMode(false);setConfirmSubmit(false);setStarted(false);startedRef.current=false;
    try{audioRef.current?.pause()}catch{}
-  }catch(e){setMessage(e instanceof Error?e.message:"Could not submit Listening.")}finally{setSubmitting(false)}
+  }catch(e){setConfirmSubmit(false);setMessage(e instanceof Error?e.message:"Could not submit Listening.")}finally{setSubmitting(false)}
  }
  async function goBack(){
   try{if(document.fullscreenElement)await document.exitFullscreen()}catch{}
@@ -237,13 +247,15 @@ export default function ListeningPage(){
  }
  async function toggleFull(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{}}
  function goQuestion(q:number){setCurrentQuestion(q);setSection(qSection(q));setTimeout(()=>document.getElementById("listen-q-"+q)?.scrollIntoView({behavior:"smooth",block:"center"}),80)}
+  function goPart(s:number){setSection(s);setCurrentQuestion((s-1)*10+1);window.scrollTo({top:0,behavior:"smooth"})}
 
  function renderGap(q:number){
   const st=answerStatus(review,q);
-  return <span className={"ls-gap-wrap "+(st?st.status:"")} id={"listen-q-"+q}><span className="ls-qnum">{q}</span><input aria-label={"Question "+q} disabled={reviewMode||!!result} value={answers[String(q)]||""} onFocus={()=>{setCurrentQuestion(q);setSection(qSection(q))}} onChange={e=>setAnswer(q,e.target.value)} />{reviewMode&&st&&<span className="ls-inline-review"><b>{st.status==="correct"?"✓":"✕"}</b> Correct: {st.correct.join(" / ")}</span>}</span>;
+  return <span className={"ls-gap-wrap "+(st?st.status:"")} id={"listen-q-"+q}><span className="ls-qnum">{q}</span><input aria-label={"Question "+q} disabled={reviewMode||!!result} value={answers[String(q)]||""} onFocus={()=>{setCurrentQuestion(q);setSection(qSection(q))}} onChange={e=>setAnswer(q,e.target.value)} /></span>;
  }
  function tokens(items:Token[],key:string){
-  return <>{items.map((t,i)=><Fragment key={key+"-"+i}>{typeof t==="string"?<span className={i>0&&items[i-1]&&typeof items[i-1]!=="string"?"ls-after-gap":""}>{t}</span>:renderGap(Number(t.q))} {typeof t==="string"&&i<items.length-1&&typeof items[i+1]==="string"?<br/>:null}</Fragment>)}</>;
+  const statuses=reviewMode?items.filter((t):t is {q:number}=>typeof t!=="string").map(t=>({q:t.q,st:answerStatus(review,t.q)})).filter((x):x is {q:number;st:ReviewItem}=>!!x.st):[];
+   return <>{items.map((t,i)=><Fragment key={key+"-"+i}>{typeof t==="string"?<span className={i>0&&items[i-1]&&typeof items[i-1]!=="string"?"ls-after-gap":""}>{t}</span>:renderGap(Number(t.q))} {typeof t==="string"&&i<items.length-1&&typeof items[i+1]==="string"?<br/>:null}</Fragment>)}{statuses.length>0&&<div className="ls-token-review" aria-label="Answer review for this line">{statuses.map(({q,st})=><span className={"ls-token-review-item "+st.status} key={q}><b>Q{q}</b><span>{st.status==="empty"?"No answer":st.status==="correct"?"Correct":"Your answer: "+(st.submitted||"—")}</span><strong>Correct: {st.correct.join(" / ")}</strong></span>)}</div>}</>;
  }
  function Status({q}:{q:number}){const st=answerStatus(review,q);if(!reviewMode||!st)return null;return <div className={"ls-review-line "+st.status}><span>{st.status==="empty"?"No answer":"Your answer: "+(st.submitted||"—")}</span><b>Correct: {st.correct.join(" / ")}</b></div>}
 
@@ -290,11 +302,23 @@ export default function ListeningPage(){
    {highlightPopup&&!reviewMode&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button className="yellow" onClick={()=>applyHighlight("yellow")} type="button"><span/> Highlight</button><button onClick={()=>applyHighlight("erase")} type="button"><Eraser size={15}/> Remove</button></div>}
    <nav className="ls-bottom-nav">
     <button className="ls-arrow" disabled={currentQuestion<=1} onClick={()=>goQuestion(currentQuestion-1)}><ChevronLeft size={17}/></button>
-    <div className="ls-number-groups">{[1,2,3,4].map(s=><div className={section===s?"active":""} key={s}><span>SECTION {s}</span><div>{Array.from({length:10},(_,i)=>(s-1)*10+i+1).map(q=>{const st=answerStatus(review,q);return <button key={q} className={(currentQuestion===q?"current ":"")+(answers[String(q)]?"answered ":"")+(reviewMode&&st?st.status:"")} onClick={()=>goQuestion(q)}>{q}</button>})}</div></div>)}</div>
-    {reviewMode?<button className="ls-submit" onClick={()=>setReviewMode(false)}>Close review <Check size={15}/></button>:<button className="ls-submit" disabled={submitting} onClick={submit}>{submitting?"Submitting…":"Submit"} <Send size={15}/></button>}
+    <div className="ls-number-groups ls-number-groups--compact" aria-label="Listening part and question navigation">{[1,2,3,4].map(s=><div className={"ls-part-group "+(section===s?"active":"")} key={s}><button type="button" className="ls-part-tab" aria-current={section===s?"step":undefined} onClick={()=>goPart(s)}>Part {s}</button>{section===s&&<div className="ls-part-numbers">{Array.from({length:10},(_,i)=>(s-1)*10+i+1).map(q=>{const st=answerStatus(review,q);return <button type="button" key={q} aria-label={"Question "+q} aria-current={currentQuestion===q?"step":undefined} className={(currentQuestion===q?"current ":"")+(answers[String(q)]?"answered ":"")+(reviewMode&&st?st.status:"")} onClick={()=>goQuestion(q)}>{q}</button>})}</div>}</div>)}</div>
+    {reviewMode?<button className="ls-submit" onClick={()=>setReviewMode(false)}>Close review <Check size={15}/></button>:<button className="ls-submit" disabled={submitting} onClick={()=>setConfirmSubmit(true)}>{submitting?"Submitting…":"Submit"} <Send size={15}/></button>}
     <button className="ls-arrow" disabled={currentQuestion>=40} onClick={()=>goQuestion(currentQuestion+1)}><ChevronRight size={17}/></button>
    </nav>
   </>}
+  {confirmSubmit&&!reviewMode&&<div className="ls-confirm-overlay" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget&&!submitting)setConfirmSubmit(false)}}>
+    <section className="ls-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="ls-confirm-title" aria-describedby="ls-confirm-detail">
+     <div className="ls-confirm-symbol"><Send size={20}/></div>
+     <h2 id="ls-confirm-title">Are you sure you want to submit?</h2>
+     <p id="ls-confirm-detail">You have answered <strong>{answeredCount} of 40</strong> questions. Once submitted, this attempt is final and you will see your score and official answers.</p>
+     {answeredCount<40&&<p className="ls-confirm-warning">{40-answeredCount} question{40-answeredCount===1?"":"s"} unanswered. You can go back and finish them first.</p>}
+     <div className="ls-confirm-actions">
+      <button ref={confirmCancelRef} type="button" className="ls-confirm-cancel" disabled={submitting} onClick={()=>setConfirmSubmit(false)}>Keep working</button>
+      <button type="button" className="ls-confirm-proceed" disabled={submitting} onClick={submit}>{submitting?"Submitting…":"Yes, submit answers"} <Send size={15}/></button>
+     </div>
+    </section>
+   </div>}
   <style jsx global>{`::highlight(ark-listening-yellow){background:#ffe58a;color:inherit}`}</style>
  </main>;
 }
