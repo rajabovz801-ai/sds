@@ -280,11 +280,16 @@ export async function POST(req:NextRequest){
     const again=grade(content.payload,attempt.answers||{});
     return json({ok:true,already_submitted:true,result:{score:attempt.score,band:attempt.band,part_scores:attempt.part_scores,elapsed_seconds:attempt.elapsed_seconds,submitted_at:attempt.submitted_at,attempt_number:Number(attempt.attempt_number||1)},review:again.review});
    }
+   const expectedStartedAt=String(body.started_at||"");
+   if(expectedStartedAt&&expectedStartedAt!==String(attempt.started_at))return json({detail:"This Listening run was restarted. Reload to begin again."},409);
    const elapsed=Math.max(0,Math.min(7200,Math.floor((Date.now()-Date.parse(attempt.started_at))/1000)));
    const stamp=new Date().toISOString();
-   const updated=await db.from("ark60_listening_attempts").update({status:"submitted",answers,submitted_at:stamp,updated_at:stamp,elapsed_seconds:elapsed,part_scores:graded.part_scores,score:graded.score,band:graded.band}).eq("id",attempt.id).eq("student_id",student.id).eq("status","in_progress").select("*").maybeSingle();
+   let finish=db.from("ark60_listening_attempts").update({status:"submitted",answers,submitted_at:stamp,updated_at:stamp,elapsed_seconds:elapsed,part_scores:graded.part_scores,score:graded.score,band:graded.band}).eq("id",attempt.id).eq("student_id",student.id).eq("status","in_progress");
+   if(expectedStartedAt)finish=finish.eq("started_at",expectedStartedAt);
+   const updated=await finish.select("*").maybeSingle();
    if(updated.error)throw updated.error;
-   attempt=updated.data||(await db.from("ark60_listening_attempts").select("*").eq("id",id).eq("student_id",student.id).maybeSingle()).data;
+   if(!updated.data)return json({detail:"This Listening run changed in another tab. Please reload."},409);
+   attempt=updated.data;
    if(!attempt)return json({detail:"Could not finish Listening."},500);
    await ensureSubmission(attempt,content);
    return json({ok:true,result:{score:graded.score,band:graded.band,part_scores:graded.part_scores,elapsed_seconds:elapsed,submitted_at:attempt.submitted_at,attempt_number:Number(attempt.attempt_number||1)},review:graded.review});
