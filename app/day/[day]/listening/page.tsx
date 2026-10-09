@@ -229,7 +229,7 @@ export default function ListeningPage(){
   if(saveTimer.current)window.clearTimeout(saveTimer.current);
   setSubmitting(true);setMessage("");
   try{
-   const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,attempt_id:attemptId,answers,elapsed_seconds:elapsed})});
+   const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,attempt_id:attemptId,started_at:startedAt,answers,elapsed_seconds:elapsed})});
    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not submit Listening.");
    setResult(obj.result);setReview(obj.review);setReviewMode(false);setConfirmSubmit(false);setStarted(false);startedRef.current=false;
    try{audioRef.current?.pause()}catch{}
