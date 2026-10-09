@@ -377,6 +377,20 @@ export async function POST(req:NextRequest){
    if(!restarted.data)return json({detail:"Listening changed in another tab. Please reload."},409);
    return json({ok:true,started_at:restarted.data.listening_started_at});
   }
+  if(action==="abandon_listening"){
+   if(preview)return json({ok:true,preview:true});
+   const expected=String(body.started_at||"");
+   if(!expected)return json({detail:"Missing Listening run."},400);
+   const row=await attempt(student.id,day);
+   if(!row||row.stage!=="listening"||String(row.listening_started_at)!==expected)return json({ok:true});
+   const stamp=new Date().toISOString();
+   const {error}=await db.from("ark60_mock_attempts")
+    .update({listening_answers:{},listening_elapsed_seconds:0,listening_started_at:stamp,updated_at:stamp})
+    .eq("id",row.id).eq("student_id",student.id).eq("stage","listening")
+    .eq("listening_started_at",expected);
+   if(error)throw error;
+   return json({ok:true});
+  }
   if(action==="save_listening"){
    if(preview)return json({ok:true,preview:true});
    const row=await ensureAttempt(student.id,day);if(row.stage!=="listening")return json({detail:"Listening is already submitted."},409);
