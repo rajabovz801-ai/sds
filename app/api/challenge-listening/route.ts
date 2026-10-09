@@ -226,6 +226,20 @@ export async function POST(req:NextRequest){
    return json({ok:true,attempt:attemptForClient(content,attempt)});
   }
 
+  if(action==="abandon"){
+   // Best-effort cleanup on exit; Start also guarantees a fresh attempt.
+   if(isPreview(student))return json({ok:true,preview:true});
+   const id=String(body.attempt_id||""),expected=String(body.started_at||"");
+   if(!id||!expected)return json({detail:"Missing Listening run."},400);
+   const stamp=new Date().toISOString();
+   const {error}=await db.from("ark60_listening_attempts")
+    .update({answers:{},elapsed_seconds:0,started_at:stamp,updated_at:stamp})
+    .eq("id",id).eq("student_id",student.id).eq("day_number",day)
+    .eq("status","in_progress").eq("started_at",expected);
+   if(error)throw error;
+   return json({ok:true});
+  }
+
   if(action==="retry"){
    if(isPreview(student))return json({ok:true,preview:true,attempt:{id:"preview-listening-"+day+"-"+Date.now(),day_number:day,attempt_number:2,status:"in_progress",answers:{},started_at:new Date().toISOString(),elapsed_seconds:0}});
    const existing=await getInProgressAttempt(student.id,day);
