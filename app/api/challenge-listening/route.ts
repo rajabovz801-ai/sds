@@ -199,6 +199,17 @@ export async function POST(req:NextRequest){
   if(action==="start"){
    if(isPreview(student))return json({ok:true,preview:true,attempt:{id:"preview-listening-"+day,day_number:day,attempt_number:1,status:"in_progress",answers:{},started_at:new Date().toISOString(),elapsed_seconds:0}});
    let attempt=await getInProgressAttempt(student.id,day);
+   if(attempt){
+    // A returning learner starts the same unfinished attempt from scratch.
+    const stamp=new Date().toISOString();
+    const reset=await db.from("ark60_listening_attempts")
+     .update({answers:{},started_at:stamp,elapsed_seconds:0,updated_at:stamp})
+     .eq("id",attempt.id).eq("student_id",student.id).eq("day_number",day)
+     .eq("status","in_progress").select("*").maybeSingle();
+    if(reset.error)throw reset.error;
+    attempt=reset.data;
+    if(!attempt)return json({detail:"Listening was updated in another tab. Please reload."},409);
+   }
    if(!attempt){
     const latest=await getLatestAttempt(student.id,day);
     if(latest){
@@ -239,10 +250,17 @@ export async function POST(req:NextRequest){
    const answers=sanitizeAnswers(content.payload,body.answers);
    if(isPreview(student))return json({ok:true,preview:true,answers});
    const id=String(body.attempt_id||"");
-   const {data:attempt,error}=await db.from("ark60_listening_attempts").select("id,status").eq("id",id).eq("student_id",student.id).eq("day_number",day).maybeSingle();
+   const {data:attempt,error}=await db.from("ark60_listening_attempts").select("id,status,started_at").eq("id",id).eq("student_id",student.id).eq("day_number",day).maybeSingle();
    if(error||!attempt)return json({detail:"Listening attempt not found."},404);
    if(attempt.status!=="in_progress")return json({detail:"This Listening test is already complete."},409);
-   const update=await db.from("ark60_listening_attempts").update({answers,updated_at:new Date().toISOString()}).eq("id",id).eq("student_id",student.id).eq("status","in_progress");
+   // New clients include the run's start time, preventing a stale tab from
+   // overwriting a reset run. Older clients are still supported.
+   const expectedStartedAt=String(body.started_at||"");
+   if(expectedStartedAt&&expectedStartedAt!==String(attempt.started_at))return json({detail:"This Listening run was restarted. Reload the page to continue."},409);
+   let updateRequest=db.from("ark60_listening_attempts").update({answers,updated_at:new Date().toISOString()}).eq("id",id).eq("student_id",student.id).eq("status","in_progress");
+   if(expectedStartedAt)updateRequest=updateRequest.eq("started_at",expectedStartedAt);
+   const update=await updateRequest.select("id").maybeSingle();
+   if(!update.error&&!update.data)return json({detail:"This Listening run changed. Please reload."},409);
    if(update.error)throw update.error;
    return json({ok:true});
   }
