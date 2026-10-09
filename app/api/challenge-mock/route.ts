@@ -368,19 +368,28 @@ export async function POST(req:NextRequest){
    if(preview)return json({ok:true,preview:true,started_at:stamp});
    const row=await ensureAttempt(student.id,day);
    if(row.stage!=="listening")return json({detail:"Listening is already submitted."},409);
-   if(row.listening_started_at)return json({ok:true,resumed:true,started_at:row.listening_started_at});
-   const started=await db.from("ark60_mock_attempts").update({listening_started_at:stamp,updated_at:stamp})
-    .eq("id",row.id).is("listening_started_at",null).select("listening_started_at").maybeSingle();
-   if(started.error)throw started.error;
-   if(started.data?.listening_started_at)return json({ok:true,started_at:started.data.listening_started_at});
-   const current=await ensureAttempt(student.id,day);
-   return json({ok:true,resumed:true,started_at:current.listening_started_at||stamp});
+   // Restart only the unsubmitted Listening stage; preserve Reading and Writing.
+   const restarted=await db.from("ark60_mock_attempts")
+    .update({listening_started_at:stamp,listening_answers:{},listening_elapsed_seconds:0,updated_at:stamp})
+    .eq("id",row.id).eq("student_id",student.id).eq("stage","listening")
+    .select("listening_started_at").maybeSingle();
+   if(restarted.error)throw restarted.error;
+   if(!restarted.data)return json({detail:"Listening changed in another tab. Please reload."},409);
+   return json({ok:true,started_at:restarted.data.listening_started_at});
   }
   if(action==="save_listening"){
    if(preview)return json({ok:true,preview:true});
    const row=await ensureAttempt(student.id,day);if(row.stage!=="listening")return json({detail:"Listening is already submitted."},409);
    const answers=sanitizeListening(src.listening.payload,body.answers);
-   const {error}=await db.from("ark60_mock_attempts").update({listening_answers:answers,listening_elapsed_seconds:Math.max(0,Number(body.elapsed_seconds)||0),updated_at:new Date().toISOString()}).eq("id",row.id);if(error)throw error;
+   const expected=String(body.started_at||"");
+   if(expected&&expected!==String(row.listening_started_at||""))return json({detail:"This Listening was restarted. Reload to begin again."},409);
+   let update=db.from("ark60_mock_attempts")
+    .update({listening_answers:answers,listening_elapsed_seconds:Math.max(0,Number(body.elapsed_seconds)||0),updated_at:new Date().toISOString()})
+    .eq("id",row.id).eq("stage","listening");
+   if(expected)update=update.eq("listening_started_at",expected);
+   const saved=await update.select("id").maybeSingle();
+   if(saved.error)throw saved.error;
+   if(!saved.data)return json({detail:"Listening changed in another tab. Please reload."},409);
    return json({ok:true});
   }
   if(action==="submit_listening"){
@@ -388,9 +397,15 @@ export async function POST(req:NextRequest){
    if(preview)return json({ok:true,preview:true,stage:"reading",reading_remaining:3600,hidden_result:graded});
    const row=await ensureAttempt(student.id,day);if(row.stage!=="listening")return json({detail:"Listening is already submitted."},409);
    if(!row.listening_started_at)return json({detail:"Start Listening before submitting."},409);
+   const expected=String(body.started_at||"");
+   if(expected&&expected!==String(row.listening_started_at))return json({detail:"This Listening was restarted. Reload to begin again."},409);
    const now=new Date().toISOString();
    const listeningElapsed=Math.max(0,Math.floor((Date.now()-Date.parse(row.listening_started_at))/1000));
-   const {error}=await db.from("ark60_mock_attempts").update({stage:"reading",listening_answers:answers,listening_score:graded.score,listening_band:graded.band,listening_part_scores:graded.part_scores,listening_elapsed_seconds:listeningElapsed,listening_submitted_at:now,reading_started_at:now,updated_at:now}).eq("id",row.id);if(error)throw error;
+   let finish=db.from("ark60_mock_attempts").update({stage:"reading",listening_answers:answers,listening_score:graded.score,listening_band:graded.band,listening_part_scores:graded.part_scores,listening_elapsed_seconds:listeningElapsed,listening_submitted_at:now,reading_started_at:now,updated_at:now}).eq("id",row.id).eq("stage","listening");
+   if(expected)finish=finish.eq("listening_started_at",expected);
+   const final=await finish.select("id").maybeSingle();
+   if(final.error)throw final.error;
+   if(!final.data)return json({detail:"Listening changed in another tab. Please reload."},409);
    return json({ok:true,stage:"reading",reading_remaining:3600});
   }
   if(action==="save_reading"){
