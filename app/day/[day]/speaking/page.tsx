@@ -172,7 +172,7 @@ export default function SpeakingPage(){
  const previewUrls=useRef<Set<string>>(new Set());
  useEffect(()=>()=>{previewUrls.current.forEach(url=>URL.revokeObjectURL(url))},[]);
  const [questionIndex,setQuestionIndex]=useState(0);
- useEffect(()=>{setQuestionIndex(0)},[stage]);
+ useEffect(()=>{const questions=stage==="part3"?p3:p1;const next=questions.findIndex(q=>!answers[q.key]);setQuestionIndex(next<0?0:next)},[stage,day]);
 
  const payload=data?.content.payload;
  const p1=payload?.part1.questions||[],p3=payload?.part3.questions||[];
