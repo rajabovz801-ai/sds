@@ -6,6 +6,8 @@ import AnimatedBackButton from "../../../components/animated-back-button";
 import "../listening/listening.css";
 import "../writing/writing.css";
 import "./mock.css";
+import "../reading/worksheet.css";
+import {ReadingGapSentence,compactReadingInstruction} from "../../../components/reading-question-ui";
 
 type Stage="not_started"|"listening"|"reading"|"writing"|"assessing"|"completed";
 type Q={number:number;type:"tfng"|"gap"|"mcq"|"select";text:string;options?:string[];instruction?:string};
@@ -157,7 +159,7 @@ export default function FullMockPage(){
   if(q.type==="select")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><select className="cr-gap cr-select" aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}><option value="">Select your answer</option>{(q.options||[]).map(opt=><option key={opt} value={optionValue(opt)}>{opt}</option>)}</select></div>;
   if(q.type==="tfng")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><div className="cr-options">{(q.options?.length?q.options:["TRUE","FALSE","NOT GIVEN"]).map(opt=><label key={opt}><input type="radio" checked={rAnswers[String(q.number)]===opt} onChange={()=>setR(q.number,opt)}/><span className="cr-radio"/>{opt}</label>)}</div></div>;
   if(q.type==="mcq")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><div className="cr-options">{(q.options||[]).map(opt=>{const v=optionValue(opt);return <label key={opt}><input type="radio" checked={rAnswers[String(q.number)]===v} onChange={()=>setR(q.number,v)}/><span className="cr-radio"/>{opt}</label>})}</div></div>;
-  return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><input className="cr-gap" type="text" placeholder="Your answer" autoComplete="off" spellCheck={false} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}/></div>;
+  return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span><ReadingGapSentence text={q.text} input={<input className="cr-gap cr-inline-gap" type="text" placeholder="Answer" autoComplete="off" spellCheck={false} aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}/>} /></span></div></div>;
  }
 
 
@@ -192,12 +194,12 @@ export default function FullMockPage(){
   const totalAnswered=Object.values(rAnswers).filter(Boolean).length;
   return <main className="cr-shell mock-reading-shell">
    <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div></div><div className="cr-head-end"><span className="cr-head-practice">FULL MOCK · PART {String(rPassage).padStart(2,"0")}</span><button className="cr-fullscreen" onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
-   <div className="cr-instructions"><div><small>FULL MOCK · IELTS READING</small><h1>{passage?.title}</h1><p>3 passages <span>·</span> 40 questions <span>·</span> one 60-minute countdown</p></div><div className="cr-tools"><span className="cr-highlight-guide"><Highlighter size={15}/> Select text for yellow highlight</span></div></div>
+   <div className="cr-instructions"><div><small>FULL MOCK · IELTS READING</small><p>3 passages <span>·</span> 40 questions <span>·</span> 60-minute countdown</p></div><div className="cr-tools"></div></div>
    <div className="cr-mobile-tabs"><button className={rTab==="passage"?"active":""} onClick={()=>setRTab("passage")}>Passage</button><button className={rTab==="questions"?"active":""} onClick={()=>setRTab("questions")}>Questions</button></div>
    <div className="cr-split">
     <section style={{display:rTab==="questions"?"var(--cr-hide-passage)":"block"}} className="cr-pane cr-passage" ref={paperRef} onMouseUp={showHighlight} onTouchEnd={()=>setTimeout(showHighlight,100)}><h2>{passage?.title}</h2>{passage?.text.split(/\n\s*\n/).filter(Boolean).map((p,i)=><p key={i}>{p}</p>)}</section>
     <section style={{display:rTab==="passage"?"var(--cr-hide-questions)":"block"}} className="cr-pane cr-questions" ref={questionsRef} onMouseUp={showHighlight} onTouchEnd={()=>setTimeout(showHighlight,100)}>
-     {groups.map((group,gi)=><section className="cr-qgroup" key={gi}><div className="cr-qgroup-head"><h3>Questions {group[0].number}{group.length>1?"–"+group[group.length-1].number:""}</h3>{group[0].instruction&&<p>{group[0].instruction}</p>}</div>{group.map(renderRQ)}</section>)}
+     {groups.map((group,gi)=><section className="cr-qgroup" key={gi}><div className="cr-qgroup-head"><h3>Questions {group[0].number}{group.length>1?"–"+group[group.length-1].number:""}</h3>{group[0].instruction&&<p>{compactReadingInstruction(group[0].instruction,group[0].type==="select")}</p>}</div>{group.map(renderRQ)}</section>)}
     </section>
    </div>
    {highlightPopup&&<div className="cr-highlight-menu" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()}><button aria-label="Yellow highlight" onClick={()=>applyHighlight("yellow")}><i className="swatch yellow"/></button><span className="cr-menu-sep"/><button aria-label="Remove highlight" onClick={()=>applyHighlight("erase")}><Eraser size={17}/></button></div>}
