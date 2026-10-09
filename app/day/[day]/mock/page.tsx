@@ -52,6 +52,19 @@ export default function FullMockPage(){
   if(audio.readyState>=1)void resume();else audio.addEventListener("loadedmetadata",resume,{once:true});
   return()=>audio.removeEventListener("loadedmetadata",resume);
  },[stage,listeningStarted,lStartedAt]);
+ // Only an unfinished Full Mock Listening stage gets reset on exit.
+ useEffect(()=>{
+  if(stage!=="listening"||!listeningStarted||!lStartedAt)return;
+  const body=JSON.stringify({action:"abandon_listening",day,started_at:lStartedAt});
+  const send=()=>{
+   try{
+    if(navigator.sendBeacon?.("/api/challenge-mock",new Blob([body],{type:"application/json"})))return;
+   }catch{}
+   void fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body,keepalive:true}).catch(()=>{});
+  };
+  window.addEventListener("pagehide",send);
+  return()=>{window.removeEventListener("pagehide",send);send()};
+ },[day,stage,listeningStarted,lStartedAt]);
  useEffect(()=>{if(stage!=="reading")return;const id=window.setInterval(()=>setRRemaining(v=>Math.max(0,v-1)),1000);return()=>window.clearInterval(id)},[stage]);
  useEffect(()=>{if(stage==="reading"&&rRemaining===0&&!busy)void submitReading(true)},[stage,rRemaining,busy]);
  useEffect(()=>{if(stage!=="writing")return;const id=window.setInterval(()=>setWRemaining(v=>Math.max(0,v-1)),1000);return()=>window.clearInterval(id)},[stage]);
