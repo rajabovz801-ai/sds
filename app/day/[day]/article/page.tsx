@@ -106,11 +106,11 @@ export default function ArticlePage(){
  return <main className="aa-shell" onClick={()=>popup&&setPopup(null)}><StudyTimeHeartbeat day={day} module="article"/>
   <header className="aa-header"><AnimatedBackButton href={"/day/"+day}/><span className="aa-brand">ARK <b>EDUCATION</b><em> · ARTICLE CDI</em></span><span className="aa-day">DAY {String(day).padStart(2,"0")}</span></header>
   <div className="aa-container">
-   <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAY {String(day).padStart(2,"0")} · DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} sections</span><span>{words.length} vocabulary words</span></div></div></section>
+   <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} sections</span><span>{words.length} vocabulary words</span></div></div></section>
    <div className="aa-work-title">
-    <div className="aa-work-copy"><span className="aa-kicker">READING WORKSPACE</span><h2>Article &amp; glossary</h2></div>
+    <div className="aa-work-copy"><h2>Article &amp; glossary</h2></div>
     <div className="aa-work-actions" aria-live="polite">
-     <span className={"aa-progress-label "+(completed?"aa-completed-label":"")}>{completed?<><CheckCircle2 size={16}/> Article completed</>:<><BookOpen size={16}/> {read}/{pages.length} read</>}</span>
+     <span className={"aa-progress-label "+(completed?"aa-completed-label":"")}>{completed?<><CheckCircle2 size={16}/> Article completed</>:<><BookOpen size={16}/> {read}/{pages.length} visited</>}</span>
      {readyToFinish&&<button type="button" className="aa-finish-cta" onClick={complete} disabled={busy}><CheckCircle2 size={16}/>{busy?"Saving…":"Finish Article"}</button>}
      {completed&&<Link className="aa-work-vocab" href={"/day/"+day+"/vocabulary"}>Vocabulary <ArrowRight size={15}/></Link>}
     </div>
@@ -128,7 +128,7 @@ export default function ArticlePage(){
       {section.paragraphs.map((p,i)=><p className="aa-text" key={i}>{rich(p)}</p>)}
       {section.callouts.length>0&&<div className="aa-callout-box"><div className="aa-callout-head"><Leaf size={16}/> MORE FROM THE ARTICLE</div>{section.callouts.map((c,i)=><div key={i} className="aa-callout"><h3>{c.title}</h3><p>{rich(c.text)}</p></div>)}</div>}
      </section>)}
-     <div className="aa-reader-nav"><span>{read}/{pages.length} sections read</span>
+     <div className="aa-reader-nav"><span>{read}/{pages.length} sections visited</span>
       {readyToFinish&&<button className="aa-next" disabled={busy} onClick={complete}><CheckCircle2 size={16}/>{busy?"Saving…":"Finish Article"}</button>}
       {completed&&<Link className="aa-next" href={"/day/"+day+"/vocabulary"}>Open Vocabulary <ArrowRight size={16}/></Link>}
      </div>
