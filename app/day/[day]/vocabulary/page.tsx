@@ -1,4 +1,6 @@
 "use client";
+import LoadingIndicator from "../../../components/loading-indicator";
+import {WorkspaceArt} from "../../../components/workspace-art";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {useParams} from "next/navigation";
@@ -82,7 +84,7 @@ export default function VocabularyPage(){
  },[units]);
  if(panel!=="overview"&&currentUnit){
   return <main className="vv-shell"><StudyTimeHeartbeat day={day} module="vocabulary"/>
-   <header className="vv-top"><AnimatedBackButton onClick={back}/><div className="vv-brand">ARK <b>EDUCATION</b><span> · VOCABULARY</span></div><span className="vv-top-tag">DAY {String(day).padStart(2,"0")}</span></header>
+   <header className="vv-top"><AnimatedBackButton onClick={back}/><div className="vv-brand">Vocabulary</div><span className="vv-top-tag">DAY {String(day).padStart(2,"0")}</span></header>
    {panel==="study"&&<div className="vv-inner vv-study">
     <div className="vv-eyebrow">STUDY YOUR WORDS</div><h1>{currentUnit.source_title} <span>Unit {currentUnit.unit_number}</span></h1>
     <p>Study all 20 unique words with Uzbek meanings and real context before starting the quiz.</p>
@@ -118,13 +120,13 @@ export default function VocabularyPage(){
  return <main className="vv-shell ch-layout vv-layout">
   <ChallengeSidebar day={day} active="Vocabulary"/>
   <div className="ch-page vv-page">
-  <header className="vv-top"><AnimatedBackButton href={"/day/"+day}/><div className="vv-brand">ARK <b>EDUCATION</b><span> · VOCABULARY</span></div><span className="vv-top-tag">DAY {String(day).padStart(2,"0")}</span></header>
+  <header className="vv-top"><AnimatedBackButton href={"/day/"+day}/><div className="vv-brand">Vocabulary</div><span className="vv-top-tag">DAY {String(day).padStart(2,"0")}</span></header>
   <div className="vv-inner vv-overview">
-   <div className="vv-intro"><div><span className="vv-eyebrow">60 DAY CHALLENGE · DAILY VOCABULARY</span><h1>Vocabulary Practice</h1><p>Every word is unique across the 60-day course. Study and master each 20-word unit at 18/20 or above.</p><div className="vv-intro-chips"><span><Bookmark size={15}/> 40 new words per source</span><span><Layers3 size={15}/> 20 per unit</span><span><Target size={15}/> 90% to complete</span></div></div><div className="vv-intro-stat"><span>YOUR PROGRESS</span><b>{units.filter(u=>u.completed).length}<small> / {units.length}</small></b><div><i style={{width:(units.length?units.filter(u=>u.completed).length/units.length*100:0)+"%"}}/></div><small>Units completed</small></div></div>
-   {loading?<div className="vv-empty">Loading your vocabulary units…</div>:!units.length?<div className="vv-empty"><LockKeyhole size={27}/><h2>Vocabulary is being prepared</h2><p>No published units are available for this day yet.</p></div>:sectionGroups.map(group=><section className="vv-group" key={group.key}>
-     <div className="vv-group-heading"><div><span className="vv-eyebrow">{group.type.toUpperCase()}</span><h2>{group.title}</h2><p>40 unique B2+/C1 words · two 20-question quizzes</p></div><span className="vv-group-status">{group.units.filter(u=>u.completed).length}/2 complete</span></div>
+   <div className="vv-intro"><div><span className="vv-eyebrow">Day {day}</span><h1>Vocabulary</h1><p>20 words per unit · Pass: 18/20</p><div className="vocab-progress"><span>{units.filter(u=>u.completed).length}/{units.length} units completed</span><progress max={Math.max(1,units.length)} value={units.filter(u=>u.completed).length}/></div></div><WorkspaceArt name="wolf-study" className="vocab-plan-art"/></div>
+   {loading?<LoadingIndicator full={false}/>:!units.length?<div className="vv-empty"><LockKeyhole size={27}/><h2>Vocabulary is being prepared</h2><p>No published units are available for this day yet.</p></div>:sectionGroups.map(group=><section className="vv-group" key={group.key}>
+     <div className="vv-group-heading"><div><span className="vv-eyebrow">{group.type.toUpperCase()}</span><h2>{group.title}</h2></div><span className="vv-group-status">{group.units.filter(u=>u.completed).length}/2 complete</span></div>
      <div className="vv-unit-grid">{group.units.map(u=><article className={"vv-unit "+sourceClass(u)} key={u.id}><div className="vv-unit-top"><span>{u.source_kind==="article"?<Bookmark size={21}/>:<BookOpen size={21}/>}</span><span className={"vv-unit-badge "+(u.completed?"done":u.in_progress?"doing":"")}>{u.completed?"Completed":u.in_progress?"In progress":"Available"}</span></div>
-        <h3>Unit {String(u.unit_number).padStart(2,"0")}</h3><div className="vv-unit-sub">20 vocabulary words · 20 questions</div><div className="vv-unit-score"><span>{u.best_score===null?"Not attempted":"Best: "+u.best_score+"/20"}</span><span>{u.attempts} attempts</span></div>
+        <h3>Unit {String(u.unit_number).padStart(2,"0")}</h3><div className="vv-unit-sub">20 words · 20 questions</div><div className="vv-unit-score"><span>{u.best_score===null?"Ready to study":"Best: "+u.best_score+"/20"}</span>{u.attempts>0&&<span>{u.attempts} attempts</span>}</div>
         <div className="vv-unit-actions"><button onClick={()=>openUnit(u,"study")}><BookOpen size={15}/> Study</button>{u.completed?<button className="vv-done" disabled><Check size={16}/> Completed</button>:<button className="vv-start" disabled={busy} onClick={()=>openUnit(u,"quiz")}>{u.in_progress?"Resume":"Start Quiz"} <ArrowRight size={16}/></button>}</div>
      </article>)}</div>
     </section>)}

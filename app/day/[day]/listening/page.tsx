@@ -1,4 +1,7 @@
 "use client";
+import LessonEntry from "../../../components/lesson-entry";
+import ui from "../../../components/learning-ui.module.css";
+import LoadingIndicator from "../../../components/loading-indicator";
 
 import AnimatedBackButton from "../../../components/animated-back-button";
 import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
@@ -283,21 +286,25 @@ export default function ListeningPage(){
   return null;
  }
 
- if(loading)return <main className="ls-shell ls-center"><div className="ls-spinner"/><b>Loading Listening…</b></main>;
+ async function checkSound(){
+  try{const ctx=new AudioContext();await ctx.resume();const osc=ctx.createOscillator(),gain=ctx.createGain();osc.frequency.value=440;gain.gain.value=0.06;osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+0.6);osc.onended=()=>{void ctx.close()}}catch{setMessage("Sound check unavailable. Check your device volume.")}
+ }
+ if(loading)return <LoadingIndicator/>;
  if(!data||!payload)return <main className="ls-shell ls-center"><Headphones size={30}/><h1>Listening unavailable</h1><p>{message}</p><AnimatedBackButton href={"/day/"+day}/></main>;
 
  if(result&&!reviewMode)return <main className="ls-shell ls-result-shell">
   <StudyTimeHeartbeat day={day} module="listening"/>
-  <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">DAY {String(day).padStart(2,"0")} · LISTENING</div><button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></header>
+  <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">Listening</div><button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></header>
   <section className="ls-result-card"><span className="ls-result-icon"><CheckCircle2 size={30}/></span><small>DAY {String(day).padStart(2,"0")} · LISTENING COMPLETE · ATTEMPT {result.attempt_number||attemptNumber}</small><h1>{result.score} <i>/ 40</i></h1><div className="ls-band">IELTS Band <b>{Number(result.band).toFixed(1)}</b></div><div className="ls-section-scores">{result.part_scores.map((s,i)=><div key={i}><span>Section {i+1}</span><b>{s}/10</b></div>)}</div><p>{data.preview?"Preview result only. Nothing was saved to the real student record or admin results.":"This attempt is saved. You can review it or start a fresh attempt without deleting this result."}</p><div className="ls-result-actions"><button onClick={()=>{setReviewMode(true);setSection(1);setCurrentQuestion(1)}}>Review answers <ChevronRight size={15}/></button><button className="ghost" disabled={submitting} onClick={retryTest}>{submitting?"Starting…":"Try again"} <RefreshCcw size={15}/></button><button className="ghost" onClick={goBack}>Back to Day {day}</button></div></section>
  </main>;
 
  return <main className={"ls-shell "+(reviewMode?"reviewing":!started?"ls-shell--intro":"")}>
   <StudyTimeHeartbeat day={day} module="listening"/>
   <audio ref={audioRef} preload="auto" src={payload.audio_url} onPlay={()=>setAudioStatus("playing")} onEnded={()=>setAudioStatus("ended")} onError={()=>{if(startedRef.current){setAudioStatus("resume");setMessage("Audio could not start. Tap Resume audio to try again.")}}} onPause={()=>{if(startedRef.current&&audioStatus==="playing"){audioRef.current?.play().catch(()=>setAudioStatus("resume"))}}}/>
-  <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">DAY {String(day).padStart(2,"0")} · LISTENING</div><div className="ls-top-actions">{started&&!reviewMode&&<span className={"ls-audio-state "+audioStatus}><Volume2 size={14}/>{audioStatus==="ended"?"Audio finished":audioStatus==="resume"?"Audio needs permission":"Playing"} {started&&<i>{secLabel(elapsed)}</i>}</span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
+  <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">{started||reviewMode?"Listening":""}</div><div className="ls-top-actions">{started&&!reviewMode&&<span className={"ls-audio-state "+audioStatus}><Volume2 size={14}/>{audioStatus==="ended"?"Audio finished":audioStatus==="resume"?"Audio needs permission":"Playing"} {started&&<i>{secLabel(elapsed)}</i>}</span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
 
-  {!started&&!reviewMode&&<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>DAY {String(day).padStart(2,"0")} · IELTS LISTENING</small><h1>Full Listening Practice</h1><p>40 questions · 4 sections. If you leave before submitting, your answers and the recording will restart from the beginning.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Audio playback</span></div></div>{data.preview&&<div className="ls-preview">Preview mode · result and coin will not be saved.</div>}<button onClick={startTest}><Headphones size={17}/> Start Listening</button></section>}
+  {!started&&!reviewMode&&message&&<div className="ls-message" role="status">{message}</div>}
+  {!started&&!reviewMode&&<LessonEntry kind="Listening" day={day} summary="4 sections · 40 questions" preview={data.preview} notice="Leaving restarts the test." check={<button className={ui.check} onClick={checkSound}><Volume2 size={16}/> Check sound</button>} onStart={startTest} instructions="The recording plays once. Leaving before submission restarts the audio and clears unfinished answers. Submit to save your result."/>}
 
   {(started||reviewMode)&&<>
    {audioStatus==="resume"&&!reviewMode&&<div className="ls-resume-banner"><Volume2 size={16}/><div><b>Audio playback needs your permission</b><span>Tap to play your recording.</span></div><button onClick={resumeAudio}>Resume audio</button></div>}

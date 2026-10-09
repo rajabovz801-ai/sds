@@ -1,4 +1,5 @@
 "use client";
+import LoadingIndicator from "./components/loading-indicator";
 import {useEffect,useState} from "react";
 import {ArrowRight,BookOpen,CalendarDays,CheckCircle2,Eye,EyeOff,GraduationCap,LockKeyhole,LogIn,ShieldCheck,Sparkles,Target,UserRound,Users} from "lucide-react";
 
@@ -60,7 +61,8 @@ export default function Home(){
   }catch{setMessage("Unable to contact the server. Please try again.")}
   finally{setBusy(false)}
  }
- if(sessionStatus!=="signed-out")return <main className="auth-v2"><section className="auth-v2-center"><div className="auth-v2-intro"><span className="auth-v2-label"><Sparkles size={15}/> THE 60-DAY IELTS CHALLENGE</span><h1>{sessionStatus==="checking"?"Welcome back.":"Your session could not be checked."}</h1><p role="status">{sessionStatus==="checking"?"Checking your saved session…":"Please check your connection and try again."}</p>{sessionStatus==="error"&&<button type="button" className="auth-v2-submit" onClick={()=>setSessionCheckKey(value=>value+1)}>Try again <ArrowRight size={18}/></button>}</div></section></main>;
+ if(sessionStatus==="checking")return <LoadingIndicator/>;
+ if(sessionStatus==="error")return <main className="auth-v2"><section className="auth-v2-center"><div className="auth-v2-intro"><h1>Your session could not be checked.</h1><p role="status">Please check your connection and try again.</p><button type="button" className="auth-v2-submit" onClick={()=>setSessionCheckKey(value=>value+1)}>Try again <ArrowRight size={18}/></button></div></section></main>;
  return <main className="auth-v2">
   <section className="auth-v2-center">
    <div className="auth-v2-intro"><span className="auth-v2-label"><Sparkles size={15}/> THE 60-DAY IELTS CHALLENGE</span><h1>Your IELTS journey<br/><span>starts here.</span></h1><p>Build consistency, track every hour of real study and follow your own 60-day pathway to a higher band.</p></div>

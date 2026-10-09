@@ -1,4 +1,7 @@
 "use client";
+import LessonEntry from "../../../components/lesson-entry";
+import ui from "../../../components/learning-ui.module.css";
+import LoadingIndicator from "../../../components/loading-indicator";
 
 import AnimatedBackButton from "../../../components/animated-back-button";
 import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
@@ -52,6 +55,7 @@ function RecorderCard({
  const [localUrl,setLocalUrl]=useState("");
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
+ const transferred=useRef(false);
  const recorderRef=useRef<MediaRecorder|null>(null);
  const streamRef=useRef<MediaStream|null>(null);
  const chunksRef=useRef<Blob[]>([]);
@@ -61,7 +65,7 @@ function RecorderCard({
  const rafRef=useRef<number|null>(null);
  const audioCtxRef=useRef<AudioContext|null>(null);
 
- useEffect(()=>()=>{cleanupMedia();if(localUrl)URL.revokeObjectURL(localUrl)},[localUrl]);
+ useEffect(()=>()=>{cleanupMedia();if(localUrl&&!transferred.current)URL.revokeObjectURL(localUrl)},[localUrl]);
 
  function cleanupMedia(){
   if(timerRef.current)window.clearInterval(timerRef.current);
@@ -79,7 +83,7 @@ function RecorderCard({
   const source=ctx.createMediaStreamSource(stream);source.connect(analyser);
   const data=new Uint8Array(analyser.frequencyBinCount);
   const draw=()=>{
-   const canvas=canvasRef.current;if(!canvas)return;
+   const canvas=canvasRef.current;if(!canvas){rafRef.current=requestAnimationFrame(draw);return;}
    analyser.getByteFrequencyData(data);
    const g=canvas.getContext("2d");if(!g)return;
    const w=canvas.width,h=canvas.height;g.clearRect(0,0,w,h);
@@ -128,7 +132,7 @@ function RecorderCard({
    const res=await fetch("/api/challenge-speaking",{method:"POST",credentials:"same-origin",body:form});
    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not save recording.");
    const answer:SavedAnswer={...obj.answer,audio_url:obj.answer?.audio_url||(preview?localUrl:null)};
-   onSaved(answer);setBlob(null);
+   transferred.current=!!preview;onSaved(answer);setBlob(null);
   }catch(e){setError(e instanceof Error?e.message:"Could not save recording. Try again.")}finally{setBusy(false)}
  }
 
@@ -165,6 +169,10 @@ export default function SpeakingPage(){
  const [notes,setNotes]=useState("");
  const [submitting,setSubmitting]=useState(false);
  const [fullScreen,setFullScreen]=useState(false);
+ const previewUrls=useRef<Set<string>>(new Set());
+ useEffect(()=>()=>{previewUrls.current.forEach(url=>URL.revokeObjectURL(url))},[]);
+ const [questionIndex,setQuestionIndex]=useState(0);
+ useEffect(()=>{setQuestionIndex(0)},[stage]);
 
  const payload=data?.content.payload;
  const p1=payload?.part1.questions||[],p3=payload?.part3.questions||[];
@@ -204,7 +212,7 @@ export default function SpeakingPage(){
  },[attemptId]);
  useEffect(()=>{if(!attemptId)return;try{localStorage.setItem("ark60-speaking-notes-"+attemptId,notes)}catch{}},[attemptId,notes]);
 
- function putAnswer(answer:SavedAnswer){setAnswers(prev=>({...prev,[answer.question_key]:answer}))}
+ function putAnswer(answer:SavedAnswer){if(answer.audio_url?.startsWith("blob:"))previewUrls.current.add(answer.audio_url);setAnswers(prev=>({...prev,[answer.question_key]:answer}))}
  async function checkMic(){
   setMicChecking(true);setMessage("");
   try{
@@ -241,7 +249,7 @@ export default function SpeakingPage(){
  async function goBack(){try{if(document.fullscreenElement)await document.exitFullscreen()}catch{}router.push("/day/"+day)}
  async function toggleFullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{}}
 
- if(loading)return <main className="sp-shell sp-center"><div className="sp-loader"/><b>Loading Speaking…</b></main>;
+ if(loading)return <LoadingIndicator/>;
  if(message&&!data)return <main className="sp-shell sp-center"><Mic size={28}/><h1>Speaking unavailable</h1><p>{message}</p><AnimatedBackButton href={"/day/"+day} ariaLabel="Back to day"/></main>;
  if(!data||!payload)return null;
 
@@ -251,29 +259,23 @@ export default function SpeakingPage(){
 
  return <main className={"sp-shell "+(stage==="intro"?"sp-shell--intro":"")}>
   <StudyTimeHeartbeat day={day} module="speaking"/>
-  <header className="sp-topbar"><AnimatedBackButton className="sp-back" onClick={goBack} ariaLabel="Back to study day"/><div className="sp-top-title"><span>DAY {pad(day)} · FULL SPEAKING</span></div><button className="sp-full" onClick={toggleFullscreen} aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} title={fullScreen?"Exit fullscreen":"Fullscreen"}>{fullScreen?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></header>
+  <header className="sp-topbar"><AnimatedBackButton className="sp-back" onClick={goBack} ariaLabel="Back to study day"/><div className="sp-top-title"><span>{stage==="intro"?"":"Speaking"}</span></div><button className="sp-full" onClick={toggleFullscreen} aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} title={fullScreen?"Exit fullscreen":"Fullscreen"}>{fullScreen?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></header>
 
-  <div className="sp-progress"><span className={stage==="intro"||stage==="part1"?"active":p1Done?"done":""}><em>{p1Done?<Check size={11}/>:"01"}</em><b>Part 1</b></span><i/><span className={stage==="part2"?"active":p2Done?"done":""}><em>{p2Done?<Check size={11}/>:"02"}</em><b>Part 2</b></span><i/><span className={stage==="part3"?"active":p3Done?"done":""}><em>{p3Done?<Check size={11}/>:"03"}</em><b>Part 3</b></span><i/><span className={stage==="review"||stage==="complete"?"active":""}><em>04</em><b>Review</b></span></div>
+  {stage!=="intro"&&<div className="sp-progress"><span className={stage==="part1"?"active":p1Done?"done":""}><em>{p1Done?<Check size={11}/>:"01"}</em><b>Part 1</b></span><i/><span className={stage==="part2"?"active":p2Done?"done":""}><em>{p2Done?<Check size={11}/>:"02"}</em><b>Part 2</b></span><i/><span className={stage==="part3"?"active":p3Done?"done":""}><em>{p3Done?<Check size={11}/>:"03"}</em><b>Part 3</b></span><i/><span className={stage==="review"||stage==="complete"?"active":""}><em>04</em><b>Review</b></span></div>}
 
   <section className={"sp-content "+(stage==="intro"?"sp-content--intro":"")}>
    {message&&<div className="sp-message">{message}<button onClick={()=>setMessage("")}>×</button></div>}
 
-   {stage==="intro"&&<div className="sp-intro">
-    {data.preview&&<div className="sp-preview-banner"><ShieldCheck size={14}/><span><b>Preview mode</b> · No real submission or coin will be saved.</span></div>}
-    <span className="sp-intro-icon"><Mic size={24}/></span><small>DAY {pad(day)} · FULL SPEAKING</small><h1>Full Speaking Practice</h1><p>Answer every question with your microphone. Your saved recordings are sent securely to your teacher for review.</p>
-    <div className="sp-intro-parts"><div className="active"><b>Part 1</b><span>{p1.length} questions</span></div><div><b>Part 2</b><span>1-minute preparation</span></div><div><b>Part 3</b><span>{p3.length} questions</span></div></div>
-    <div className="sp-mic-check"><ShieldCheck size={17}/><span>{micReady?"Microphone ready":"Microphone permission is required"}</span>{!micReady&&<button onClick={checkMic} disabled={micChecking}>{micChecking?"Checking…":"Check microphone"}</button>}</div>
-    <button className="sp-start" onClick={startSpeaking}><Mic size={17}/> Start Speaking</button>
-   </div>}
+   {stage==="intro"&&<LessonEntry kind="Speaking" day={day} summary="Part 1 · Part 2 · Part 3" preview={data.preview} check={<button className={ui.check} onClick={checkMic} disabled={micChecking}><Mic size={16}/>{micChecking?"Checking…":micReady?"Microphone ready":"Check microphone"}</button>} onStart={startSpeaking} instructions="Record and save each answer. Part 2 includes one minute to prepare. Review your recordings before submitting them to your teacher."/>}
 
    {stage==="part1"&&<div className="sp-part">
-    <div className="sp-part-head"><small>PART 1</small><h1>{payload.part1.topic}</h1><p>Record and save one answer for each question.</p></div>
-    <div className="sp-questions">{p1.map(q=><RecorderCard key={q.key} day={day} attemptId={attemptId} questionKey={q.key} questionText={q.text} part={1} saved={answers[q.key]} preview={!!data.preview} maxSeconds={90} onSaved={putAnswer}/>)}</div>
+    <div className="sp-part-head"><small>PART 1</small><h1>{payload.part1.topic.replace(/^TOPIC\s+\d+\.\s*/i,"")}</h1></div>
+    <nav className={ui.questionNav} aria-label="Part 1 questions">{p1.map((q,i)=><button key={q.key} className={i===questionIndex?ui.selected:""} disabled={i!==questionIndex&&!answers[p1[questionIndex]?.key]} onClick={()=>setQuestionIndex(i)} aria-label={"Question "+(i+1)+(answers[q.key]?", saved":"")} aria-current={i===questionIndex?"step":undefined}>{answers[q.key]?<Check size={14}/>:i+1}</button>)}<span>{questionIndex+1} / {p1.length}</span></nav><div className="sp-questions sp-single">{p1.filter((q,i)=>i===questionIndex).map(q=><RecorderCard key={q.key} day={day} attemptId={attemptId} questionKey={q.key} questionText={q.text} part={1} saved={answers[q.key]} preview={!!data.preview} maxSeconds={90} onSaved={a=>{putAnswer(a);setQuestionIndex(i=>Math.min(i+1,p1.length-1))}}/>)}</div>
     <div className="sp-part-footer"><span>{Object.values(answers).filter(a=>a.part_number===1).length}/{p1.length} answers saved</span><button disabled={!p1Done} onClick={()=>setStage("part2")}>Continue to Part 2 <Send size={14}/></button></div>
    </div>}
 
    {stage==="part2"&&<div className="sp-part">
-    <div className="sp-part-head"><small>PART 2 · CUE CARD</small><h1>{payload.part2.topic}</h1></div>
+    <div className="sp-part-head"><small>PART 2 · CUE CARD</small><h1>Long turn</h1></div>
     <article className="sp-cue"><h2>{payload.part2.prompt}</h2><h3>You should say:</h3><ul>{payload.part2.bullets.map(x=><li key={x}>{x}</li>)}</ul></article>
     {!p2Done&&<div className="sp-prep">
      <div><Clock3 size={20}/><span><small>PREPARATION</small><b>{prepStarted?secondsLabel(prepRemaining):"1:00"}</b></span></div>
@@ -285,14 +287,15 @@ export default function SpeakingPage(){
    </div>}
 
    {stage==="part3"&&<div className="sp-part">
-    <div className="sp-part-head"><small>PART 3</small><h1>{payload.part3.topic}</h1><p>Record and save one answer for each question.</p></div>
-    <div className="sp-questions">{p3.map(q=><RecorderCard key={q.key} day={day} attemptId={attemptId} questionKey={q.key} questionText={q.text} part={3} saved={answers[q.key]} preview={!!data.preview} maxSeconds={90} onSaved={putAnswer}/>)}</div>
+    <div className="sp-part-head"><small>PART 3</small><h1>{payload.part3.topic.replace(/^TOPIC\s+\d+\.\s*/i,"")}</h1></div>
+    <nav className={ui.questionNav} aria-label="Part 3 questions">{p3.map((q,i)=><button key={q.key} className={i===questionIndex?ui.selected:""} disabled={i!==questionIndex&&!answers[p3[questionIndex]?.key]} onClick={()=>setQuestionIndex(i)} aria-label={"Question "+(i+1)+(answers[q.key]?", saved":"")} aria-current={i===questionIndex?"step":undefined}>{answers[q.key]?<Check size={14}/>:i+1}</button>)}<span>{questionIndex+1} / {p3.length}</span></nav><div className="sp-questions sp-single">{p3.filter((q,i)=>i===questionIndex).map(q=><RecorderCard key={q.key} day={day} attemptId={attemptId} questionKey={q.key} questionText={q.text} part={3} saved={answers[q.key]} preview={!!data.preview} maxSeconds={90} onSaved={a=>{putAnswer(a);setQuestionIndex(i=>Math.min(i+1,p3.length-1))}}/>)}</div>
     <div className="sp-part-footer"><button className="ghost" onClick={()=>setStage("part2")}>Back to Part 2</button><button disabled={!p3Done} onClick={()=>setStage("review")}>Review answers <Check size={14}/></button></div>
    </div>}
 
    {stage==="review"&&<div className="sp-review">
     <small>DAY {pad(day)} · FULL SPEAKING</small><h1>Ready to submit</h1><p>Check that every part is complete. After submission, recordings cannot be replaced.</p>
     <div className="sp-review-grid"><article><b>Part 1</b><strong>{p1.filter(q=>answers[q.key]).length}/{p1.length}</strong><span>recorded</span></article><article><b>Part 2</b><strong>{p2Done?1:0}/1</strong><span>recorded</span></article><article><b>Part 3</b><strong>{p3.filter(q=>answers[q.key]).length}/{p3.length}</strong><span>recorded</span></article></div>
+    <div className={ui.reviewList}>{[...p1,{key:part2Key,text:payload.part2.prompt},...p3].map(q=><article key={q.key}><p>{q.text}</p>{answers[q.key]?.audio_url?<audio controls preload="none" src={answers[q.key].audio_url||undefined}/>:<span>Recording saved</span>}</article>)}</div>
     <button className="sp-submit" disabled={submitting||Object.keys(answers).length!==expectedCount} onClick={submit}><Send size={16}/>{submitting?"Submitting…":"Submit Full Speaking"}</button>
     <button className="sp-review-back" onClick={()=>setStage("part3")}>Return to Part 3</button>
    </div>}

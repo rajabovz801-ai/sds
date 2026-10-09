@@ -1,4 +1,5 @@
 "use client";
+import LoadingIndicator from "../../../components/loading-indicator";
 import {useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {useParams} from "next/navigation";
@@ -99,14 +100,14 @@ export default function ArticlePage(){
   getSelection()?.removeAllRanges();chosen.current=null;setMenu(null);
  }
  useEffect(()=>{const f=(e:KeyboardEvent)=>{if(e.key==="Escape"){setPopup(null);setMenu(null)}};window.addEventListener("keydown",f);return()=>window.removeEventListener("keydown",f)},[]);
- if(loading)return <main className="aa-shell"><div className="aa-loading">Loading the article…</div></main>;
+ if(loading)return <LoadingIndicator/>;
  if(!data)return <main className="aa-shell"><div className="aa-loading"><AnimatedBackButton href={"/day/"+day}/><p>{error||"Article unavailable"}</p></div></main>;
  const article=data.article,pages=article.sections,read=data.progress.visited_pages.length,completed=!!data.progress.completed_at,readyToFinish=read===pages.length&&!completed;
  
  return <main className="aa-shell" onClick={()=>popup&&setPopup(null)}><StudyTimeHeartbeat day={day} module="article"/>
-  <header className="aa-header"><AnimatedBackButton href={"/day/"+day}/><span className="aa-brand">ARK <b>EDUCATION</b><em> · ARTICLE CDI</em></span><span className="aa-day">DAY {String(day).padStart(2,"0")}</span></header>
+  <header className="aa-header"><AnimatedBackButton href={"/day/"+day}/><span className="aa-brand">Article</span><span className="aa-day">DAY {String(day).padStart(2,"0")}</span></header>
   <div className="aa-container">
-   <section className="aa-hero"><div className="aa-hero-text"><span className="aa-kicker">DAILY ARTICLE</span><h1>{article.title}</h1><p>{rich(article.deck)}</p><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} sections</span><span>{words.length} vocabulary words</span></div></div></section>
+   <section className="aa-hero"><div className="aa-hero-text"><h1>{article.title}</h1><div className="aa-hero-meta">BY {article.byline}<span>{pages.length} sections</span><span>{words.length} vocabulary words</span></div></div></section>
    <div className="aa-work-title">
     <div className="aa-work-copy"><h2>Article &amp; glossary</h2></div>
     <div className="aa-work-actions" aria-live="polite">
@@ -120,7 +121,7 @@ export default function ArticlePage(){
    <div id="aa-reading-workspace" className="aa-grid">
     <div ref={reader} className={"aa-reader "+(tab==="article"?"aa-mobile-visible":"")} onMouseUp={selectedText} onTouchEnd={()=>setTimeout(selectedText,100)}>
      <div className="aa-reader-toolbar">
-      <div className="aa-reader-navigation"><span className="aa-reader-page-title"><BookOpen size={15}/> SECTION {String(page+1).padStart(2,"0")} <i>OF {String(pages.length).padStart(2,"0")}</i></span></div>
+      <div className="aa-reader-navigation"><nav className="article-section-nav" aria-label="Article sections">{pages.map((section,i)=><button key={section.page} aria-current={page===i?"step":undefined} onClick={()=>sectionNodes.current.get(section.page)?.scrollIntoView({behavior:"smooth",block:"start"})}>{i+1}</button>)}</nav><span className="aa-reader-page-title"><BookOpen size={15}/> SECTION {String(page+1).padStart(2,"0")} <i>OF {String(pages.length).padStart(2,"0")}</i></span></div>
       
      </div>
      {pages.map((section,i)=><section key={section.page} className="aa-article-section" data-article-section={section.page} id={"aa-section-"+section.page} ref={node=>{if(node)sectionNodes.current.set(section.page,node);else sectionNodes.current.delete(section.page);}}>
@@ -133,7 +134,7 @@ export default function ArticlePage(){
       {completed&&<Link className="aa-next" href={"/day/"+day+"/vocabulary"}>Open Vocabulary <ArrowRight size={16}/></Link>}
      </div>
     </div>
-    <aside className={"aa-vocab "+(tab==="vocab"?"aa-mobile-visible":"")}><div className="aa-vocab-head"><span className="aa-kicker">B2+ / C1 · IN CONTEXT</span><h2>Interactive glossary</h2><p>Tap underlined words in the article for Uzbek meanings and English explanations.</p></div>
+    <aside className={"aa-vocab "+(tab==="vocab"?"aa-mobile-visible":"")}><div className="aa-vocab-head"><span className="aa-kicker">B2+ / C1 · IN CONTEXT</span><h2>Glossary</h2><p>Tap a word to see its meaning.</p></div>
       <label className="aa-vocab-search"><span className="aa-sr-only">Search vocabulary</span><input type="search" placeholder="Search vocabulary…" aria-label="Search vocabulary" value={glossaryQuery} onChange={e=>setGlossaryQuery(e.target.value)}/></label><div className="aa-words" aria-label="Article vocabulary">{visibleWords.map(({word:w,index:i})=><button key={w.id} onClick={e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setPopup({word:w,x:Math.min(innerWidth-310,Math.max(12,r.left)),y:r.bottom+255>innerHeight?Math.max(61,r.top-251):r.bottom+9})}}><span className="aa-index">{String(i+1).padStart(2,"0")}</span><span><b>{w.display_word}</b><small>{w.meaning_uz}</small></span><em>{w.level}</em></button>)}{visibleWords.length===0&&<p className="aa-vocab-empty">No matching words.</p>}</div>
       <div className="aa-side-footer"><p>{Math.ceil(words.length/20)} units · 20 words each · Pass at 18/20</p><Link href={"/day/"+day+"/vocabulary"}>Open Vocabulary <ArrowRight size={16}/></Link></div>
     </aside>

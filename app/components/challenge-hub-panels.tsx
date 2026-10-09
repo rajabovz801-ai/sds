@@ -1,4 +1,5 @@
 "use client";
+import LoadingIndicator from "./loading-indicator";
 
 import {useEffect,useMemo,useState} from "react";
 import {BookOpen,Headphones,PenLine,Newspaper,NotebookPen,Mic,Award,Check,Clock3,Coins,LogOut,Save,Star,Trophy,X} from "lucide-react";
@@ -98,7 +99,7 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
     <button className={period==="all"?"active":""} onClick={()=>setPeriod("all")}>All time</button>
    </div>
 
-   {message?<div className="hub-error">{message}</div>:loading?<div className="hub-loading">Loading real rankings…</div>:sorted.length?<>
+   {message?<div className="hub-error">{message}</div>:loading?<LoadingIndicator full={false}/>:sorted.length?<>
    <div className={"lb-podium lb-podium-"+Math.min(3,top.length)} aria-label={periodLabel+" top students"}>
     {top.map(row=><article className={"lb-podium-card rank-"+row.rank+" "+(row.student_id===studentId?"me ":"")} key={row.student_id}>
      <div className="lb-award-row">{row.rank===1?<WorkspaceArt name="crown" className="lb-crown"/>:<span className="lb-crown-space" aria-hidden="true"/>}

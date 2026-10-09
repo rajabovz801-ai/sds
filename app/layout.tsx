@@ -1,5 +1,6 @@
 import "./globals.css";
 import "./night-theme.css";
+import "./lesson-polish.css";
 import SiteTheme from "./components/site-theme";
 import type { Metadata, Viewport } from "next";
 export const metadata:Metadata={title:"ARK IELTS · 60 Day Challenge",description:"ARK Education IELTS 60-day learning platform",robots:{index:false,follow:false}};

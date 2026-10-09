@@ -1,4 +1,5 @@
 "use client";
+import LoadingIndicator from "../../../components/loading-indicator";
 import {useParams,useRouter} from "next/navigation";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {BookOpen,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Headphones,Eraser,Highlighter,LockKeyhole,Maximize2,Minimize2,PenLine,Send,ShieldCheck,Volume2} from "lucide-react";
@@ -163,7 +164,7 @@ export default function FullMockPage(){
  }
 
 
- if(loading)return <main className="mock-loading"><span>ARK EDUCATION</span><b>Preparing Full Mock…</b></main>;
+ if(loading)return <LoadingIndicator/>;
  if(!data)return <main className="mock-loading"><span>FULL MOCK</span><b>{message||"Mock unavailable."}</b><button onClick={()=>router.push("/dashboard")}>Back to dashboard</button></main>;
 
  if(stage==="not_started")return <main className="mock-entry"><header className="mock-entry-top"><AnimatedBackButton href="/dashboard"/><b>ARK EDUCATION · FULL MOCK</b><span>{data.preview?"PREVIEW MODE":mockDateText}</span></header><section className="mock-entry-card"><small>DAY {String(day).padStart(2,"0")} · IELTS FULL MOCK</small><h1>Listening → Reading → Writing</h1><p>Complete all three sections in order. Section scores stay hidden until the Writing assessment is finished.</p><div className="mock-entry-steps"><div><Headphones/><b>Listening</b><span>40 questions · audio once</span></div><div><BookOpen/><b>Reading</b><span>40 questions · 60 minutes</span></div><div><PenLine/><b>Writing</b><span>Task 1 + Task 2 · 60 minutes</span></div></div>{data.preview&&<div className="mock-preview-note"><ShieldCheck size={16}/> Teacher preview · nothing is saved to real student results.</div>}<button disabled={busy} onClick={startMock}>{busy?"Opening…":"Start Full Mock"} <ChevronRight size={17}/></button>{message&&<p className="mock-error">{message}</p>}</section></main>;

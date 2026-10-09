@@ -1,4 +1,5 @@
 "use client";
+import LoadingIndicator from "../components/loading-indicator";
 
 import AnimatedBackButton from "../components/animated-back-button";
 import {WorkspaceArt} from "../components/workspace-art";
@@ -197,7 +198,7 @@ export default function Dashboard(){
  ];
  const visible=month==="all"?DAYS:DAYS.filter(x=>month==="oct"?x.date.getUTCMonth()===9:x.date.getUTCMonth()===10);
 
- if(!authChecked&&!stats)return <main className="empty-view"><div className="empty-icon"><Clock3 size={28}/></div><h1>Loading your challenge…</h1><p>Checking your account and course progress.</p></main>;
+ if(!authChecked&&!stats)return <LoadingIndicator/>;
  if(authChecked&&!stats&&loadError)return <main className="empty-view"><div className="empty-icon"><CircleHelp size={28}/></div><h1>Could not load your dashboard</h1><p>{loadError}</p><button type="button" onClick={()=>setRetryCount(value=>value+1)}>Try again</button></main>;
 
  return <div className={"learning-shell "+(theme==="dark"?"theme-dark":"theme-light")}><StudentPresence area="Dashboard"/>

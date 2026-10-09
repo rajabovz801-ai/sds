@@ -4039,6 +4039,98 @@ html[data-ark-theme="dark"] .wa-shell {
     background: #0F1926;
     color: #EAF0F7
 }
+html[data-ark-theme="dark"] .loadingScreen {
+    background: var(--lesson-canvas,#152131)
+}
+html[data-ark-theme="dark"] .spinner {
+    border: 3px solid #29384A;
+    border-top-color: #385E91
+}
+html[data-ark-theme="dark"] .entry {
+    border: 1px solid #29384A;
+    background: #152131;
+    color: #EAF0F7;
+    box-shadow: 0 12px 32px #00000026
+}
+html[data-ark-theme="dark"] .day {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .summary {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .preview {
+    background: #152131;
+    color: #9CBFFF
+}
+html[data-ark-theme="dark"] .check {
+    border: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .notice {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .start {
+    background: #3B73E8;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] .start:hover {
+    background: #3B73E8
+}
+html[data-ark-theme="dark"] .instructions {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .instructions summary {
+    color: #9CBFFF
+}
+html[data-ark-theme="dark"] .questionNav button {
+    border: 1px solid #29384A;
+    background: #152131;
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .questionNav button.selected {
+    background: #3B73E8;
+    color: #EAF0F7;
+    border-color: #385E91
+}
+html[data-ark-theme="dark"] .questionNav span {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .reviewList article {
+    border: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .reviewList span {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .entry {
+    background: #1B2A3D;
+    border-color: #29384A;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .loadingScreen {
+    background: #1B2A3D
+}
+html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .spinner {
+    border-color: #29384A;
+    border-top-color: #385E91
+}
+html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .summary,html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .notice,html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .instructions,html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .day {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .check,html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .reviewList article {
+    border-color: #29384A
+}
+html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .preview {
+    background: #1B2A3D;
+    color: #9CBFFF
+}
+html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .questionNav button {
+    background: #1B2A3D;
+    border-color: #29384A;
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] :global(html[data-ark-theme=dark]) .questionNav button.selected {
+    background: #3B73E8;
+    color: #EAF0F7
+}
 html[data-ark-theme="dark"] .aa-shell {
     background: #0F1926;
     color: #EAF0F7
@@ -7205,6 +7297,79 @@ html[data-ark-theme="dark"] .writing-controls button.ghost {
 }
 html[data-ark-theme="dark"] .writing-shell {
     background: #0F1926;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] .ark-back-control .ark-back-icon {
+    background: #152131
+}
+html[data-ark-theme="dark"] .ark-back-control:hover .ark-back-icon {
+    background: #1B2A3D
+}
+html[data-ark-theme="dark"] .day-progress,html[data-ark-theme="dark"] .vocab-progress {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .day-progress progress,html[data-ark-theme="dark"] .vocab-progress progress {
+    accent-color: #9CBFFF
+}
+html[data-ark-theme="dark"] .vv-unit-actions button:first-child {
+    color: #9CBFFF;
+    border: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .article-section-nav button {
+    border: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .article-section-nav button[aria-current=step] {
+    background: #3B73E8;
+    color: #EAF0F7;
+    border-color: #385E91
+}
+html[data-ark-theme="dark"] .writing-prompt {
+    border-left: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .writing-submit-hint {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .writing-pane-head i {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"][data-ark-theme=dark] .ark-back-control .ark-back-icon {
+    background: #1B2A3D !important
+}
+html[data-ark-theme="dark"][data-ark-theme=dark] .day-progress,html[data-ark-theme="dark"][data-ark-theme=dark] .vocab-progress {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"][data-ark-theme=dark] .vv-unit-actions button:first-child {
+    color: #A7B6C8;
+    border-color: #29384A
+}
+html[data-ark-theme="dark"][data-ark-theme=dark] .writing-prompt {
+    border-color: #29384A
+}
+html[data-ark-theme="dark"][data-ark-theme=dark] .article-section-nav button {
+    border-color: #29384A
+}
+@media (min-width:851px) {
+    html[data-ark-theme="dark"] .writing-divider {
+        background: #152131
+    }
+}
+@media (min-width:851px) {
+    html[data-ark-theme="dark"] .writing-divider span {
+        background: #1B2A3D
+    }
+}
+@media (min-width:851px) {
+    html[data-ark-theme="dark"] .writing-divider:focus-visible {
+        outline: 2px solid #385E91
+    }
+}
+@media (min-width:851px) {
+    html[data-ark-theme="dark"][data-ark-theme=dark] .writing-divider {
+        background: #1B2A3D
+    }
+}
+html[data-ark-theme="dark"] .cd-day .cd-day-open {
+    background: #3B73E8;
     color: #EAF0F7
 }
 html[data-ark-theme="dark"] .nt-shell {
