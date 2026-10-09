@@ -68,14 +68,14 @@ export default function ListeningPage(){
    setData(obj);
    const a=obj.attempt as Attempt|null;
    if(a){
-    setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers(a.answers||{});setStartedAt(a.started_at||"");
+    setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setStartedAt(a.started_at||"");
     if(a.status==="submitted"){
      setResult({score:Number(a.score||0),band:Number(a.band||0),part_scores:a.part_scores||[0,0,0,0],elapsed_seconds:Number(a.elapsed_seconds||0),submitted_at:a.submitted_at||undefined,attempt_number:Number(a.attempt_number||1)});
-     setReview(a.review||null);setReviewMode(false);setStarted(false);
+     setAnswers(a.answers||{});setReview(a.review||null);setReviewMode(false);setStarted(false);
     }else{
-     setStarted(true);startedRef.current=true;
-     const q=Object.keys(a.answers||{}).map(Number).filter(Boolean).sort((x,y)=>x-y).pop()||1;
-     setCurrentQuestion(q);setSection(qSection(q));
+     // Abandoned Listening opens with a clean Start screen.
+     setAnswers({});setStarted(false);startedRef.current=false;
+     setAudioStatus("idle");setElapsed(0);setCurrentQuestion(1);setSection(1);
     }
    }
   }catch(e){setMessage(e instanceof Error?e.message:"Could not load Listening.")}finally{setLoading(false)}
@@ -94,13 +94,7 @@ export default function ListeningPage(){
   const audio=audioRef.current;
   const resume=async()=>{
    try{
-    // Audio playback must follow the media element itself, not the wall-clock age
-    // of the Listening attempt. A learner may return to an in-progress attempt
-    // after autoplay was blocked or the tab was suspended; using startedAt as
-    // the audio position incorrectly marked the recording as already finished.
-    if(audio.ended){
-     audio.currentTime=0;
-    }
+    // Autoplay permission retries should not rewind during a running session.
     await audio.play();setAudioStatus("playing");
    }catch{
     setAudioStatus("resume");
@@ -171,7 +165,7 @@ export default function ListeningPage(){
    const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});
    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not start Listening.");
    const a=obj.attempt as Attempt;
-   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers(a.answers||{});setStartedAt(a.started_at);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);
+   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers({});setStartedAt(a.started_at);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);setElapsed(0);setAudioStatus("idle");
    try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.()}catch{}
    requestAnimationFrame(async()=>{
     const audio=audioRef.current;if(!audio)return;
@@ -186,7 +180,7 @@ export default function ListeningPage(){
    const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"retry",day})});
    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not start another Listening attempt.");
    const a=obj.attempt as Attempt;
-   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||attemptNumber+1));setAnswers(a.answers||{});setStartedAt(a.started_at);setElapsed(0);
+   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||attemptNumber+1));setAnswers({});setStartedAt(a.started_at);setElapsed(0);
    setResult(null);setReview(null);setReviewMode(false);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);setAudioStatus("idle");
    setData(prev=>prev?{...prev,attempt:a}:prev);
    try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.()}catch{}
@@ -211,7 +205,7 @@ export default function ListeningPage(){
   saveTimer.current=window.setTimeout(async()=>{
    setSaving(true);
    try{
-    const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save",day,attempt_id:attemptId,answers:next})});
+    const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save",day,attempt_id:attemptId,started_at:startedAt,answers:next})});
     if(!res.ok){const o=await res.json().catch(()=>({}));throw new Error(o.detail||"Could not save answers.")}
    }catch(e){setMessage(e instanceof Error?e.message:"Could not save answers.")}finally{setSaving(false)}
   },450);
@@ -290,12 +284,11 @@ export default function ListeningPage(){
   {!started&&!reviewMode&&<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>DAY {String(day).padStart(2,"0")} · IELTS LISTENING</small><h1>Full Listening Practice</h1><p>40 questions · 4 sections. The recording plays once and cannot be paused or replayed.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Audio playback</span></div></div>{data.preview&&<div className="ls-preview">Preview mode · result and coin will not be saved.</div>}<button onClick={startTest}><Headphones size={17}/> Start Listening</button></section>}
 
   {(started||reviewMode)&&<>
-   {audioStatus==="resume"&&!reviewMode&&<div className="ls-resume-banner"><Volume2 size={16}/><div><b>Audio playback needs your permission</b><span>The recording will resume from the current test position, not from the beginning.</span></div><button onClick={resumeAudio}>Resume audio</button></div>}
+   {audioStatus==="resume"&&!reviewMode&&<div className="ls-resume-banner"><Volume2 size={16}/><div><b>Audio playback needs your permission</b><span>Tap to play your recording.</span></div><button onClick={resumeAudio}>Resume audio</button></div>}
    {message&&<div className="ls-message">{message}<button onClick={()=>setMessage("")}>×</button></div>}
-   <section className="ls-instruction"><div><b>{reviewMode?"ANSWER REVIEW":currentSection?.label}</b><span>{reviewMode?"Your answers and the official correct answers":currentSection?.range}</span></div>{!reviewMode&&<span className="ls-save-state">{saving?"Saving answers…":"Answers auto-save"}</span>}</section>
+   <section className="ls-instruction"><div><b>{reviewMode?"ANSWER REVIEW":currentSection?.label}</b><span>{reviewMode?"Your answers and the official correct answers":currentSection?.range}</span></div></section>
    <div className="ls-workspace">
     <section className="ls-question-paper" ref={paperRef} onMouseUp={showHighlightMenu} onTouchEnd={()=>setTimeout(showHighlightMenu,100)}>
-     <div className="ls-section-heading"><span>{currentSection?.label}</span><b>{currentSection?.range}</b></div>
      {currentSection?.blocks?.map((b:any,i:number)=>renderBlock(b,i))}
     </section>
    </div>
