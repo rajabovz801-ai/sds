@@ -442,16 +442,19 @@ test("Listening answer key stays server-side until submission",()=>{
   assert.doesNotMatch(read("app/day/[day]/listening/page.tsx"),/answer_key/);
 });
 
-test("Listening persists in-progress answers and resumes one-time audio from server start time",()=>{
+test("Unsubmitted Listening reopens blank and resets its audio from the beginning",()=>{
   const api=read("app/api/challenge-listening/route.ts");
   const page=read("app/day/[day]/listening/page.tsx");
   assert.match(api,/action==="save"/);
-  assert.match(api,/ark60_listening_attempts/);
+  assert.match(api,/action==="abandon"/);
+  assert.match(api,/started_at:stamp,elapsed_seconds:0/);
+  assert.match(api,/answers:\{\}/);
+  assert.match(page,/setAnswers\(\{\}\);setStarted\(false\)/);
+  assert.match(page,/audio\.currentTime=0/);
   assert.match(page,/queueSave/);
-  assert.match(page,/Date\.now\(\)-Date\.parse\(startedAt\)/);
-  assert.match(page,/audio\.currentTime=offset/);
-  assert.match(page,/Audio playback needs your permission/);
-  assert.doesNotMatch(page,/controls/);
+  assert.doesNotMatch(page,/audio\.currentTime=offset/);
+  assert.doesNotMatch(page,/Answers auto-save/);
+  assert.doesNotMatch(page,/<audio[^>]*controls/);
 });
 
 test("Listening completion is preview-safe and awards through the existing submission trigger",()=>{
