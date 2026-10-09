@@ -1898,3 +1898,51 @@ button.user-tile>svg{color:#8290a0;flex:none}
  .lb-board .lb-podium-metrics{max-width:none}
  .workspace-dashboard .resume-card h2{font-size:16px}
 }
+
+/* Profile-only scenes; artwork occupies dedicated space beside readable copy. */
+.sidebar-chest{width:48px;height:48px}
+.progress-v2 .hub-kpis article{display:grid;grid-template-columns:minmax(0,1fr) 66px;column-gap:12px;padding:17px;align-items:center}
+.progress-v2 .hub-kpis article>span,.progress-v2 .hub-kpis article>b{grid-column:1;min-width:0;overflow-wrap:anywhere}
+.progress-v2 .hub-kpis article>.workspace-art{position:static;transform:none;grid-column:2;grid-row:1/3;width:66px;height:66px}
+.lb-board .lb-podium-card,.lb-board .lb-podium-card.rank-1{padding:14px 14px 12px}
+.lb-board .lb-crown{position:static;transform:none;width:38px;height:32px;margin:0 0 5px}
+.lb-board .lb-podium-card:not(.rank-1):before{content:"";display:block;height:37px;flex:none}
+.rank-medal{width:44px;height:46px;margin:-9px 0 0}
+.rank-medal>b{font-size:18px;padding-bottom:8px}
+.lb-board .lb-podium-card h2,.lb-board .lb-podium-card.rank-1 h2{margin-top:4px}
+.lb-board .lb-podium-metrics{margin-top:8px;padding-top:8px}
+.lb-board .lb-avatar-status,.lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:97px;margin:0}
+.module-task-art{width:36px;height:36px}
+.task-copy{min-width:0}
+.workspace-60-day-plan .plan-heading{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:18px;align-items:center}
+.plan-heading .hero-copy{grid-column:1;grid-row:1;min-width:0}
+.plan-mascot{grid-column:2;grid-row:1;width:110px;height:110px}
+.plan-heading .date-badge{position:static;grid-column:3;grid-row:1}
+@media(max-width:1000px){.workspace-60-day-plan .plan-heading{grid-template-columns:minmax(0,1fr) 100px}.plan-heading .date-badge{grid-column:1;grid-row:2;justify-self:start}.plan-mascot{width:100px;height:100px}}
+@media(max-width:640px){
+ .progress-v2 .hub-kpis article{grid-template-columns:minmax(0,1fr) 46px;column-gap:8px;padding:12px;min-height:108px}
+ .progress-v2 .hub-kpis article>.workspace-art{width:46px;height:46px}
+ .progress-v2 .hub-kpis b{padding-right:0;font-size:22px}
+ .progress-v2 .hub-kpis span{font-size:12px}
+ .workspace-60-day-plan .plan-heading{gap:10px;grid-template-columns:minmax(0,1fr) 82px}
+ .plan-mascot{width:82px;height:90px}
+ .module-task-art{width:32px;height:32px}
+ .lb-board .lb-podium-card,.lb-board .lb-podium-card.rank-1{padding:12px}
+ .lb-board .lb-podium-card:not(.rank-1):before{display:none}
+ .lb-board .lb-avatar-status{top:64px}
+ .lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:101px}
+}
+.lb-award-row{display:flex;align-items:center;justify-content:center;gap:12px;max-width:100%;min-height:70px}
+.lb-crown-space{width:38px;flex:none}
+.lb-board .lb-award-row .lb-crown{margin:0}
+.lb-award-row .rank-medal{margin:0;flex:none}
+.lb-board .lb-podium-card:not(.rank-1):before{display:none}
+.lb-board .lb-avatar-status,.lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:67px;left:calc(50% - 35px)}
+@media(max-width:640px){.lb-board .lb-avatar-status,.lb-board .lb-podium-card.rank-1 .lb-avatar-status{top:65px}}
+@media(max-width:640px){
+ .progress-v2 .hub-kpis article{grid-template-columns:minmax(0,1fr) 40px;row-gap:8px}
+ .progress-v2 .hub-kpis article>span{grid-column:1/-1;grid-row:1;overflow-wrap:normal;word-break:normal}
+ .progress-v2 .hub-kpis article>b{grid-column:1;grid-row:2;font-size:20px;white-space:normal;overflow-wrap:normal}
+ .progress-v2 .hub-kpis article>.workspace-art{grid-column:2;grid-row:2;width:40px;height:44px}
+}
+@media(max-width:380px){.progress-v2 .hub-kpis{grid-template-columns:1fr}.progress-v2 .hub-kpis article{min-height:94px}}

@@ -89,7 +89,7 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
  return <section className="hub-panel leaderboard-v2">
   <div className="hub-heading lb-heading"><div><small>LIVE COURSE DATA</small><h1>Leaderboard</h1><p>Rankings are based on earned coins and active study time.</p></div><WorkspaceArt name="wolf-trophy" className="hub-mascot"/></div>
 
-  {preview&&<article className="demo-leaderboard-card has-reward-theme" style={cosmeticCSS(cosmetics)}><RewardAvatar avatar={cosmetics?.avatar} initials="RU"/><div><b>Rustam <ThemeMark theme={cosmetics?.theme}/></b><small>Preview account · Not ranked</small></div><span className="demo-label">TRY DEMO</span></article>}
+  {preview&&<article className="demo-leaderboard-card"><RewardAvatar avatar={cosmetics?.avatar} initials="RU"/><div><b>Rustam</b><small>Preview account · Not ranked</small></div><span className="demo-label">TRY DEMO</span></article>}
   <div className="lb-board">
    {sorted.some(row=>row.status==="online")&&<div className="lb-live-strip"><span><i/>{sorted.filter(row=>row.status==="online").length} student{sorted.filter(row=>row.status==="online").length===1?"":"s"} online now</span><div>{sorted.filter(row=>row.status==="online").slice(0,3).map(row=><b key={row.student_id}>{row.full_name}</b>)}</div></div>}
    <div className="lb-period-tabs" aria-label="Leaderboard period">
@@ -100,12 +100,11 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
 
    {message?<div className="hub-error">{message}</div>:loading?<div className="hub-loading">Loading real rankings…</div>:sorted.length?<>
    <div className={"lb-podium lb-podium-"+Math.min(3,top.length)} aria-label={periodLabel+" top students"}>
-    {top.map(row=><article className={"lb-podium-card rank-"+row.rank+" "+(row.student_id===studentId?"me ":"")+(row.cosmetics?.theme?"has-reward-theme":"")} style={cosmeticCSS(row.cosmetics)} key={row.student_id}>
-     <div className="lb-card-cover" aria-hidden="true"/>
-     {row.rank===1&&<WorkspaceArt name="crown" className="lb-crown"/>}
+    {top.map(row=><article className={"lb-podium-card rank-"+row.rank+" "+(row.student_id===studentId?"me ":"")} key={row.student_id}>
+     <div className="lb-award-row">{row.rank===1?<WorkspaceArt name="crown" className="lb-crown"/>:<span className="lb-crown-space" aria-hidden="true"/>}
      <RewardAvatar className="lb-avatar" avatar={row.cosmetics?.avatar} initials={initials(row)}/>
-     <RankMedal rank={row.rank}/>
-     <h2>{row.full_name} <ThemeMark theme={row.cosmetics?.theme}/>{row.cosmetics?.badge&&<Award size={14} aria-label={row.cosmetics.badge}/>}</h2>
+     <RankMedal rank={row.rank}/></div>
+     <h2>{row.full_name}{row.cosmetics?.badge&&<Award size={14} aria-label={row.cosmetics.badge}/>}</h2>
      <p>@{row.username}{row.student_id===studentId?" · You":""}</p>
      <div className="lb-podium-metrics"><span><Coins size={15}/><b>{row.coins}</b><small>Coins</small></span><span><Clock3 size={15}/><b>{fmt(row.active_seconds)}</b><small>Study time</small></span></div>
      <span className={"lb-status lb-avatar-status "+row.status} aria-label={statusLabel(row.status)} title={statusLabel(row.status)}><i/></span>
@@ -114,16 +113,16 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
 
    {table.length>0&&<div className="lb-table-wrap">
     <div className="lb-table-head"><span>#</span><span>Student</span><span>Coins</span><span>Study time</span><span>Status</span></div>
-    {table.map(row=><div className={"lb-table-row "+(row.student_id===studentId?"me ":"")+(row.cosmetics?.theme?"has-reward-theme":"")} style={cosmeticCSS(row.cosmetics)} key={row.student_id}>
+    {table.map(row=><div className={"lb-table-row "+(row.student_id===studentId?"me ":"")} key={row.student_id}>
      <b className="lb-table-rank">{row.rank}</b>
-     <div className="lb-table-person"><RewardAvatar className="lb-mini-avatar" avatar={row.cosmetics?.avatar} initials={initials(row)}/><div><b>{row.full_name} <ThemeMark theme={row.cosmetics?.theme}/></b><small>@{row.username}{row.student_id===studentId?" · You":""}</small></div></div>
+     <div className="lb-table-person"><RewardAvatar className="lb-mini-avatar" avatar={row.cosmetics?.avatar} initials={initials(row)}/><div><b>{row.full_name}</b><small>@{row.username}{row.student_id===studentId?" · You":""}</small></div></div>
      <strong><Coins size={14}/>{row.coins}</strong>
      <strong><Clock3 size={14}/>{fmt(row.active_seconds)}</strong>
      <span className={"lb-status "+row.status}><i/>{statusLabel(row.status)}</span>
     </div>)}
    </div>}
 
-   {current&&current.rank>10&&<div className={"lb-current-row "+(current.cosmetics?.theme?"has-reward-theme":"")} style={cosmeticCSS(current.cosmetics)}><span>Your rank</span><b>#{current.rank}</b><div><RewardAvatar className="lb-mini-avatar" avatar={current.cosmetics?.avatar} initials={initials(current)}/><span><strong>{current.full_name} <ThemeMark theme={current.cosmetics?.theme}/></strong><small>@{current.username}</small></span></div><span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span></div>}
+   {current&&current.rank>10&&<div className="lb-current-row"><span>Your rank</span><b>#{current.rank}</b><div><RewardAvatar className="lb-mini-avatar" avatar={current.cosmetics?.avatar} initials={initials(current)}/><span><strong>{current.full_name}</strong><small>@{current.username}</small></span></div><span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span></div>}
   </>:<div className="hub-empty"><Trophy size={28}/><b>No leaderboard activity in this period yet.</b><p>Earn coins or record active study time to appear here.</p></div>}
   </div>
  </section>;

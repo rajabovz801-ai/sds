@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 type Day={n:number,date:Date,mock:boolean};
-import {RewardAvatar,cosmeticCSS,type CosmeticState} from "../components/reward-style";
+import {RewardAvatar,type CosmeticState} from "../components/reward-style";
 
 type StudentStats=HubStats;
 type ModuleCard={name:string;detail:string;icon:typeof BookOpen;tone:string;time:string};
@@ -197,14 +197,14 @@ export default function Dashboard(){
  if(!authChecked&&!stats)return <main className="empty-view"><div className="empty-icon"><Clock3 size={28}/></div><h1>Loading your challenge…</h1><p>Checking your account and course progress.</p></main>;
  if(authChecked&&!stats&&loadError)return <main className="empty-view"><div className="empty-icon"><CircleHelp size={28}/></div><h1>Could not load your dashboard</h1><p>{loadError}</p><button type="button" onClick={()=>setRetryCount(value=>value+1)}>Try again</button></main>;
 
- return <div style={cosmeticCSS(stats?.student.cosmetics)} className={"learning-shell "+(theme==="dark"?"theme-dark":"theme-light")+(stats?.student.cosmetics?.theme?" has-workspace-theme":"")}><StudentPresence area="Dashboard"/>
+ return <div className={"learning-shell "+(theme==="dark"?"theme-dark":"theme-light")}><StudentPresence area="Dashboard"/>
   <aside className={"learning-sidebar "+(sidebar?"open":"")}>
    <div className="learning-brand learning-brand-minimal"><button className="mobile-close" aria-label="Close menu" onClick={()=>setSidebar(false)}><X size={18}/></button></div>
    <div className="side-overline">WORKSPACE</div>
    <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom">
     <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><WorkspaceArt name="reward-chest" className="sidebar-chest"/><div><b>Daily reward</b><small>Grow your reward collection</small></div><ChevronRight size={14}/></button>
-    <button className={"user-tile sidebar-profile-tile "+(stats?.student.cosmetics?.theme?"has-reward-theme":"")} onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
+    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
    </div>
   </aside>
 
@@ -260,7 +260,7 @@ export default function Dashboard(){
        {planModules.length?planModules.map(({name,detail,icon:Icon,tone})=>{
         const done=stats?.completed.some(x=>x.day_number===planDayNumber&&x.module===name.toLowerCase());
         return <div key={name} className={"detail-item dashboard-task "+(done?"task-completed ":"")+(planLive?"task-ready":"task-pending")}>
-         <span className={"task-icon "+tone}><Icon size={19} strokeWidth={1.8}/></span>
+         <span className={"task-icon "+tone}>{["Reading","Listening","Writing","Article","Vocabulary","Speaking"].includes(name)?<WorkspaceArt name={"module-"+name.toLowerCase()} className="module-task-art"/>:<Icon size={19} strokeWidth={1.8}/>}</span>
          <div className="task-copy"><strong>{name}<span className="task-coin-badge"><Coins size={11}/> +1 coin</span></strong><small>{detail}</small></div>
          <button type="button" className={"task-action "+(planLive?"can-open":"future")+" "+(done?"completed":"")} disabled={!planLive} onClick={()=>{if(planLive)window.location.assign(moduleHref(planDayNumber,name))}}>
           {done?"Completed":planLive?"Start":"Locked"}{done?<CheckCircle2 size={15}/>:planLive?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
@@ -272,6 +272,7 @@ export default function Dashboard(){
      </section>
     </>:view==="60-Day Plan"?<>
      <div className="page-heading plan-heading">
+      <WorkspaceArt name="wolf-plan" className="plan-mascot"/>
       <div className="hero-copy"><div className="section-eyebrow"><CalendarDays size={13}/> COURSE ROADMAP <span className="eyebrow-line"/></div><h1>60-Day Plan</h1><p>Explore the full challenge calendar, published tasks and Full Mock Sundays.</p></div>
       <span className="date-badge"><CalendarDays size={15}/> 1 Oct – 29 Nov</span>
      </div>
@@ -298,12 +299,12 @@ export default function Dashboard(){
 
       <aside className="detail-panel" id="day-detail">
        <div className="day-details-top"><div className="detail-overline">{chosen.mock?"FULL IELTS MOCK":"DAILY TRAINING PLAN"}</div><div className="day-row"><h2>Day {String(chosen.n).padStart(2,"0")}</h2><span className="day-inline-date">{format(chosen.date,{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</span><span className={"detail-status "+(live?"ready":"locked")}>{live?"Available":"Locked"}</span></div><p>{chosen.mock?"Complete the published mock sections for this date.":"Complete the published modules for this study day."}</p><div className="detail-subhead"><span>{chosenRequired.length?chosenRequired.length+" published task"+(chosenRequired.length===1?"":"s"):"Materials not published yet"}</span><span>{chosen.mock?"Full Mock":"IELTS practice"}</span></div></div>
-       <div className="detail-list">{display.map(({name,detail,icon:Icon,tone,time})=>{
+       <div className="detail-list">{display.map(({name,detail,icon:Icon,tone})=>{
         const ready=live&&moduleReady(name);
         const done=stats?.completed.some(x=>x.day_number===chosen.n&&x.module===name.toLowerCase());
         return <div key={name} className={"detail-item "+(done?"task-completed ":"")+(ready?"task-ready":"task-pending")}>
-         <span className={"task-icon "+tone}><Icon size={19} strokeWidth={1.8}/></span>
-         <div className="task-copy"><strong>{name}{moduleReady(name)&&<span className="task-coin-badge"><Coins size={11}/> +1 coin</span>}</strong><small>{moduleReady(name)?detail:"Material not published yet"}</small><span><Clock3 size={11}/>{time}</span></div>
+         <span className={"task-icon "+tone}>{["Reading","Listening","Writing","Article","Vocabulary","Speaking"].includes(name)?<WorkspaceArt name={"module-"+name.toLowerCase()} className="module-task-art"/>:<Icon size={19} strokeWidth={1.8}/>}</span>
+         <div className="task-copy"><strong>{name}{moduleReady(name)&&<span className="task-coin-badge"><Coins size={11}/> +1 coin</span>}</strong><small>{moduleReady(name)?detail:"Material not published yet"}</small></div>
          <button type="button" className={"task-action "+(ready?"can-open":"future")+" "+(done?"completed":"")} disabled={!ready} title={!live?"Available on "+format(chosen.date,{day:"numeric",month:"long"}):!moduleReady(name)?"Material not published yet":"Open "+name} onClick={()=>{if(ready)window.location.assign(moduleHref(chosen.n,name))}}>
           {done?"Completed":ready?"Start":live?"Soon":"Locked"}{done?<CheckCircle2 size={15}/>:ready?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
          </button>
