@@ -94,6 +94,7 @@ export default function Dashboard(){
  const [resumeLocation,setResumeLocation]=useState<ChallengeResume|null>(null);
  const [rewardOpen,setRewardOpen]=useState(false);
  const [theme,setTheme]=useState<"light"|"dark">("light");
+ const [themeReady,setThemeReady]=useState(false);
  const [typedWelcome,setTypedWelcome]=useState("");
  const [typing,setTyping]=useState(false);
 
@@ -124,10 +125,12 @@ export default function Dashboard(){
  },[retryCount]);
 
  useEffect(()=>{
-  const saved=localStorage.getItem("ark60-theme");
-  setTheme(saved==="dark"?"dark":"light");
+  const sync=()=>{setTheme(document.documentElement.dataset.arkTheme==="dark"?"dark":"light")};
+  sync();setThemeReady(true);
+  window.addEventListener("storage",sync);
+  return()=>window.removeEventListener("storage",sync);
  },[]);
- useEffect(()=>{localStorage.setItem("ark60-theme",theme)},[theme]);
+ useEffect(()=>{if(!themeReady)return;try{localStorage.setItem("ark60-theme",theme)}catch{}document.documentElement.dataset.arkTheme=theme;window.dispatchEvent(new Event("ark-theme-change"))},[theme,themeReady]);
  useEffect(()=>{
   try{setResumeLocation(parseChallengeResume(localStorage.getItem(CHALLENGE_RESUME_STORAGE_KEY)))}catch{setResumeLocation(null)}
  },[]);

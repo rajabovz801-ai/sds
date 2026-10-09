@@ -2,3 +2,8 @@
 ::highlight(aa-yellow){background:#ffe785;color:inherit}
 ::highlight(aa-green){background:#b5f0cd;color:inherit}
 ::highlight(ark-listening-yellow){background:#ffe58a;color:inherit}
+html[data-ark-theme="dark"] ::highlight(aa-yellow){background:#66551f;color:#fff3c4}
+html[data-ark-theme="dark"] ::highlight(aa-green){background:#205541;color:#d0f5e4}
+html[data-ark-theme="dark"] ::highlight(ark-listening-yellow){background:#66551f;color:#fff3c4}
+html[data-ark-theme="dark"] ::highlight(ark-reading-yellow){background:#66551f;color:#fff3c4}
+html[data-ark-theme="dark"] ::highlight(ark-mock-yellow){background:#66551f;color:#fff3c4}
