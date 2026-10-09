@@ -104,6 +104,22 @@ export default function ListeningPage(){
   return()=>audio.removeEventListener("loadedmetadata",resume);
  },[started,payload?.audio_url]);
 
+ // Clear unfinished answers when the learner leaves the page. A lost exit
+ // request is safe: the next Start resets the attempt again on the server.
+ useEffect(()=>{
+  if(!attemptId||!startedAt||!started)return;
+  const body=JSON.stringify({action:"abandon",day,attempt_id:attemptId,started_at:startedAt});
+  const send=()=>{
+   if(!startedRef.current)return;
+   try{
+    if(navigator.sendBeacon?.("/api/challenge-listening",new Blob([body],{type:"application/json"})))return;
+   }catch{}
+   void fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body,keepalive:true}).catch(()=>{});
+  };
+  window.addEventListener("pagehide",send);
+  return()=>{window.removeEventListener("pagehide",send);send()};
+ },[day,attemptId,startedAt,started]);
+
  useEffect(()=>()=>{if(saveTimer.current)window.clearTimeout(saveTimer.current)},[]);
 
  function clearHighlights(){
