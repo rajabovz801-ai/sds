@@ -1,8 +1,9 @@
 "use client";
 
 import {useEffect,useMemo,useState} from "react";
-import {Award,Check,Clock3,Coins,Crown,Gift,LogOut,Save,Star,Target,Trophy,X} from "lucide-react";
+import {BookOpen,Headphones,PenLine,Newspaper,NotebookPen,Mic,Award,Check,Clock3,Coins,LogOut,Save,Star,Trophy,X} from "lucide-react";
 
+import {WorkspaceArt,RankMedal} from "./workspace-art";
 import {StyleCollection,RewardAvatar,RewardDecoration,ThemeMark,cosmeticCSS,type CosmeticState} from "./reward-style";
 
 type Student={
@@ -38,7 +39,7 @@ export function RewardModal({open,onClose,onBalance,onStyle}:{open:boolean;onClo
  const gifts=(data?.catalog||[]).slice(page*7,page*7+7);
  return <div className="reward-backdrop" role="dialog" aria-modal="true" aria-label="Daily reward"><section className="reward-modal reward-modal-extended">
   <button className="reward-close" onClick={onClose} aria-label="Close reward"><X size={20}/></button>
-  <div className="reward-coin"><Gift size={24}/></div><h2>A little reward, every day</h2><p>Coins, scenic themes, avatars and milestones. Your collection keeps growing.</p>
+  <WorkspaceArt name="reward-chest" className="reward-modal-chest"/><h2>A little reward, every day</h2><p>Coins, scenic themes, avatars and milestones. Your collection keeps growing.</p>
   {data?.preview&&<div className="reward-demo-controls"><span><b>Rustam · Try demo</b><small>Simulated claims · real coin balance stays unchanged</small></span><label>Reward day<select value={demoDay} disabled={loading} onChange={e=>{const n=Number(e.target.value);setDemoDay(n);void load(n)}}>{[8,9,10,11,12,13,14,21,28,60].map(n=><option key={n} value={n}>Day {n}</option>)}</select></label><button disabled={loading} onClick={()=>void load(demoDay)}>Reset demo</button></div>}
   <div className="reward-progress-line"><b>{data?.claimed_days||0} rewards collected</b><span>Days {page*7+1}–{Math.min(60,page*7+7)}</span></div>
   <div className="reward-week">{gifts.map(g=><div key={g.day} className={"reward-day "+(g.day===active?"active ":"")+(g.day<=(data?.claimed_days||0)?"claimed":"")}><small>DAY {g.day}</small>{g.kind==="coins"?<span className="reward-mini-coin"><Star size={11} fill="currentColor"/></span>:g.kind==="theme"?<img className="reward-gift-thumb" src={'/images/rewards/'+(g.day===13?'night-sky':'dawn')+'.png'} alt={g.day===13?'Night Sky reward':'Theme and avatar reward'}/>:g.kind==="avatar"?<img className="reward-gift-avatar" src="/images/rewards/girl.png" alt="Avatar reward"/>:<Award size={23}/>}<b>{g.kind==="coins"?"+"+g.amount:g.kind==="decoration"?"Decor":g.kind[0].toUpperCase()+g.kind.slice(1)}</b>{g.day<=(data?.claimed_days||0)&&<Check size={13}/>}</div>)}</div>
@@ -86,9 +87,9 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
  const periodLabel=period==="week"?"This week":period==="30d"?"Last 30 days":"All time";
 
  return <section className="hub-panel leaderboard-v2">
-  <div className="hub-heading lb-heading"><div><small>LIVE COURSE DATA</small><h1>Leaderboard</h1><p>Rankings are based on earned coins and active study time.</p></div><Trophy size={34}/></div>
+  <div className="hub-heading lb-heading"><div><small>LIVE COURSE DATA</small><h1>Leaderboard</h1><p>Rankings are based on earned coins and active study time.</p></div><WorkspaceArt name="wolf-trophy" className="hub-mascot"/></div>
 
-  {preview&&<article className="demo-leaderboard-card has-reward-theme" style={cosmeticCSS(cosmetics)}><RewardAvatar avatar={cosmetics?.avatar} initials="RU"/><div><b>Rustam <ThemeMark theme={cosmetics?.theme}/></b><small>Your demo leaderboard card · no ranking or coins added</small></div><span className="demo-label">TRY DEMO</span></article>}
+  {preview&&<article className="demo-leaderboard-card has-reward-theme" style={cosmeticCSS(cosmetics)}><RewardAvatar avatar={cosmetics?.avatar} initials="RU"/><div><b>Rustam <ThemeMark theme={cosmetics?.theme}/></b><small>Preview account · Not ranked</small></div><span className="demo-label">TRY DEMO</span></article>}
   <div className="lb-board">
    {sorted.some(row=>row.status==="online")&&<div className="lb-live-strip"><span><i/>{sorted.filter(row=>row.status==="online").length} student{sorted.filter(row=>row.status==="online").length===1?"":"s"} online now</span><div>{sorted.filter(row=>row.status==="online").slice(0,3).map(row=><b key={row.student_id}>{row.full_name}</b>)}</div></div>}
    <div className="lb-period-tabs" aria-label="Leaderboard period">
@@ -100,13 +101,14 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
    {message?<div className="hub-error">{message}</div>:loading?<div className="hub-loading">Loading real rankings…</div>:sorted.length?<>
    <div className={"lb-podium lb-podium-"+Math.min(3,top.length)} aria-label={periodLabel+" top students"}>
     {top.map(row=><article className={"lb-podium-card rank-"+row.rank+" "+(row.student_id===studentId?"me ":"")+(row.cosmetics?.theme?"has-reward-theme":"")} style={cosmeticCSS(row.cosmetics)} key={row.student_id}>
-     {row.rank===1&&<Crown className="lb-crown" size={28}/>}
+     <div className="lb-card-cover" aria-hidden="true"/>
+     {row.rank===1&&<WorkspaceArt name="crown" className="lb-crown"/>}
      <RewardAvatar className="lb-avatar" avatar={row.cosmetics?.avatar} initials={initials(row)}/>
-     <span className="lb-rank-badge">{row.rank}</span>
+     <RankMedal rank={row.rank}/>
      <h2>{row.full_name} <ThemeMark theme={row.cosmetics?.theme}/>{row.cosmetics?.badge&&<Award size={14} aria-label={row.cosmetics.badge}/>}</h2>
      <p>@{row.username}{row.student_id===studentId?" · You":""}</p>
      <div className="lb-podium-metrics"><span><Coins size={15}/><b>{row.coins}</b><small>Coins</small></span><span><Clock3 size={15}/><b>{fmt(row.active_seconds)}</b><small>Study time</small></span></div>
-     <div className={"lb-status "+row.status}><i/>{statusLabel(row.status)}</div>
+     <span className={"lb-status lb-avatar-status "+row.status} aria-label={statusLabel(row.status)} title={statusLabel(row.status)}><i/></span>
     </article>)}
    </div>
 
@@ -128,11 +130,12 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
 }
 
 export function ProgressPanel({stats,completedDays}:{stats:HubStats;completedDays:number}){
- const modules=["reading","article","vocabulary","writing","listening","speaking"];
+ const modules=["reading","listening","writing","article","vocabulary","speaking"];
+ const icons:Record<string,typeof BookOpen>={reading:BookOpen,listening:Headphones,writing:PenLine,article:Newspaper,vocabulary:NotebookPen,speaking:Mic};
  const total=stats.completed.length,required=Object.values(stats.required_by_day||{}).reduce((n,x)=>n+x.length,0);
- return <section className="hub-panel progress-v2"><div className="hub-heading"><div><small>REAL ACTIVITY</small><h1>Your progress</h1><p>Only saved challenge activity is counted here.</p></div><Target size={34}/></div>
-  <div className="hub-kpis"><article><span>Completed days</span><b>{completedDays}<small>/60</small></b></article><article><span>Completed tasks</span><b>{total}<small>/{required||"—"}</small></b></article><article><span>Total study time</span><b>{fmt(stats.active_seconds)}</b></article><article><span>Coins earned</span><b>{stats.coins}</b></article></div>
-  <div className="module-progress-list">{modules.map(m=>{const count=stats.completed.filter(x=>x.module===m).length;const seconds=Number(stats.by_module?.[m]||0);return <div key={m}><span className="module-progress-name">{moduleLabel(m)}</span><div className="module-progress-bar"><i style={{width:Math.min(100,Math.max(count?8:0,(seconds/3600)*12))+"%"}}/></div><b>{count} tasks · {fmt(seconds)}</b></div>})}</div>
+ return <section className="hub-panel progress-v2"><div className="hub-heading"><div><small>REAL ACTIVITY</small><h1>Your progress</h1><p>Only saved challenge activity is counted here.</p></div><WorkspaceArt name="wolf-progress" className="hub-mascot"/></div>
+  <div className="hub-kpis"><article><span>Completed days</span><b>{completedDays}<small>/60</small></b><WorkspaceArt name="calendar"/></article><article><span>Completed tasks</span><b>{total}<small>/{required||"—"}</small></b><WorkspaceArt name="checklist"/></article><article><span>Total study time</span><b>{fmt(stats.active_seconds)}</b><WorkspaceArt name="clock"/></article><article><span>Coins earned</span><b>{stats.coins}</b><WorkspaceArt name="coins"/></article></div>
+  <div className="module-progress-list">{modules.map(m=>{const Icon=icons[m];const count=stats.completed.filter(x=>x.module===m).length;const seconds=Number(stats.by_module?.[m]||0);return <div key={m}><span className="module-progress-name"><Icon size={24} strokeWidth={1.8} aria-hidden="true"/>{moduleLabel(m)}</span><div className="module-progress-bar"><i style={{width:Math.min(100,Math.max(count?8:0,(seconds/3600)*12))+"%"}}/></div><b>{count} tasks · {fmt(seconds)}</b></div>})}</div>
  </section>;
 }
 

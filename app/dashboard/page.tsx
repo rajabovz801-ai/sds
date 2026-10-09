@@ -1,6 +1,7 @@
 "use client";
 
 import AnimatedBackButton from "../components/animated-back-button";
+import {WorkspaceArt} from "../components/workspace-art";
 import StudentPresence from "../components/student-presence";
 import {LeaderboardPanel,ProfilePanel,ProgressPanel,RewardModal,type HubStats} from "../components/challenge-hub-panels";
 import {useEffect,useMemo,useState} from "react";
@@ -11,7 +12,7 @@ import {
 } from "lucide-react";
 
 type Day={n:number,date:Date,mock:boolean};
-import {RewardAvatar,RewardDecoration,cosmeticCSS,type CosmeticState} from "../components/reward-style";
+import {RewardAvatar,cosmeticCSS,type CosmeticState} from "../components/reward-style";
 
 type StudentStats=HubStats;
 type ModuleCard={name:string;detail:string;icon:typeof BookOpen;tone:string;time:string};
@@ -202,8 +203,8 @@ export default function Dashboard(){
    <div className="side-overline">WORKSPACE</div>
    <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom">
-    <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><span><Coins size={16}/></span><div><b>Daily reward</b><small>Grow your reward collection</small></div><ChevronRight size={14}/></button>
-    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
+    <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><WorkspaceArt name="reward-chest" className="sidebar-chest"/><div><b>Daily reward</b><small>Grow your reward collection</small></div><ChevronRight size={14}/></button>
+    <button className={"user-tile sidebar-profile-tile "+(stats?.student.cosmetics?.theme?"has-reward-theme":"")} onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
    </div>
   </aside>
 
@@ -227,25 +228,23 @@ export default function Dashboard(){
 
     {view==="Dashboard"?<>
      <div className="page-heading dashboard-heading">
-      <div className="hero-landscape" aria-hidden="true">{stats?.student.cosmetics?.unlocked?.decorations&&<RewardDecoration theme={stats.student.cosmetics.theme}/>}</div>
+      <WorkspaceArt name="wolf-study" className="dashboard-mascot"/>
       <div className="hero-copy">
        <div className="section-eyebrow"><span className="rocket-mark">✦</span> YOUR IELTS JOURNEY <span className="eyebrow-line"/></div>
        <h1 className="typewriter-title" aria-label={stats?"Welcome, "+stats.student.first_name+".":"Welcome."}><span aria-hidden="true">{typedWelcome||" "}</span>{typing&&<i className="typewriter-caret" aria-hidden="true"/>}</h1>
-       <p>Stay focused on today. Every completed task moves your 60-day IELTS challenge forward.</p>
+       <p>Stay focused on today. Every completed task moves you forward.</p>
       </div>
       <span className="date-badge"><CalendarDays size={15}/> 1 Oct – 29 Nov</span>
      </div>
 
      <div className="kpi-row dashboard-kpis">
       <div className="kpi-card"><div><span>COURSE PROGRESS</span><b>{completedDays} <i>/ 60</i></b><small>Days completed</small></div><ChartNoAxesCombined size={22}/></div>
-      <div className="kpi-card"><div><span>{currentDay?"TODAY":"NEXT STUDY DAY"}</span><b>{planDone} <i>/ {planRequired.length||"—"}</i></b><small>{planRequired.length?"Published tasks completed":"No published tasks yet"}</small></div><CheckCircle2 size={22}/></div>
-      <div className="kpi-card"><div><span>STUDY TIME</span><b>{stats?duration(stats.today_seconds):"—"}</b><small>{stats?"Total "+duration(stats.active_seconds):"Starts after sign-in"}</small></div><Clock3 size={22}/></div>
+      <div className="kpi-card"><div><span>TODAY’S STUDY TIME</span><b>{stats?duration(stats.today_seconds):"—"}</b><small>{stats?"Total "+duration(stats.active_seconds):"Starts after sign-in"}</small></div><Clock3 size={22}/></div>
       <div className="kpi-card kpi-highlight"><div><span>COINS</span><b>{stats?.coins??0}</b><small>Earn +1 for each completed task</small></div><Coins size={23}/></div>
      </div>
 
      {resumeLocation&&<section className="resume-card" aria-label="Continue your last lesson">
       <div className="resume-card__copy">
-       <span className="resume-card__eyebrow"><Clock3 size={13}/> SAVED ON THIS DEVICE</span>
        <h2>Continue your last lesson</h2>
        <p>Day {String(resumeLocation.day).padStart(2,"0")} · {resumeLocation.area==="Day"?"Daily plan":resumeLocation.area}</p>
       </div>
@@ -258,11 +257,11 @@ export default function Dashboard(){
        <div className="today-progress"><strong>{planDone}/{planRequired.length||0}</strong><span>completed</span></div>
       </div>
       <div className="today-task-list">
-       {planModules.length?planModules.map(({name,detail,icon:Icon,tone,time})=>{
+       {planModules.length?planModules.map(({name,detail,icon:Icon,tone})=>{
         const done=stats?.completed.some(x=>x.day_number===planDayNumber&&x.module===name.toLowerCase());
         return <div key={name} className={"detail-item dashboard-task "+(done?"task-completed ":"")+(planLive?"task-ready":"task-pending")}>
          <span className={"task-icon "+tone}><Icon size={19} strokeWidth={1.8}/></span>
-         <div className="task-copy"><strong>{name}<span className="task-coin-badge"><Coins size={11}/> +1 coin</span></strong><small>{detail}</small><span><Clock3 size={11}/>{time}</span></div>
+         <div className="task-copy"><strong>{name}<span className="task-coin-badge"><Coins size={11}/> +1 coin</span></strong><small>{detail}</small></div>
          <button type="button" className={"task-action "+(planLive?"can-open":"future")+" "+(done?"completed":"")} disabled={!planLive} onClick={()=>{if(planLive)window.location.assign(moduleHref(planDayNumber,name))}}>
           {done?"Completed":planLive?"Start":"Locked"}{done?<CheckCircle2 size={15}/>:planLive?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
          </button>
