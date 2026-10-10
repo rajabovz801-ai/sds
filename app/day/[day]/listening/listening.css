@@ -1037,3 +1037,28 @@
   .ls-confirm-actions{flex-direction:column-reverse}
   .ls-confirm-actions button{width:100%}
 }
+
+/* Shared daily and Full Mock navigation: parts left, selected questions centred. */
+html .ls-shell .ls-part-navigation{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;min-height:64px;padding:10px 16px}
+.ls-part-tabs,.ls-question-numbers{display:flex;align-items:center;gap:5px;min-width:0}
+.ls-part-tabs{justify-content:flex-start}
+.ls-question-numbers{justify-content:center;overflow-x:auto;padding:2px;scrollbar-width:thin}
+.ls-part-tabs button,.ls-question-numbers button{height:34px;border:1px solid #cbd7e4;border-radius:6px;background:#fff;color:#35516c;cursor:pointer;font:600 12px/1 Arial,Helvetica,sans-serif;flex-shrink:0}
+.ls-part-tabs button{padding:0 12px;white-space:nowrap}
+.ls-question-numbers button{width:32px;min-width:32px;padding:0}
+.ls-part-tabs button.active,.ls-question-numbers button.current{background:#2563eb;border-color:#2563eb;color:#fff}
+.ls-question-numbers button.answered,.ls-question-numbers button.correct{background:#eaf5ed;border-color:#a9ceb2;color:#22683b}
+.ls-question-numbers button.wrong,.ls-question-numbers button.empty{background:#fff1ef;border-color:#eac2bc;color:#a43e34}
+.ls-question-numbers button.current{background:#2563eb;border-color:#2563eb;color:#fff;box-shadow:0 0 0 2px #2563eb;font-weight:700}
+.ls-part-tabs button:focus-visible,.ls-question-numbers button:focus-visible{outline:3px solid #93b4fa;outline-offset:2px}
+html .ls-shell .ls-instruction{max-width:1100px;margin-left:auto;margin-right:auto}
+html .ls-shell .ls-mcq .ls-q-title{display:flex;align-items:flex-start;gap:10px;margin:0 0 8px}
+html .ls-shell .ls-mcq .ls-q-title>.ls-qnum{flex:0 0 26px;width:26px;height:26px;margin:0}
+html .ls-shell .ls-mcq .ls-q-title>b{font-weight:600;line-height:1.5}
+html .ls-shell .ls-mcq .ls-options{margin-left:36px;display:grid;gap:6px}
+html .ls-shell .ls-mcq .ls-option{padding-top:4px;padding-bottom:4px;min-height:30px}
+html .ls-shell .ls-mcq{margin-bottom:18px}
+html .ls-shell [id^="listen-q-"]{scroll-margin-top:150px;scroll-margin-bottom:90px}
+.mock-section-lock{width:32px;height:32px;display:grid;place-items:center;color:#637b93}
+@media(max-width:1000px){html .ls-shell .ls-part-navigation{grid-template-columns:minmax(0,1fr) auto;gap:8px}.ls-question-numbers{grid-column:1/-1;grid-row:2;justify-content:center}.ls-part-navigation>.ls-submit{grid-column:2;grid-row:1}.ls-workspace{padding-bottom:110px}}
+@media(max-width:600px){html .ls-shell .ls-part-navigation{padding:7px 8px;gap:6px}.ls-part-tabs{gap:4px}.ls-part-tabs button{padding:0 8px;font-size:11px;height:32px}.ls-question-numbers button{width:28px;min-width:28px;height:30px}.ls-question-numbers{gap:4px}.ls-part-navigation>.ls-submit{font-size:11px;padding:0 9px;min-height:32px}html .ls-shell .ls-instruction{margin-left:12px;margin-right:12px}}

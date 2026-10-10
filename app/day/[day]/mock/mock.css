@@ -39,28 +39,7 @@
 .mock-reading-shell .cr-mobile-tabs{display:none}
 .mock-reading-shell .cr-split{height:calc(100dvh - 67px - 74px - 60px);display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:11px 13px;background:#f1f2ef}
 .mock-reading-shell .cr-pane{border:1px solid #ccd5df;border-radius:11px;overflow-y:auto;min-height:0;padding:24px 26px;scrollbar-color:#aeb9c8 #fff;scrollbar-width:thin;background:#fffdf8;box-shadow:0 3px 13px #1e334b0b}
-.mock-reading-shell .cr-passage{font:16px/1.88 "Times New Roman",Times,serif;color:#1c2c3f;letter-spacing:0}
-.mock-reading-shell .cr-passage h2{font:800 22px/1.35 Arial,sans-serif;color:#142740;margin:0 0 25px}
-.mock-reading-shell .cr-passage p{margin:0 0 23px;white-space:pre-wrap}
-.mock-reading-shell .cr-questions{font-family:Arial,Helvetica,sans-serif;font-size:13px}
-.mock-reading-shell .cr-qgroup{margin:0 0 30px}
-.mock-reading-shell .cr-qgroup-head{padding-bottom:12px;border-bottom:1px solid #e1e5e8;margin:0 0 18px}
-.mock-reading-shell .cr-qgroup-head h3{color:#142740;font-size:19px;font-weight:850;line-height:1.4;margin:0 0 8px}
-.mock-reading-shell .cr-qgroup-head p{font-size:14px;font-weight:550;line-height:1.7;color:#40546b;margin:0;white-space:pre-line}
-.mock-reading-shell .cr-question{margin:0 0 19px;padding:0 0 20px;border-bottom:1px solid #dfe5e8}
-.mock-reading-shell .cr-question-head{display:flex;gap:12px;align-items:flex-start}
-.mock-reading-shell .cr-question-head b{min-width:34px;min-height:34px;display:grid;place-items:center;padding:5px 8px;border-radius:7px;background:#eaf2fa;border:1px solid #bfd0e0;color:#142740;font-size:14px;font-weight:850}
-.mock-reading-shell .cr-question-head span{padding-top:2px;font-size:16px;font-weight:600;line-height:1.75;color:#172b45;letter-spacing:0;white-space:pre-line}
-.mock-reading-shell .cr-options{display:grid;gap:10px;margin:14px 0 0 46px}
-.mock-reading-shell .cr-options label{display:flex;align-items:center;gap:10px;cursor:pointer;position:relative;font-size:14px;line-height:1.55;font-weight:600;color:#243850;padding:4px 0}
-.mock-reading-shell .cr-options input{position:absolute;opacity:0;pointer-events:none}
-.mock-reading-shell .cr-radio{width:18px;height:18px;border:1.5px solid #7189a1;border-radius:50%;display:grid;place-items:center;flex:0 0 18px;background:#fffdf8}
-.mock-reading-shell .cr-options input:checked+.cr-radio{border-color:#142740}
-.mock-reading-shell .cr-options input:checked+.cr-radio:after{content:"";width:8px;height:8px;border-radius:50%;background:#142740}
-.mock-reading-shell .cr-gap{display:block;margin:14px 0 0 46px;min-width:190px;min-height:44px;padding:9px 12px;background:#fff;border:1.5px solid #9dafc2;border-radius:7px;color:#172b45;font-size:15px;font-weight:650}
-.mock-reading-shell .cr-gap::placeholder{color:#718297;font-weight:500}
-.mock-reading-shell .cr-gap:focus{outline:3px solid #ffe58a;border-color:#b88e42}
-.mock-reading-shell .cr-select{cursor:pointer;max-width:calc(100% - 46px);line-height:1.5}
+/* Passage and question typography use the shared Reading worksheet rules. */
 .mock-reading-shell .cr-highlight-menu{position:fixed;z-index:120;transform:translateX(-50%);background:#fffdf8;border:1px solid #d8c69e;box-shadow:0 12px 35px #29204428;border-radius:12px;display:flex;align-items:center;gap:3px;padding:5px}
 .mock-reading-shell .cr-highlight-menu button{width:37px;height:34px;background:#fff;border:0;border-radius:8px;display:grid;place-items:center;cursor:pointer;color:#55506f}
 .mock-reading-shell .cr-highlight-menu button:hover{background:#f7f2e8}
@@ -92,13 +71,6 @@
  .mock-reading-shell:has(.cr-mobile-tabs .active:first-child){--cr-hide-questions:none;--cr-hide-passage:block}
  .mock-reading-shell:has(.cr-mobile-tabs .active:last-child){--cr-hide-passage:none;--cr-hide-questions:block}
  .mock-reading-shell .cr-pane{height:100%;padding:15px 14px}
- .mock-reading-shell .cr-passage{font-size:16px}
- .mock-reading-shell .cr-qgroup-head h3{font-size:17px}
- .mock-reading-shell .cr-qgroup-head p{font-size:13px}
- .mock-reading-shell .cr-question-head span{font-size:15px;line-height:1.7}
- .mock-reading-shell .cr-question-head b{min-width:32px;min-height:32px}
- .mock-reading-shell .cr-gap{font-size:16px;max-width:calc(100% - 40px);margin-left:40px}
- .mock-reading-shell .cr-options{margin-left:40px}
  .mock-reading-shell .cr-footer{min-height:60px;padding:6px 8px;gap:6px;overflow-x:auto}
  .mock-reading-shell .mock-part-nav{gap:3px}.mock-reading-shell .mock-part-nav button{height:31px;padding:0 8px;font-size:9px}
  .mock-reading-shell .cr-number-strip{justify-content:flex-start;min-width:160px}

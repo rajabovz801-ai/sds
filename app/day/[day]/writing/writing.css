@@ -130,3 +130,19 @@
 .writing-editor-footer{font-size:12px!important}
 .writing-finish small{font-size:12px!important}
 .writing-result-strip span{font-size:12px!important}
+
+/* Shared Writing task and editor presentation, including Full Mock. */
+html .writing-shell .writing-task-chip{background:#fff;border:1px solid #cbd7e4;color:#36516d;border-radius:7px;font:600 13px/1.2 Arial,Helvetica,sans-serif;padding:9px 14px}
+html .writing-shell .writing-task-chip.active{background:#2563eb;border-color:#2563eb;color:#fff}
+html .writing-shell .writing-top-center{font:700 12px/1.3 Arial,Helvetica,sans-serif;color:#36516d;letter-spacing:.06em}
+html .writing-shell .writing-pane-head{padding:12px 20px;font-size:12px;letter-spacing:.04em}
+html .writing-shell .writing-pane-head>span{color:#587087}
+html .writing-shell .writing-paper{padding:20px 24px}
+html .writing-shell .writing-prompt{font:400 17px/1.6 "Times New Roman",Times,serif;padding:14px 16px}
+html .writing-shell .writing-editor-wrap textarea{font:400 17px/1.6 Arial,Helvetica,sans-serif;padding:22px 24px;box-sizing:border-box}
+html .writing-shell .writing-instruction{font:400 17px/1.6 "Times New Roman",Times,serif}
+html .writing-shell .writing-time-note,.writing-shell .writing-min{font:400 13px/1.5 Arial,Helvetica,sans-serif}
+html .writing-shell .writing-editor-wrap textarea::placeholder{font:400 16px/1.6 Arial,Helvetica,sans-serif;color:#8292a4}
+html .writing-shell .mock-writing-table{font:400 14px/1.45 Arial,Helvetica,sans-serif}
+html .writing-shell .mock-writing-table th{font-weight:600}
+@media(max-width:600px){html .writing-shell .writing-paper{padding:18px}html .writing-shell .writing-task-chip{font-size:12px;padding:8px 10px}html .writing-shell .writing-editor-wrap textarea{padding:18px;font-size:16px}html .writing-shell .writing-prompt,html .writing-shell .writing-instruction{font-size:16px}}

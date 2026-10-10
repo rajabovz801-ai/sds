@@ -1,6 +1,7 @@
 "use client";
 import LessonEntry from "../../../components/lesson-entry";
 import ui from "../../../components/learning-ui.module.css";
+import ListeningPartNavigation from "../../../components/listening-part-navigation";
 import LoadingIndicator from "../../../components/loading-indicator";
 
 import AnimatedBackButton from "../../../components/animated-back-button";
@@ -316,11 +317,9 @@ export default function ListeningPage(){
     </section>
    </div>
    {highlightPopup&&!reviewMode&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()} role="toolbar" aria-label="Highlight selected text"><button className="yellow" onClick={()=>applyHighlight("yellow")} type="button"><span/> Highlight</button><button onClick={()=>applyHighlight("erase")} type="button"><Eraser size={15}/> Remove</button></div>}
-   <nav className="ls-bottom-nav">
-    <button className="ls-arrow" disabled={currentQuestion<=1} onClick={()=>goQuestion(currentQuestion-1)}><ChevronLeft size={17}/></button>
-    <div className="ls-number-groups ls-number-groups--compact" aria-label="Listening part and question navigation">{[1,2,3,4].map(s=><div className={"ls-part-group "+(section===s?"active":"")} key={s}><button type="button" className="ls-part-tab" aria-current={section===s?"step":undefined} onClick={()=>goPart(s)}>Part {s}</button>{section===s&&<div className="ls-part-numbers">{Array.from({length:10},(_,i)=>(s-1)*10+i+1).map(q=>{const st=answerStatus(review,q);return <button type="button" key={q} aria-label={"Question "+q} aria-current={currentQuestion===q?"step":undefined} className={(currentQuestion===q?"current ":"")+(answers[String(q)]?"answered ":"")+(reviewMode&&st?st.status:"")} onClick={()=>goQuestion(q)}>{q}</button>})}</div>}</div>)}</div>
+   <nav className="ls-bottom-nav ls-part-navigation">
+    <ListeningPartNavigation part={section} currentQuestion={currentQuestion} questionClass={q=>(answers[String(q)]?"answered ":"")+(reviewMode?answerStatus(review,q)?.status||"":"")} onPart={goPart} onQuestion={goQuestion}/>
     {reviewMode?<button className="ls-submit" onClick={()=>setReviewMode(false)}>Close review <Check size={15}/></button>:<button className="ls-submit" disabled={submitting} onClick={()=>setConfirmSubmit(true)}>{submitting?"Submitting…":"Submit"} <Send size={15}/></button>}
-    <button className="ls-arrow" disabled={currentQuestion>=40} onClick={()=>goQuestion(currentQuestion+1)}><ChevronRight size={17}/></button>
    </nav>
   </>}
   {confirmSubmit&&!reviewMode&&<div className="ls-confirm-overlay" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget&&!submitting)setConfirmSubmit(false)}}>
