@@ -89,7 +89,7 @@ export default function VocabularyPage(){
     <div className="vv-eyebrow">STUDY YOUR WORDS</div><h1>{currentUnit.source_title} <span>Unit {currentUnit.unit_number}</span></h1>
     <p>Study all 20 unique words with Uzbek meanings and real context before starting the quiz.</p>
     <div className="vv-study-grid">{words?.map((w,i)=><article key={w.id}><div><span>{String(i+1).padStart(2,"0")}</span><b>{w.display_word}</b><em>{w.level}</em></div><h3>{w.meaning_uz}</h3>{w.definition_en&&<p>{w.definition_en}</p>}{w.example&&<details className="study-example"><summary>Show example</summary><small>{w.example}</small></details>}</article>)}</div>
-    <div className="vv-study-actions"><button onClick={back}>Back to units</button><button className="vv-purple" onClick={async()=>{setBusy(true);try{await start(currentUnit)}catch(e){setError(String(e))}finally{setBusy(false)}}} disabled={busy}>Start 20-question quiz <ArrowRight size={17}/></button></div>
+    <div className="vv-study-actions"><AnimatedBackButton onClick={back} ariaLabel="Back to units"/><button className="vv-purple" onClick={async()=>{setBusy(true);try{await start(currentUnit)}catch(e){setError(String(e))}finally{setBusy(false)}}} disabled={busy}>Start 20-question quiz <ArrowRight size={17}/></button></div>
    </div>}
    {panel==="quiz"&&attempt&&current&&<div className="vv-inner vv-quiz">
      <div className="vv-quiz-top"><span className="vv-eyebrow">{sourceLabel(currentUnit)} · UNIT {String(currentUnit.unit_number).padStart(2,"0")}</span><span className="vv-quiz-count">QUESTION {attempt.answered+1} / 20</span></div>

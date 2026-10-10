@@ -1,11 +1,10 @@
 "use client";
 import LoadingIndicator from "../../../components/loading-indicator";
-import Link from "next/link";
 import {useParams,useRouter} from "next/navigation";
 import AnimatedBackButton from "../../../components/animated-back-button";
 import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {useEffect,useMemo,useRef,useState,type CSSProperties} from "react";
-import {ArrowLeft,CheckCircle2,Clock3,Pause,Play,Send,ShieldCheck,Maximize2,Minimize2} from "lucide-react";
+import {CheckCircle2,Clock3,Pause,Play,Send,ShieldCheck,Maximize2,Minimize2} from "lucide-react";
 import TaskVisual from "./TaskVisual";
 import "./writing.css";
 
@@ -124,8 +123,8 @@ export default function WritingPage(){
  async function submit(auto=false){if(!data||sending||data.submission)return;if(!answer.trim()){if(!auto)setMessage("Write your response before submitting.");return}if(!auto&&!window.confirm("Submit this Writing response? You will not be able to edit it afterwards."))return;setSending(true);setMessage("");try{const r=await fetch("/api/challenge-writing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit",day,answer,duration_seconds:used})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit your response.");visitIdRef.current=null;if(draftSaveRef.current)window.clearTimeout(draftSaveRef.current);try{if(storageKey)localStorage.removeItem(storageKey)}catch{};setData(prev=>prev?{...prev,submission:obj.submission,draft:null}:prev);setPaused(true);setMessage(obj.preview?"Preview completed. Nothing was saved to student results.":"Your response has been submitted. Your result will be available soon.")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit your response.")}finally{setSending(false)}}
 
  if(loading)return <LoadingIndicator/>;
- if(error||!data)return <main className="writing-loading"><span>ARK EDUCATION</span><b>{error||"Writing task unavailable."}</b><Link href={`/day/${day}`}>Back to Day {day}</Link></main>;
- if(data.submission)return <main className="writing-finish"><section><div className="writing-finish-icon"><CheckCircle2 size={34}/></div><small>DAY {String(day).padStart(2,"0")} · {taskLabel.toUpperCase()}</small><h1>Writing submitted</h1><p>{data.submission.review_status==="preview"?"Preview submission completed. Nothing was saved to student results.":"Your response has been submitted. Your result will be available soon."}</p><div className="writing-result-strip"><span>STATUS<b>{data.submission.review_status==="reviewed"?"Checked":data.submission.review_status==="preview"?"Preview only":"Pending review"}</b></span><span>WORDS<b>{String(data.submission.payload?.word_count||words||"—")}</b></span>{data.submission.review_status==="reviewed"&&<span>BAND<b>{data.submission.band??"—"}</b></span>}</div>{data.submission.review_status==="reviewed"&&data.submission.review_feedback&&<div className="writing-feedback"><b>Teacher feedback</b><p>{data.submission.review_feedback}</p></div>}<Link className="writing-back" href={`/day/${day}`}><ArrowLeft size={16}/> Back to Day {day}</Link></section></main>;
+ if(error||!data)return <main className="writing-loading"><span>ARK EDUCATION</span><b>{error||"Writing task unavailable."}</b><AnimatedBackButton href={`/day/${day}`} ariaLabel="Back to study day"/></main>;
+ if(data.submission)return <main className="writing-finish"><section><div className="writing-finish-icon"><CheckCircle2 size={34}/></div><small>DAY {String(day).padStart(2,"0")} · {taskLabel.toUpperCase()}</small><h1>Writing submitted</h1><p>{data.submission.review_status==="preview"?"Preview submission completed. Nothing was saved to student results.":"Your response has been submitted. Your result will be available soon."}</p><div className="writing-result-strip"><span>STATUS<b>{data.submission.review_status==="reviewed"?"Checked":data.submission.review_status==="preview"?"Preview only":"Pending review"}</b></span><span>WORDS<b>{String(data.submission.payload?.word_count||words||"—")}</b></span>{data.submission.review_status==="reviewed"&&<span>BAND<b>{data.submission.band??"—"}</b></span>}</div>{data.submission.review_status==="reviewed"&&data.submission.review_feedback&&<div className="writing-feedback"><b>Teacher feedback</b><p>{data.submission.review_feedback}</p></div>}<AnimatedBackButton href={`/day/${day}`} ariaLabel="Back to study day"/></section></main>;
 
  const p=data.content.payload;
  return <main className="writing-shell"><StudyTimeHeartbeat day={day} module="writing"/>

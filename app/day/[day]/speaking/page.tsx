@@ -283,13 +283,13 @@ export default function SpeakingPage(){
     </div>}
     {prepStarted&&<label className="sp-notes"><span>Private notes <i>not sent to your teacher</i></span><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Write short notes while you prepare…" disabled={p2Done}/></label>}
     {prepReady||p2Done?<div className="sp-questions"><RecorderCard day={day} attemptId={attemptId} questionKey={part2Key} questionText={payload.part2.prompt} part={2} saved={answers[part2Key]} preview={!!data.preview} maxSeconds={payload.part2.max_answer_seconds||120} onSaved={putAnswer}/></div>:null}
-    <div className="sp-part-footer"><button className="ghost" onClick={()=>setStage("part1")}>Back to Part 1</button><button disabled={!p2Done} onClick={()=>setStage("part3")}>Continue to Part 3 <Send size={14}/></button></div>
+    <div className="sp-part-footer"><AnimatedBackButton onClick={()=>setStage("part1")} ariaLabel="Back to Part 1"/><button disabled={!p2Done} onClick={()=>setStage("part3")}>Continue to Part 3 <Send size={14}/></button></div>
    </div>}
 
    {stage==="part3"&&<div className="sp-part">
     <div className="sp-part-head"><small>PART 3</small><h1>{payload.part3.topic.replace(/^TOPIC\s+\d+\.\s*/i,"")}</h1></div>
     <nav className={ui.questionNav} aria-label="Part 3 questions" data-compact-questions>{p3.map((q,i)=><button key={q.key} className={i===questionIndex?ui.selected:""} disabled={i!==questionIndex&&!answers[p3[questionIndex]?.key]} onClick={()=>setQuestionIndex(i)} aria-label={"Question "+(i+1)+(answers[q.key]?", saved":"")} aria-current={i===questionIndex?"step":undefined}>{answers[q.key]?<Check size={14}/>:i+1}</button>)}<span>Question {questionIndex+1} of {p3.length}</span></nav><div className="sp-questions sp-single">{p3.filter((q,i)=>i===questionIndex).map(q=><RecorderCard key={q.key} day={day} attemptId={attemptId} questionKey={q.key} questionText={q.text} part={3} saved={answers[q.key]} preview={!!data.preview} maxSeconds={90} onSaved={a=>{putAnswer(a);setQuestionIndex(i=>Math.min(i+1,p3.length-1))}}/>)}</div>
-    <div className="sp-part-footer"><button className="ghost" onClick={()=>setStage("part2")}>Back to Part 2</button><button disabled={!p3Done} onClick={()=>setStage("review")}>Review answers <Check size={14}/></button></div>
+    <div className="sp-part-footer"><AnimatedBackButton onClick={()=>setStage("part2")} ariaLabel="Back to Part 2"/><button disabled={!p3Done} onClick={()=>setStage("review")}>Review answers <Check size={14}/></button></div>
    </div>}
 
    {stage==="review"&&<div className="sp-review">
@@ -297,13 +297,13 @@ export default function SpeakingPage(){
     <div className="sp-review-grid"><article><b>Part 1</b><strong>{p1.filter(q=>answers[q.key]).length}/{p1.length}</strong><span>recorded</span></article><article><b>Part 2</b><strong>{p2Done?1:0}/1</strong><span>recorded</span></article><article><b>Part 3</b><strong>{p3.filter(q=>answers[q.key]).length}/{p3.length}</strong><span>recorded</span></article></div>
     <div className={ui.reviewList}>{[...p1,{key:part2Key,text:payload.part2.prompt},...p3].map(q=><article key={q.key}><p>{q.text}</p>{answers[q.key]?.audio_url?<audio controls preload="none" src={answers[q.key].audio_url||undefined}/>:<span>Recording saved</span>}</article>)}</div>
     <button className="sp-submit" disabled={submitting||Object.keys(answers).length!==expectedCount} onClick={submit}><Send size={16}/>{submitting?"Submitting…":"Submit Full Speaking"}</button>
-    <button className="sp-review-back" onClick={()=>setStage("part3")}>Return to Part 3</button>
+    <AnimatedBackButton onClick={()=>setStage("part3")} ariaLabel="Return to Part 3"/>
    </div>}
 
    {submitted&&stage==="complete"&&<div className="sp-complete"><span><CheckCircle2 size={30}/></span><small>DAY {pad(day)}</small><h1>Speaking complete</h1><p>{data.preview?"Preview completed. No real submission, coin or admin record was created.":"Your Full Speaking attempt was submitted for teacher review."}</p>
     {!data.preview&&<div className="sp-result-state"><b>{data.attempt?.review_status==="reviewed"?"Teacher review complete":"Teacher review pending"}</b>{data.attempt?.review_status==="reviewed"&&<><strong>Band {Number(data.attempt.band).toFixed(1)}</strong>{data.attempt.feedback&&<p>{data.attempt.feedback}</p>}</>}</div>}
     {!data.preview&&data.attempt?.audio_expired&&<div className="sp-expired"><LockKeyhole size={15}/> Audio expired · recording retention period ended.</div>}
-    <button onClick={goBack}>Back to Day {pad(day)}</button>
+    <AnimatedBackButton onClick={goBack} ariaLabel="Back to study day"/>
    </div>}
   </section>
  </main>;
