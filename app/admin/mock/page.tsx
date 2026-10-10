@@ -3,6 +3,7 @@ import {useEffect,useMemo,useState} from "react";
 import {BookOpen,CheckCircle2,Clock3,FileText,Headphones,PenLine,RefreshCcw,Search,UserRound,X} from "lucide-react";
 import AnimatedBackButton from "../../components/animated-back-button";
 import "./mock-admin.css";
+import MockLiveView from "./mock-live-view";
 
 type Student={first_name:string;last_name:string;username:string};
 type Attempt={
@@ -26,7 +27,7 @@ const status=(r:Attempt)=>{
 };
 
 export default function AdminFullMock(){
- const [day,setDay]=useState(4);
+ const [day,setDay]=useState(4),[teacherPreview,setTeacherPreview]=useState<(Student&{id:string})|null>(null);
  const [rows,setRows]=useState<Attempt[]>([]),[loading,setLoading]=useState(true),[message,setMessage]=useState(""),[query,setQuery]=useState(""),[selected,setSelected]=useState<Attempt|null>(null),[lastUpdated,setLastUpdated]=useState("");
  async function load(silent=false){
   if(!silent)setLoading(true);setMessage("");
@@ -35,9 +36,9 @@ export default function AdminFullMock(){
    const obj=await res.json();
    if(res.status===401){window.location.assign("/admin");return}
    if(!res.ok)throw new Error(obj.detail||"Could not load Full Mock results.");
-   setRows(obj.attempts||[]);
+   setRows(obj.attempts||[]);setTeacherPreview(obj.teacher_preview||null);
    setLastUpdated(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Tashkent",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date()));
-   if(selected){const fresh=(obj.attempts||[]).find((x:Attempt)=>x.id===selected.id);if(fresh)setSelected(fresh)}
+   setSelected(previous=>previous?((obj.attempts||[]).find((x:Attempt)=>x.id===previous.id)||previous):null);
   }catch(e){setMessage(e instanceof Error?e.message:"Could not contact the server.")}
   finally{if(!silent)setLoading(false)}
  }
@@ -52,6 +53,7 @@ export default function AdminFullMock(){
   <section className="ma-kpis"><article><Headphones/><span>LISTENING SUBMITTED</span><b>{listeningDone}</b></article><article><BookOpen/><span>READING SUBMITTED</span><b>{readingDone}</b></article><article><CheckCircle2/><span>FULLY COMPLETED</span><b>{completed}</b></article><article><UserRound/><span>STARTED MOCK</span><b>{rows.length}</b></article></section>
   <section className="ma-toolbar"><div><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search student…"/></div><span className="ma-day-picker"><select aria-label="Full Mock day" value={day} onChange={e=>setDay(Number(e.target.value))}>{MOCK_DAYS.map(d=><option key={d} value={d}>Day {String(d).padStart(2,"0")} · {mockDate(d,true)}</option>)}</select><b>{mockDate(day).toUpperCase()} · DAY {String(day).padStart(2,"0")}</b></span></section>
   {message&&<p className="ma-message">{message}</p>}
+  {teacherPreview&&<button className="ma-preview-button" onClick={()=>setSelected({id:"teacher-preview",student_id:teacherPreview.id,student:teacherPreview,stage:"listening",started_at:new Date().toISOString(),day_number:day,status:"in_progress",listening_score:null,listening_band:null,listening_part_scores:null,listening_submitted_at:null,reading_score:null,reading_band:null,reading_part_scores:null,reading_submitted_at:null,writing_band:null,writing_assessment:null,writing_task1:"",writing_task2:"",writing_submitted_at:null,grading_error:null,updated_at:new Date().toISOString(),completed_at:null})}>Open @{teacherPreview.username} · teacher live preview</button>}
   <section className="ma-table-wrap">
    <div className="ma-table-head"><div><small>SECTION-BY-SECTION RESULTS</small><h2>Student progress and scores</h2></div><span>{visible.length} students</span></div>
    <div className="ma-overflow"><table><thead><tr><th>Student</th><th>Listening /40</th><th>L Band</th><th>Reading /40</th><th>R Band</th><th>Writing</th><th>Mock Overall</th><th>Status</th></tr></thead><tbody>
@@ -70,6 +72,7 @@ export default function AdminFullMock(){
   {selected&&<div className="ma-modal-bg" onMouseDown={e=>{if(e.target===e.currentTarget)setSelected(null)}}><section className="ma-modal">
    <header><div><small>{mockDate(day,true).toUpperCase()} · FULL MOCK</small><h2>{selected.student?selected.student.first_name+" "+selected.student.last_name:"Student"}</h2><p>@{selected.student?.username||"student"} · Started {when(selected.started_at)}</p></div><button onClick={()=>setSelected(null)}><X size={18}/></button></header>
    <div className="ma-modal-body">
+    <MockLiveView day={day} studentId={selected.student_id}/>
     <div className="ma-section-card"><div><Headphones/><h3>Listening</h3></div><strong>{selected.listening_score!=null?selected.listening_score+"/40":"Not submitted"}</strong><span>{selected.listening_band!=null?"Band "+band(selected.listening_band):"—"}</span>{selected.listening_part_scores&&<small>Sections: {selected.listening_part_scores.join(" · ")}</small>}</div>
     <div className="ma-section-card"><div><BookOpen/><h3>Reading</h3></div><strong>{selected.reading_score!=null?selected.reading_score+"/40":"Not submitted"}</strong><span>{selected.reading_band!=null?"Band "+band(selected.reading_band):"—"}</span>{selected.reading_part_scores&&<small>Parts: {selected.reading_part_scores.join(" · ")}</small>}</div>
     <div className="ma-section-card writing"><div><PenLine/><h3>Writing</h3></div><strong>{selected.writing_band!=null?"Band "+band(selected.writing_band):selected.stage==="assessing"?"AI assessing…":"Not submitted"}</strong>{selected.grading_error&&<p className="ma-grade-error">{selected.grading_error}</p>}

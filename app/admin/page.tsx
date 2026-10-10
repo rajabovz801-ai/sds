@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import MockLiveView from "./mock/mock-live-view";
+import "./mock/mock-admin.css";
 import AnimatedBackButton from "../components/animated-back-button";
 import {useEffect,useMemo,useState} from "react";
 import {LayoutDashboard,Users,CalendarDays,FileText,Mic,ChartNoAxesCombined,Trophy,Clock3,Settings,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Bell,Menu,X,ShieldCheck,ChevronRight,CheckCircle2,LockKeyhole,LogOut,UserPlus,UserCog,Eye,EyeOff,Trash2} from "lucide-react";
@@ -46,7 +48,7 @@ export default function AdminPage(){
  const [leaderRows,setLeaderRows]=useState<LeaderRow[]>([]);
  const [leaderLoading,setLeaderLoading]=useState(false);
  const [leaderMessage,setLeaderMessage]=useState("");
- const [liveRows,setLiveRows]=useState<LiveRow[]>([]);
+ const [liveRows,setLiveRows]=useState<LiveRow[]>([]),[liveStudent,setLiveStudent]=useState<LiveRow|null>(null);
  const [liveLoading,setLiveLoading]=useState(false);
  const [adminNotes,setAdminNotes]=useState<AdminNote[]>([]);
 
@@ -183,6 +185,7 @@ export default function AdminPage(){
   </aside>
   {mobile&&<button className="sidebar-overlay" onClick={()=>setMobile(false)} aria-label="Close navigation"/>}
   <div className="learning-main"><header className="learning-topbar"><div className="topbar-left"><button className="menu-toggle" aria-label="Open navigation" onClick={()=>setMobile(true)}><Menu size={20}/></button><b className="topbar-section">{view}</b><div className="topbar-line"/><span className="topbar-status"><span className="status-pulse"/> Course starts 1 October</span></div><div className="topbar-right"><span className="time-chip"><Clock3 size={15}/>{clock||"--:--:--"} <small>UZT</small></span><button className="top-icon admin-bell" onClick={()=>setView("Notifications")} aria-label="Notifications"><Bell size={18}/>{((dashboard?.pending_writing||0)+(dashboard?.pending_speaking||0))>0&&<span>{(dashboard?.pending_writing||0)+(dashboard?.pending_speaking||0)}</span>}</button><span className="profile-chip"><span>{admin.display_name.slice(0,2).toUpperCase()}</span> {admin.display_name} · {admin.role==="super_admin"?"Super Admin":"Admin"}</span></div></header>
+   {liveStudent&&<aside className="admin-live-drawer" role="dialog" aria-modal="true" aria-label="Student live mock"><header><div><b>{liveStudent.full_name}</b><small>@{liveStudent.username}</small></div><button onClick={()=>setLiveStudent(null)} aria-label="Close live mock"><X size={20}/></button></header>{courseDays.find(d=>d.n===liveStudent.day_number)?.mock?<MockLiveView day={liveStudent.day_number!} studentId={liveStudent.student_id}/>:<p>This student is not currently on a Full Mock day.</p>}</aside>}
    <main className="learning-content"><div className="page-heading admin-page-heading"><div className="hero-copy"><div className="section-eyebrow"><ShieldCheck size={16}/> ADMINISTRATION <span className="eyebrow-line"/></div><h1>{view==="Overview"?"Course control centre":view}</h1><p>ARK IELTS · 60-day challenge · 1 October – 29 November 2026</p></div></div>
    {view==="Overview"?<>
     <div className="kpi-row"><div className="kpi-card"><div><span>REGISTERED STUDENTS</span><b>{dashboard?.total_students??0}</b><small>Active course accounts</small></div><Users size={22}/></div><div className="kpi-card"><div><span>ONLINE NOW</span><b>{dashboard?.online_now??liveRows.filter(x=>x.status==="online").length}</b><small>{dashboard?.idle_now??liveRows.filter(x=>x.status==="idle").length} idle</small></div><span className="admin-online-icon"><i/></span></div><div className="kpi-card"><div><span>WRITING TO REVIEW</span><b>{dashboard?.pending_writing??0}</b><small>Inside 72-hour inbox</small></div><FileText size={22}/></div><div className="kpi-card kpi-highlight"><div><span>SPEAKING TO REVIEW</span><b>{dashboard?.pending_speaking??0}</b><small>Inside 72-hour inbox</small></div><Mic size={22}/></div></div>
@@ -190,7 +193,7 @@ export default function AdminPage(){
     <section className="admin-live-activity">
      <header><div><span className="section-eyebrow">REAL-TIME STUDENT PRESENCE</span><h2>Live Student Activity</h2><p>Presence is separate from study-time tracking. Being online does not add study minutes.</p></div><div className="live-summary"><span><b>{dashboard?.active_today??0}</b> Active today</span><span><b>{duration(dashboard?.today_seconds||0)}</b> Study today</span><button type="button" onClick={loadLiveActivity}>Refresh</button></div></header>
      <div className="live-table"><div className="live-row head"><span>Student</span><span>Status</span><span>Current activity</span><span>Day</span><span>Today</span><span>Last seen</span></div>
-      {liveLoading&&!liveRows.length?<div className="live-empty">Loading live activity…</div>:liveRows.length?liveRows.map(row=><div className="live-row" key={row.student_id}><span className="live-student"><b>{row.full_name}</b><small>@{row.username}</small></span><span className={"live-status "+row.status}><i/>{row.status==="online"?"Online":row.status==="idle"?"Idle":"Offline"}</span><strong>{row.current_area||"—"}</strong><span>{row.day_number?"Day "+String(row.day_number).padStart(2,"0"):"—"}</span><span>{duration(row.today_seconds||0)}</span><span>{row.last_seen_at?new Date(row.last_seen_at).toLocaleTimeString("en-GB",{timeZone:"Asia/Tashkent",hour:"2-digit",minute:"2-digit"}):"Never"}</span></div>):<div className="live-empty">No student presence yet.</div>}
+      {liveLoading&&!liveRows.length?<div className="live-empty">Loading live activity…</div>:liveRows.length?liveRows.map(row=><div className="live-row" key={row.student_id}><span className="live-student"><button className="admin-live-name" onClick={()=>setLiveStudent(row)}><b>{row.full_name}</b><small>@{row.username}</small></button></span><span className={"live-status "+row.status}><i/>{row.status==="online"?"Online":row.status==="idle"?"Idle":"Offline"}</span><strong>{row.current_area||"—"}</strong><span>{row.day_number?"Day "+String(row.day_number).padStart(2,"0"):"—"}</span><span>{duration(row.today_seconds||0)}</span><span>{row.last_seen_at?new Date(row.last_seen_at).toLocaleTimeString("en-GB",{timeZone:"Asia/Tashkent",hour:"2-digit",minute:"2-digit"}):"Never"}</span></div>):<div className="live-empty">No student presence yet.</div>}
      </div>
     </section>
    </>:view==="Requests"?<section className="student-request-panel">

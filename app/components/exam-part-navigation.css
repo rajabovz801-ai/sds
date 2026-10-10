@@ -28,5 +28,14 @@ html body .cr-shell:not(.cr-overview) .cr-question-head span,html body .cr-shell
 html body .cr-shell:not(.cr-overview) .cr-footer,html body .ls-shell .ls-part-navigation{background:#fff!important}
 
 /* Consistent readable body and answer text across daily and Full Mock exams. */
-html body .ls-shell .ls-question-paper,html body .ls-shell .ls-question-paper :is(p,li,td,.ls-q-title,.ls-option,.ls-match),html body .ls-shell .ls-question-paper :is(input,select){font-size:18px!important;line-height:1.6}
-html body .cr-shell:not(.cr-overview) .cr-passage,html body .cr-shell:not(.cr-overview) .cr-passage p,html body .cr-shell:not(.cr-overview) .cr-questions,html body .cr-shell:not(.cr-overview) :is(.cr-question-head span,.cr-options label,.cr-qgroup-head p),html body .cr-shell:not(.cr-overview) .cr-questions :is(input,select){font-size:18px!important;line-height:1.6!important}
+html body .ls-shell .ls-question-paper,html body .ls-shell .ls-question-paper :is(p,li,td,.ls-q-title,.ls-option,.ls-match),html body .ls-shell .ls-question-paper :is(input,select){font-size:17px!important;line-height:1.6}
+html body .cr-shell:not(.cr-overview) .cr-passage,html body .cr-shell:not(.cr-overview) .cr-passage p,html body .cr-shell:not(.cr-overview) .cr-questions,html body .cr-shell:not(.cr-overview) :is(.cr-question-head span,.cr-options label,.cr-qgroup-head p),html body .cr-shell:not(.cr-overview) .cr-questions :is(input,select){font-size:17px!important;line-height:1.6!important}
+
+html body .cr-shell .cr-question-head span{font-weight:600!important;color:#172234}
+html body .ls-shell .ls-block:has(>.ls-map-image-wrap){display:grid;grid-template-columns:minmax(0,1.25fr) minmax(260px,1fr);gap:18px;align-items:start}
+html body .ls-shell .ls-block:has(>.ls-map-image-wrap)>.ls-block-head,html body .ls-shell .ls-block:has(>.ls-map-image-wrap)>.ls-source-title{grid-column:1/-1}
+html body .ls-shell .ls-block>.ls-map-image-wrap{grid-column:1;grid-row:auto;margin:0;padding:8px}
+html body .ls-shell .ls-block:has(>.ls-map-image-wrap)>.ls-match-list{grid-column:2;grid-row:3}
+html body .ls-shell .ls-block:has(>.ls-map-image-wrap)>.ls-choice-box{grid-column:2}
+html body .ls-shell .ls-map-image-wrap img{width:100%;max-height:430px}
+@media(max-width:700px){html body .ls-shell .ls-block:has(>.ls-map-image-wrap){display:block}html body .ls-shell .ls-block>.ls-map-image-wrap{margin-bottom:16px}html body .ls-shell .ls-question-paper,html body .ls-shell .ls-question-paper :is(p,li,td,.ls-q-title,.ls-option,.ls-match,input,select),html body .cr-shell:not(.cr-overview) :is(.cr-passage,.cr-passage p,.cr-questions,.cr-question-head span,.cr-options label,.cr-qgroup-head p,.cr-questions input,.cr-questions select){font-size:16px!important}}

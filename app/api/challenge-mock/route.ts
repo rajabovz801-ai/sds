@@ -1,3 +1,4 @@
+import {sanitizeMockSnapshot,liveLeaseActive} from "@/lib/mock-live";
 import {NextRequest,NextResponse} from "next/server";
 import {getAdmin,getStudent,isDayOpen,isOwnOrigin,isPreview} from "@/lib/ark60-content-auth";
 import {getServiceSupabase} from "@/lib/supabase/server";
@@ -348,6 +349,16 @@ export async function GET(req:NextRequest){
   const admin=action.startsWith("admin_")?await getAdmin(req):null;
   if(action.startsWith("admin_")){
    if(!admin)return json({detail:"Admin sign-in required."},401);
+   if(action==="admin_live"){
+    const studentId=url.searchParams.get("student_id")||"";
+    if(!/^[0-9a-f-]{36}$/i.test(studentId))return json({detail:"Invalid student."},400);
+    const db=getServiceSupabase();
+    const {data:live,error}=await db.from("ark60_mock_live").select("*").eq("student_id",studentId).eq("day_number",day).maybeSingle();if(error)throw error;
+    if(!live?.allowed||!liveLeaseActive(live.heartbeat_at))return json({available:false,detail:"Student has not allowed sharing or is offline."});
+    const {error:viewError}=await db.from("ark60_mock_live").update({viewed_at:new Date().toISOString()}).eq("student_id",studentId).eq("day_number",day).eq("allowed",true);if(viewError)throw viewError;
+    const materials=await source(day,true);if(!materials)return json({available:false});
+    return json({available:true,snapshot:live.snapshot,updated_at:live.snapshot_at,content:{listening:safeListening(materials.listening.payload),reading:materials.reading.map(safeReading),writing:safeWriting(materials.writing.payload)}});
+   }
    if(src&&action==="admin_list")await retryFailedAssessments(src,day,2);
    const db=getServiceSupabase();
    const {data,error}=await db.from("ark60_mock_attempts").select("*").eq("day_number",day).order("updated_at",{ascending:false});
@@ -355,7 +366,10 @@ export async function GET(req:NextRequest){
    const ids=[...new Set((data||[]).map(x=>x.student_id))];let students:any[]=[];
    if(ids.length){const q=await db.from("ark60_students").select("id,first_name,last_name,username").in("id",ids);if(q.error)throw q.error;students=q.data||[]}
    const people=new Map(students.filter(s=>String(s.username).toLowerCase()!=="rustam7").map(s=>[s.id,s]));
-   return json({day:day,attempts:(data||[]).filter(x=>people.has(x.student_id)).map(x=>({...x,student:people.get(x.student_id)}))});
+   const {data:teacher}=await db.from("ark60_students").select("id,first_name,last_name,username").eq("username","rustam7").maybeSingle();
+   let teacherPreview=null;
+   if(teacher){const {data:share}=await db.from("ark60_mock_live").select("allowed,heartbeat_at").eq("student_id",teacher.id).eq("day_number",day).maybeSingle();if(share?.allowed&&liveLeaseActive(share.heartbeat_at))teacherPreview=teacher}
+   return json({day:day,teacher_preview:teacherPreview,attempts:(data||[]).filter(x=>people.has(x.student_id)).map(x=>({...x,student:people.get(x.student_id)}))});
   }
   const student=viewer;if(!student)return json({detail:"Please sign in."},401);
   if(!src)return json({detail:"Full Mock materials are not published yet."},404);
@@ -380,6 +394,18 @@ export async function POST(req:NextRequest){
   const src=await source(day,isPreview(student));if(!src)return json({detail:"Full Mock materials are not published yet."},404);
   const action=String(body.action||""),preview=isPreview(student),db=getServiceSupabase();
 
+  if(action==="live_consent"){
+   const allowed=body.allowed===true;
+   const {error}=await db.from("ark60_mock_live").upsert({student_id:student.id,day_number:day,allowed,snapshot:null,snapshot_at:null,viewed_at:null,heartbeat_at:new Date().toISOString()},{onConflict:"student_id,day_number"});if(error)throw error;
+   return json({ok:true,allowed});
+  }
+  if(action==="live_heartbeat"){
+   const {data:live,error}=await db.from("ark60_mock_live").select("allowed,viewed_at").eq("student_id",student.id).eq("day_number",day).maybeSingle();if(error)throw error;
+   if(!live?.allowed)return json({ok:true,watching:false});
+   const watching=liveLeaseActive(live.viewed_at),snapshot=watching?sanitizeMockSnapshot(body.snapshot):null,stamp=new Date().toISOString();
+   const {error:saveError}=await db.from("ark60_mock_live").update({heartbeat_at:stamp,...(snapshot?{snapshot,snapshot_at:stamp}:!watching?{snapshot:null,snapshot_at:null}:{})}).eq("student_id",student.id).eq("day_number",day).eq("allowed",true);if(saveError)throw saveError;
+   return json({ok:true,watching});
+  }
   if(action==="start"){
    if(preview)return json({ok:true,preview:true,stage:"listening"});
    const row=await ensureAttempt(student.id,day);return json({ok:true,stage:row.stage});

@@ -31,7 +31,9 @@ export default function FullMockPage(){
  const mockDate=new Date(Date.UTC(2026,9,day));
  const mockDateText=mockDate.toLocaleDateString("en-GB",{day:"numeric",month:"long",timeZone:"UTC"}).toUpperCase();
  const [data,setData]=useState<MockData|null>(null),[stage,setStage]=useState<Stage>("not_started"),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
- const [full,setFull]=useState(false);
+ const [sharing,setSharing]=useState(false),[watching,setWatching]=useState(false),[shareMessage,setShareMessage]=useState("");
+ const liveState=useRef<any>(null);
+ const [full,setFull]=useState(false),[confirmStage,setConfirmStage]=useState<"listening"|"reading"|null>(null);
  const [listeningStarted,setListeningStarted]=useState(false),[lStartedAt,setLStartedAt]=useState(""),[audioState,setAudioState]=useState<"idle"|"playing"|"ended"|"resume">("idle"),[lSection,setLSection]=useState(1),[lCurrentQuestion,setLCurrentQuestion]=useState(1),[lAnswers,setLAnswers]=useState<Record<string,string>>({}),[lElapsed,setLElapsed]=useState(0);
  const [rPassage,setRPassage]=useState(1),[rTab,setRTab]=useState<"passage"|"questions">("passage"),[rAnswers,setRAnswers]=useState<Record<string,string>>({}),[rRemaining,setRRemaining]=useState(3600);
  const [wTask,setWTask]=useState<1|2>(1),[w1,setW1]=useState(""),[w2,setW2]=useState(""),[wRemaining,setWRemaining]=useState(3600);
@@ -40,6 +42,18 @@ export default function FullMockPage(){
  const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
  const paperRef=useRef<HTMLDivElement>(null);
 
+ liveState.current={watching,stage,lSection,lCurrentQuestion,lAnswers,lElapsed,audioState,rPassage,rTab,rAnswers,rRemaining,wTask,w1,w2,wRemaining};
+ useEffect(()=>{
+  if(!sharing||!["listening","reading","writing"].includes(stage))return;
+  let active=true,inflight=false;
+  const tick=async()=>{if(inflight)return;inflight=true;try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_heartbeat",day,snapshot:liveState.current?.watching?liveState.current:null})});const obj=await res.json();if(active&&res.ok)setWatching(obj.watching===true)}catch{}finally{inflight=false}};
+  void tick();const id=window.setInterval(tick,3000);
+  return()=>{active=false;window.clearInterval(id)};
+ },[sharing,stage,day]);
+ async function changeSharing(allowed:boolean){
+  setShareMessage("");try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_consent",day,allowed})});if(!res.ok)throw new Error();setSharing(allowed);setWatching(false)}catch{setShareMessage("Could not update sharing. Please try again.")}
+ }
+ const shareControl=<aside className="mock-share-control"><span>{sharing?(watching?"Admin is viewing your mock":"Mock sharing allowed"):"Allow admin to view only this mock and your typed answers?"}</span><button onClick={()=>changeSharing(!sharing)}>{sharing?"Stop sharing":"Allow mock view"}</button>{shareMessage&&<small>{shareMessage}</small>}</aside>;
  useEffect(()=>{const f=()=>setFull(!!document.fullscreenElement);f();document.addEventListener("fullscreenchange",f);return()=>document.removeEventListener("fullscreenchange",f)},[]);
  useEffect(()=>{let live=true;(async()=>{setLoading(true);try{const r=await fetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Full Mock could not be loaded.");if(!live)return;setData(obj);setStage(obj.mock.stage);setLAnswers(obj.mock.stage==="listening"?{}:obj.mock.listening_answers||{});setLStartedAt(obj.mock.stage==="listening"?"":obj.mock.listening_started_at||"");setListeningStarted(false);setLElapsed(obj.mock.stage==="listening"?0:Number(obj.mock.listening_elapsed_seconds||0));setRAnswers(obj.mock.reading_answers||{});setW1(obj.mock.writing_task1||"");setW2(obj.mock.writing_task2||"");setRRemaining(Number(obj.mock.reading_remaining??3600));setWRemaining(Number(obj.mock.writing_remaining??3600));setResult(obj.mock.result||null)}catch(e){if(live)setMessage(e instanceof Error?e.message:"Full Mock could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day]);
 
@@ -102,13 +116,13 @@ export default function FullMockPage(){
    setLAnswers({});setLSection(1);setLCurrentQuestion(1);setLElapsed(0);setLStartedAt(obj.started_at||new Date().toISOString());setListeningStarted(true);setAudioState("idle");
   }catch(e){setMessage(e instanceof Error?e.message:"Could not start Listening.")}finally{setBusy(false)}
  }
- async function submitListening(){
-  if(busy)return;if(!window.confirm("Submit Listening and continue to Reading? You cannot return to this section."))return;
+ async function submitListening(confirmed=false){
+  if(busy)return;if(!confirmed){setConfirmStage("listening");return}setConfirmStage(null);
   void ensureExamFullscreen();
   setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_listening",day,started_at:lStartedAt,answers:lAnswers,elapsed_seconds:lElapsed})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit Listening.");audioRef.current?.pause();if(obj.hidden_result)setPreviewListening(obj.hidden_result);setRRemaining(Number(obj.reading_remaining??3600));setStage("reading");setRPassage(1);setRTab("passage")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Listening.")}finally{setBusy(false)}
  }
  async function submitReading(auto=false){
-  if(busy)return;if(!auto&&!window.confirm("Submit Reading and continue to Writing? You cannot return to Reading."))return;
+  if(busy)return;
   if(!auto)void ensureExamFullscreen();
   setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_reading",day,answers:rAnswers})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit Reading.");if(obj.hidden_result)setPreviewReading(obj.hidden_result);setWRemaining(Number(obj.writing_remaining??3600));setStage("writing");setWTask(1)}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Reading.")}finally{setBusy(false)}
  }
@@ -171,12 +185,13 @@ export default function FullMockPage(){
  }
 
 
+ const confirmation=confirmStage&&<div className="mock-confirm-backdrop" role="presentation"><section className="mock-confirm" role="dialog" aria-modal="true" aria-labelledby="mock-confirm-title"><h2 id="mock-confirm-title">Submit {confirmStage==="listening"?"Listening":"Reading"}?</h2><p>You will continue to {confirmStage==="listening"?"Reading":"Writing"}. You cannot return to this section.</p><div><button onClick={()=>setConfirmStage(null)}>Cancel</button><button onClick={()=>{if(confirmStage==="listening")void submitListening(true);else{setConfirmStage(null);void submitReading(false)}}}>Submit and continue</button></div></section></div>;
  if(loading)return <LoadingIndicator/>;
  if(!data)return <main className="mock-loading"><span>FULL MOCK</span><b>{message||"Mock unavailable."}</b><AnimatedBackButton onClick={()=>router.push("/dashboard")} ariaLabel="Back to dashboard"/></main>;
 
- if(stage==="not_started")return <main className="mock-entry"><header className="mock-entry-top"><AnimatedBackButton href="/dashboard"/><b>ARK EDUCATION · FULL MOCK</b><span>{data.preview?"PREVIEW MODE":mockDateText}</span></header><section className="mock-entry-card"><small>DAY {String(day).padStart(2,"0")} · IELTS FULL MOCK</small><h1>Listening → Reading → Writing</h1><p>Complete all three sections in order. Section scores stay hidden until the Writing assessment is finished.</p><div className="mock-entry-steps"><div><Headphones/><b>Listening</b><span>40 questions · audio once</span></div><div><BookOpen/><b>Reading</b><span>40 questions · 60 minutes</span></div><div><PenLine/><b>Writing</b><span>Task 1 + Task 2 · 60 minutes</span></div></div>{data.preview&&<div className="mock-preview-note"><ShieldCheck size={16}/> Teacher preview · nothing is saved to real student results.</div>}<button disabled={busy} onClick={startMock}>{busy?"Opening…":"Start Full Mock"} <ChevronRight size={17}/></button>{message&&<p className="mock-error">{message}</p>}</section></main>;
+ if(stage==="not_started")return <main className="mock-entry"><header className="mock-entry-top"><AnimatedBackButton href="/dashboard"/><b>ARK EDUCATION · FULL MOCK</b><span>{data.preview?"PREVIEW MODE":mockDateText}</span></header><section className="mock-entry-card"><small>DAY {String(day).padStart(2,"0")} · IELTS FULL MOCK</small><h1>Listening → Reading → Writing</h1><p>Complete all three sections in order. Section scores stay hidden until the Writing assessment is finished.</p>{shareControl}<div className="mock-entry-steps"><div><Headphones/><b>Listening</b><span>40 questions · audio once</span></div><div><BookOpen/><b>Reading</b><span>40 questions · 60 minutes</span></div><div><PenLine/><b>Writing</b><span>Task 1 + Task 2 · 60 minutes</span></div></div>{data.preview&&<div className="mock-preview-note"><ShieldCheck size={16}/> Teacher preview · nothing is saved to real student results.</div>}<button disabled={busy} onClick={startMock}>{busy?"Opening…":"Start Full Mock"} <ChevronRight size={17}/></button>{message&&<p className="mock-error">{message}</p>}</section></main>;
 
- if(stage==="listening")return <main className={"ls-shell mock-section-shell "+(!listeningStarted?"ls-shell--intro":"")}>
+ if(stage==="listening")return <main className={"ls-shell mock-section-shell "+(!listeningStarted?"ls-shell--intro":"")}>{confirmation}{shareControl}
   <audio ref={audioRef} preload="auto" src={lp.audio_url} onPlay={()=>setAudioState("playing")} onEnded={()=>setAudioState("ended")} onPause={()=>{if(listeningStarted&&audioState==="playing"){audioRef.current?.play().catch(()=>setAudioState("resume"))}}}/>
   <header className="ls-topbar"><div className="mock-section-lock" aria-label="Section locked until submission"><LockKeyhole size={17}/></div><div className="ls-top-title">FULL MOCK · LISTENING</div><div className="ls-top-actions">{listeningStarted&&<span className={"ls-audio-state "+audioState}><Volume2 size={14}/>{audioState==="ended"?"Audio finished":audioState==="resume"?"Audio needs permission":"Playing"} <i>{fmt(lElapsed)}</i></span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
   {!listeningStarted?<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>FULL MOCK · SECTION 1 OF 3</small><h1>Listening</h1><p>40 questions · 4 sections. If you leave before submitting, your unfinished Listening will restart from the beginning.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Playback</span></div></div><button disabled={busy} onClick={startListening}><Headphones size={17}/> {busy?"Starting…":"Start Listening"}</button></section>:<>
@@ -186,7 +201,7 @@ export default function FullMockPage(){
    {highlightPopup&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()}><button className="yellow" onClick={()=>applyHighlight("yellow")}><span/> Highlight</button><button onClick={()=>applyHighlight("erase")}><Eraser size={15}/> Remove</button></div>}
    <nav className="ls-bottom-nav ls-part-navigation">
     <ListeningPartNavigation part={lSection} currentQuestion={lCurrentQuestion} questionClass={q=>lAnswers[String(q)]?"answered":""} onPart={part=>{setLSection(part);setLCurrentQuestion((part-1)*10+1);window.scrollTo({top:0,behavior:"smooth"})}} onQuestion={goLQuestion}/>
-    <button className="ls-submit" disabled={busy} onClick={submitListening}>{busy?"Submitting…":"Submit Listening"} <Send size={15}/></button>
+    <button className="ls-submit" disabled={busy} onClick={()=>submitListening()}>{busy?"Submitting…":"Submit Listening"} <Send size={15}/></button>
    </nav>
   </>}
   {message&&<div className="mock-floating-message">{message}</div>}
@@ -198,7 +213,7 @@ export default function FullMockPage(){
   for(const q of passage?.questions||[]){const last=groups[groups.length-1];if(!last||last[0]?.instruction!==q.instruction)groups.push([q]);else last.push(q)}
   const partAnswered=(passage?.questions||[]).filter(q=>rAnswers[String(q.number)]).length;
   const totalAnswered=Object.values(rAnswers).filter(Boolean).length;
-  return <main className="cr-shell mock-reading-shell">
+  return <main className="cr-shell mock-reading-shell">{confirmation}{shareControl}
    <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div></div><div className="cr-head-end"><span className="cr-head-practice">FULL MOCK · PART {String(rPassage).padStart(2,"0")}</span><button className="cr-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
    <div className="cr-instructions"><div><small>FULL MOCK · IELTS READING</small><p>3 passages <span>·</span> 40 questions <span>·</span> 60-minute countdown</p></div><div className="cr-tools"></div></div>
    <div className="cr-mobile-tabs"><button className={rTab==="passage"?"active":""} onClick={()=>setRTab("passage")}>Passage</button><button className={rTab==="questions"?"active":""} onClick={()=>setRTab("questions")}>Questions</button></div>
@@ -212,14 +227,14 @@ export default function FullMockPage(){
    <footer className="cr-footer mock-reading-footer">
     <ListeningPartNavigation label="Reading parts" parts={[1,2,3]} part={rPassage} currentQuestion={0} questions={(passage?.questions||[]).map(q=>q.number)} questionClass={q=>rAnswers[String(q)]?"answered":""} onPart={part=>{setRPassage(part);setRTab("passage")}} onQuestion={q=>{setRTab("questions");setTimeout(()=>document.getElementById("question-"+q)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}/>
     <span className="cr-answer-count">{totalAnswered+" / 40 answered"}</span>
-    <button className="cr-submit" disabled={busy} onClick={()=>submitReading(false)}><Send size={15}/> {busy?"Submitting…":"Submit Reading"}</button>
+    <button className="cr-submit" disabled={busy} onClick={()=>setConfirmStage("reading")}><Send size={15}/> {busy?"Submitting…":"Submit Reading"}</button>
    </footer>
    {message&&<div className="mock-floating-message">{message}</div>}
    <style jsx global>{`::highlight(ark-mock-yellow){background:#ffe58a;color:inherit}`}</style>
   </main>
  }
 
- if(stage==="writing")return <main className="writing-shell mock-writing-shell">
+ if(stage==="writing")return <main className="writing-shell mock-writing-shell">{shareControl}
   <header className="writing-topbar"><div className="writing-back-slot"><LockKeyhole size={17}/></div><div className="writing-top-center"><b>FULL MOCK · WRITING</b></div><div className="writing-top-meta"><strong className={wRemaining<=300?"urgent":""}><Clock3 size={16}/>{fmt(wRemaining)}</strong><button className="writing-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
   <section className="writing-toolbar"><div className="mock-writing-tabs"><button className={"writing-task-chip "+(wTask===1?"active":"")} onClick={()=>setWTask(1)}>Writing Task 1</button><button className={"writing-task-chip "+(wTask===2?"active":"")} onClick={()=>setWTask(2)}>Writing Task 2</button><span className="writing-rule">Task 1 + Task 2 · 60 minutes total</span></div><div className="writing-controls"><button className="submit" disabled={busy||!w1.trim()||!w2.trim()} onClick={()=>submitWriting(false)}><Send size={16}/>{busy?"Submitting…":"Submit Writing"}</button></div></section>
   <div className="writing-stage">
