@@ -28,6 +28,7 @@ test("admin polling retries failed assessments in small batches",()=>{
 
 test("student assessing screen polls until result is completed",()=>{
  assert.ok(page.includes('if(stage!=="assessing")return'));
- assert.ok(page.includes('window.setInterval(check,5000)'));
+ assert.ok(page.includes('window.setTimeout(check,3000)'));
+ assert.ok(page.includes('if(active&&!finished)'));
  assert.ok(page.includes('obj?.mock?.stage==="completed"'));
 });

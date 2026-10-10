@@ -192,6 +192,10 @@ def day_status(day_num):
         raise HTTPException(status_code=403,detail="This day is not yet available")
     return d
 
+def completed_mock_days(user,before=61):
+    rows=db("GET","ark60_mock_attempts",{"select":"day_number","student_id":"eq."+user["id"],"stage":"eq.completed","day_number":"lt."+str(before)})
+    return [int(row["day_number"]) for row in (rows or [])]
+
 def day_unlocked_for_user(user,day_num):
     if day_num<1 or day_num>60:
         return False
@@ -200,16 +204,21 @@ def day_unlocked_for_user(user,day_num):
     d=START+timedelta(days=day_num-1)
     if today()<d:
         return False
-    if day_num==1:
+    if day_num==4 and now()<datetime(2026,10,4,5,0,tzinfo=timezone.utc):
+        return False
+    if day_num==1 or d.weekday()==6:
         return True
     rows=db("POST","rpc/ark60_student_dashboard_summary",payload={"p_student":user["id"],"p_today":str(today())})
     summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
     required_by_day=summary.get("required_by_day") or {}
     completed=summary.get("completed") or []
+    mocks=set(completed_mock_days(user,day_num)) if day_num>4 else set()
     for prior_day in range(1,day_num):
         required=required_by_day.get(str(prior_day)) or []
         if not required:
             continue
+        if (START+timedelta(days=prior_day-1)).weekday()==6 and prior_day not in mocks:
+            return False
         done={str(item.get("module")) for item in completed if int(item.get("day_number") or 0)==prior_day}
         if any(str(module) not in done for module in required):
             return False
@@ -244,6 +253,7 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
             "completed":[] if preview else (summary.get("completed") or []),
             "coins":0 if preview else int(summary.get("coins") or 0),
             "required_by_day":summary.get("required_by_day") or {},
+            "completed_mock_days":[] if preview else completed_mock_days(user),
             "preview":preview
         }
     if action=="reward_center":

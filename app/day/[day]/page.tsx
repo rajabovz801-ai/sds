@@ -1,4 +1,5 @@
 "use client";
+import {challengeDayUnlocked} from "../../../lib/ark60-day-access";
 import {WorkspaceArt} from "../../components/workspace-art";
 import AnimatedBackButton from "../../components/animated-back-button";
 import StudentPresence from "../../components/student-presence";
@@ -19,23 +20,13 @@ const regular=[
  {name:"Speaking",description:"Daily speaking practice",icon:Mic,tone:"pink"}
 ];
 function uzToday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tashkent",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
-type ProgressState={preview?:boolean;required_by_day?:Record<string,string[]>;completed?:Array<{day_number:number;module:string}>};
+type ProgressState={completed_mock_days?:number[];preview?:boolean;required_by_day?:Record<string,string[]>;completed?:Array<{day_number:number;module:string}>};
 type AvailabilityKey="progress"|"reading"|"article"|"vocabulary"|"speaking"|"listening"|"writing"|"mock";
 type ModuleAvailabilityKey=Exclude<AvailabilityKey,"progress">;
 type AvailabilityState=Record<AvailabilityKey,"checking"|"ready"|"error">;
 const EMPTY_AVAILABILITY:AvailabilityState={progress:"checking",reading:"checking",article:"checking",vocabulary:"checking",speaking:"checking",listening:"checking",writing:"checking",mock:"checking"};
 function progressUnlocked(day:number,stats:ProgressState|null,today:string,now=Date.now()){
- if(stats?.preview)return true;
- if(day===4&&now<Date.UTC(2026,9,4,5,0,0))return false;
- const iso=new Date(Date.UTC(2026,9,day)).toISOString().slice(0,10);
- if(iso>today||!stats)return false;
- for(let prior=1;prior<day;prior+=1){
-  const required=stats.required_by_day?.[String(prior)]||[];
-  if(!required.length)continue;
-  const done=new Set((stats.completed||[]).filter(x=>x.day_number===prior).map(x=>x.module));
-  if(!required.every(module=>done.has(module)))return false;
- }
- return true;
+ return challengeDayUnlocked(day,stats,today,now);
 }
 export default function DayPage(){
  const params=useParams<{day:string}>();const day=Math.max(1,Math.min(60,Number(params.day)||1));

@@ -16,7 +16,7 @@ type Stage="not_started"|"listening"|"reading"|"writing"|"assessing"|"completed"
 type Q={number:number;type:"tfng"|"gap"|"mcq"|"select";text:string;options?:string[];instruction?:string};
 type Passage={id:string;ordinal:number;title:string;text:string;questions:Q[];question_source:string};
 type MockData={
- preview:boolean;day:number;
+ preview:boolean;day:number;live_consent?:boolean;
  content:{listening:{title:string;payload:any};reading:Passage[];writing:{title:string;payload:any}};
  mock:{stage:Stage;status:string;listening_started_at?:string|null;listening_elapsed_seconds?:number;reading_remaining:number;writing_remaining:number;listening_answers?:Record<string,string>;reading_answers?:Record<string,string>;writing_task1?:string;writing_task2?:string;result?:any}
 };
@@ -32,8 +32,9 @@ export default function FullMockPage(){
  const mockDateText=mockDate.toLocaleDateString("en-GB",{day:"numeric",month:"long",timeZone:"UTC"}).toUpperCase();
  const [data,setData]=useState<MockData|null>(null),[stage,setStage]=useState<Stage>("not_started"),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
  const [sharing,setSharing]=useState(false),[watching,setWatching]=useState(false),[shareMessage,setShareMessage]=useState("");
+ const [consentBusy,setConsentBusy]=useState(false);
  const liveState=useRef<any>(null);
- const [full,setFull]=useState(false),[confirmStage,setConfirmStage]=useState<"listening"|"reading"|null>(null);
+ const [full,setFull]=useState(false),[confirmStage,setConfirmStage]=useState<"listening"|"reading"|"writing"|null>(null);
  const [listeningStarted,setListeningStarted]=useState(false),[lStartedAt,setLStartedAt]=useState(""),[audioState,setAudioState]=useState<"idle"|"playing"|"ended"|"resume">("idle"),[lSection,setLSection]=useState(1),[lCurrentQuestion,setLCurrentQuestion]=useState(1),[lAnswers,setLAnswers]=useState<Record<string,string>>({}),[lElapsed,setLElapsed]=useState(0);
  const [rPassage,setRPassage]=useState(1),[rTab,setRTab]=useState<"passage"|"questions">("passage"),[rAnswers,setRAnswers]=useState<Record<string,string>>({}),[rRemaining,setRRemaining]=useState(3600);
  const [wTask,setWTask]=useState<1|2>(1),[w1,setW1]=useState(""),[w2,setW2]=useState(""),[wRemaining,setWRemaining]=useState(3600);
@@ -43,19 +44,29 @@ export default function FullMockPage(){
  const paperRef=useRef<HTMLDivElement>(null);
 
  liveState.current={watching,stage,lSection,lCurrentQuestion,lAnswers,lElapsed,audioState,rPassage,rTab,rAnswers,rRemaining,wTask,w1,w2,wRemaining};
+ const mockActive=["listening","reading","writing"].includes(stage);
  useEffect(()=>{
-  if(!sharing||!["listening","reading","writing"].includes(stage))return;
-  let active=true,inflight=false,timer:number|undefined;
-  const tick=async()=>{if(inflight)return;inflight=true;try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_heartbeat",day,snapshot:liveState.current?.watching?liveState.current:null})});const obj=await res.json();if(active&&res.ok)setWatching(obj.watching===true)}catch{}finally{inflight=false;if(active)timer=window.setTimeout(tick,liveState.current?.watching?3000:10000)}};
-  void tick();
-  return()=>{active=false;if(timer)window.clearTimeout(timer)};
- },[sharing,stage,day]);
- async function changeSharing(allowed:boolean){
-  setShareMessage("");try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_consent",day,allowed})});if(!res.ok)throw new Error();setSharing(allowed);setWatching(false)}catch{setShareMessage("Could not update sharing. Please try again.")}
+  if(!sharing||!mockActive)return;
+  let active=true,inflight=false,timer:number|undefined;const controller=new AbortController();
+  const stop=()=>{
+   active=false;controller.abort();if(timer)window.clearTimeout(timer);
+   const body=JSON.stringify({action:"live_stop",day});
+   try{if(navigator.sendBeacon?.("/api/challenge-mock",new Blob([body],{type:"application/json"})))return}catch{}
+   void fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body,keepalive:true}).catch(()=>{});
+  };
+  const tick=async()=>{if(!active||inflight)return;inflight=true;try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",signal:controller.signal,headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_heartbeat",day,snapshot:liveState.current?.watching?liveState.current:null})});const obj=await res.json();if(active&&res.ok)setWatching(obj.watching===true)}catch{}finally{inflight=false;if(active)timer=window.setTimeout(tick,liveState.current?.watching?3000:10000)}};
+  const resume=async()=>{try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",signal:controller.signal,headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_resume",day})});if(active&&res.ok)void tick()}catch{}};
+  void resume();window.addEventListener("pagehide",stop);
+  const restore=()=>{if(controller.signal.aborted)location.reload()};window.addEventListener("pageshow",restore);
+  return()=>{window.removeEventListener("pagehide",stop);window.removeEventListener("pageshow",restore);stop()};
+ },[sharing,mockActive,day]);
+ async function allowMockView(){
+  if(consentBusy||sharing)return;
+  setConsentBusy(true);setShareMessage("");try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_consent",day,allowed:true})});const obj=await res.json();if(!res.ok||obj.allowed!==true)throw new Error();setSharing(true);setWatching(false)}catch{setShareMessage("Could not allow mock view. Please try again.")}finally{setConsentBusy(false)}
  }
- const shareControl=<aside className="mock-share-control"><span>{sharing?(watching?"Admin is viewing your mock":"Mock sharing allowed"):"Allow admin to view only this mock and your typed answers?"}</span><button onClick={()=>changeSharing(!sharing)}>{sharing?"Stop sharing":"Allow mock view"}</button>{shareMessage&&<small>{shareMessage}</small>}</aside>;
+ const shareControl=<aside className="mock-consent"><p>Your admin may view this mock, your current section and typed answers during the exam. Only this mock is shared. Viewing ends when you finish or leave.</p>{sharing?<span className="mock-consent-accepted"><CheckCircle2 size={16}/> Mock view allowed</span>:<button disabled={consentBusy} onClick={allowMockView}>{consentBusy?"Allowing…":"Allow mock view"}</button>}{shareMessage&&<small role="alert">{shareMessage}</small>}</aside>;
  useEffect(()=>{const f=()=>setFull(!!document.fullscreenElement);f();document.addEventListener("fullscreenchange",f);return()=>document.removeEventListener("fullscreenchange",f)},[]);
- useEffect(()=>{let live=true;(async()=>{setLoading(true);try{const r=await fetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Full Mock could not be loaded.");if(!live)return;setData(obj);setStage(obj.mock.stage);setLAnswers(obj.mock.stage==="listening"?{}:obj.mock.listening_answers||{});setLStartedAt(obj.mock.stage==="listening"?"":obj.mock.listening_started_at||"");setListeningStarted(false);setLElapsed(obj.mock.stage==="listening"?0:Number(obj.mock.listening_elapsed_seconds||0));setRAnswers(obj.mock.reading_answers||{});setW1(obj.mock.writing_task1||"");setW2(obj.mock.writing_task2||"");setRRemaining(Number(obj.mock.reading_remaining??3600));setWRemaining(Number(obj.mock.writing_remaining??3600));setResult(obj.mock.result||null)}catch(e){if(live)setMessage(e instanceof Error?e.message:"Full Mock could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day]);
+ useEffect(()=>{let live=true;(async()=>{setLoading(true);try{const r=await fetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Full Mock could not be loaded.");if(!live)return;setData(obj);setSharing(obj.live_consent===true);setStage(obj.mock.stage);setLAnswers(obj.mock.stage==="listening"?{}:obj.mock.listening_answers||{});setLStartedAt(obj.mock.stage==="listening"?"":obj.mock.listening_started_at||"");setListeningStarted(false);setLElapsed(obj.mock.stage==="listening"?0:Number(obj.mock.listening_elapsed_seconds||0));setRAnswers(obj.mock.reading_answers||{});setW1(obj.mock.writing_task1||"");setW2(obj.mock.writing_task2||"");setRRemaining(Number(obj.mock.reading_remaining??3600));setWRemaining(Number(obj.mock.writing_remaining??3600));setResult(obj.mock.result||null)}catch(e){if(live)setMessage(e instanceof Error?e.message:"Full Mock could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day]);
 
  useEffect(()=>{if(stage!=="listening"||!listeningStarted||!lStartedAt)return;const tick=()=>setLElapsed(Math.max(0,Math.floor((Date.now()-Date.parse(lStartedAt))/1000)));tick();const id=window.setInterval(tick,1000);return()=>window.clearInterval(id)},[stage,listeningStarted,lStartedAt]);
  useEffect(()=>{
@@ -88,7 +99,15 @@ export default function FullMockPage(){
  useEffect(()=>{if(stage==="reading"&&rRemaining===0&&!busy)void submitReading(true)},[stage,rRemaining,busy]);
  useEffect(()=>{if(stage!=="writing")return;const id=window.setInterval(()=>setWRemaining(v=>Math.max(0,v-1)),1000);return()=>window.clearInterval(id)},[stage]);
  useEffect(()=>{if(stage==="writing"&&wRemaining===0&&!busy)void submitWriting(true)},[stage,wRemaining,busy]);
- useEffect(()=>{if(stage!=="assessing")return;let active=true;const check=async()=>{try{const r=await fetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!active||!r.ok)return;if(obj?.mock?.stage==="completed"){setResult(obj.mock.result);setStage("completed");setMessage("")}}catch{}};void check();const id=window.setInterval(check,5000);return()=>{active=false;window.clearInterval(id)}},[stage,day]);
+ useEffect(()=>{
+  if(stage!=="assessing")return;
+  let active=true,finished=false,timer:number|undefined;const controller=new AbortController();
+  const check=async()=>{
+   try{const r=await fetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store",signal:controller.signal});const obj=await r.json();if(!active||!r.ok)return;if(obj?.mock?.stage==="completed"){finished=true;setResult(obj.mock.result);setStage("completed");setMessage("")}}
+   catch{}finally{if(active&&!finished)timer=window.setTimeout(check,3000)}
+  };
+  void check();return()=>{active=false;controller.abort();if(timer)window.clearTimeout(timer)};
+ },[stage,day]);
 
  function queueSave(kind:"listening"|"reading"|"writing",payload:any){
   if(saveRef.current)window.clearTimeout(saveRef.current);
@@ -105,11 +124,11 @@ export default function FullMockPage(){
  function setWriting(which:1|2,value:string){if(which===1)setW1(value);else setW2(value);queueSave("writing",{task1:which===1?value:w1,task2:which===2?value:w2})}
 
  async function startMock(){
-  if(busy)return;void ensureExamFullscreen();
+  if(busy||!sharing)return;void ensureExamFullscreen();
   setBusy(true);setMessage("");try{const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Full Mock.");setStage("listening");setLSection(1);setLCurrentQuestion(1)}catch(e){setMessage(e instanceof Error?e.message:"Could not start Full Mock.")}finally{setBusy(false)}
  }
  async function startListening(){
-  if(busy)return;void ensureExamFullscreen();setBusy(true);setMessage("");
+  if(busy||!sharing)return;void ensureExamFullscreen();setBusy(true);setMessage("");
   try{
    const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start_listening",day})});
    const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Listening.");
@@ -126,9 +145,10 @@ export default function FullMockPage(){
   if(!auto)void ensureExamFullscreen();
   setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_reading",day,answers:rAnswers})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit Reading.");if(obj.hidden_result)setPreviewReading(obj.hidden_result);setWRemaining(Number(obj.writing_remaining??3600));setStage("writing");setWTask(1)}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Reading.")}finally{setBusy(false)}
  }
- async function submitWriting(auto=false){
+ async function submitWriting(auto=false,confirmed=false){
   if(busy)return;if(!auto&&(!w1.trim()||!w2.trim())){setMessage("Complete both Writing Task 1 and Task 2 before submitting.");return}
-  if(!auto&&!window.confirm("Submit Writing and finish the Full Mock?"))return;
+  if(!auto&&!confirmed){setConfirmStage("writing");return}
+  setConfirmStage(null);
   setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_writing",day,task1:w1,task2:w2,auto,preview_listening:previewListening,preview_reading:previewReading})});const obj=await r.json();if(r.status===202){setStage("assessing");setMessage(obj.detail||"Writing is being assessed.");return}if(!r.ok)throw new Error(obj.detail||"Could not submit Writing.");setResult(obj.result);setStage("completed")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Writing.")}finally{setBusy(false)}
  }
  async function toggleFull(){try{if(document.fullscreenElement)await document.exitFullscreen();else await ensureExamFullscreen()}catch{}}
@@ -178,23 +198,23 @@ export default function FullMockPage(){
   return null;
  }
  function renderRQ(q:Q){
-  if(q.type==="select")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><select className="cr-gap cr-select" aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}><option value="">Select your answer</option>{(q.options||[]).map(opt=><option key={opt} value={optionValue(opt)}>{opt}</option>)}</select></div>;
+  if(q.type==="select")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span><ReadingGapSentence text={q.text} input={<select className="cr-gap cr-select cr-inline-select" aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}><option value="">Select answer</option>{(q.options||[]).map(opt=><option key={opt} value={optionValue(opt)}>{opt}</option>)}</select>}/></span></div></div>;
   if(q.type==="tfng")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><div className="cr-options">{(q.options?.length?q.options:["TRUE","FALSE","NOT GIVEN"]).map(opt=><label key={opt}><input type="radio" checked={rAnswers[String(q.number)]===opt} onChange={()=>setR(q.number,opt)}/><span className="cr-radio"/>{opt}</label>)}</div></div>;
   if(q.type==="mcq")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><div className="cr-options">{(q.options||[]).map(opt=>{const v=optionValue(opt);return <label key={opt}><input type="radio" checked={rAnswers[String(q.number)]===v} onChange={()=>setR(q.number,v)}/><span className="cr-radio"/>{opt}</label>})}</div></div>;
   return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span><ReadingGapSentence text={q.text} input={<input className="cr-gap cr-inline-gap" type="text" placeholder="Answer" autoComplete="off" spellCheck={false} aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}/>} /></span></div></div>;
  }
 
 
- const confirmation=confirmStage&&<div className="mock-confirm-backdrop" role="presentation"><section className="mock-confirm" role="dialog" aria-modal="true" aria-labelledby="mock-confirm-title"><h2 id="mock-confirm-title">Submit {confirmStage==="listening"?"Listening":"Reading"}?</h2><p>You will continue to {confirmStage==="listening"?"Reading":"Writing"}. You cannot return to this section.</p><div><button onClick={()=>setConfirmStage(null)}>Cancel</button><button onClick={()=>{if(confirmStage==="listening")void submitListening(true);else{setConfirmStage(null);void submitReading(false)}}}>Submit and continue</button></div></section></div>;
+ const confirmation=confirmStage&&<div className="mock-confirm-backdrop" role="presentation"><section className="mock-confirm" role="dialog" aria-modal="true" aria-labelledby="mock-confirm-title"><h2 id="mock-confirm-title">Submit {confirmStage==="listening"?"Listening":confirmStage==="reading"?"Reading":"Writing"}?</h2><p>{confirmStage==="writing"?"Finish the Full Mock? Your results will appear after the Writing assessment is complete.":<>You will continue to {confirmStage==="listening"?"Reading":"Writing"}. You cannot return to this section.</>}</p><div><button autoFocus onClick={()=>setConfirmStage(null)}>Cancel</button><button onClick={()=>{if(confirmStage==="listening")void submitListening(true);else if(confirmStage==="writing")void submitWriting(false,true);else{setConfirmStage(null);void submitReading(false)}}}>{confirmStage==="writing"?"Submit and finish":"Submit and continue"}</button></div></section></div>;
  if(loading)return <LoadingIndicator/>;
  if(!data)return <main className="mock-loading"><span>FULL MOCK</span><b>{message||"Mock unavailable."}</b><AnimatedBackButton onClick={()=>router.push("/dashboard")} ariaLabel="Back to dashboard"/></main>;
 
- if(stage==="not_started")return <main className="mock-entry"><header className="mock-entry-top"><AnimatedBackButton href="/dashboard"/><b>ARK EDUCATION · FULL MOCK</b><span>{data.preview?"PREVIEW MODE":mockDateText}</span></header><section className="mock-entry-card"><small>DAY {String(day).padStart(2,"0")} · IELTS FULL MOCK</small><h1>Listening → Reading → Writing</h1><p>Complete all three sections in order. Section scores stay hidden until the Writing assessment is finished.</p>{shareControl}<div className="mock-entry-steps"><div><Headphones/><b>Listening</b><span>40 questions · audio once</span></div><div><BookOpen/><b>Reading</b><span>40 questions · 60 minutes</span></div><div><PenLine/><b>Writing</b><span>Task 1 + Task 2 · 60 minutes</span></div></div>{data.preview&&<div className="mock-preview-note"><ShieldCheck size={16}/> Teacher preview · nothing is saved to real student results.</div>}<button disabled={busy} onClick={startMock}>{busy?"Opening…":"Start Full Mock"} <ChevronRight size={17}/></button>{message&&<p className="mock-error">{message}</p>}</section></main>;
+ if(stage==="not_started")return <main className="mock-entry"><header className="mock-entry-top"><AnimatedBackButton href="/dashboard"/><b>ARK EDUCATION · FULL MOCK</b><span>{data.preview?"PREVIEW MODE":mockDateText}</span></header><section className="mock-entry-card"><small>DAY {String(day).padStart(2,"0")} · IELTS FULL MOCK</small><h1>Listening → Reading → Writing</h1><p>Complete all three sections in order. Section scores stay hidden until the Writing assessment is finished.</p>{shareControl}<div className="mock-entry-steps"><div><Headphones/><b>Listening</b><span>40 questions · audio once</span></div><div><BookOpen/><b>Reading</b><span>40 questions · 60 minutes</span></div><div><PenLine/><b>Writing</b><span>Task 1 + Task 2 · 60 minutes</span></div></div>{data.preview&&<div className="mock-preview-note"><ShieldCheck size={16}/> Teacher preview · nothing is saved to real student results.</div>}<button disabled={busy||!sharing||consentBusy} onClick={startMock}>{busy?"Opening…":"Start Full Mock"} <ChevronRight size={17}/></button>{message&&<p className="mock-error">{message}</p>}</section></main>;
 
- if(stage==="listening")return <main className={"ls-shell mock-section-shell "+(!listeningStarted?"ls-shell--intro":"")}>{confirmation}{shareControl}
+ if(stage==="listening")return <main className={"ls-shell mock-section-shell "+(!listeningStarted?"ls-shell--intro":"")}>{confirmation}
   <audio ref={audioRef} preload="auto" src={lp.audio_url} onPlay={()=>setAudioState("playing")} onEnded={()=>setAudioState("ended")} onPause={()=>{if(listeningStarted&&audioState==="playing"){audioRef.current?.play().catch(()=>setAudioState("resume"))}}}/>
   <header className="ls-topbar"><div className="mock-section-lock" aria-label="Section locked until submission"><LockKeyhole size={17}/></div><div className="ls-top-title">FULL MOCK · LISTENING</div><div className="ls-top-actions">{listeningStarted&&<span className={"ls-audio-state "+audioState}><Volume2 size={14}/>{audioState==="ended"?"Audio finished":audioState==="resume"?"Audio needs permission":"Playing"} <i>{fmt(lElapsed)}</i></span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
-  {!listeningStarted?<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>FULL MOCK · SECTION 1 OF 3</small><h1>Listening</h1><p>40 questions · 4 sections. If you leave before submitting, your unfinished Listening will restart from the beginning.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Playback</span></div></div><button disabled={busy} onClick={startListening}><Headphones size={17}/> {busy?"Starting…":"Start Listening"}</button></section>:<>
+  {!listeningStarted?<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>FULL MOCK · SECTION 1 OF 3</small><h1>Listening</h1><p>40 questions · 4 sections. If you leave before submitting, your unfinished Listening will restart from the beginning.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Playback</span></div></div>{!sharing&&shareControl}<button disabled={busy||!sharing||consentBusy} onClick={startListening}><Headphones size={17}/> {busy?"Starting…":"Start Listening"}</button></section>:<>
    {audioState==="resume"&&<div className="ls-resume-banner"><Volume2 size={16}/><div><b>Audio needs permission</b><span>Tap to play the recording.</span></div><button onClick={()=>audioRef.current?.play().then(()=>setAudioState("playing")).catch(()=>{})}>Resume audio</button></div>}
    <section className="ls-instruction"><div><b>Part {lSection}</b><span>{currentSection?.range}</span></div></section>
    <div className="ls-workspace"><section className="ls-question-paper" ref={paperRef} onMouseUp={showHighlight}>{currentSection?.blocks?.map((b:any,i:number)=>renderL(b,i))}</section></div>
@@ -213,7 +233,7 @@ export default function FullMockPage(){
   for(const q of passage?.questions||[]){const last=groups[groups.length-1];if(!last||last[0]?.instruction!==q.instruction)groups.push([q]);else last.push(q)}
   const partAnswered=(passage?.questions||[]).filter(q=>rAnswers[String(q.number)]).length;
   const totalAnswered=Object.values(rAnswers).filter(Boolean).length;
-  return <main className="cr-shell mock-reading-shell">{confirmation}{shareControl}
+  return <main className="cr-shell mock-reading-shell">{confirmation}
    <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div></div><div className="cr-head-end"><span className="cr-head-practice">FULL MOCK · PART {String(rPassage).padStart(2,"0")}</span><button className="cr-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
    <div className="cr-instructions"><div><small>FULL MOCK · IELTS READING</small><p>3 passages <span>·</span> 40 questions <span>·</span> 60-minute countdown</p></div><div className="cr-tools"></div></div>
    <div className="cr-mobile-tabs"><button className={rTab==="passage"?"active":""} onClick={()=>setRTab("passage")}>Passage</button><button className={rTab==="questions"?"active":""} onClick={()=>setRTab("questions")}>Questions</button></div>
@@ -234,7 +254,7 @@ export default function FullMockPage(){
   </main>
  }
 
- if(stage==="writing")return <main className="writing-shell mock-writing-shell">{shareControl}
+ if(stage==="writing")return <main className="writing-shell mock-writing-shell">{confirmation}
   <header className="writing-topbar"><div className="writing-back-slot"><LockKeyhole size={17}/></div><div className="writing-top-center"><b>FULL MOCK · WRITING</b></div><div className="writing-top-meta"><strong className={wRemaining<=300?"urgent":""}><Clock3 size={16}/>{fmt(wRemaining)}</strong><button className="writing-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
   <section className="writing-toolbar"><div className="mock-writing-tabs"><button className={"writing-task-chip "+(wTask===1?"active":"")} onClick={()=>setWTask(1)}>Writing Task 1</button><button className={"writing-task-chip "+(wTask===2?"active":"")} onClick={()=>setWTask(2)}>Writing Task 2</button><span className="writing-rule">Task 1 + Task 2 · 60 minutes total</span></div><div className="writing-controls"><button className="submit" disabled={busy||!w1.trim()||!w2.trim()} onClick={()=>submitWriting(false)}><Send size={16}/>{busy?"Submitting…":"Submit Writing"}</button></div></section>
   <div className="writing-stage">

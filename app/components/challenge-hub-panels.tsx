@@ -14,7 +14,7 @@ type Student={
 type Completed={day_number:number;module:string;score:number|null;band:number|null;review_status:string};
 export type HubStats={
  student:Student;today_seconds:number;active_seconds:number;coins:number;
- by_module:Record<string,number>;completed:Completed[];required_by_day:Record<string,string[]>;preview?:boolean;
+ by_module:Record<string,number>;completed:Completed[];required_by_day:Record<string,string[]>;completed_mock_days?:number[];preview?:boolean;
 };
 type RewardEvent={id:string;day_number:number;module:string;kind:string;amount:number;created_at:string};
 type RewardGift={day:number;kind:string;amount:number;label:string};

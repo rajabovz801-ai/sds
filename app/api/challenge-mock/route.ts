@@ -5,11 +5,17 @@ import {getServiceSupabase} from "@/lib/supabase/server";
 
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
+export const maxDuration=120;
 
 type Obj=Record<string,any>;
 const START_UTC=Date.UTC(2026,9,1);
 const DAY_MS=86_400_000;
 const json=(body:any,status=200)=>NextResponse.json(body,{status,headers:{"Cache-Control":"private, no-store"}});
+const LIVE_STOPPED_AT="1970-01-01T00:00:00.000Z";
+async function stopMockLive(studentId:string,day:number){
+ const {error}=await getServiceSupabase().from("ark60_mock_live").update({snapshot:null,snapshot_at:null,viewed_at:null,heartbeat_at:LIVE_STOPPED_AT}).eq("student_id",studentId).eq("day_number",day);
+ if(error)throw error;
+}
 
 function validMockDay(value:any){
  const day=Number(value);
@@ -183,6 +189,7 @@ function normalizeAssessment(parsed:any){
 }
 
 async function gradeWriting(task1:string,task2:string,content:Obj){
+ try{
  const key=process.env.OPENAI_API_KEY||"";
  if(!key)return {ok:false,error:"OpenAI API key is not configured yet."};
  const model=process.env.OPENAI_WRITING_MODEL||"gpt-5-mini";
@@ -192,19 +199,23 @@ async function gradeWriting(task1:string,task2:string,content:Obj){
 
 TASK 1 PROMPT:
 ${t1.prompt||""}
+${(t1.instructions||[]).join("\n")}
+${t1.visual?"\nTASK 1 REFERENCE DATA:\n"+JSON.stringify(t1.visual):""}
 
 STUDENT TASK 1:
 ${task1}
 
 TASK 2 PROMPT:
 ${t2.prompt||""}
+${(t2.instructions||[]).join("\n")}
 
 STUDENT TASK 2:
 ${task2}
 
-Score each criterion and each task from 0 to 9 in 0.5 increments. Task 2 contributes twice as much as Task 1 to the final Writing band. Keep feedback concise and useful.`;
+Score each criterion and each task from 0 to 9 in 0.5 increments. Check Task 1 data accuracy against the supplied reference data. Task 2 contributes twice as much as Task 1 to the final Writing band. Keep feedback concise and useful.`;
  const response=await fetch("https://api.openai.com/v1/responses",{
   method:"POST",
+  signal:AbortSignal.timeout(90000),
   headers:{Authorization:"Bearer "+key,"Content-Type":"application/json"},
   body:JSON.stringify({
    model,
@@ -229,6 +240,9 @@ Score each criterion and each task from 0 to 9 in 0.5 increments. Task 2 contrib
  }catch(e){
   console.error("writing AI parse failed",String(e),text.slice(0,500));
   return {ok:false,error:"AI assessment returned an invalid format."};
+ }
+ }catch{
+  return {ok:false,error:"AI assessment was interrupted. Your Writing is saved for retry."};
  }
 }
 
@@ -293,30 +307,39 @@ function retryCount(error:any){
  const m=String(error||"").match(/^retry:(\d+):/);
  return m?Number(m[1]):0;
 }
+function canRetryAssessment(row:Obj){
+ const error=String(row.grading_error||"");
+ if(!error||retryCount(error)>=3)return false;
+ if(error!=="retrying")return true;
+ const updated=Date.parse(row.updated_at||"");
+ return Number.isFinite(updated)&&Date.now()-updated>120000;
+}
 async function completeWriting(row:Obj,assessed:any,src:Obj){
  const db=getServiceSupabase(),now=new Date().toISOString();
  const upd=await db.from("ark60_mock_attempts").update({
   stage:"completed",status:"completed",
   writing_band:assessed.band,writing_assessment:assessed.assessment,
   grading_error:null,completed_at:now,updated_at:now
- }).eq("id",row.id).select("*").single();
+ }).eq("id",row.id).eq("stage","assessing").eq("updated_at",row.updated_at).select("*").single();
  if(upd.error)throw upd.error;
  await mirrorCompletion(upd.data,src);
  return upd.data;
 }
-async function retryFailedAssessments(src:Obj,day:number,limit=2){
+async function retryFailedAssessments(src:Obj,day:number,limit=2,studentId?:string){
  const db=getServiceSupabase();
- const q=await db.from("ark60_mock_attempts").select("*")
-  .eq("day_number",day).eq("stage","assessing").not("grading_error","is",null)
-  .order("updated_at",{ascending:true}).limit(8);
+ let query=db.from("ark60_mock_attempts").select("*")
+  .eq("day_number",day).eq("stage","assessing").not("grading_error","is",null);
+ if(studentId)query=query.eq("student_id",studentId);
+ const q=await query.order("updated_at",{ascending:true}).limit(8);
  if(q.error)throw q.error;
- const candidates=(q.data||[]).filter((row:any)=>String(row.grading_error||"")!=="retrying"&&retryCount(row.grading_error)<3).slice(0,limit);
+ const candidates=(q.data||[]).filter(canRetryAssessment).slice(0,limit);
  await Promise.all(candidates.map(async(row:any)=>{
   const currentError=String(row.grading_error||"");
   const nextTry=retryCount(currentError)+1;
   const claim=await db.from("ark60_mock_attempts")
    .update({grading_error:"retrying",updated_at:new Date().toISOString()})
    .eq("id",row.id).eq("stage","assessing").eq("grading_error",currentError)
+   .eq("updated_at",row.updated_at)
    .select("*").maybeSingle();
   if(claim.error||!claim.data)return;
   const assessed=await gradeWriting(String(row.writing_task1||""),String(row.writing_task2||""),src.writing.payload);
@@ -326,7 +349,7 @@ async function retryFailedAssessments(src:Obj,day:number,limit=2){
    await db.from("ark60_mock_attempts").update({
     grading_error:"retry:"+nextTry+":"+assessed.error,
     updated_at:new Date().toISOString()
-   }).eq("id",row.id).eq("stage","assessing");
+   }).eq("id",row.id).eq("stage","assessing").eq("updated_at",claim.data.updated_at);
   }
  }));
 }
@@ -376,11 +399,12 @@ export async function GET(req:NextRequest){
   if(!src)return json({detail:"Full Mock materials are not published yet."},404);
   if(!(await isDayOpen(day,student)))return json({detail:"This Full Mock is not open yet.",opens_at:mockOpensAt(day)},403);
   const preview=isPreview(student);let row=preview?null:await attempt(student.id,day);
-  if(!preview&&row?.stage==="assessing"&&row?.grading_error&&String(row.grading_error)!=="retrying"&&retryCount(row.grading_error)<3){
-   await retryFailedAssessments(src,day,1);
+  if(!preview&&row?.stage==="assessing"&&canRetryAssessment(row)){
+   await retryFailedAssessments(src,day,1,student.id);
    row=await attempt(student.id,day);
   }
-  return json({preview,day:day,content:{listening:{title:src.listening.title,payload:safeListening(src.listening.payload)},reading:src.reading.map(safeReading),writing:{title:src.writing.title,payload:safeWriting(src.writing.payload)}},mock:stateForClient(row,preview,src)});
+  const {data:consent,error:consentError}=await getServiceSupabase().from("ark60_mock_live").select("allowed").eq("student_id",student.id).eq("day_number",day).maybeSingle();if(consentError)throw consentError;
+  return json({preview,day:day,live_consent:consent?.allowed===true,content:{listening:{title:src.listening.title,payload:safeListening(src.listening.payload)},reading:src.reading.map(safeReading),writing:{title:src.writing.title,payload:safeWriting(src.writing.payload)}},mock:stateForClient(row,preview,src)});
  }catch(e){console.error("mock GET",e);return json({detail:"Could not load Full Mock."},500)}
 }
 
@@ -391,8 +415,10 @@ export async function POST(req:NextRequest){
   const body=await req.json().catch(()=>null);if(!body||typeof body!=="object")return json({detail:"Invalid request."},400);
   const day=validMockDay(body.day||4);
   if(!day)return json({detail:"This day is not a scheduled Full Mock day."},400);
-  if(!(await isDayOpen(day,student)))return json({detail:"This Full Mock is not open yet.",opens_at:mockOpensAt(day)},403);
   const action=String(body.action||""),preview=isPreview(student),db=getServiceSupabase();
+  // Exit must still clear live content if the scheduled day has since closed.
+  if(action==="live_stop"){await stopMockLive(student.id,day);return json({ok:true})}
+  if(!(await isDayOpen(day,student)))return json({detail:"This Full Mock is not open yet.",opens_at:mockOpensAt(day)},403);
 
   if(action==="live_consent"){
    const allowed=body.allowed===true;
@@ -401,13 +427,23 @@ export async function POST(req:NextRequest){
    return json({ok:true,allowed});
   }
   if(action==="live_heartbeat"){
-   const {data:live,error}=await db.from("ark60_mock_live").select("allowed,viewed_at").eq("student_id",student.id).eq("day_number",day).maybeSingle();if(error)throw error;
-   if(!live?.allowed)return json({ok:true,watching:false});
+   const {data:live,error}=await db.from("ark60_mock_live").select("allowed,viewed_at,heartbeat_at").eq("student_id",student.id).eq("day_number",day).maybeSingle();if(error)throw error;
+   if(!live?.allowed||Date.parse(live.heartbeat_at)===0)return json({ok:true,watching:false});
    const watching=liveLeaseActive(live.viewed_at),snapshot=watching?sanitizeMockSnapshot(body.snapshot):null,stamp=new Date().toISOString();
-   const {error:saveError}=await db.from("ark60_mock_live").update({heartbeat_at:stamp,...(snapshot?{snapshot,snapshot_at:stamp}:!watching?{snapshot:null,snapshot_at:null}:{})}).eq("student_id",student.id).eq("day_number",day).eq("allowed",true);if(saveError)throw saveError;
+   const {error:saveError}=await db.from("ark60_mock_live").update({heartbeat_at:stamp,...(snapshot?{snapshot,snapshot_at:stamp}:!watching?{snapshot:null,snapshot_at:null}:{})}).eq("student_id",student.id).eq("day_number",day).eq("allowed",true).eq("heartbeat_at",live.heartbeat_at);if(saveError)throw saveError;
    return json({ok:true,watching});
   }
   const src=await source(day,isPreview(student));if(!src)return json({detail:"Full Mock materials are not published yet."},404);
+  if(["start","start_listening","live_resume"].includes(action)){
+   const {data:consent,error}=await db.from("ark60_mock_live").select("allowed").eq("student_id",student.id).eq("day_number",day).maybeSingle();if(error)throw error;
+   if(!consent?.allowed)return json({detail:"Allow mock view before starting this Full Mock."},403);
+  }
+  if(action==="live_resume"){
+   const row=preview?null:await attempt(student.id,day);
+   if(!preview&&!["listening","reading","writing"].includes(row?.stage))return json({detail:"This mock is not active."},409);
+   const {error}=await db.from("ark60_mock_live").update({heartbeat_at:new Date().toISOString(),snapshot:null,snapshot_at:null,viewed_at:null}).eq("student_id",student.id).eq("day_number",day).eq("allowed",true);if(error)throw error;
+   return json({ok:true});
+  }
 
   if(action==="start"){
    if(preview)return json({ok:true,preview:true,stage:"listening"});
@@ -493,13 +529,27 @@ export async function POST(req:NextRequest){
    const row=await ensureAttempt(student.id,day);if(row.stage!=="writing")return json({detail:"Writing is not active."},409);
    const task1=String(body.task1||"").slice(0,25000),task2=String(body.task2||"").slice(0,25000);
    const elapsed=Math.max(0,3600-remaining(row.writing_started_at,3600));
-   const {error}=await db.from("ark60_mock_attempts").update({writing_task1:task1,writing_task2:task2,writing_elapsed_seconds:elapsed,updated_at:new Date().toISOString()}).eq("id",row.id);if(error)throw error;
+   const {error}=await db.from("ark60_mock_attempts").update({writing_task1:task1,writing_task2:task2,writing_elapsed_seconds:elapsed,updated_at:new Date().toISOString()}).eq("id",row.id).eq("stage","writing");if(error)throw error;
    return json({ok:true});
   }
   if(action==="submit_writing"){
    const task1=String(body.task1||"").trim().slice(0,25000),task2=String(body.task2||"").trim().slice(0,25000);
    const auto=body.auto===true;
    if((!task1||!task2)&&!auto)return json({detail:"Complete both Writing tasks before submitting."},400);
+   // Reject stale submissions before spending time on an AI assessment.
+   const row=preview?null:await ensureAttempt(student.id,day);
+   if(row?.stage==="completed")return json({ok:true,stage:"completed",result:stateForClient(row,false,src).result});
+   if(row?.stage==="assessing")return json({ok:true,stage:"assessing",detail:"Writing is saved and being assessed."},202);
+   if(row&&row.stage!=="writing")return json({detail:"Writing is not active."},409);
+   let savedRow=row;
+   if(row){
+    const now=new Date().toISOString(),elapsed=Math.max(0,3600-remaining(row.writing_started_at,3600));
+    const saved=await db.from("ark60_mock_attempts").update({stage:"assessing",status:"assessing",writing_task1:task1,writing_task2:task2,writing_elapsed_seconds:elapsed,writing_submitted_at:now,grading_error:"retrying",updated_at:now}).eq("id",row.id).eq("stage","writing").select("*").maybeSingle();
+    if(saved.error)throw saved.error;
+    if(!saved.data)return json({ok:true,stage:"assessing",detail:"Writing is already submitted. Checking its result."},202);
+    savedRow=saved.data;
+    await stopMockLive(student.id,day);
+   }
    const assessed=await gradeWriting(task1,task2,src.writing.payload);
    if(preview){
     if(!assessed.ok)return json({ok:false,preview:true,grading_unavailable:true,detail:assessed.error},503);
@@ -507,15 +557,13 @@ export async function POST(req:NextRequest){
     const result={listening:hiddenL,reading:hiddenR,writing:{band:assessed.band,assessment:assessed.assessment},overall:overall3(Number(hiddenL.band||0),Number(hiddenR.band||0),Number(assessed.band||0)),review:answerReview(src,hiddenL.answers||{},hiddenR.answers||{})};
     return json({ok:true,preview:true,stage:"completed",result});
    }
-   const row=await ensureAttempt(student.id,day);if(row.stage!=="writing")return json({detail:"Writing is not active."},409);
-   const now=new Date().toISOString(),elapsed=Math.max(0,3600-remaining(row.writing_started_at,3600));
+   if(!savedRow)throw new Error("Writing attempt is missing.");
    if(!assessed.ok){
-    await db.from("ark60_mock_attempts").update({stage:"assessing",status:"assessing",writing_task1:task1,writing_task2:task2,writing_elapsed_seconds:elapsed,writing_submitted_at:now,grading_error:assessed.error,updated_at:now}).eq("id",row.id);
-    return json({ok:true,stage:"assessing",detail:"Writing submitted. AI assessment is waiting for configuration."},202);
+    const failed=await db.from("ark60_mock_attempts").update({grading_error:assessed.error,updated_at:new Date().toISOString()}).eq("id",savedRow.id).eq("stage","assessing").eq("updated_at",savedRow.updated_at);
+    if(failed.error)throw failed.error;
+    return json({ok:true,stage:"assessing",detail:"Writing is saved. AI assessment will be retried."},202);
    }
-   const saved=await db.from("ark60_mock_attempts").update({writing_task1:task1,writing_task2:task2,writing_elapsed_seconds:elapsed,writing_submitted_at:now,updated_at:now}).eq("id",row.id).select("*").single();
-   if(saved.error)throw saved.error;
-   const completed=await completeWriting(saved.data,assessed,src);
+   const completed=await completeWriting(savedRow,assessed,src);
    return json({ok:true,stage:"completed",result:stateForClient(completed,false,src).result});
   }
   return json({detail:"Unknown Full Mock action."},400);

@@ -182,9 +182,17 @@
   outline-offset:1px;
   border-color:#3475b6;
 }
+.cr-shell:not(.cr-overview) .cr-questions .cr-inline-select{
+  display:inline-block!important;
+  width:155px!important;
+  max-width:100%;
+  margin:2px 4px!important;
+  vertical-align:middle;
+  font-size:17px!important;
+}
 .cr-shell:not(.cr-overview) .cr-options{
   display:grid;
-  gap:4px!important;
+  gap:2px!important;
   margin:7px 0 0 40px!important;
   padding:0;
 }
@@ -194,7 +202,7 @@
   display:flex;
   align-items:center;
   gap:9px;
-  padding:4px 7px!important;
+  padding:3px 7px!important;
   margin:0!important;
   border:1px solid transparent;
   border-radius:6px;

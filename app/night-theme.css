@@ -6093,17 +6093,20 @@ html[data-ark-theme="dark"] .mock-confirm button:last-child {
     color: #EAF0F7;
     border-color: #385E91
 }
-html[data-ark-theme="dark"] .mock-share-control {
+html[data-ark-theme="dark"] .mock-consent {
+    border: 1px solid #29384A;
     background: #152131;
-    color: #9CBFFF;
-    border: 1px solid #29384A
+    color: #EAF0F7
 }
-html[data-ark-theme="dark"] .mock-share-control button {
-    background: #152131;
+html[data-ark-theme="dark"] .mock-consent button {
     border: 1px solid #385E91;
-    color: #9CBFFF
+    background: #3B73E8;
+    color: #EAF0F7
 }
-html[data-ark-theme="dark"] .mock-share-control small {
+html[data-ark-theme="dark"] .mock-consent-accepted {
+    color: #83D6AE
+}
+html[data-ark-theme="dark"] .mock-consent small {
     color: #F3A0A0
 }
 html[data-ark-theme="dark"] .cr-shell:not(.cr-overview) {

@@ -1,4 +1,5 @@
 "use client";
+import {challengeDayUnlocked} from "../../lib/ark60-day-access";
 import LoadingIndicator from "../components/loading-indicator";
 
 import AnimatedBackButton from "../components/animated-back-button";
@@ -48,18 +49,7 @@ function tashkentDate(){
 }
 function unlocked(d:Day,today:string){return d.date.toISOString().slice(0,10)<=today}
 function progressUnlocked(day:number,stats:StudentStats|null,today:string,now=Date.now()){
- const target=DAYS[day-1];
- if(!target||!stats)return false;
- if(stats.preview)return true;
- if(day===4&&now<Date.UTC(2026,9,4,5,0,0))return false;
- if(!unlocked(target,today))return false;
- for(let prior=1;prior<day;prior+=1){
-  const required=stats.required_by_day?.[String(prior)]||[];
-  if(!required.length)continue;
-  const done=new Set(stats.completed.filter(x=>x.day_number===prior).map(x=>x.module));
-  if(!required.every(module=>done.has(module)))return false;
- }
- return true;
+ return challengeDayUnlocked(day,stats,today,now);
 }
 function modulesFor(day:Day){
  if(day.mock)return mockModules;

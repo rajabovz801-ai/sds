@@ -1,6 +1,7 @@
 import "server-only";
 import {createHash} from "node:crypto";
 import type {NextRequest} from "next/server";
+import {challengeDayUnlocked,isChallengeMockDay} from "./ark60-day-access";
 
 export type Student={id:string;username:string;first_name:string;last_name:string;status:string};
 export type Admin={id:string;username:string;display_name:string;role:string;status:string};
@@ -49,18 +50,13 @@ export function isDayOpen(n:number,user:Student){
 }
 export async function isDayUnlocked(n:number,user:Student){
  if(!isDayOpen(n,user))return false;
- if(isPreview(user)||n===1)return true;
- const rows=await sqlTable("rpc/ark60_student_dashboard_summary","POST","",{p_student:user.id,p_today:todayInTashkent()});
+ if(isPreview(user)||n===1||isChallengeMockDay(n))return true;
+ const [rows,mocks]=await Promise.all([
+  sqlTable("rpc/ark60_student_dashboard_summary","POST","",{p_student:user.id,p_today:todayInTashkent()}),
+  n>4?sqlTable("ark60_mock_attempts","GET","select=day_number&student_id=eq."+user.id+"&stage=eq.completed&day_number=lt."+n):Promise.resolve([])
+ ]);
  const summary=Array.isArray(rows)?(rows[0]||{}):(rows||{});
- const requiredByDay=(summary.required_by_day||{}) as Record<string,string[]>;
- const completed=Array.isArray(summary.completed)?summary.completed as Array<{day_number:number;module:string}>:[];
- for(let d=1;d<n;d+=1){
-  const required=Array.isArray(requiredByDay[String(d)])?requiredByDay[String(d)]:[];
-  if(!required.length)continue;
-  const done=new Set(completed.filter(item=>Number(item.day_number)===d).map(item=>String(item.module)));
-  if(!required.every(module=>done.has(module)))return false;
- }
- return true;
+ return challengeDayUnlocked(n,{required_by_day:summary.required_by_day||{},completed:summary.completed||[],completed_mock_days:(mocks||[]).map((row:Row)=>Number(row.day_number))},todayInTashkent());
 }
 export function isOwnOrigin(req:NextRequest){
  const origin=req.headers.get("origin");return !origin||origin===new URL(req.url).origin;

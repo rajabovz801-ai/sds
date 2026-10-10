@@ -44,8 +44,10 @@ test("Writing grading uses server-only OpenAI configuration and no client API ke
 
 test("4 Oct is gated at 10:00 Tashkent and teacher preview bypass remains",()=>{
  assert.ok(api.includes("Date.UTC(2026,9,4,5,0,0)"));
- assert.ok(dashboard.includes("day===4&&now<Date.UTC(2026,9,4,5,0,0)"));
- assert.ok(day.includes("day===4&&now<Date.UTC(2026,9,4,5,0,0)"));
+ const access=fs.readFileSync("lib/ark60-day-access.ts","utf8");
+ assert.ok(access.includes("day===4&&now<Date.UTC(2026,9,4,5,0,0)"));
+ assert.ok(dashboard.includes("return challengeDayUnlocked(day,stats,today,now)"));
+ assert.ok(day.includes("return challengeDayUnlocked(day,stats,today,now)"));
  assert.ok(api.includes("isPreview(student)"));
 });
 
