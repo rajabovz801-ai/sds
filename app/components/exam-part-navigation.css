@@ -1,0 +1,22 @@
+/* Centred, inline expanding parts shared by every Reading and Listening exam. */
+html body .ls-shell .ls-part-navigation,html body .cr-shell .cr-footer{display:grid;grid-template-columns:140px minmax(0,1fr) 140px;align-items:center;gap:12px;background:#f5f0e5;padding:10px 16px;min-height:62px}
+.exam-part-strip{grid-column:2;display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:3px}
+.exam-question-numbers{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.exam-part-strip button{height:34px;flex-shrink:0;border:1px solid #c6c9cf;border-radius:5px;background:#fffdf7;color:#17202d;font:700 13px/1 Arial,Helvetica,sans-serif;cursor:pointer}
+.exam-part-tab{padding:0 15px;white-space:nowrap}
+.exam-question-numbers button{width:34px;padding:0}
+.exam-part-strip .active,.exam-question-numbers .current{border-color:#2563eb;color:#1648bf;background:#edf2ff;box-shadow:inset 0 0 0 1px #2563eb}
+.exam-question-numbers .answered,.exam-question-numbers .correct{background:#e6f1e6;border-color:#a3c5aa;color:#204c30}
+.exam-question-numbers .wrong,.exam-question-numbers .empty{background:#fff0ea;border-color:#dcafa2;color:#862d21}
+.exam-question-numbers .current{border-color:#2563eb;color:#1648bf;background:#edf2ff}
+.exam-part-strip button:focus-visible{outline:3px solid #88aaf2;outline-offset:2px}
+html body .cr-shell .cr-footer>.cr-answer-count{display:none}
+html body .ls-shell .ls-question-paper,html body .cr-shell:not(.cr-overview) .cr-pane{background:#fffaf0;color:#182230;border-color:#d8d1c5}
+html body .ls-shell,html body .ls-shell .ls-workspace,html body .cr-shell:not(.cr-overview),html body .cr-shell:not(.cr-overview) .cr-split{background:#f2eee5}
+html body .ls-shell .ls-instruction,html body .cr-shell:not(.cr-overview) .cr-instructions{background:#f9f5ec}
+html body .ls-shell .ls-qnum,html body .cr-shell .cr-question-head b,html body .cr-shell .cr-number{color:#152032;font-weight:700}
+@media(max-width:1050px){html body .ls-shell .ls-part-navigation,html body .cr-shell .cr-footer{grid-template-columns:minmax(0,1fr);gap:5px;padding:7px 9px}.exam-part-strip{justify-content:safe center}html body .ls-shell .ls-part-navigation>.ls-submit,html body .cr-shell .cr-footer>.cr-submit{justify-self:end}.ls-shell .ls-workspace{padding-bottom:112px}}
+@media(max-width:600px){.exam-part-strip{justify-content:flex-start;gap:4px}.exam-part-tab{padding:0 10px}.exam-question-numbers{gap:4px}.exam-part-strip button{height:32px;font-size:12px}.exam-question-numbers button{width:29px}}
+
+html body .ls-part-navigation>.ls-submit,html body .cr-footer>.cr-submit{grid-column:3;grid-row:1}
+@media(max-width:1050px){.exam-part-strip{grid-column:1}html body .ls-part-navigation>.ls-submit,html body .cr-footer>.cr-submit{grid-column:1;grid-row:2}}

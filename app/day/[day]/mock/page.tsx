@@ -206,8 +206,7 @@ export default function FullMockPage(){
    </div>
    {highlightPopup&&<div className="cr-highlight-menu" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()}><button aria-label="Yellow highlight" onClick={()=>applyHighlight("yellow")}><i className="swatch yellow"/></button><span className="cr-menu-sep"/><button aria-label="Remove highlight" onClick={()=>applyHighlight("erase")}><Eraser size={17}/></button></div>}
    <footer className="cr-footer mock-reading-footer">
-    <div className="mock-part-nav">{[1,2,3].map(part=><button key={part} className={rPassage===part?"active":""} onClick={()=>{setRPassage(part);setRTab("passage")}}>PART {part}</button>)}</div>
-    <div className="cr-number-strip" aria-label="Question navigation">{(passage?.questions||[]).map(q=><button key={q.number} className={rAnswers[String(q.number)]?"answered":""} onClick={()=>{setRTab("questions");setTimeout(()=>document.getElementById("question-"+q.number)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}>{q.number}</button>)}</div>
+    <ListeningPartNavigation label="Reading parts" parts={[1,2,3]} part={rPassage} currentQuestion={0} questions={(passage?.questions||[]).map(q=>q.number)} questionClass={q=>rAnswers[String(q)]?"answered":""} onPart={part=>{setRPassage(part);setRTab("passage")}} onQuestion={q=>{setRTab("questions");setTimeout(()=>document.getElementById("question-"+q)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}/>
     <span className="cr-answer-count">{totalAnswered+" / 40 answered"}</span>
     <button className="cr-submit" disabled={busy} onClick={()=>submitReading(false)}><Send size={15}/> {busy?"Submitting…":"Submit Reading"}</button>
    </footer>

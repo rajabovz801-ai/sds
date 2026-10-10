@@ -4039,6 +4039,52 @@ html[data-ark-theme="dark"] .wa-shell {
     background: #0F1926;
     color: #EAF0F7
 }
+html[data-ark-theme="dark"] body .ls-shell .ls-part-navigation,html[data-ark-theme="dark"] body .cr-shell .cr-footer {
+    background: #0F1926
+}
+html[data-ark-theme="dark"] .exam-part-strip button {
+    border: 1px solid #29384A;
+    background: #152131;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] .exam-part-strip .active,html[data-ark-theme="dark"] .exam-question-numbers .current {
+    border-color: #385E91;
+    color: #9CBFFF;
+    background: #152131;
+    box-shadow: inset 0 0 0 1px #00000026
+}
+html[data-ark-theme="dark"] .exam-question-numbers .answered,html[data-ark-theme="dark"] .exam-question-numbers .correct {
+    background: #18372A;
+    border-color: #29384A;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] .exam-question-numbers .wrong,html[data-ark-theme="dark"] .exam-question-numbers .empty {
+    background: #3B232C;
+    border-color: #29384A;
+    color: #E8C56A
+}
+html[data-ark-theme="dark"] .exam-question-numbers .current {
+    border-color: #385E91;
+    color: #9CBFFF;
+    background: #152131
+}
+html[data-ark-theme="dark"] .exam-part-strip button:focus-visible {
+    outline: 3px solid #385E91
+}
+html[data-ark-theme="dark"] body .ls-shell .ls-question-paper,html[data-ark-theme="dark"] body .cr-shell:not(.cr-overview) .cr-pane {
+    background: #0F1926;
+    color: #EAF0F7;
+    border-color: #29384A
+}
+html[data-ark-theme="dark"] body .ls-shell,html[data-ark-theme="dark"] body .ls-shell .ls-workspace,html[data-ark-theme="dark"] body .cr-shell:not(.cr-overview),html[data-ark-theme="dark"] body .cr-shell:not(.cr-overview) .cr-split {
+    background: #0F1926
+}
+html[data-ark-theme="dark"] body .ls-shell .ls-instruction,html[data-ark-theme="dark"] body .cr-shell:not(.cr-overview) .cr-instructions {
+    background: #0F1926
+}
+html[data-ark-theme="dark"] body .ls-shell .ls-qnum,html[data-ark-theme="dark"] body .cr-shell .cr-question-head b,html[data-ark-theme="dark"] body .cr-shell .cr-number {
+    color: #EAF0F7
+}
 html[data-ark-theme="dark"] .loadingScreen {
     background: var(--lesson-canvas,#152131)
 }
