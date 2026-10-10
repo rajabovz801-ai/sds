@@ -7639,15 +7639,6 @@ html[data-ark-theme="dark"] .cr-answer-detail {
 html[data-ark-theme="dark"] .cr-detail-scroll th {
     background: #152131
 }
-html[data-ark-theme="dark"] ::highlight(ark-listening-yellow) {
-    background: #1B2A3D
-}
-html[data-ark-theme="dark"] ::highlight(ark-mock-yellow) {
-    background: #1B2A3D
-}
-html[data-ark-theme="dark"] ::highlight(ark-mock-yellow) {
-    background: #1B2A3D
-}
 html[data-ark-theme="dark"] .ra-shell {
     --ra-purple: #9CBFFF;
     background: #0F1926;
@@ -8117,9 +8108,6 @@ html[data-ark-theme="dark"] .ra-mobile-tabs button.active {
     background: #152131;
     color: #9CBFFF;
     border-color: #29384A
-}
-html[data-ark-theme="dark"] ::highlight(ark-reading-yellow) {
-    background: #1B2A3D
 }
 html[data-ark-theme="dark"] .cr-select {
     background: #0F1926

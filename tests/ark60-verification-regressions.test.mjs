@@ -21,6 +21,8 @@ test('night color generation is reproducible and excludes module-only global syn
  const generated=read('app/night-theme.css');
  assert.equal(generated,before,'checked-in theme must match generator');
  assert.doesNotMatch(generated,/:global\(/);
+ assert.doesNotMatch(generated,/::highlight\(/,'native browser highlights stay in the public stylesheet');
+ assert.match(read('public/ark-highlight-api.css'),/::highlight\(ark-listening-yellow\)/);
  assert.doesNotMatch(generated,/html\[data-ark-theme[^\]]*\]\s+html\[data-ark-theme/);
  assert.match(read('app/components/learning-ui.module.css'),/:global\(html\[data-ark-theme=dark\]\) \.entry/,'explicit module dark colors remain in their scoped stylesheet');
 });
