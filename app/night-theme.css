@@ -4127,7 +4127,7 @@ html[data-ark-theme="dark"] body .ls-shell .ls-qnum,html[data-ark-theme="dark"] 
 html[data-ark-theme="dark"] body .cr-shell:not(.cr-overview) .cr-footer,html[data-ark-theme="dark"] body .ls-shell .ls-part-navigation {
     background: #0F1926 !important
 }
-html[data-ark-theme="dark"] body .cr-shell .cr-question-head span {
+html[data-ark-theme="dark"] body .cr-shell:not(.cr-overview) .cr-question-head span {
     color: #EAF0F7
 }
 html[data-ark-theme="dark"] .loadingScreen {

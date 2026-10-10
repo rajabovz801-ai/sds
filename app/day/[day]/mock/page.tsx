@@ -45,10 +45,10 @@ export default function FullMockPage(){
  liveState.current={watching,stage,lSection,lCurrentQuestion,lAnswers,lElapsed,audioState,rPassage,rTab,rAnswers,rRemaining,wTask,w1,w2,wRemaining};
  useEffect(()=>{
   if(!sharing||!["listening","reading","writing"].includes(stage))return;
-  let active=true,inflight=false;
-  const tick=async()=>{if(inflight)return;inflight=true;try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_heartbeat",day,snapshot:liveState.current?.watching?liveState.current:null})});const obj=await res.json();if(active&&res.ok)setWatching(obj.watching===true)}catch{}finally{inflight=false}};
-  void tick();const id=window.setInterval(tick,3000);
-  return()=>{active=false;window.clearInterval(id)};
+  let active=true,inflight=false,timer:number|undefined;
+  const tick=async()=>{if(inflight)return;inflight=true;try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_heartbeat",day,snapshot:liveState.current?.watching?liveState.current:null})});const obj=await res.json();if(active&&res.ok)setWatching(obj.watching===true)}catch{}finally{inflight=false;if(active)timer=window.setTimeout(tick,liveState.current?.watching?3000:10000)}};
+  void tick();
+  return()=>{active=false;if(timer)window.clearTimeout(timer)};
  },[sharing,stage,day]);
  async function changeSharing(allowed:boolean){
   setShareMessage("");try{const res=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_consent",day,allowed})});if(!res.ok)throw new Error();setSharing(allowed);setWatching(false)}catch{setShareMessage("Could not update sharing. Please try again.")}

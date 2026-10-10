@@ -4,9 +4,12 @@ import {useEffect,useState} from "react";
 type Props={day:number;studentId:string};
 export default function MockLiveView({day,studentId}:Props){
  const [data,setData]=useState<any>(null),[error,setError]=useState("");
- useEffect(()=>{let active=true,pending=false;setData(null);setError("");const load=async()=>{if(pending||document.visibilityState!=="visible")return;pending=true;try{const r=await fetch(`/api/challenge-mock?action=admin_live&day=${day}&student_id=${encodeURIComponent(studentId)}`,{cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Live view unavailable");if(active){setData(obj);setError("")}}catch(e){if(active)setError(e instanceof Error?e.message:"Connection lost")}finally{pending=false}};void load();const id=window.setInterval(load,3000);return()=>{active=false;window.clearInterval(id)}},[day,studentId]);
+ useEffect(()=>{let active=true,pending=false,materials:any=null;setData(null);setError("");const load=async()=>{if(pending||document.visibilityState!=="visible")return;pending=true;try{const r=await fetch(`/api/challenge-mock?action=admin_live&day=${day}&student_id=${encodeURIComponent(studentId)}${materials?"":"&content=1"}`,{cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Live view unavailable");if(active){if(obj.content)materials=obj.content;setData({...obj,content:materials});setError("")}}catch(e){if(active)setError(e instanceof Error?e.message:"Connection lost")}finally{pending=false}};void load();const id=window.setInterval(load,3000);return()=>{active=false;window.clearInterval(id)}},[day,studentId]);
  if(error)return <div className="ma-live-paper">{error}</div>;
  if(!data?.available)return <div className="ma-live-paper">{data?.detail||"Connecting to student mock…"}</div>;
+ return <MockLiveContent data={data}/>;
+}
+export function MockLiveContent({data}:{data:any}){
  const s=data.snapshot,c=data.content;
  if(!s)return <div className="ma-live-paper">Waiting for the student's next update…</div>;
  const stale=!data.updated_at||Date.now()-Date.parse(data.updated_at)>12000;

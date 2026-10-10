@@ -341,7 +341,8 @@ export async function GET(req:NextRequest){
    return json({detail:"This day is not a scheduled Full Mock day."},400);
   }
   const viewer=await getStudent(req);
-  const src=viewer&&isPreview(viewer)?await source(day,true):await source(day);
+  let src:Obj|null=null;
+  if(!action.startsWith("admin_"))src=viewer&&isPreview(viewer)?await source(day,true):await source(day);
   if(action==="availability"){
    const start=mockStartMs(day);
    return json({published:!!src,open:!!src&&(!!viewer&&isPreview(viewer)||Date.now()>=start),opens_at:mockOpensAt(day)});
@@ -356,10 +357,10 @@ export async function GET(req:NextRequest){
     const {data:live,error}=await db.from("ark60_mock_live").select("*").eq("student_id",studentId).eq("day_number",day).maybeSingle();if(error)throw error;
     if(!live?.allowed||!liveLeaseActive(live.heartbeat_at))return json({available:false,detail:"Student has not allowed sharing or is offline."});
     const {error:viewError}=await db.from("ark60_mock_live").update({viewed_at:new Date().toISOString()}).eq("student_id",studentId).eq("day_number",day).eq("allowed",true);if(viewError)throw viewError;
-    const materials=await source(day,true);if(!materials)return json({available:false});
-    return json({available:true,snapshot:live.snapshot,updated_at:live.snapshot_at,content:{listening:safeListening(materials.listening.payload),reading:materials.reading.map(safeReading),writing:safeWriting(materials.writing.payload)}});
+    const materials=url.searchParams.get("content")==="1"?await source(day,true):null;
+    return json({available:true,snapshot:live.snapshot,updated_at:live.snapshot_at,...(materials?{content:{listening:safeListening(materials.listening.payload),reading:materials.reading.map(safeReading),writing:safeWriting(materials.writing.payload)}}:{})});
    }
-   if(src&&action==="admin_list")await retryFailedAssessments(src,day,2);
+   if(action==="admin_list"){src=await source(day);if(src)await retryFailedAssessments(src,day,2)}
    const db=getServiceSupabase();
    const {data,error}=await db.from("ark60_mock_attempts").select("*").eq("day_number",day).order("updated_at",{ascending:false});
    if(error)throw error;
@@ -391,11 +392,11 @@ export async function POST(req:NextRequest){
   const day=validMockDay(body.day||4);
   if(!day)return json({detail:"This day is not a scheduled Full Mock day."},400);
   if(!(await isDayOpen(day,student)))return json({detail:"This Full Mock is not open yet.",opens_at:mockOpensAt(day)},403);
-  const src=await source(day,isPreview(student));if(!src)return json({detail:"Full Mock materials are not published yet."},404);
   const action=String(body.action||""),preview=isPreview(student),db=getServiceSupabase();
 
   if(action==="live_consent"){
    const allowed=body.allowed===true;
+   if(allowed&&!(await source(day,preview)))return json({detail:"Full Mock materials are not published yet."},404);
    const {error}=await db.from("ark60_mock_live").upsert({student_id:student.id,day_number:day,allowed,snapshot:null,snapshot_at:null,viewed_at:null,heartbeat_at:new Date().toISOString()},{onConflict:"student_id,day_number"});if(error)throw error;
    return json({ok:true,allowed});
   }
@@ -406,6 +407,8 @@ export async function POST(req:NextRequest){
    const {error:saveError}=await db.from("ark60_mock_live").update({heartbeat_at:stamp,...(snapshot?{snapshot,snapshot_at:stamp}:!watching?{snapshot:null,snapshot_at:null}:{})}).eq("student_id",student.id).eq("day_number",day).eq("allowed",true);if(saveError)throw saveError;
    return json({ok:true,watching});
   }
+  const src=await source(day,isPreview(student));if(!src)return json({detail:"Full Mock materials are not published yet."},404);
+
   if(action==="start"){
    if(preview)return json({ok:true,preview:true,stage:"listening"});
    const row=await ensureAttempt(student.id,day);return json({ok:true,stage:row.stage});
