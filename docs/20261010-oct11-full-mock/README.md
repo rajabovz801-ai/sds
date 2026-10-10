@@ -15,3 +15,5 @@ Flow remains Listening → Reading → Writing. Answer keys are removed from act
 Verification: meaningful grading and draft-access tests cover perfect score, alternatives, reversed pairs, duplicate rejection, public source exclusion and key stripping. Full test suite, TypeScript and production build must pass before deployment. Real-browser Writing AI scoring is a separate check; no synthetic real-student attempt is created.
 
 Rollback: revert this commit to remove preview/review UI. Day 11 database records can remain draft safely; do not delete any attempts. Publishing requires a separate explicit user instruction; do not automatically promote draft statuses on October 11.
+
+Live browser verification found a pre-existing lesson-polish three-column divider rule applying to the mock's two-column Writing layout: the answer pane occupied a 7px divider track. A mock-scoped desktop grid override restores the answer pane without changing ordinary Writing's draggable divider. Listening audio played, its table and map rendered, and Listening → Reading → Writing navigation succeeded in Rustam's non-persistent preview.
