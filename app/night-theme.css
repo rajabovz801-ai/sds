@@ -4085,6 +4085,9 @@ html[data-ark-theme="dark"] body .ls-shell .ls-instruction,html[data-ark-theme="
 html[data-ark-theme="dark"] body .ls-shell .ls-qnum,html[data-ark-theme="dark"] body .cr-shell .cr-question-head b,html[data-ark-theme="dark"] body .cr-shell .cr-number {
     color: #EAF0F7
 }
+html[data-ark-theme="dark"] body .cr-shell:not(.cr-overview) .cr-footer,html[data-ark-theme="dark"] body .ls-shell .ls-part-navigation {
+    background: #0F1926 !important
+}
 html[data-ark-theme="dark"] .loadingScreen {
     background: var(--lesson-canvas,#152131)
 }
@@ -6030,6 +6033,16 @@ html[data-ark-theme="dark"] .mock-answer-review .wrong {
 }
 html[data-ark-theme="dark"] .mock-answer-review .empty {
     color: #A7B6C8
+}
+html[data-ark-theme="dark"] .mock-fullscreen-notice {
+    border: 1px solid #29384A;
+    background: #152131;
+    box-shadow: 0 3px 14px #00000026;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] .mock-fullscreen-notice button {
+    background: #3B73E8;
+    color: #EAF0F7
 }
 html[data-ark-theme="dark"] .cr-shell:not(.cr-overview) {
     background: #0F1926

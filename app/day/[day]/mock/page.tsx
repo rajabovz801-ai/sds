@@ -1,4 +1,5 @@
 "use client";
+import {ensureExamFullscreen} from "../../../../lib/exam-fullscreen";
 import ListeningPartNavigation from "../../../components/listening-part-navigation";
 import LoadingIndicator from "../../../components/loading-indicator";
 import {useParams,useRouter} from "next/navigation";
@@ -30,7 +31,7 @@ export default function FullMockPage(){
  const mockDate=new Date(Date.UTC(2026,9,day));
  const mockDateText=mockDate.toLocaleDateString("en-GB",{day:"numeric",month:"long",timeZone:"UTC"}).toUpperCase();
  const [data,setData]=useState<MockData|null>(null),[stage,setStage]=useState<Stage>("not_started"),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
- const [full,setFull]=useState(false);
+ const [full,setFull]=useState(false),[fullSupported,setFullSupported]=useState(false);
  const [listeningStarted,setListeningStarted]=useState(false),[lStartedAt,setLStartedAt]=useState(""),[audioState,setAudioState]=useState<"idle"|"playing"|"ended"|"resume">("idle"),[lSection,setLSection]=useState(1),[lCurrentQuestion,setLCurrentQuestion]=useState(1),[lAnswers,setLAnswers]=useState<Record<string,string>>({}),[lElapsed,setLElapsed]=useState(0);
  const [rPassage,setRPassage]=useState(1),[rTab,setRTab]=useState<"passage"|"questions">("passage"),[rAnswers,setRAnswers]=useState<Record<string,string>>({}),[rRemaining,setRRemaining]=useState(3600);
  const [wTask,setWTask]=useState<1|2>(1),[w1,setW1]=useState(""),[w2,setW2]=useState(""),[wRemaining,setWRemaining]=useState(3600);
@@ -39,7 +40,7 @@ export default function FullMockPage(){
  const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
  const paperRef=useRef<HTMLDivElement>(null);
 
- useEffect(()=>{const f=()=>setFull(!!document.fullscreenElement);document.addEventListener("fullscreenchange",f);return()=>document.removeEventListener("fullscreenchange",f)},[]);
+ useEffect(()=>{setFullSupported(!!document.fullscreenEnabled);const f=()=>setFull(!!document.fullscreenElement);f();document.addEventListener("fullscreenchange",f);return()=>document.removeEventListener("fullscreenchange",f)},[]);
  useEffect(()=>{let live=true;(async()=>{setLoading(true);try{const r=await fetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Full Mock could not be loaded.");if(!live)return;setData(obj);setStage(obj.mock.stage);setLAnswers(obj.mock.stage==="listening"?{}:obj.mock.listening_answers||{});setLStartedAt(obj.mock.stage==="listening"?"":obj.mock.listening_started_at||"");setListeningStarted(false);setLElapsed(obj.mock.stage==="listening"?0:Number(obj.mock.listening_elapsed_seconds||0));setRAnswers(obj.mock.reading_answers||{});setW1(obj.mock.writing_task1||"");setW2(obj.mock.writing_task2||"");setRRemaining(Number(obj.mock.reading_remaining??3600));setWRemaining(Number(obj.mock.writing_remaining??3600));setResult(obj.mock.result||null)}catch(e){if(live)setMessage(e instanceof Error?e.message:"Full Mock could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day]);
 
  useEffect(()=>{if(stage!=="listening"||!listeningStarted||!lStartedAt)return;const tick=()=>setLElapsed(Math.max(0,Math.floor((Date.now()-Date.parse(lStartedAt))/1000)));tick();const id=window.setInterval(tick,1000);return()=>window.clearInterval(id)},[stage,listeningStarted,lStartedAt]);
@@ -90,10 +91,11 @@ export default function FullMockPage(){
  function setWriting(which:1|2,value:string){if(which===1)setW1(value);else setW2(value);queueSave("writing",{task1:which===1?value:w1,task2:which===2?value:w2})}
 
  async function startMock(){
-  setBusy(true);setMessage("");try{const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Full Mock.");setStage("listening");setLSection(1);setLCurrentQuestion(1);document.documentElement.requestFullscreen?.().catch(()=>{})}catch(e){setMessage(e instanceof Error?e.message:"Could not start Full Mock.")}finally{setBusy(false)}
+  if(busy)return;void ensureExamFullscreen();
+  setBusy(true);setMessage("");try{const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Full Mock.");setStage("listening");setLSection(1);setLCurrentQuestion(1)}catch(e){setMessage(e instanceof Error?e.message:"Could not start Full Mock.")}finally{setBusy(false)}
  }
  async function startListening(){
-  if(busy)return;setBusy(true);setMessage("");
+  if(busy)return;void ensureExamFullscreen();setBusy(true);setMessage("");
   try{
    const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start_listening",day})});
    const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Listening.");
@@ -102,10 +104,12 @@ export default function FullMockPage(){
  }
  async function submitListening(){
   if(busy)return;if(!window.confirm("Submit Listening and continue to Reading? You cannot return to this section."))return;
+  void ensureExamFullscreen();
   setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_listening",day,started_at:lStartedAt,answers:lAnswers,elapsed_seconds:lElapsed})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit Listening.");audioRef.current?.pause();if(obj.hidden_result)setPreviewListening(obj.hidden_result);setRRemaining(Number(obj.reading_remaining??3600));setStage("reading");setRPassage(1);setRTab("passage")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Listening.")}finally{setBusy(false)}
  }
  async function submitReading(auto=false){
   if(busy)return;if(!auto&&!window.confirm("Submit Reading and continue to Writing? You cannot return to Reading."))return;
+  if(!auto)void ensureExamFullscreen();
   setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_reading",day,answers:rAnswers})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit Reading.");if(obj.hidden_result)setPreviewReading(obj.hidden_result);setWRemaining(Number(obj.writing_remaining??3600));setStage("writing");setWTask(1)}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Reading.")}finally{setBusy(false)}
  }
  async function submitWriting(auto=false){
@@ -113,7 +117,7 @@ export default function FullMockPage(){
   if(!auto&&!window.confirm("Submit Writing and finish the Full Mock?"))return;
   setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await fetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_writing",day,task1:w1,task2:w2,auto,preview_listening:previewListening,preview_reading:previewReading})});const obj=await r.json();if(r.status===202){setStage("assessing");setMessage(obj.detail||"Writing is being assessed.");return}if(!r.ok)throw new Error(obj.detail||"Could not submit Writing.");setResult(obj.result);setStage("completed")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Writing.")}finally{setBusy(false)}
  }
- async function toggleFull(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{}}
+ async function toggleFull(){try{if(document.fullscreenElement)await document.exitFullscreen();else await ensureExamFullscreen()}catch{}}
  function showHighlight(){
   const sel=window.getSelection();if(!sel||sel.isCollapsed||!sel.rangeCount)return;
   const r=sel.getRangeAt(0);
@@ -167,6 +171,7 @@ export default function FullMockPage(){
  }
 
 
+ const fullscreenNotice=fullSupported&&!full&&(stage==="reading"||stage==="writing")?<aside className="mock-fullscreen-notice" aria-label="Fullscreen reminder"><span>Continue your mock in fullscreen</span><button type="button" onClick={()=>void ensureExamFullscreen()}><Maximize2 size={16}/> Continue in fullscreen</button></aside>:null;
  if(loading)return <LoadingIndicator/>;
  if(!data)return <main className="mock-loading"><span>FULL MOCK</span><b>{message||"Mock unavailable."}</b><AnimatedBackButton onClick={()=>router.push("/dashboard")} ariaLabel="Back to dashboard"/></main>;
 
@@ -194,8 +199,8 @@ export default function FullMockPage(){
   for(const q of passage?.questions||[]){const last=groups[groups.length-1];if(!last||last[0]?.instruction!==q.instruction)groups.push([q]);else last.push(q)}
   const partAnswered=(passage?.questions||[]).filter(q=>rAnswers[String(q.number)]).length;
   const totalAnswered=Object.values(rAnswers).filter(Boolean).length;
-  return <main className="cr-shell mock-reading-shell">
-   <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div></div><div className="cr-head-end"><span className="cr-head-practice">FULL MOCK · PART {String(rPassage).padStart(2,"0")}</span><button className="cr-fullscreen" onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
+  return <main className="cr-shell mock-reading-shell">{fullscreenNotice}
+   <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div></div><div className="cr-head-end"><span className="cr-head-practice">FULL MOCK · PART {String(rPassage).padStart(2,"0")}</span><button className="cr-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
    <div className="cr-instructions"><div><small>FULL MOCK · IELTS READING</small><p>3 passages <span>·</span> 40 questions <span>·</span> 60-minute countdown</p></div><div className="cr-tools"></div></div>
    <div className="cr-mobile-tabs"><button className={rTab==="passage"?"active":""} onClick={()=>setRTab("passage")}>Passage</button><button className={rTab==="questions"?"active":""} onClick={()=>setRTab("questions")}>Questions</button></div>
    <div className="cr-split">
@@ -215,8 +220,8 @@ export default function FullMockPage(){
   </main>
  }
 
- if(stage==="writing")return <main className="writing-shell mock-writing-shell">
-  <header className="writing-topbar"><div className="writing-back-slot"><LockKeyhole size={17}/></div><div className="writing-top-center"><b>FULL MOCK · WRITING</b></div><div className="writing-top-meta"><strong className={wRemaining<=300?"urgent":""}><Clock3 size={16}/>{fmt(wRemaining)}</strong><button className="writing-fullscreen" onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
+ if(stage==="writing")return <main className="writing-shell mock-writing-shell">{fullscreenNotice}
+  <header className="writing-topbar"><div className="writing-back-slot"><LockKeyhole size={17}/></div><div className="writing-top-center"><b>FULL MOCK · WRITING</b></div><div className="writing-top-meta"><strong className={wRemaining<=300?"urgent":""}><Clock3 size={16}/>{fmt(wRemaining)}</strong><button className="writing-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
   <section className="writing-toolbar"><div className="mock-writing-tabs"><button className={"writing-task-chip "+(wTask===1?"active":"")} onClick={()=>setWTask(1)}>Writing Task 1</button><button className={"writing-task-chip "+(wTask===2?"active":"")} onClick={()=>setWTask(2)}>Writing Task 2</button><span className="writing-rule">Task 1 + Task 2 · 60 minutes total</span></div><div className="writing-controls"><button className="submit" disabled={busy||!w1.trim()||!w2.trim()} onClick={()=>submitWriting(false)}><Send size={16}/>{busy?"Submitting…":"Submit Writing"}</button></div></section>
   <div className="writing-stage">
    <section className="writing-task-pane"><div className="writing-pane-head"><span>QUESTION</span><b>{task.label}</b></div><div className="writing-paper"><p className="writing-time-note">Recommended: about {Math.round(Number(task.recommended_seconds||0)/60)} minutes.</p>{wTask===2&&<p className="writing-topic-note">Write about the following topic:</p>}<div className="writing-prompt">{task.prompt}</div>{task.visual?.kind==="table"&&<div className="mock-writing-table-wrap"><table className="mock-writing-table"><thead><tr>{task.visual.headers.map((h:string)=><th key={h}>{h}</th>)}</tr></thead><tbody>{task.visual.rows.map((row:string[],i:number)=><tr key={i}>{row.map((c,j)=><td key={j}>{c}</td>)}</tr>)}</tbody></table></div>}{(task.instructions||[]).map((x:string,i:number)=><p className="writing-instruction" key={i}>{x}</p>)}<p className="writing-min">Write at least {task.min_words} words.</p></div></section>
