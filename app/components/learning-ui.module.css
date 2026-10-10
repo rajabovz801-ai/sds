@@ -13,9 +13,9 @@
 .start{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;width:100%;border:0;border-radius:9px;background:#2864e8;color:white;font:600 14px/1.4 Arial,sans-serif;cursor:pointer}
 .start:hover{background:#1f55cb}
 /* Shared compact Start-style return control; legacy page rules must not recolor it. */
-.back:global(.ark-back-control){width:fit-content!important;max-width:100%;min-width:104px;min-height:36px!important;height:36px!important;padding:0 12px!important;justify-self:start!important;align-self:center!important;gap:8px!important;white-space:nowrap!important;border:0!important;border-radius:9px!important;background:#2864e8!important;color:#fff!important;font:600 14px/1.4 Arial,sans-serif!important;display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 auto;position:relative;text-decoration:none!important;box-shadow:none!important;transform:none!important;transition:background .15s ease}
+.back:global(.ark-back-control){width:fit-content!important;max-width:100%;min-width:104px;min-height:36px!important;height:36px!important;padding:0 12px!important;justify-self:start!important;align-self:center!important;gap:8px!important;white-space:nowrap!important;border:0!important;border-radius:9px!important;background:#1d4ed8!important;color:#fff!important;font:700 14px/1.4 Arial,sans-serif!important;display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 auto;position:relative;text-decoration:none!important;box-shadow:none!important;transform:none!important;transition:background .15s ease}
 .back:global(.ark-back-control) svg{width:16px!important;height:16px!important;flex:none!important;position:static!important;color:inherit!important}
-.back:global(.ark-back-control):hover{background:#1f55cb!important}
+.back:global(.ark-back-control):hover{background:#1e40af!important}
 .start:focus-visible,.back:global(.ark-back-control):focus-visible{outline:3px solid #97b7ff!important;outline-offset:3px}
 @media(max-width:760px){.back:global(.ark-back-control){min-width:100px;min-height:36px!important;padding:0 12px!important}}
 @media(prefers-reduced-motion:reduce){.back:global(.ark-back-control){transition:none}}
