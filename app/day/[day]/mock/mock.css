@@ -124,7 +124,3 @@
 .mock-answer-review{text-align:left;margin:24px 0}.mock-answer-review details{border:1px solid #d8e1eb;border-radius:10px;margin:10px 0;background:#fff}.mock-answer-review summary{padding:16px;cursor:pointer;font-weight:700}.mock-review-scroll{overflow-x:auto}.mock-answer-review table{width:100%;border-collapse:collapse;font-size:14px;min-width:480px}.mock-answer-review th,.mock-answer-review td{padding:12px;text-align:left;border-top:1px solid #e2e8f0;vertical-align:top}.mock-answer-review th small{display:block;max-width:280px;font-weight:400;margin-top:5px;line-height:1.5}.mock-answer-review .correct{color:#166534}.mock-answer-review .wrong{color:#b91c1c}.mock-answer-review .empty{color:#64748b}
 /* Full Mock has two panes and no draggable divider. */
 @media(min-width:851px){html .mock-writing-shell .writing-stage{grid-template-columns:minmax(0,46%) minmax(0,1fr)}}
-
-.mock-fullscreen-notice{position:fixed;z-index:90;right:18px;bottom:76px;display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #c8d6ea;border-radius:8px;background:#fff;box-shadow:0 3px 14px #14233816;font:13px/1.4 Arial,Helvetica,sans-serif;color:#243850}
-.mock-fullscreen-notice button{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:6px;padding:9px 12px;background:#2563eb;color:white;font-weight:700;cursor:pointer}
-@media(max-width:780px){.mock-fullscreen-notice{right:9px;left:9px;bottom:112px;flex-wrap:wrap;justify-content:center;font-size:12px}}

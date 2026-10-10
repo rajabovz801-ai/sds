@@ -6034,16 +6034,6 @@ html[data-ark-theme="dark"] .mock-answer-review .wrong {
 html[data-ark-theme="dark"] .mock-answer-review .empty {
     color: #A7B6C8
 }
-html[data-ark-theme="dark"] .mock-fullscreen-notice {
-    border: 1px solid #29384A;
-    background: #152131;
-    box-shadow: 0 3px 14px #00000026;
-    color: #EAF0F7
-}
-html[data-ark-theme="dark"] .mock-fullscreen-notice button {
-    background: #3B73E8;
-    color: #EAF0F7
-}
 html[data-ark-theme="dark"] .cr-shell:not(.cr-overview) {
     background: #0F1926
 }
