@@ -55,6 +55,6 @@ test("Full Mock student plan is LRW only",()=>{
  assert.ok(mockBlock.includes('name:"Reading"'));
  assert.ok(mockBlock.includes('name:"Writing"'));
  assert.ok(!mockBlock.includes('name:"Speaking"'));
- assert.ok(dayPage.includes("Three exam sections on your scheduled mock day."));
+ assert.ok(dayPage.includes('sunday?"3 sections":"6 modules"'));
  assert.ok(dayPage.includes('sunday?[regular[1],regular[0],regular[4]]:regular'));
 });

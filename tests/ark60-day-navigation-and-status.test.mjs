@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import {readingPassageForDay} from "../lib/ark60-reading-plan.ts";
 
 const read=(path)=>fs.readFileSync(new URL("../"+path,import.meta.url),"utf8");
 
@@ -8,9 +9,12 @@ test("day plan and Reading picker use one shared passage schedule",()=>{
   const plan=read("lib/ark60-reading-plan.ts");
   const day=read("app/day/[day]/page.tsx");
   const reading=read("app/day/[day]/reading/page.tsx");
-  assert.match(plan,/1:\s*\[1, 5, 8, 12, 15\]/);
-  assert.match(plan,/2:\s*\[2, 6, 9, 13, 16\]/);
-  assert.match(plan,/3:\s*\[3, 7, 10, 14, 17\]/);
+  let regularIndex=0;
+  for(let n=1;n<=60;n++){
+    const sunday=new Date(Date.UTC(2026,9,n)).getUTCDay()===0;
+    assert.equal(readingPassageForDay(n),sunday?null:(regularIndex++%3)+1);
+  }
+  for(const n of [0,61,1.5,NaN])assert.equal(readingPassageForDay(n),null);
   assert.match(day,/readingPassageForDay\(day\)/);
   assert.match(reading,/readingPassageForDay\(day\)/);
   assert.doesNotMatch(day,/P2_DAYS|P3_DAYS/);

@@ -22,8 +22,8 @@ test("Reading and Writing use one 60 minute countdown each",()=>{
  assert.ok(api.includes("reading_remaining:3600"));
  assert.ok(api.includes("writing_remaining:3600"));
  assert.ok(page.includes("useState(3600)"));
- assert.ok(page.includes("reading_remaining||3600"));
- assert.ok(page.includes("writing_remaining||3600"));
+ assert.ok(page.includes("reading_remaining??3600"));
+ assert.ok(page.includes("writing_remaining??3600"));
  assert.ok(page.includes("60 minutes total"));
 });
 

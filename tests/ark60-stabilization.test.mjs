@@ -383,18 +383,16 @@ test("Speaking reviews appear in student notifications",()=>{
 });
 
 
-test("Speaking intro uses compact ARK challenge hierarchy without duplicate brand title",()=>{
+test("Speaking intro uses shared compact entry and explicit preview without real writes",()=>{
   const page=read("app/day/[day]/speaking/page.tsx");
-  const css=read("app/day/[day]/speaking/speaking.css");
+  const entry=read("app/components/lesson-entry.tsx");
   assert.doesNotMatch(page,/ARK IELTS SPEAKING/);
-  assert.match(page,/DAY \{pad\(day\)\} · FULL SPEAKING/);
-  assert.match(page,/sp-preview-banner/);
-  assert.match(page,/No real submission or coin will be saved/);
+  assert.match(page,/<LessonEntry kind="Speaking"/);
+  assert.match(page,/preview=\{data.preview\}/);
+  assert.match(entry,/Teacher preview/);
+  assert.match(entry,/results and coins are not saved/);
   assert.match(page,/className="sp-back"/);
-  assert.match(page,/stage==="intro"\|\|stage==="part1"/);
-  assert.match(css,/\.sp-start\{width:340px/);
-  assert.match(css,/\.sp-intro\{max-width:650px/);
-  assert.match(css,/\.sp-back \.ark-back-icon/);
+  assert.match(page,/stage==="intro"&&<LessonEntry/);
 });
 
 
@@ -428,7 +426,8 @@ test("challenge Listening has no name ID Telegram or external reporting flow",()
   const api=read("app/api/challenge-listening/route.ts");
   assert.doesNotMatch(page,/studentName|studentId|Telegram|Rajabov_Zuhriddin|Bilimly/);
   assert.doesNotMatch(api,/telegram|GOOGLE_SCRIPT|listening-report|student_name|student_id\s*=\s*String\(body/);
-  assert.match(page,/Start Listening/);
+  assert.match(page,/<LessonEntry kind="Listening"/);
+  assert.match(read("app/components/lesson-entry.tsx"),/Start \{kind\}/);
   assert.match(page,/Review answers/);
   assert.match(page,/Your answer:/);
   assert.match(page,/Correct:/);
