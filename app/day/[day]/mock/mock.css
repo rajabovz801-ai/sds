@@ -148,3 +148,5 @@
 .mock-reading-shell .cr-answer-count{font-size:12px!important}
 .mock-reading-shell .cr-submit{font-size:12px!important}
 .mock-reading-shell .cr-mobile-tabs button{font-size:12px!important}
+
+.mock-answer-review{text-align:left;margin:24px 0}.mock-answer-review details{border:1px solid #d8e1eb;border-radius:10px;margin:10px 0;background:#fff}.mock-answer-review summary{padding:16px;cursor:pointer;font-weight:700}.mock-review-scroll{overflow-x:auto}.mock-answer-review table{width:100%;border-collapse:collapse;font-size:14px;min-width:480px}.mock-answer-review th,.mock-answer-review td{padding:12px;text-align:left;border-top:1px solid #e2e8f0;vertical-align:top}.mock-answer-review th small{display:block;max-width:280px;font-weight:400;margin-top:5px;line-height:1.5}.mock-answer-review .correct{color:#166534}.mock-answer-review .wrong{color:#b91c1c}.mock-answer-review .empty{color:#64748b}

@@ -5988,6 +5988,22 @@ html[data-ark-theme="dark"] .mock-entry :is(.mock-entry-card>button,.mock-result
 html[data-ark-theme="dark"] .mock-entry :is(.mock-entry-card>button,.mock-result-card>button):hover:not(:disabled) {
     background: #3B73E8
 }
+html[data-ark-theme="dark"] .mock-answer-review details {
+    border: 1px solid #29384A;
+    background: #152131
+}
+html[data-ark-theme="dark"] .mock-answer-review th,html[data-ark-theme="dark"] .mock-answer-review td {
+    border-top: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .mock-answer-review .correct {
+    color: #83D6AE
+}
+html[data-ark-theme="dark"] .mock-answer-review .wrong {
+    color: #F3A0A0
+}
+html[data-ark-theme="dark"] .mock-answer-review .empty {
+    color: #A7B6C8
+}
 html[data-ark-theme="dark"] .cr-shell:not(.cr-overview) {
     background: #0F1926
 }

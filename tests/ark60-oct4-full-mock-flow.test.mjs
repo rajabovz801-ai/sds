@@ -28,7 +28,7 @@ test("Reading and Writing use one 60 minute countdown each",()=>{
 });
 
 test("Section results remain hidden until final mock result",()=>{
- assert.ok(api.includes("hidden_result:graded"));
+ assert.ok(api.includes("hidden_result:{...graded,answers}"));
  assert.ok(page.includes("setPreviewListening(obj.hidden_result)"));
  assert.ok(page.includes("setPreviewReading(obj.hidden_result)"));
  assert.ok(page.includes("Section scores stay hidden until the Writing assessment is finished."));

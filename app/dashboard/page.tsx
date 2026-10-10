@@ -85,6 +85,7 @@ export default function Dashboard(){
  const [today,setToday]=useState("2026-09-30");
  const [clock,setClock]=useState(Date.now());
  const [selected,setSelected]=useState(1);
+ const [previewMockDay,setPreviewMockDay]=useState<number|null>(null);
  const [view,setView]=useState("Dashboard");
  const [sidebar,setSidebar]=useState(false);
  const [month,setMonth]=useState<"all"|"oct"|"nov">("oct");
@@ -164,6 +165,14 @@ export default function Dashboard(){
   return()=>window.clearInterval(id);
  },[view,stats?.student.first_name]);
 
+ useEffect(()=>{
+  let active=true;setPreviewMockDay(null);
+  if(!stats?.preview||!DAYS[selected-1]?.mock)return;
+  fetch("/api/challenge-mock?action=availability&day="+selected,{credentials:"same-origin",cache:"no-store"})
+   .then(async r=>r.ok?await r.json():null).then(value=>{if(active&&value?.published)setPreviewMockDay(selected)}).catch(()=>{});
+  return()=>{active=false};
+ },[selected,stats?.preview]);
+
  async function exit(){
   if(stats){
    try{await fetch("/api/ark60",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"logout"})})}catch{}
@@ -187,7 +196,7 @@ export default function Dashboard(){
 
  const chosen=DAYS[selected-1];
  const live=progressUnlocked(chosen.n,stats,today,clock);
- const chosenRequired=stats?.required_by_day?.[String(chosen.n)]||[];
+ const chosenRequired=preview&&previewMockDay===chosen.n?["listening","reading","writing"]:stats?.required_by_day?.[String(chosen.n)]||[];
  const display=useMemo(()=>modulesFor(chosen),[chosen]);
  const moduleReady=(name:string)=>chosenRequired.includes(name.toLowerCase());
  const navigation=[

@@ -1,0 +1,41 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import ts from 'typescript';
+const api=fs.readFileSync('app/api/challenge-mock/route.ts','utf8');
+const sql=fs.readFileSync('supabase/migrations/20261010_oct11_full_mock_draft.sql','utf8');
+const payloads=[...sql.matchAll(/'((?:[^']|'')*)'::jsonb/g)].map(m=>JSON.parse(m[1].replaceAll("''","'")));
+const listening=payloads[0],writing=payloads[1];
+const reading=[0,1,2].map(i=>({questions:payloads[2+i*3],answer_key:payloads[3+i*3]}));
+const code=ts.transpileModule(api.slice(api.indexOf('function norm('),api.indexOf('const WRITING_SCHEMA=')),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+const funcs=new Function('getServiceSupabase',code+';return {source,gradeListening,gradeReading,answerReview,safeListening,safeReading};');
+const f=funcs(()=>{});
+test('Day 11 keeps all five material records in draft, without live attempt mutations',()=>{
+ assert.equal((sql.match(/values\(11,/g)||[]).length,5);
+ assert.doesNotMatch(sql,/status='published'|values\(4,|ark60_.*attempt/);
+ assert.equal(writing.tasks.length,2);
+ assert.equal(listening.total_questions,40);
+ assert.deepEqual(reading.flatMap(p=>p.questions.map(q=>q.number)),Array.from({length:40},(_,i)=>i+1));
+ assert.equal(reading[0].answer_key[2][0],'TRUE');
+});
+test('Perfect keys, alternatives and reversed Listening pairs score 40; duplicate pair loses one',()=>{
+ const a=Object.fromEntries(Object.entries(listening.answer_key).map(([q,v])=>[q,v[0]]));
+ Object.assign(a,{'1':'CAFÉ','2':'6 months','11':'D','12':'B','13':'C','14':'A','31':'ax'});
+ assert.equal(f.gradeListening(listening,a).score,40);
+ a['12']='D';assert.equal(f.gradeListening(listening,a).score,39);
+ const r=Object.fromEntries(reading.flatMap(p=>p.questions.map((q,i)=>[q.number,p.answer_key[i][0].toLowerCase()])));
+ assert.equal(f.gradeReading(reading,r).score,40);
+ const review=f.answerReview({listening:{payload:listening},reading},a,r);
+ assert.equal(review.listening.filter(x=>x.status==='correct').length,39);
+ assert.equal(review.reading.filter(x=>x.status==='correct').length,40);
+ assert.equal(f.safeListening(listening).answer_key,undefined);
+ assert.equal(f.safeReading({...reading[0],passage_text:'text'}).answer_key,undefined);
+});
+test('Draft source remains inaccessible to regular viewers after the calendar date; preview can load it',async()=>{
+ const db={from(table){let module;let statuses=[];const b={select(){return b},eq(k,v){if(k==='module')module=v;return b},in(k,v){statuses=v;return b},maybeSingle(){return Promise.resolve({data:statuses.includes('draft')?{status:'draft',payload:module==='listening'?listening:writing}:null})},order(){return Promise.resolve({data:statuses.includes('draft')?reading:[]})}};return b}};
+ const ff=funcs(()=>db);
+ assert.equal(await ff.source(11),null);
+ assert.ok(await ff.source(11,true));
+ assert.match(api,/source\(day,isPreview\(student\)\)/);
+ assert.match(api,/viewer&&isPreview\(viewer\)\?await source\(day,true\):await source\(day\)/);
+});
