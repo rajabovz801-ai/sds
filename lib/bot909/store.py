@@ -17,6 +17,10 @@ class Store:
             with urlopen(req,timeout=15) as response:
                 return json.loads(response.read() or b'null')
         except HTTPError as error:
+            try:failure=json.loads(error.read())
+            except Exception:failure={}
+            rules={'DEADLINE_CLOSED':'🔒 Hozir qabul yopilgan. Vazifalar 21:00 gacha qabul qilinadi.','INVALID_MATERIAL':'Bu vazifa hozir mavjud emas. Asosiy menyudan qayta oching.','RETELL_NOT_OPEN':'🎙 Retelling 16:00 dan qabul qilinadi.','MATERIAL_LOCKED':'Bu testdan natija topshirilgan. PDF, kod va javob kalitini o‘zgartirib bo‘lmaydi.','DUPLICATE_CODE':'Bu kod boshqa kunda band.','INVALID_ANSWERS':'Javoblarni tekshiring: 1a2b3c shaklida yuboring.','INVALID_MATERIAL_EDIT':'Tahrirlash ma’lumotlarini tekshiring.'}
+            if failure.get('message') in rules:raise ValueError(rules[failure['message']]) from None
             # Never include credentials or full user payloads in logs.
             raise RuntimeError('Database request failed: '+str(error.code)) from None
     def get(self, table, **query):return self.call('GET',table,query) or []

@@ -1,7 +1,7 @@
 """Owner-only import of reviewed, packaged challenge PDFs and answer keys."""
 import base64,hashlib,json
 from pathlib import Path
-from .core import OWNER
+from .core import OWNER,CHALLENGE_GROUP
 ROOT=Path(__file__).with_name('materials')
 
 def bundle():
@@ -14,6 +14,7 @@ def import_day(db,tg,day,group_ids):
     if not row or not group_ids:raise ValueError('Kun yoki guruh tanlanmagan.')
     groups=[]
     for gid in group_ids:
+        if gid!=CHALLENGE_GROUP:raise ValueError('Hozir materiallar faqat 909 uchun yuklanadi.')
         g=db.one('cb909_groups',chat_id='eq.'+str(gid))
         if not g or not g['active'] or not g.get('start_date'):raise ValueError('Faol guruh topilmadi.')
         existing=db.one('cb909_materials',group_id='eq.'+str(gid),cycle_start='eq.'+g['start_date'],day='eq.'+str(day))

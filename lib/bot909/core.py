@@ -3,6 +3,7 @@ import re
 from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 OWNER = 5170628705
+CHALLENGE_GROUP = -1002319452850
 TZ = ZoneInfo('Asia/Tashkent')
 ANSWER_HELP = '\n\nQuyidagi shakllardan birida yuboring:\n1a2b3c\n1A 2B 3C\n1-A, 2-B, 3-C'
 
@@ -68,3 +69,8 @@ def challenge_start(group, settings=None):
 
 def retell_caption(day,has_audio=True):
     return (f'🎙 {day}-KUN · RETELLING\n\nMatnni o‘qing, '+('audioni tinglang va ' if has_audio else '')+'o‘z so‘zlaringiz bilan qayta hikoya qilib @ArkTutorBot ga yuboring.\n\n⏰ 21:00 gacha\n💬 Yordam: @rustam_usmon0v')
+
+
+def valid_name(value):
+    parts=value.split()
+    return 2<=len(parts)<=6 and len(value)<=80 and all(any(c.isalpha() for c in part) for part in parts) and all(c.isalpha() or c in " '-’‘ʻʼ" for c in value)
