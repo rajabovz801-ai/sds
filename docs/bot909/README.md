@@ -16,7 +16,7 @@ Seven days, Asia/Tashkent. PDFs at 08:00, retelling at 16:00, daily reports at 2
 
 Persistent outbox deduplication prevents overlapping workers from deliberately sending the same scheduled item twice. Failed or interrupted sends remain visible in the admin delivery panel; ambiguous sends are not automatically retried because Telegram has no idempotency key. A scheduler outage can delay delivery. After 21:00, missed tests/retelling are not posted retroactively. Daily reports include absent submissions. Test keys are admin-supplied; they are not guessed from a missing PDF. Currently answer options are A–D.
 
-Incoming private messages are deleted after processing; the previous menu is edited or replaced. Retelling originals are forwarded as media to the owner before deletion. Admin lists paginate the first 500 registered students and last 30 delivery events. Daily reports are split into complete HTML lines.
+Incoming private messages and previous bot prompts remain in the chat. Text input receives a new response; inline button navigation edits the current menu. Failed edits send a new message without deleting the old one. Retelling media is forwarded to the owner. /start welcomes users and asks new users for their full name; returning users can continue or change their name. Admin lists paginate the first 500 registered students and last 30 delivery events. Daily reports are split into complete HTML lines.
 
 ## Verification
 

@@ -26,6 +26,12 @@ class Rules(unittest.TestCase):
             with patch('lib.bot909.store.urlopen',return_value=io.BytesIO(b'[{"id":true}]')) as request:
                 self.assertEqual(Store().one('cb909_settings',id='eq.true'),{'id':True})
                 self.assertTrue(request.call_args.args[0].full_url.startswith('https://svdigxqdivcmljirjwhk.supabase.co/rest/v1/'))
+    def test_start_welcomes_and_preserves_previous_messages(self):
+        db=DB();tg=TG();db.users[123]={'telegram_id':123,'step':'name','state':{},'menu_id':9}
+        Bot(db,tg).handle({'message':{'from':{'id':123},'chat':{'id':123,'type':'private'},'text':'/start'}})
+        sent=[p for method,p in tg.calls if method=='sendMessage']
+        self.assertIn('7 kunlik challenge botiga xush kelibsiz',sent[0]['text'])
+        self.assertFalse(any(method in ('deleteMessage','editMessageText') for method,p in tg.calls))
     def test_formats(self):
         for s in ('1a2b3c','1A 2B 3C','!1a,2b;3c','ABC','3c\n1a\n2b'):self.assertEqual(parse_answers(s,3),list('ABC'))
     def test_invalid(self):

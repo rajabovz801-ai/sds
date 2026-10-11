@@ -51,10 +51,6 @@ async def webhook(request:Request,path:str=''):
         try:bot.handle(update)
         except ValueError as error:bot.display(bot.user(uid),str(error))
         db.patch('cb909_updates',{'status':'done'},update_id='eq.'+str(update['update_id']))
-        m=update.get('message') or {}
-        if m.get('chat',{}).get('type')=='private':
-            try:tg.call('deleteMessage',chat_id=uid,message_id=m['message_id'])
-            except RuntimeError:pass
         drain(db,tg);return {'ok':True}
     except Exception:
         # No token, message payload, or secret is returned in errors.

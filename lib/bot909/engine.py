@@ -20,15 +20,12 @@ class Bot:
     def step(self,u,step,state=None):return self.save(u,step=step,state=state or {})
     def display(self,u,text,markup=None):
         p=dict(chat_id=u['telegram_id'],text=text,parse_mode='HTML',reply_markup=markup or keys([BACK]))
-        if u.get('menu_id'):
+        if getattr(self,'edit_menu',False) and u.get('menu_id'):
             try:
                 self.tg.call('editMessageText',message_id=u['menu_id'],**p);return
             except RuntimeError:pass
         sent=self.tg.call('sendMessage',**p)
-        old=u.get('menu_id');self.save(u,menu_id=sent['message_id'])
-        if old:
-            try:self.tg.call('deleteMessage',chat_id=u['telegram_id'],message_id=old)
-            except RuntimeError:pass
+        self.save(u,menu_id=sent['message_id'])
     def subscribed(self,uid):
         c=self.settings()
         if not c.get('channel_id') or not c.get('channel_url'):return False
@@ -61,6 +58,7 @@ class Bot:
         self.db.call('POST','cb909_outbox',{'on_conflict':'dedupe'},dict(dedupe=key,chat_id=uid,method='sendMessage',payload=dict(text=text,parse_mode='HTML',**(extra or {}))),'resolution=ignore-duplicates,return=representation')
     def handle(self,update):
         member=update.get('my_chat_member');m=update.get('message') or {};cb=update.get('callback_query') or {}
+        self.edit_menu=bool(cb)
         actor=(member or cb or m).get('from') or {};uid=actor.get('id')
         if not uid:return
         if member:
@@ -84,7 +82,12 @@ class Bot:
             self.admin(u,action or 'a:home');return
         if uid==OWNER and u.get('step','').startswith('admin:') and not text.startswith('/start') and action!='home':
             self.admin_input(u,m);return
-        if text.startswith('/start') or action=='rename':
+        if text.startswith('/start'):
+            welcome='👋 <b>7 kunlik challenge botiga xush kelibsiz!</b>\n\n🏛 <b>ARK EDUCATION</b>\n\nHar kuni grammatika testini ishlang va retelling yuboring. Natijalaringiz botda saqlanadi.\n\n📄 Test — <b>08:00</b>\n🎙 Retelling mavzusi — <b>16:00</b>\n⏰ Vazifalar — <b>21:00 gacha</b>\n🕒 O‘zbekiston vaqti'
+            if u.get('name'):
+                self.step(u,'home');self.display(u,welcome+'\n\n👤 '+safe(u['name'])+'\nDavom etish uchun tugmani bosing.',keys([('🚀 Davom etish','home')],[('✏️ Ismni tuzatish','rename')]));return
+            self.step(u,'name');self.display(u,welcome+'\n\n👤 <b>Ism va familiyangizni yozing.</b>\nMasalan: <i>Rustam Usmonov</i>',keys());return
+        if action=='rename':
             self.step(u,'name');self.display(u,'👤 <b>Ism va familiyangizni yozing.</b>\n\nMasalan: Rustam Usmonov',keys());return
         if u['step']=='name' and text:
             name=' '.join(text.split())
