@@ -30,11 +30,12 @@ async def webhook(request:Request,path:str=''):
             elif action!='inspect':return JSONResponse({'ok':False},status_code=400)
             stage='getMe';me=tg.call('getMe')
             stage='getWebhookInfo';info=tg.call('getWebhookInfo')
-            stage='database';db=Store();settings=db.one('cb909_settings',id='eq.true') or {}
+            stage='database_init';db=Store()
+            stage='database_read';settings=db.one('cb909_settings',id='eq.true') or {}
             return {'ok':True,'username':me['username'],'webhook':info['url'],'pending':info['pending_update_count'],'last_error':info.get('last_error_message'),'challenge_active':settings.get('active',False),'menu':tg.call('getChatMenuButton'),'owner_commands':tg.call('getMyCommands',scope={'type':'chat','chat_id':OWNER})}
         except Exception as error:
             diagnostic=str(error) if isinstance(error,RuntimeError) else type(error).__name__
-            return JSONResponse({'ok':False,'error':diagnostic,'stage':stage,'reason_type':type(getattr(error,'reason',None)).__name__},status_code=503)
+            return JSONResponse({'ok':False,'error':diagnostic,'stage':stage,'reason_type':type(getattr(error,'reason',None)).__name__,'category':'header' if 'header' in str(error).lower() else 'url' if 'url' in str(error).lower() else 'other'},status_code=503)
     if not authorized(request.headers.get('x-telegram-bot-api-secret-token'),'TELEGRAM_WEBHOOK_SECRET'):
         return JSONResponse({'ok':False},status_code=401)
     body=await request.body()
