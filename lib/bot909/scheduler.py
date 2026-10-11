@@ -74,7 +74,9 @@ def drain(db,tg,limit=8):
         # Do not let one recipient exhaust Telegram's chat/group rate limits.
         recent=db.get('cb909_outbox',chat_id='eq.'+str(item['chat_id']),status='eq.sent',sent_at='gt.'+(local_now()-timedelta(seconds=60)).isoformat(),order='sent_at.desc',limit=20)
         if len(recent)>=20:continue
-        if recent and (local_now()-__import__('datetime').datetime.fromisoformat(recent[0]['sent_at'])).total_seconds()<1:continue
+        if recent:
+            gap=(local_now()-__import__('datetime').datetime.fromisoformat(recent[0]['sent_at'])).total_seconds()
+            if gap<1:time.sleep(1.05-gap)
         attempts=item.get('attempts',0)+1
         claim=db.patch('cb909_outbox',{'status':'sending','claimed_at':local_now().isoformat(),'attempts':attempts},id='eq.'+item['id'],status='eq.pending')
         if not claim:continue
