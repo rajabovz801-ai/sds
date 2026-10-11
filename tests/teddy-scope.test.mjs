@@ -4,16 +4,16 @@ import { readFileSync, existsSync } from "node:fs";
 
 const read = path => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("Teddy keeps student login and staff agents while removing the daily report scheduler", () => {
+test("909 replaces legacy registration while preserving staff agents", () => {
   const config = JSON.parse(read("vercel.json"));
   const manager = read("app/api/telegram/manager/route.js");
   const legacy = read("app/api/telegram/route.js");
   const english = read("app/api/telegram/english/route.js");
   assert.deepEqual(config.crons || [], []);
-  assert.match(manager, /handlePrivateRegistration/);
-  assert.match(manager, /handleStaffManagerMessage/);
+  assert.match(manager, /status:410/);
+  assert.equal(existsSync(new URL("../app/api/telegram/teacher/route.js", import.meta.url)), true);
   assert.doesNotMatch(manager, /forwardToLegacy|answerGeneralMessage/);
-  assert.match(english, /sendPlatformEntry/);
+  assert.match(english, /status:410/);
   assert.doesNotMatch(legacy, /runAgent|answerGeneralMessage|assessEssay|createFeedbackPdf/);
   assert.equal(existsSync(new URL("../app/api/daily-homework-report/route.js", import.meta.url)), false);
 });
