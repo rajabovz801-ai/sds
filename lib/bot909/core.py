@@ -64,3 +64,7 @@ def media(message):
 
 def challenge_start(group, settings=None):
     return group.get('start_date') or (settings or {}).get('start_date')
+
+
+def retell_caption(day,has_audio=True):
+    return (f'🎙 {day}-KUN · RETELLING\n\nMatnni o‘qing, '+('audioni tinglang va ' if has_audio else '')+'o‘z so‘zlaringiz bilan qayta hikoya qilib @ArkTutorBot ga yuboring.\n\n⏰ 21:00 gacha\n💬 Yordam: @rustam_usmon0v')

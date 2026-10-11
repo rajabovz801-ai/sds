@@ -1,7 +1,7 @@
 """Durable group-local schedules, private HTML snapshots and safe delivery retries."""
 from datetime import date,timedelta
 import time
-from .core import OWNER,local_now,day_number,test_caption,challenge_start
+from .core import OWNER,local_now,day_number,test_caption,challenge_start,retell_caption
 from .engine import safe
 from .reports import group_report,summary,render_html
 from .store import TelegramError
@@ -35,7 +35,7 @@ def schedule(db,now=None):
             if now.hour>=15 and (not (mat.get('retell_photo_id') or mat.get('retell_text')) or not mat.get('retell_audio_id')):
                 enqueue(db,prefix+':retell-warning',OWNER,'sendMessage',{'text':f'⚠️ {g["label"]} · {day}-kun: retelling matni/rasmi yoki namuna audio yetishmayapti. /admin → Test va retelling.'})
             if 16<=now.hour<21 and (mat.get('retell_photo_id') or mat.get('retell_text')):
-                text=f'🎙 {day}-KUN · RETELLING\n\nMatnni o‘qing, '+('audioni tinglang va ' if mat.get('retell_audio_id') else '')+'o‘z so‘zlaringiz bilan qayta hikoya qilib @ArkTutorBot ga yuboring.\n\n⏰ 21:00 gacha\n💬 Yordam: @rustam_usmon0v'
+                text=retell_caption(day,bool(mat.get('retell_audio_id')))
                 photo_key=prefix+':photo'
                 if mat.get('retell_photo_id'):enqueue(db,photo_key,g['chat_id'],'sendPhoto',{'photo':mat['retell_photo_id'],'caption':text})
                 else:enqueue(db,prefix+':retell',g['chat_id'],'sendMessage',{'text':text+'\n\n'+mat['retell_text']})

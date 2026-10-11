@@ -290,7 +290,8 @@ class Bot:
             if rights['status']!='administrator':raise ValueError('Botni kanalda admin qiling.')
             self.db.patch('cb909_settings',{'channel_id':cid,'channel_url':url},id='eq.true');self.admin(u,'a:home');return
         if step=='admin:date':
-            d=date.fromisoformat(text)
+            try:d=date.fromisoformat(text)
+            except ValueError:raise ValueError('Sanani YYYY-MM-DD shaklida yozing. Masalan: 2026-10-12.')
             if d<local_now().date():raise ValueError('Boshlanish sanasi o‘tmishda bo‘lmasin.')
             if self.settings().get('active'):raise ValueError('Avval challenge’ni to‘xtating; yangi sana keyingi bosqich uchun ishlatiladi.')
             self.db.patch('cb909_groups',{'start_date':text},chat_id='eq.'+str(s['group_id']));self.admin(u,'a:home');return
@@ -324,13 +325,13 @@ class Bot:
 
     def preview(self,u,mid):
         from .scheduler import enqueue
-        from .core import test_caption
+        from .core import test_caption,retell_caption
         from uuid import uuid4
         mat=self.db.one('cb909_materials',id='eq.'+mid)
         if not mat:raise ValueError('Material topilmadi.')
         prefix='preview:'+str(uuid4())
         enqueue(self.db,prefix+':pdf',OWNER,'sendDocument',{'document':mat['pdf_id'],'caption':test_caption(mat['day'],safe(mat.get('title') or 'Grammar Challenge'),safe(mat['code'])),'parse_mode':'HTML'})
-        if mat.get('retell_photo_id'):enqueue(self.db,prefix+':photo',OWNER,'sendPhoto',{'photo':mat['retell_photo_id'],'caption':f'🎙 {mat["day"]}-KUN · RETELLING · Admin ko‘rinishi'})
+        if mat.get('retell_photo_id'):enqueue(self.db,prefix+':photo',OWNER,'sendPhoto',{'photo':mat['retell_photo_id'],'caption':retell_caption(mat['day'],bool(mat.get('retell_audio_id')))})
         if mat.get('retell_audio_id'):
             kind=mat.get('retell_audio_kind') or 'audio';payload={kind:mat['retell_audio_id']}
             if mat.get('retell_photo_id'):payload['_after']=prefix+':photo'
