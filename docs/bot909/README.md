@@ -32,3 +32,9 @@ Local tests do not replace a production round trip: verify webhook secret reject
 Prior deployment: dpl_71ffYCS18Ur5xVhT9s3AkH1XFWFw, source 1d5ab8c1f5b00ffe68ddc996829f3ba11fd0e345. Challenge data lives separately in cb909_* tables; old student results were not deleted. Old jobs ark-business-proxy-process-due, ark-business-proxy-release-checking, teddy-outbox-sender and sa_teddy_attendance_18_tashkent are paused. Separate staff-agent, tracker and IELTS cleanup schedules remain active.
 
 For rollback: disable cb909-scheduler, restore the prior deployment and its legacy webhook at /api/telegram/english, then restore the four paused schedules if needed. Restoring a deployment alone does not restore the Telegram webhook. No credentials are committed. The temporary protected setup endpoint uses BOT909_SETUP_AUTH; its value is held only in deployment configuration.
+
+
+## Prepared October 12 release
+See REVIEW-20261011.md. Apply upgrade.sql with this release before using new fields. The packaged manifest contains reviewed keys; keep it server-side. POST protected setup action import_day accepts day and groups and uploads one owner copy, then creates published material records for the specified active groups. It refuses conflicting existing content. Never serve the answer manifest as a public asset. The test group is excluded from student selection and scheduled real-group messages. Photo and sample audio are separate linked messages, not a mixed album. This release has not been deployed or imported yet.
+
+Release 2026-10-11: group-local dates (909 Oct 12; 404 Oct 13), cycle-scoped codes, persistent private coin ledger, 21:00 HTML snapshots, delivery state diagnostics. Packaged 7 reviewed grammar PDFs and 909-only retelling PNG/original MP3 pairs. 404 retelling is pending owner materials.
