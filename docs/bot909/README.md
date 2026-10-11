@@ -25,7 +25,7 @@ Incoming private messages and previous bot prompts remain in the chat. Text inpu
 `npm run typecheck`
 `npm run build`
 
-Local tests do not replace a production round trip: verify webhook secret rejection, `/admin` denial from a second account, channel membership, group joining, PDF upload/publication, scheduled delivery and deadline behavior after deployment. Production cutover completed on 2026-10-11: @ArkTutorBot webhook points to https://ark-writing-bot.vercel.app/api/challenge_bot. Owner commands and the commands menu were verified through Telegram API. Challenge remains inactive until the owner configures the channel, groups, date and materials. Real student/admin chat interaction and real scheduled PDF/retelling posting require those inputs.
+Local tests do not replace a production round trip: verify webhook secret rejection, `/admin` denial from a second account, channel membership, group joining, PDF upload/publication, scheduled delivery and deadline behavior after deployment. Production cutover completed on 2026-10-11: @ArkTutorBot webhook points to https://ark-writing-bot.vercel.app/api/challenge_bot. Owner commands and the commands menu were verified through Telegram API. Release activated on 2026-10-11 after live group/channel permission checks and all material imports. 909 starts 2026-10-12; 404 starts 2026-10-13.
 
 ## Production recovery
 
@@ -35,6 +35,6 @@ For rollback: disable cb909-scheduler, restore the prior deployment and its lega
 
 
 ## Prepared October 12 release
-See REVIEW-20261011.md. Apply upgrade.sql with this release before using new fields. The packaged manifest contains reviewed keys; keep it server-side. POST protected setup action import_day accepts day and groups and uploads one owner copy, then creates published material records for the specified active groups. It refuses conflicting existing content. Never serve the answer manifest as a public asset. The test group is excluded from student selection and scheduled real-group messages. Photo and sample audio are separate linked messages, not a mixed album. This release has not been deployed or imported yet.
+See REVIEW-20261011.md. Apply upgrade.sql with this release before using new fields. The packaged manifest contains reviewed keys; keep it server-side. POST protected setup action import_day accepts day and groups and uploads one owner copy, then creates published material records for the specified active groups. It refuses conflicting existing content. Never serve the answer manifest as a public asset. The test group is excluded from student selection and scheduled real-group messages. Photo and sample audio are separate linked messages, not a mixed album. This release is deployed and imported. Real test-group delivery and the private HTML attachment were confirmed by Telegram message IDs.
 
 Release 2026-10-11: group-local dates (909 Oct 12; 404 Oct 13), cycle-scoped codes, persistent private coin ledger, 21:00 HTML snapshots, delivery state diagnostics. Packaged 7 reviewed grammar PDFs and 909-only retelling PNG/original MP3 pairs. 404 retelling is pending owner materials.
