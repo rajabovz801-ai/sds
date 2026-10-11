@@ -1,4 +1,7 @@
 import unittest
+import io,os
+from unittest.mock import patch
+from lib.bot909.store import Store
 from datetime import date,datetime
 from lib.bot909.core import parse_answers,accepts,TZ,OWNER
 from lib.bot909.engine import Bot
@@ -18,6 +21,11 @@ class TG:
         self.calls.append((method,p))
         return {'status':'member'} if method=='getChatMember' else {'message_id':1}
 class Rules(unittest.TestCase):
+    def test_empty_public_url_uses_database_host(self):
+        with patch.dict(os.environ,{'NEXT_PUBLIC_SUPABASE_URL':'','SUPABASE_SECRET_KEY':'fake'}):
+            with patch('lib.bot909.store.urlopen',return_value=io.BytesIO(b'[{"id":true}]')) as request:
+                self.assertEqual(Store().one('cb909_settings',id='eq.true'),{'id':True})
+                self.assertTrue(request.call_args.args[0].full_url.startswith('https://svdigxqdivcmljirjwhk.supabase.co/rest/v1/'))
     def test_formats(self):
         for s in ('1a2b3c','1A 2B 3C','!1a,2b;3c','ABC','3c\n1a\n2b'):self.assertEqual(parse_answers(s,3),list('ABC'))
     def test_invalid(self):

@@ -50,7 +50,7 @@ class Bot:
         return True
     def choose_group(self,u,groups=None):
         self.step(u,'group');groups=groups if groups is not None else self.db.get('cb909_groups',active='eq.true')
-        self.display(u,'🎓 <b>Guruhingizni tanlang.</b>\n\nGuruh tanlash majburiy.' if groups else '⏳ <b>909 guruh hali ulanmagan.</b>',keys(*[[( '🎓 '+g['label'],'g:'+str(g['chat_id']))] for g in groups],[BACK]))
+        self.display(u,'🎓 <b>Guruhingizni tanlang.</b>\n\nGuruh tanlash majburiy.' if groups else '⏳ <b>909 guruh hali ulanmagan.</b>',keys(*[[( '🎓 '+g.get('title',g['label']),'g:'+str(g['chat_id']))] for g in groups],[BACK]))
     def material(self,u):
         c=self.settings();now=local_now()
         if not c.get('start_date') or not c.get('active') or not accepts(date.fromisoformat(c['start_date']),now):raise ValueError('⏰ Vazifalar faqat challenge kuni 21:00 gacha qabul qilinadi.')
