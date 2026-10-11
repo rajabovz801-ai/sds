@@ -16,9 +16,10 @@ async def webhook(request:Request,path:str=''):
     if request.headers.get('x-bot909-setup'):
         if not authorized(request.headers.get('x-bot909-setup'),'BOT909_SETUP_AUTH'):
             return JSONResponse({'ok':False},status_code=401)
+        stage='request'
         try:
             action=(await request.json()).get('action')
-            tg=Telegram()
+            stage='token';tg=Telegram()
             if action=='connect':
                 url=os.environ['BOT909_WEBHOOK_URL'];secret=os.environ['TELEGRAM_WEBHOOK_SECRET']
                 if not url.startswith('https://') or not secret:raise ValueError('Invalid setup')
@@ -27,10 +28,13 @@ async def webhook(request:Request,path:str=''):
                 tg.call('setMyCommands',commands=[{'command':'start','description':'909 Challenge boshlash'}])
                 tg.call('setMyCommands',scope={'type':'chat','chat_id':OWNER},commands=[{'command':'start','description':'Challenge boshlash'},{'command':'admin','description':'909 admin panel'}])
             elif action!='inspect':return JSONResponse({'ok':False},status_code=400)
-            me=tg.call('getMe');info=tg.call('getWebhookInfo')
-            db=Store();settings=db.one('cb909_settings',id='eq.true') or {}
+            stage='getMe';me=tg.call('getMe')
+            stage='getWebhookInfo';info=tg.call('getWebhookInfo')
+            stage='database';db=Store();settings=db.one('cb909_settings',id='eq.true') or {}
             return {'ok':True,'username':me['username'],'webhook':info['url'],'pending':info['pending_update_count'],'last_error':info.get('last_error_message'),'challenge_active':settings.get('active',False),'menu':tg.call('getChatMenuButton'),'owner_commands':tg.call('getMyCommands',scope={'type':'chat','chat_id':OWNER})}
-        except Exception:return JSONResponse({'ok':False,'error':'Setup failed'},status_code=503)
+        except Exception as error:
+            diagnostic=str(error) if isinstance(error,RuntimeError) else type(error).__name__
+            return JSONResponse({'ok':False,'error':diagnostic,'stage':stage,'reason_type':type(getattr(error,'reason',None)).__name__},status_code=503)
     if not authorized(request.headers.get('x-telegram-bot-api-secret-token'),'TELEGRAM_WEBHOOK_SECRET'):
         return JSONResponse({'ok':False},status_code=401)
     body=await request.body()
