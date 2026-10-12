@@ -193,8 +193,34 @@ def day_status(day_num):
     return d
 
 def completed_mock_days(user,before=61):
-    rows=db("GET","ark60_mock_attempts",{"select":"day_number","student_id":"eq."+user["id"],"stage":"eq.completed","day_number":"lt."+str(before)})
-    return [int(row["day_number"]) for row in (rows or [])]
+    # A fully submitted mock counts for day progression even when AI Writing
+    # evaluation is still pending or has exhausted its retries. This does NOT
+    # invent a score or mark the grading itself as finished.
+    rows=db("GET","ark60_mock_attempts",{
+        "select":"day_number,stage,listening_submitted_at,reading_submitted_at,writing_submitted_at",
+        "student_id":"eq."+user["id"],"day_number":"lt."+str(before)
+    })
+    return sorted({
+        int(row["day_number"]) for row in (rows or [])
+        if row.get("stage","completed")=="completed"
+        or (row.get("stage")=="assessing" and all(row.get(key) for key in
+            ("listening_submitted_at","reading_submitted_at","writing_submitted_at")))
+    })
+
+
+def completion_with_submitted_mocks(summary, mock_days):
+    # Mirror only progression, not assessment or results. Mark these modules
+    # pending to avoid representing an ungraded submission as an AI grade.
+    completed=list(summary.get("completed") or [])
+    done={(int(row.get("day_number") or 0),str(row.get("module") or "")) for row in completed}
+    for day in mock_days:
+        if (START+timedelta(days=day-1)).weekday()!=6:
+            continue
+        for module in ("listening","reading","writing"):
+            if (day,module) not in done:
+                completed.append({"day_number":day,"module":module,"review_status":"pending"})
+                done.add((day,module))
+    return completed
 
 def day_unlocked_for_user(user,day_num):
     if day_num<1 or day_num>60:
@@ -211,8 +237,8 @@ def day_unlocked_for_user(user,day_num):
     rows=db("POST","rpc/ark60_student_dashboard_summary",payload={"p_student":user["id"],"p_today":str(today())})
     summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
     required_by_day=summary.get("required_by_day") or {}
-    completed=summary.get("completed") or []
     mocks=set(completed_mock_days(user,day_num)) if day_num>4 else set()
+    completed=completion_with_submitted_mocks(summary,mocks)
     for prior_day in range(1,day_num):
         required=required_by_day.get(str(prior_day)) or []
         if not required:
@@ -245,15 +271,16 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         rows=db("POST","rpc/ark60_student_dashboard_summary",payload={"p_student":user["id"],"p_today":str(today())})
         summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
         preview=user.get("username")=="rustam7"
+        mock_days=[] if preview else completed_mock_days(user)
         return {
             "student":{**user,"cosmetics":cosmetic_state(user)},
             "active_seconds":0 if preview else int(summary.get("active_seconds") or 0),
             "today_seconds":0 if preview else int(summary.get("today_seconds") or 0),
             "by_module":({m:0 for m in sorted(MODULES)} if preview else (summary.get("by_module") or {m:0 for m in sorted(MODULES)})),
-            "completed":[] if preview else (summary.get("completed") or []),
+            "completed":[] if preview else completion_with_submitted_mocks(summary,mock_days),
             "coins":0 if preview else int(summary.get("coins") or 0),
             "required_by_day":summary.get("required_by_day") or {},
-            "completed_mock_days":[] if preview else completed_mock_days(user),
+            "completed_mock_days":mock_days,
             "preview":preview
         }
     if action=="reward_center":
