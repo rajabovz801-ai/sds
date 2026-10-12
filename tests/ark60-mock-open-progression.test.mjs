@@ -28,16 +28,16 @@ test('Python API applies the same mock exception and strict following-day requir
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 tree=ast.parse(Path('api/ark60.py').read_text())
-funcs=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in ['completed_mock_days','day_unlocked_for_user']]
-state={'today':date(2026,10,11),'done':${JSON.stringify(allDone)},'mocks':[4,11]}
+funcs=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in ['completed_mock_days','completion_with_submitted_mocks','day_unlocked_for_user']]
+state={'today':date(2026,10,11),'done':${JSON.stringify(allDone)},'mocks':[4,11],'pending':[]}
 required=json.loads(${JSON.stringify(JSON.stringify(required))})
 calls=[]
 def db(method,table,params=None,payload=None):
  calls.append((table,params))
  if table=='rpc/ark60_student_dashboard_summary': return [{'required_by_day':required,'completed':state['done']}]
  assert table=='ark60_mock_attempts'
- assert params['student_id']=='eq.student' and params['stage']=='eq.completed'
- return [{'day_number':d} for d in state['mocks']]
+ assert params['student_id']=='eq.student'
+ return [{'day_number':d,'stage':'completed'} for d in state['mocks']]+state['pending']
 scope={'START':date(2026,10,1),'timedelta':timedelta,'datetime':datetime,'timezone':timezone,'today':lambda:state['today'],'now':lambda:datetime(2026,10,12,tzinfo=timezone.utc),'db':db}
 exec(compile(ast.Module(body=funcs,type_ignores=[]),'<test>','exec'),scope)
 user={'id':'student','username':'student'}
@@ -49,9 +49,20 @@ state['done']=json.loads(${JSON.stringify(JSON.stringify(allDone))})
 assert scope['day_unlocked_for_user'](user,12)
 state['mocks']=[4]
 assert not scope['day_unlocked_for_user'](user,12)
+state['pending']=[{'day_number':11,'stage':'assessing','listening_submitted_at':'2026-10-11T01:00:00Z','reading_submitted_at':'2026-10-11T02:00:00Z','writing_submitted_at':'2026-10-11T03:00:00Z'}]
+assert scope['day_unlocked_for_user'](user,12)
+state['pending'][0]['writing_submitted_at']=None
+assert not scope['day_unlocked_for_user'](user,12)
+state['pending']=[]
 state['mocks']=[4,11]
 state['done']=[x for x in state['done'] if not (x['day_number']==2 and x['module']=='article')]
 assert not scope['day_unlocked_for_user'](user,12)
+state['pending']=[{'day_number':11,'stage':'assessing','listening_submitted_at':'2026-10-11T01:00:00Z','reading_submitted_at':'2026-10-11T02:00:00Z','writing_submitted_at':'2026-10-11T03:00:00Z'}]
+assert not scope['day_unlocked_for_user'](user,12)
+summary={'completed':[]}
+extra=scope['completion_with_submitted_mocks'](summary,[11])
+assert {(x['day_number'],x['module']) for x in extra}=={(11,'listening'),(11,'reading'),(11,'writing')}
+assert all(x['review_status']=='pending' for x in extra)
 print('PASS')`;
  assert.equal(execFileSync('python3',['-c',script],{encoding:'utf8'}).trim(),'PASS');
 });
