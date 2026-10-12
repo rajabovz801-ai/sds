@@ -145,6 +145,10 @@ export async function gradeArk60Writing(input:{day:number;task_type:string;promp
 export async function assessArk60Submission(row:Obj){
   const db=getServiceSupabase();
   const payload={...(row?.payload||{})};
+  // A Full Mock contains two tasks and must never be regraded by the daily
+  // single-task Writing worker (especially a provisional rescue record).
+  if(payload.source==="full_mock"||payload.task_type==="full_mock")
+    return {ok:false,id:row.id,error:"Full Mock Writing requires the two-task evaluator."};
   const graded=await gradeArk60Writing({
     day:Number(row?.day_number)||0,
     task_type:String(payload.task_type||"writing"),
@@ -192,7 +196,7 @@ export async function gradePendingArk60WritingBatch(limit=8){
     .eq("module","writing").eq("review_status","pending")
     .order("submitted_at",{ascending:true}).limit(500);
   if(error)throw error;
-  const pending=(data||[]).filter((row:any)=>!row?.payload?.ai_assessment).slice(0,safeLimit);
+  const pending=(data||[]).filter((row:any)=>!row?.payload?.ai_assessment&&row?.payload?.source!=="full_mock"&&row?.payload?.task_type!=="full_mock").slice(0,safeLimit);
   const results=await Promise.all(pending.map((row:any)=>assessArk60Submission(row)));
   return {
     processed:results.length,
