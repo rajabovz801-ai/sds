@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550" role="img" aria-labelledby="title desc">
+<title id="title">Pioneer Historical Village Map</title>
+<desc id="desc">Village map with locations A to K, pond, clock tower, church, picnic area, car park, and main gate for IELTS Listening Test 201.</desc>
+<rect width="900" height="550" fill="#fff"/>
+<g fill="#111" font-family="Arial,Helvetica,sans-serif">
+<text x="450" y="34" font-size="24" text-anchor="middle" font-weight="700">Pioneer Historical Village Map</text>
+<text x="450" y="57" font-size="15" text-anchor="middle">Questions 15–20 · Choose A–K</text>
+</g>
+<g stroke="#333" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<!-- boundaries and roads -->
+<path d="M150 110H328 Q347 111 347 132 V300 Q345 335 314 335 H147 V410 H339 V438 H404 V408 Q404 380 431 374 H504 Q538 374 538 406 V439 H583 Q605 440 614 412 L633 367 Q655 332 698 320 L775 309 Q809 300 814 277 Q816 259 799 248 L690 181 Q660 159 662 132 Q665 110 700 102 L763 96"/>
+<path d="M347 132H681 Q722 132 714 162 Q710 187 684 210 Q657 235 649 263 Q638 287 611 304 Q575 314 548 346 Q527 372 502 374"/>
+<path d="M404 408 L404 374 Q408 346 451 336 L511 336 Q557 332 571 306"/>
+<path d="M110 110H150 M110 410H147 M763 96H836"/>
+<path d="M147 315H332"/>
+<path d="M649 263 Q707 267 718 284 Q739 310 766 310"/>
+<path d="M614 412 Q664 413 678 381 Q697 352 743 347 Q771 341 791 330" />
+</g>
+<!-- pond -->
+<path d="M472 145 Q503 122 547 144 Q571 156 567 176 Q567 199 533 202 Q512 211 483 194 Q454 193 457 172 Q452 159 472 145Z" fill="#f3f7f8" stroke="#666" stroke-width="2.5"/>
+<text x="511" y="174" fill="#222" font-family="Georgia,serif" font-size="22" text-anchor="middle" font-style="italic">Pond</text>
+<g stroke="#555" stroke-width="1.5" fill="#fafafa">
+<circle cx="463" cy="158" r="7"/><circle cx="476" cy="141" r="6"/><circle cx="547" cy="144" r="8"/><circle cx="565" cy="172" r="8"/><circle cx="552" cy="199" r="7"/><circle cx="481" cy="195" r="7"/>
+</g>
+<!-- tree grove -->
+<g fill="#e9eded" stroke="#555" stroke-width="2">
+<path d="M425 286L426 245"/><path d="M412 284L413 257"/><path d="M437 284L438 260"/>
+<circle cx="425" cy="229" r="25"/><circle cx="405" cy="244" r="17"/><circle cx="442" cy="244" r="18"/>
+<path d="M418 244L422 276L426 244" fill="none"/>
+</g>
+<!-- church -->
+<g fill="#f7f7f7" stroke="#444" stroke-width="2">
+<rect x="283" y="351" width="44" height="45" rx="2"/><path d="M279 352L305 326L333 352Z"/><path d="M304 326V311M297 318H311"/><rect x="298" y="371" width="13" height="25"/><rect x="314" y="358" width="7" height="11"/>
+</g>
+<!-- clock tower -->
+<g fill="#f7f7f7" stroke="#444" stroke-width="2.1">
+<path d="M360 140L374 117L388 140Z"/><rect x="365" y="140" width="18" height="52"/><circle cx="374" cy="147" r="5"/><path d="M372 174H377"/>
+</g>
+<!-- picnic area -->
+<g stroke="#444" stroke-width="2" fill="none">
+<path d="M632 346l40 0M641 337l24 0M648 337v18M659 337v18"/><path d="M681 352h33M688 344h22M696 344v18M708 344v18"/>
+</g>
+<text x="676" y="380" font-size="17" font-family="Arial" font-weight="700" text-anchor="middle">Picnic Area</text>
+<!-- car park -->
+<rect x="79" y="421" width="223" height="94" rx="8" fill="none" stroke="#444" stroke-width="2.5"/>
+<text x="185" y="446" font-family="Arial" font-size="17" text-anchor="middle" font-weight="700">Car Park</text>
+<g stroke="#999" stroke-width="2.5"><path d="M115 452L99 503M152 452L137 503M189 452L174 503M226 452L211 503M262 452L247 503"/></g>
+<g fill="#e8e8e8" stroke="#333" stroke-width="2.3"><rect x="110" y="469" width="17" height="30" rx="5" transform="rotate(16 118 482)"/><rect x="163" y="467" width="17" height="30" rx="5" transform="rotate(16 170 482)"/><rect x="223" y="464" width="17" height="30" rx="5" transform="rotate(16 231 480)"/></g>
+<text x="372" y="452" font-family="Arial" font-weight="700" font-size="19" text-anchor="middle">Main Gate</text>
+<g stroke="#333" stroke-width="2.3"><path d="M347 425V444M400 425V444"/></g>
+<!-- small tree clusters -->
+<g stroke="#666" fill="#eee" stroke-width="2"><circle cx="93" cy="114" r="13"/><circle cx="115" cy="91" r="12"/><circle cx="792" cy="104" r="12"/><circle cx="820" cy="91" r="12"/><circle cx="839" cy="107" r="11"/><circle cx="813" cy="125" r="10"/></g>
+<!-- compass -->
+<g stroke="#333" stroke-width="1.8"><path d="M137 180V226M113 203H161"/><path d="M137 177l-5 10h10Z" fill="#333"/><path d="M161 203l-9-5v10Z" fill="#333"/></g>
+<g font-family="Arial" fill="#333" font-size="11" font-weight="700"><text x="133" y="170">N</text><text x="134" y="240">S</text><text x="100" y="207">W</text><text x="167" y="207">E</text></g>
+<!-- letter markers -->
+<g font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="19" text-anchor="middle" fill="#222" stroke="#333" stroke-width="2">
+<rect x="149" y="92" width="30" height="28" fill="#fff"/><rect x="503" y="76" width="30" height="28" fill="#fff"/><rect x="786" y="104" width="30" height="28" fill="#fff"/><rect x="297" y="135" width="30" height="28" fill="#fff"/><rect x="298" y="226" width="30" height="28" fill="#fff"/><rect x="562" y="221" width="30" height="28" fill="#fff"/><rect x="68" y="303" width="30" height="28" fill="#fff"/><rect x="143" y="339" width="30" height="28" fill="#fff"/><rect x="432" y="326" width="30" height="28" fill="#fff"/><rect x="816" y="305" width="30" height="28" fill="#fff"/><rect x="589" y="402" width="30" height="28" fill="#fff"/>
+</g>
+<g font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="18" text-anchor="middle" fill="#111">
+<text x="164" y="112">A</text><text x="518" y="96">B</text><text x="801" y="124">C</text><text x="312" y="155">D</text><text x="313" y="246">E</text><text x="577" y="241">F</text><text x="83" y="323">G</text><text x="158" y="359">H</text><text x="447" y="346">I</text><text x="831" y="325">J</text><text x="604" y="422">K</text>
+</g>
+</svg>
