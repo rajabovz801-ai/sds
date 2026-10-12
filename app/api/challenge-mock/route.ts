@@ -220,7 +220,8 @@ Score each criterion and each task from 0 to 9 in 0.5 increments. Check Task 1 d
   body:JSON.stringify({
    model,
    input:prompt,
-   max_output_tokens:1800,
+   // Two essays and all criterion feedback require ample room for complete structured JSON.
+   max_output_tokens:8000,
    text:{format:{type:"json_schema",name:"ielts_writing_assessment",strict:true,schema:WRITING_SCHEMA}}
   })
  });
