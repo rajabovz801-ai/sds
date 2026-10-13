@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 868 548" width="868" height="548" role="img" aria-label="Linwood Apartment Complex map A to K">
+<rect width="868" height="548" fill="white"/><g stroke="#333" stroke-width="1.4" fill="none">
+<rect x="10" y="12" width="842" height="505"/><path d="M217 150 V183 L236 215 M217 150 L407 187 L680 143 M410 150 V201 M213 334 L165 381 M216 332 L296 386 M296 337 V390 M410 331 V440 M410 383 H740 V321 M616 260 H689 V303 H740 V324 M546 184 V347" stroke="#777" stroke-dasharray="6 5"/>
+<path d="M105 214 Q144 205 170 236 Q180 258 156 285 Q150 312 133 325 Q109 336 88 308 Q73 285 93 257 Q83 229 105 214Z"/>
+<rect x="110" y="101" width="146" height="48"/><rect x="339" y="101" width="133" height="48"/><rect x="637" y="125" width="80" height="36"/>
+<rect x="235" y="235" width="33" height="69"/><rect x="269" y="202" width="125" height="117"/><path d="M330 202 V319 M330 241 H394 M330 280 H394"/>
+<rect x="448" y="202" width="114" height="117"/><path d="M498 202 V319 M448 240 H498 M448 278 H498"/>
+<rect x="562" y="233" width="35" height="68"/>
+<rect x="712" y="250" width="55" height="75"/>
+<rect x="97" y="360" width="66" height="77"/><rect x="174" y="380" width="68" height="49"/><rect x="256" y="380" width="73" height="49"/><rect x="683" y="405" width="90" height="49"/><rect x="346" y="446" width="130" height="49"/>
+</g>
+<g font-family="Arial,Helvetica,sans-serif" fill="#222" text-anchor="middle">
+<text x="434" y="55" font-size="27" font-weight="bold">Linwood Apartment Complex</text>
+<text x="434" y="78" font-size="16" font-weight="bold">@ListeningVolume</text>
+<g font-size="17" font-weight="bold"><text x="183" y="133">A</text><text x="405" y="131">B</text><text x="678" y="148">C</text><text x="251" y="276">D</text><text x="360" y="268">E</text><text x="472" y="232">F</text><text x="472" y="269">G</text><text x="739" y="293">H</text><text x="129" y="402">I</text><text x="293" y="409">J</text><text x="728" y="432">K</text></g>
+<g font-size="12" font-weight="bold"><text x="298" y="261">Blue</text><text x="298" y="278">block</text><text x="361" y="218">Internet</text><text x="361" y="232">café</text><text x="361" y="306">Gym</text><text x="531" y="262">Red</text><text x="531" y="276">block</text><text x="219" y="399">Water</text><text x="219" y="414">taps</text><text x="132" y="283">Pond</text><text x="412" y="475">Car park</text><text x="434" y="539">▲ ENTRANCE</text></g>
+<text transform="translate(584 272) rotate(-90)" font-size="12" font-weight="bold">Cafe</text>
+<text x="425" y="214" font-weight="bold" font-size="13">T</text><text x="425" y="235" font-weight="bold" font-size="13">h</text><text x="425" y="256" font-weight="bold" font-size="13">e</text><text x="425" y="281" font-weight="bold" font-size="13">A</text><text x="425" y="302" font-weight="bold" font-size="13">r</text><text x="425" y="323" font-weight="bold" font-size="13">c</text><text x="425" y="344" font-weight="bold" font-size="13">a</text><text x="425" y="365" font-weight="bold" font-size="13">d</text><text x="425" y="386" font-weight="bold" font-size="13">e</text>
+</g>
+<g fill="#272727"><path d="M72 157 l-15 35 h10 l-14 15 h14 l-12 13 h31 l-13-14 h13 l-12-15 h10z"/><path d="M801 111 l-15 35 h10 l-14 15 h14 l-12 13 h31 l-13-14 h13 l-12-15 h10z"/><path d="M749 180 l-15 35 h10 l-14 15 h14 l-12 13 h31 l-13-14 h13 l-12-15 h10z"/><path d="M623 429 l-15 35 h10 l-14 15 h14 l-12 13 h31 l-13-14 h13 l-12-15 h10z"/></g>
+<g fill="none" stroke="#777" stroke-width="1.2"><path d="M127 163 l-11 24 h22z"/><path d="M176 175 l-12 30 h25z"/><path d="M683 91 l-9 27 h20z"/><path d="M734 95 l-9 24 h20z"/><path d="M586 399 l-10 28 h22z"/><path d="M643 399 l-10 28 h22z"/></g>
+<g font-family="Arial,Helvetica,sans-serif" font-size="10" fill="#333" text-anchor="middle"><text x="780" y="28">N</text><text x="780" y="82">S</text><text x="738" y="55">W</text><text x="821" y="55">E</text></g><g stroke="#333" stroke-width="1"><path d="M780 39 V68 M760 54 H803"/><path d="M780 33 l-4 8 h8z M780 74 l-4-8 h8z M756 54 l8-4 v8z M807 54 l-8-4 v8z" fill="#333"/></g>
+</svg>
