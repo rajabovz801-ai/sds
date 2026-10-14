@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 560" width="1050" height="560" role="img" aria-label="Rosedale Library floor plan with lettered locations A to H">
+<rect width="1050" height="560" fill="#ffffff"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#242424" text-anchor="middle">
+<text x="525" y="27" font-size="24" font-weight="700">Rosedale Library — Map</text>
+<g stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" fill="none">
+<path d="M83 502 H970 L850 63 M908 48 L1041 502" />
+<path d="M287 279 L358 304 L358 387 L288 415 Z" stroke-dasharray="10 9"/>
+<path d="M357 318 H444 V175 H698 V222 H756 L824 278 L862 330 L900 393 L920 427 V457 H439 V417 H359 V318" />
+<path d="M444 175 V80 H700 V175" stroke-dasharray="10 9"/>
+<path d="M700 80 H800 V174 H757" stroke-dasharray="10 9"/>
+<path d="M444 175 H698 V226 H540 V247 H695" />
+<path d="M540 265 H696 V306 H540 Z" />
+<path d="M444 306 H487 V385 H446 M512 385 H445 V323" />
+<path d="M684 306 H730 V386 H684 V306" />
+<path d="M485 386 H550 V410 H602 V457 H439 V385 M539 385 V306" />
+<path d="M541 410 H601 V455 H439 V415" />
+<path d="M630 413 H700 V455 H630 Z M701 418 H813 L830 434 V457 H700" />
+<path d="M740 385 H812 V432 H740 Z" />
+<path d="M835 433 H907 V456 H835 Z" />
+<path d="M851 277 H879 L905 329 L869 368 L887 405" />
+<path d="M835 435 V457 M891 405 L917 427" />
+<path d="M650 226 H760 M760 226 L811 281 L848 280 L885 338 L867 362" />
+<path d="M359 318 H444 M359 384 H444 M380 318 V384 M396 318 V384 M412 318 V384 M428 318 V384" stroke-width="2"/>
+<path d="M557 460 L541 499 M602 460 L626 499 M556 473 H605 M551 487 H615"/>
+<path d="M731 78 L805 78 M730 79 V171" stroke-dasharray="9 9"/>
+</g>
+<g font-size="21" font-weight="bold">
+<text x="570" y="118">A</text><text x="754" y="118">B</text><text x="321" y="362">C</text>
+<text x="621" y="292">D</text><text x="850" y="321">E</text>
+<text x="510" y="396">F</text><text x="850" y="451">G</text><text x="892" y="450">H</text>
+</g>
+<g font-size="17">
+<text x="570" y="201">Adult</text><text x="570" y="223">Fiction</text>
+<text x="465" y="330">Local</text><text x="465" y="349">Historical</text><text x="465" y="368">Display</text>
+<text x="776" y="325">Information</text><text x="776" y="345">Desk</text>
+<text x="760" y="403">Audio</text><text x="760" y="422">Collection</text>
+<text x="756" y="436">Staff</text><text x="756" y="450">Workroom</text>
+<text x="568" y="430">Entrance</text><text x="568" y="451">Hall</text>
+<text x="496" y="446">Toilets</text><text x="409" y="362">Access</text><text x="409" y="381">Ramp</text>
+<text x="125" y="330">Park</text><text x="997" y="172" transform="rotate(75 997 172)">Queens Parade</text>
+<text x="944" y="118">Sea</text><text x="530" y="529">Roberts Avenue</text>
+</g>
+<g stroke="#222" stroke-width="2.2" fill="none">
+<path d="M124 178 L124 228 M96 181 Q92 148 122 145 Q153 147 151 181 Q153 207 124 213 Q98 210 96 181 Z M120 183 L109 170 M123 191 L134 179"/>
+<path d="M198 174 L198 231 M172 165 Q170 134 198 128 Q229 130 228 168 Q222 197 198 201 Q171 194 172 165Z M198 188 L184 170 M198 188 L213 165"/>
+<path d="M272 180 L272 220 M248 165 Q246 143 270 137 Q299 139 299 168 Q296 190 272 194 Q251 192 248 165Z"/>
+</g>
+<rect x="70" y="50" width="236" height="66" fill="#fff" stroke="#222" stroke-width="2"/>
+<text x="88" y="77" text-anchor="start" font-size="17" font-weight="bold">Key</text>
+<text x="88" y="102" text-anchor="start" font-size="15">Proposed extension</text>
+<path d="M230 97 H290" stroke="#222" stroke-width="2" stroke-dasharray="6 5"/>
+</g>
+</svg>
