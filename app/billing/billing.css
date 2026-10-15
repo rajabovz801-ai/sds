@@ -1,0 +1,72 @@
+.bill-page{--bill-ink:#182d48;--bill-line:#e0e8f2;--bill-muted:#708197;--bill-blue:#2c63ea;color:var(--bill-ink);font-size:14px;max-width:1440px;margin:0 auto;padding-bottom:34px}
+.bill-page *{box-sizing:border-box}
+.bill-page h1,.bill-page h2,.bill-page p{margin:0}
+.bill-page button,.bill-page input{font:inherit}
+.bill-hero{min-height:170px;border:1px solid var(--bill-line);background:linear-gradient(120deg,#f4f8ff,#f3f6fb);border-radius:20px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;padding:25px 30px;margin-bottom:14px}
+.bill-hero h1,.bill-admin-head h1{font:700 clamp(26px,3vw,42px)/1.17 Georgia,serif;letter-spacing:-.04em;margin:10px 0}
+.bill-hero p,.bill-admin-head p,.bill-muted,.bill-section-head p{font-size:13px;color:var(--bill-muted);line-height:1.5}
+.bill-hero img{max-width:220px;width:28%;max-height:156px;object-fit:contain}
+.bill-eyebrow{font-size:11px;letter-spacing:.14em;color:#4d68b1;font-weight:800}
+.bill-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.bill-summary-card{border:1px solid var(--bill-line);border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;background:#fff;min-width:0}
+.bill-summary-card>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.bill-summary-card small,.bill-summary-card div>span{color:var(--bill-muted);font-size:12px}
+.bill-summary-card b{font:700 18px Georgia,serif;overflow-wrap:anywhere}
+.bill-icon{display:grid;place-items:center;flex:0 0 49px;height:49px;border-radius:50%}
+.bill-icon.blue{background:#e9f0ff;color:#2866d6}.bill-icon.green{background:#e9f8ef;color:#29845f}.bill-icon.purple{background:#f1ecff;color:#7954ce}
+.bill-section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:28px 0 12px}
+.bill-section-head h2,.bill-box h2{font:700 20px Georgia,serif;margin:0 0 5px}
+.bill-small-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--bill-line);border-radius:9px;background:#fff;color:#2856b2;text-decoration:none;font-size:12px!important;padding:9px 12px;cursor:pointer;white-space:nowrap}
+.bill-plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.bill-plan{position:relative;min-width:0;padding:23px 18px 16px;border:1px solid var(--bill-line);background:#fff;border-radius:16px;text-align:left;display:flex;flex-direction:column;align-items:stretch;gap:8px;cursor:pointer;color:var(--bill-ink)}
+.bill-plan.highlight{background:linear-gradient(160deg,#fffefa,#f5faff)}.bill-plan.chosen{border-color:#2f68ec;box-shadow:0 0 0 1px #2f68ec,0 7px 20px rgba(45,102,231,.07)}
+.bill-popular{position:absolute;top:-12px;right:10px;background:#2c63ea;border-radius:30px;color:white;font-size:11px;font-weight:800;display:flex;align-items:center;gap:5px;padding:5px 11px}
+.bill-plan-art{height:52px;width:52px;display:grid;place-items:center;border-radius:17px;background:#eaf2ff;color:#2b64df;margin-bottom:3px}.bill-plan-art.mock{background:#fff4e5;color:#c88a21}.bill-plan-art.all_access{background:#fff6d9;color:#b8830c}
+.bill-plan-art svg{width:24px;height:24px}
+.bill-plan strong{font:700 20px Georgia,serif}
+.bill-plan-sub{color:var(--bill-muted);font-size:12px;min-height:35px;line-height:1.4}
+.bill-price{font:700 27px Georgia,serif;letter-spacing:-.03em;margin-top:4px}
+.bill-plan>small{color:var(--bill-muted);font-size:12px}
+.bill-plan ul{list-style:none;padding:8px 0;margin:0;display:flex;flex-direction:column;gap:9px;flex:1}
+.bill-plan li{display:flex;align-items:flex-start;gap:6px;font-size:12px;line-height:1.35}
+.bill-plan li svg{flex-shrink:0;color:#158b61}
+.bill-select{border:1px solid #2e66e8;border-radius:9px;color:#275fe3;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:12px;padding:10px}
+.bill-select.on{background:#2d64eb;color:#fff}
+.bill-pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.bill-box{border:1px solid var(--bill-line);border-radius:15px;background:#fff;padding:22px;min-width:0}
+.bill-box h2{display:flex;align-items:center;gap:10px;font-size:20px}
+.bill-box h2 svg{color:#3067e5}
+.bill-methods{display:flex;gap:8px;margin:18px 0 12px}
+.bill-methods button{flex:1;cursor:pointer;border:1px solid var(--bill-line);border-radius:9px;padding:12px;background:#f9fbff;color:#38546a;font-weight:800;letter-spacing:.04em}
+.bill-methods button.current{background:#ecf4ff;color:#245bd4;border-color:#2a66ed}
+.bill-card{background:linear-gradient(115deg,#eff5ff,#fff9e9);border:1px solid #e4ebf5;border-radius:13px;padding:18px 15px;display:flex;flex-direction:column;position:relative;gap:9px}
+.bill-card small{color:#5e7592}.bill-card strong{font:700 clamp(17px,2vw,23px) Georgia,serif;letter-spacing:.02em;overflow-wrap:anywhere}.bill-card>span{font-size:12px}
+.bill-card button{align-self:flex-end;border:1px solid #d6e3ff;border-radius:8px;background:#fff;color:#265ecc;display:flex;align-items:center;gap:5px;padding:7px 10px;cursor:pointer;font-size:12px}
+.bill-not-set{background:#fff9ed;color:#835900;border:1px solid #f3dfb7;border-radius:10px;padding:17px;line-height:1.5;font-size:12px}.bill-not-set a{color:#2563eb}
+.bill-order-amount{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:17px 0;font-size:12px}.bill-order-amount strong{font-size:19px}
+.bill-primary,.bill-telegram{width:100%;border:none;display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;background:#2863eb;color:#fff!important;text-decoration:none;font-weight:700;font-size:13px;border-radius:10px;cursor:pointer}
+.bill-primary:disabled{opacity:.48;cursor:not-allowed}
+.bill-steps{list-style:none;padding:10px 0 0;margin:0;display:flex;flex-direction:column;gap:16px}
+.bill-steps li{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.4}.bill-steps b{display:grid;place-items:center;border-radius:50%;background:#eaf2ff;color:#2361d4;height:26px;width:26px;flex:0 0 26px}
+.bill-telegram{margin-top:18px;background:#2188d7}.bill-caution{background:#f0f6ff;border:1px solid #dce9fc;color:#335b84;border-radius:10px;padding:12px;margin-top:13px!important;font-size:12px;line-height:1.55;display:flex;align-items:center;gap:6px}
+.bill-pending{padding:13px;border:1px solid #f2e0b9;background:#fffaf0;border-radius:10px;margin-top:16px;display:flex;flex-direction:column;gap:7px}
+.bill-pending>span{font-size:11px;color:#ad7714;font-weight:700}.bill-pending>strong{font-size:19px}.bill-pending>p{color:#7b6d57;font-size:12px}
+.bill-pending button{background:#fff;border:1px solid #e8d9b9;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;color:#7c6024;font-size:12px;cursor:pointer}
+.bill-history{margin-top:16px}.bill-table-wrap{overflow-x:auto;max-width:100%}.bill-table-wrap table{width:100%;border-collapse:collapse;text-align:left;font-size:12px;white-space:nowrap}.bill-table-wrap th{padding:12px 11px;color:#75859a;font-size:11px;background:#f5f8fc;font-weight:700}.bill-table-wrap td{border-top:1px solid #eaf0f5;padding:12px 11px;vertical-align:middle}.bill-note{display:block;color:#8694a8;font-size:11px;padding-top:3px;white-space:normal;max-width:220px}
+.bill-status{display:inline-flex;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:750}.bill-status.pending{background:#fff4da;color:#a26800}.bill-status.approved{background:#e7f7eb;color:#157447}.bill-status.rejected{background:#ffe8e8;color:#b72d30}
+.bill-error,.bill-success,.bill-message{font-size:12px;line-height:1.5;padding:11px 12px;border-radius:9px;margin-top:10px!important}.bill-error{background:#fff0f0;color:#a42727}.bill-success,.bill-message{background:#e9f7ef;color:#1d7450}
+.bill-admin-head{background:linear-gradient(110deg,#f1f6ff,#fff);border:1px solid var(--bill-line);border-radius:16px;padding:22px;margin:0 0 16px}
+.bill-admin-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.bill-admin-stats>div{border:1px solid var(--bill-line);background:#fff;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:9px}.bill-admin-stats span{font-size:12px;color:#657a92}.bill-admin-stats strong{font:700 23px Georgia,serif}
+.bill-admin-filters{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0}.bill-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.bill-tabs button{cursor:pointer;padding:10px 11px;background:#f6f9fd;border-radius:8px;border:1px solid var(--bill-line);font-size:12px;color:#475b75}
+.bill-tabs button.active{background:#2d64eb;color:#fff;border-color:#2d64eb}
+.bill-search{display:flex;align-items:center;gap:6px;border:1px solid var(--bill-line);background:#fff;border-radius:8px;padding:9px;color:#71829a}.bill-search input{min-width:185px;border:none;outline:none;font-size:12px}
+.bill-review-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:330px}.bill-review-actions>label{flex:1 1 100%;font-size:10px;color:#76899b}
+.bill-review-actions input{display:block;margin-top:3px;max-width:250px;width:100%;padding:7px;border:1px solid var(--bill-line);border-radius:7px;font-size:11px}
+.bill-review-actions button{display:flex;align-items:center;gap:4px;border:0;border-radius:6px;padding:7px 8px;color:#fff;font-size:11px;cursor:pointer}.bill-review-actions button.approve{background:#148457}.bill-review-actions button.reject{background:#dc3f48}
+.bill-review-actions button:disabled{opacity:.5;cursor:not-allowed}
+.bill-admin-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.bill-field{display:flex;flex-direction:column;gap:7px;color:#708095;font-size:12px;margin:15px 0}
+.bill-field input{border:1px solid var(--bill-line);background:#fff;border-radius:9px;padding:12px;font-size:13px;color:#182d48;min-width:0}.bill-check{display:flex;align-items:center;gap:7px;margin:13px 0;color:#526881;font-size:12px}
+.bill-check input{width:16px;height:16px}
+@media(max-width:1100px){.bill-summary{grid-template-columns:1fr}.bill-plans{grid-template-columns:1fr 1fr}.bill-plans>.bill-plan:last-child{grid-column:1/-1}.bill-admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.bill-hero{padding:20px;min-height:140px}.bill-hero img{width:90px;height:100px}.bill-hero h1{font-size:28px}.bill-plans,.bill-pay-grid,.bill-admin-cards{grid-template-columns:1fr}.bill-plans>.bill-plan:last-child{grid-column:auto}.bill-summary-card{padding:13px}.bill-admin-filters{flex-direction:column;align-items:stretch}.bill-tabs{width:100%}.bill-search input{width:100%}.bill-box{padding:15px}.bill-admin-stats strong{font-size:18px}}
