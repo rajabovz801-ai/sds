@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       db.from("ark60_billing_access").select("plan_key,starts_at,expires_at,mock_on").eq("student_id", student.id).order("starts_at", { ascending: false }).limit(30),
     ]);
     if (cards.error || orders.error || access.error) throw new Error("Billing schema is not available yet.");
-    return send({ plans: BILLING_PLANS, cards: cards.data || [], orders: orders.data || [], access: access.data || [], telegram: "rustam_usmon0v" });
+    return send({ plans: BILLING_PLANS, cards: cards.data || [], orders: orders.data || [], access: access.data || [], telegram: "rustam_usmon0v", student: { first_name: student.first_name, last_name: student.last_name, username: student.username } });
   } catch {
     return send({ error: "Billing hozircha tayyor emas. Iltimos, keyinroq urinib ko‘ring." }, 503);
   }

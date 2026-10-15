@@ -91,3 +91,35 @@ html[data-ark-theme="dark"] .bill-search input{background:transparent;color:#edf
 html[data-ark-theme="dark"] .bill-caution{background:#20344e;border-color:#31567e;color:#b5d2ed}
 html[data-ark-theme="dark"] .bill-not-set{background:#3b3224;border-color:#705e3b;color:#f1d195}
 html[data-ark-theme="dark"] .bill-not-set a{color:#9bc3ff}
+
+/* Compact payment workspace: readable controls, minimal vertical travel. */
+.bill-compact{font-family:Manrope,Inter,ui-sans-serif,system-ui,sans-serif;max-width:1240px}
+.bill-compact .bill-hero{min-height:74px;padding:8px 0 16px;border:0;border-radius:0;background:none;margin-bottom:0}
+.bill-compact .bill-hero h1{font:800 27px/1.2 Manrope,Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:-.035em;margin:0 0 6px}
+.bill-compact .bill-summary{gap:0;background:#edf4ff;border:1px solid var(--bill-line);border-radius:10px;margin-bottom:18px}
+.bill-compact .bill-summary-card{border:0;border-radius:0;background:transparent;padding:12px 15px;gap:9px}
+.bill-compact .bill-summary-card+ .bill-summary-card{border-left:1px solid var(--bill-line)}
+.bill-compact .bill-summary-card>div{gap:3px}.bill-compact .bill-summary-card b{font:700 13px/1.3 inherit;font-family:inherit;font-size:13px}
+.bill-compact .bill-summary-card div>span{display:none}.bill-compact .bill-icon{height:30px;flex-basis:30px;background:transparent}.bill-compact .bill-icon svg{width:20px}
+.bill-compact .bill-plan{padding:17px 16px 13px;border-radius:12px;gap:6px}.bill-compact .bill-plan.highlight{background:#f6f9ff}
+.bill-compact .bill-plan-top{display:flex;align-items:center;gap:10px;min-height:88px}.bill-compact .bill-art{width:76px;height:82px;object-fit:contain;flex-shrink:0}
+.bill-compact .bill-plan strong{font:750 16px/1.3 Manrope,Inter,ui-sans-serif,system-ui,sans-serif}
+.bill-compact .bill-price{font:800 clamp(19px,1.8vw,25px)/1.3 Manrope,Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:-.035em;margin:4px 0}
+.bill-compact .bill-plan-top small{font-size:11px;color:var(--bill-muted)}
+.bill-compact .bill-plan ul{padding:8px 0;gap:7px}.bill-compact .bill-select{padding:8px}.bill-compact .bill-popular{top:-9px;font-size:10px;padding:4px 9px}
+.bill-compact .bill-plan:disabled{cursor:default;opacity:1}.bill-compact .bill-plan:focus-visible{outline:3px solid #76a5ff;outline-offset:3px}
+.bill-compact .bill-box{padding:16px;border-radius:12px}.bill-compact .bill-box h2{font:750 16px/1.4 Manrope,Inter,ui-sans-serif,system-ui,sans-serif;margin-bottom:6px}
+.bill-compact .bill-methods{margin:10px 0 9px}.bill-compact .bill-methods button{padding:8px;font-size:12px}.bill-compact .bill-methods button:disabled{cursor:default}
+.bill-compact .bill-card{background:linear-gradient(115deg,#173671,#2867c9);color:white;border:0;padding:14px 16px;gap:6px;min-height:106px}
+.bill-compact .bill-card small,.bill-compact .bill-card>span{color:#d4e3ff}.bill-compact .bill-card strong{font:650 clamp(18px,2vw,24px)/1.4 ui-monospace,SFMono-Regular,monospace;color:#fff;letter-spacing:.06em}
+.bill-compact .bill-card button{position:absolute;right:12px;bottom:11px;font-size:11px;padding:5px 8px;background:#ffffff16;border-color:#ffffff55;color:#fff}
+.bill-compact .bill-card>span{padding-bottom:25px}.bill-compact .bill-order-amount{margin:11px 0}.bill-compact .bill-order-amount strong{font-size:17px}
+.bill-compact .bill-primary,.bill-compact .bill-telegram{padding:10px;border-radius:8px;font-size:12px;min-height:40px}
+.bill-compact .bill-steps{gap:13px;padding-top:8px}.bill-compact .bill-steps li{font-size:12px;align-items:flex-start}.bill-compact .bill-steps li strong{font-weight:750}
+.bill-compact .bill-telegram{margin-top:15px}.bill-compact .bill-caution{font-size:11px;padding:8px 10px;margin-top:8px!important}.bill-compact .bill-pending{padding:10px;margin-top:12px;gap:4px}.bill-compact .bill-pending small{font-size:11px;color:var(--bill-muted)}
+.bill-compact .bill-contact{font-size:11px;text-align:center;margin-top:6px}.bill-compact .bill-history{margin-top:12px}.bill-compact .bill-history>.bill-muted{padding:10px 0 3px}.bill-compact .bill-table-wrap td,.bill-compact .bill-table-wrap th{padding:9px}
+html[data-ark-theme="dark"] .bill-compact .bill-summary{background:#1d304b}html[data-ark-theme="dark"] .bill-compact .bill-plan.highlight{background:#1a2c45}html[data-ark-theme="dark"] .bill-compact .bill-hero{background:none}
+@media(min-width:901px){.learning-shell:has(.bill-compact){grid-template-columns:224px minmax(0,1fr)}.learning-shell:has(.bill-compact) .learning-content{padding:18px 24px 30px}.learning-shell:has(.bill-compact) .learning-sidebar{padding-left:12px;padding-right:12px}.learning-shell:has(.bill-compact) .learning-nav button{min-height:40px;padding:10px 12px}}
+@media(min-width:701px){.bill-compact .bill-plans{grid-template-columns:repeat(3,minmax(0,1fr))}.bill-compact .bill-plans>.bill-plan:last-child{grid-column:auto}.bill-compact .bill-summary{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:701px) and (max-width:1150px){.bill-compact .bill-art{width:52px;height:65px}.bill-compact .bill-plan{padding:15px 10px 11px}.bill-compact .bill-plan-top{gap:6px}.bill-compact .bill-plan strong{font-size:14px}.bill-compact .bill-price{font-size:18px}}
+@media(max-width:700px){.bill-compact .bill-hero h1{font-size:23px}.bill-compact .bill-hero{gap:9px}.bill-compact .bill-summary{grid-template-columns:1fr;gap:0;margin-bottom:14px}.bill-compact .bill-summary-card{padding:8px 12px}.bill-compact .bill-summary-card+ .bill-summary-card{border-left:0;border-top:1px solid var(--bill-line)}.bill-compact .bill-summary-card>div{flex-direction:row;justify-content:space-between;align-items:center;flex:1;gap:10px}.bill-compact .bill-plan-top{min-height:70px}.bill-compact .bill-art{width:68px;height:68px}.bill-compact .bill-plan ul{gap:5px}.bill-compact .bill-plan{padding:12px 14px}.bill-compact .bill-box{padding:14px}.bill-compact .bill-card strong{font-size:21px}.bill-compact .bill-card button{position:static;align-self:flex-end}.bill-compact .bill-pay-grid{margin-top:12px}.bill-compact .bill-hero .bill-small-btn{padding:8px;font-size:11px!important}}

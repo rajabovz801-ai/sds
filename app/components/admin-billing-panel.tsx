@@ -42,7 +42,7 @@ export default function AdminBillingPanel() {
  const visible=useMemo(()=>data?.orders.filter(order=>{
    const matches=filter==="all"||order.status===filter;
    const q=search.toLowerCase().trim();
-   return matches&&(!q||[order.order_code,order.student?.first_name,order.student?.last_name,order.student?.username,order.plan_key].some(value=>String(value||"").toLowerCase().includes(q)));
+   return matches&&(!q||[order.student?.first_name,order.student?.last_name,order.student?.username,order.plan_key].some(value=>String(value||"").toLowerCase().includes(q)));
  })||[],[data,filter,search]);
  async function post(body:object) {
    const res=await fetch("/api/admin/billing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -50,9 +50,9 @@ export default function AdminBillingPanel() {
    if(!res.ok)throw Error(result.error||"Amal bajarilmadi.");
  }
  async function review(order:AdminOrder,decision:"approved"|"rejected"){
-   if(decision==="approved"&&!window.confirm(order.order_code+" uchun "+formatSom(order.price_uzs)+" BANK HISOBIGA TUSHGANINI tekshirdingizmi? Tasdiqlansa paket ochiladi.")) return;
+   if(decision==="approved"&&!window.confirm((order.student?.first_name||"O‘quvchi")+" uchun "+formatSom(order.price_uzs)+" uchun TELEGRAM CHEKI va BANK TUSHUMINI tekshirdingizmi? Tasdiqlansa paket ochiladi.")) return;
    if(decision==="rejected"&&!note[order.id]?.trim()) { setMessage("Rad etish uchun sabab yozing."); return; }
-   if(decision==="rejected"&&!window.confirm(order.order_code+" to‘lovini rad etasizmi?"))return;
+   if(decision==="rejected"&&!window.confirm((order.student?.first_name||"O‘quvchi")+" to‘lovini rad etasizmi?"))return;
    setBusy(order.id);setMessage("");
    try {await post({action:"review",order_id:order.id,decision,note:note[order.id]||""});await load();setMessage(decision==="approved"?"To‘lov tasdiqlandi, paket yozildi.":"To‘lov rad etildi.");}
    catch(e){setMessage(e instanceof Error?e.message:"Tekshirib bo‘lmadi.");}
@@ -72,16 +72,16 @@ export default function AdminBillingPanel() {
      <div><span>✕ Rad etilgan</span><strong>{data?.stats.rejected??"—"}</strong></div>
      <div><span>Jami tasdiqlangan</span><strong>{formatSom(data?.stats.approved_uzs??0)}</strong></div>
    </div>
-   <div className="bill-section-head"><div><h2>To‘lov so‘rovlari</h2><p>Buyurtma ID raqamini Telegramdagi chek bilan solishtiring.</p></div><button className="bill-small-btn" onClick={()=>void load()} disabled={loading}><RefreshCw size={15}/> Yangilash</button></div>
+   <div className="bill-section-head"><div><h2>To‘lov so‘rovlari</h2><p>Telegramdagi chekni o‘quvchining ism familiyasi, paketi, summasi va sana bilan solishtiring.</p></div><button className="bill-small-btn" onClick={()=>void load()} disabled={loading}><RefreshCw size={15}/> Yangilash</button></div>
    <div className="bill-admin-filters">
     <div className="bill-tabs">{[{key:"pending",name:"Kutilmoqda"},{key:"approved",name:"Tasdiqlangan"},{key:"rejected",name:"Rad etilgan"},{key:"all",name:"Barchasi"}].map(item=><button key={item.key} className={filter===item.key?"active":""} onClick={()=>setFilter(item.key)}>{item.name}</button>)}</div>
-    <label className="bill-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="O‘quvchi yoki buyurtma raqami"/></label>
+    <label className="bill-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Ism, familiya yoki username"/></label>
    </div>
    {!!message&&<p className="bill-message" role="status">{message}</p>}
    <section className="bill-box">
-    {!visible.length?<p className="bill-muted">{loading?"Yuklanmoqda...":"Bu bo‘limda so‘rov yo‘q."}</p>:<div className="bill-table-wrap"><table><thead><tr><th>O‘quvchi</th><th>Buyurtma</th><th>Paket</th><th>Summa</th><th>Usul</th><th>Holat</th><th>Amal</th></tr></thead><tbody>{visible.map(order=><tr key={order.id}>
+    {!visible.length?<p className="bill-muted">{loading?"Yuklanmoqda...":"Bu bo‘limda so‘rov yo‘q."}</p>:<div className="bill-table-wrap"><table><thead><tr><th>O‘quvchi</th><th>Sana</th><th>Paket</th><th>Summa</th><th>Usul</th><th>Holat</th><th>Amal</th></tr></thead><tbody>{visible.map(order=><tr key={order.id}>
       <td><b>{order.student?order.student.first_name+" "+order.student.last_name:"O‘quvchi"}</b><small className="bill-note">{order.student?.username||order.student?.id||""}</small></td>
-      <td><b>{order.order_code}</b><small className="bill-note">{new Date(order.created_at).toLocaleString("uz-UZ")}</small></td>
+      <td><small className="bill-note">{new Date(order.created_at).toLocaleString("uz-UZ")}</small></td>
       <td>{BILLING_PLANS.find(p=>p.key===order.plan_key)?.name}</td><td>{formatSom(order.price_uzs)}</td><td>{order.payment_method.toUpperCase()}</td>
       <td><span className={"bill-status "+order.status}>{order.status==="pending"?"Kutilmoqda":order.status==="approved"?"Tasdiqlangan":"Rad etilgan"}</span>{order.admin_note&&<small className="bill-note">{order.admin_note}</small>}</td>
       <td>{order.status==="pending"?<div className="bill-review-actions">
