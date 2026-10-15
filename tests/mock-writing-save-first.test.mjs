@@ -28,7 +28,7 @@ function setup({stage='writing',saveError=false,loseClaim=false,fetchFails=false
  new Function('require','exports','module','fetch','process',code)(name=>{
   if(name==='next/server')return {NextResponse:{json:(body,init)=>({body,status:init.status})}};
   if(name==='@/lib/mock-live')return {};
-  if(name==='@/lib/ark60-content-auth')return {getStudent:async()=>({id:'student'}),isOwnOrigin:()=>true,isDayOpen:async()=>true,isPreview:()=>false};
+  if(name==='@/lib/ark60-content-auth')return {getStudent:async()=>({id:'student'}),isOwnOrigin:()=>true,isDayUnlocked:async()=>true,isDayOpen:async()=>true,isPreview:()=>false};
   if(name==='@/lib/supabase/server')return {getServiceSupabase:()=>db};
   throw Error(name);
  },mod.exports,mod,async(url,options)=>{

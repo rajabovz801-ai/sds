@@ -1,3 +1,4 @@
+import {hasCompletedResult} from "@/lib/billing/server";
 import {NextRequest,NextResponse} from "next/server";
 import {getAdmin,getStudent,isDayUnlocked,isOwnOrigin,isPreview} from "@/lib/ark60-content-auth";
 import {getServiceSupabase} from "@/lib/supabase/server";
@@ -175,7 +176,7 @@ export async function GET(req:NextRequest){
   if(!content)return json({detail:"Listening material has not been published yet."},404);
 
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
-  if(!(await isDayUnlocked(day,student)))return json({detail:"This Listening task is not available yet."},403);
+  if(!(await isDayUnlocked(day,student,"listening",true))&&!(await hasCompletedResult(student.id,day,"listening")))return json({detail:"This Listening task is not available yet."},403);
   if(isPreview(student))return json({content:{...content,payload:safePayload(content.payload)},attempt:null,preview:true});
   const attempt=await getCurrentAttempt(student.id,day);
   if(attempt?.status==="submitted")await ensureSubmission(attempt,content);
@@ -190,7 +191,7 @@ export async function POST(req:NextRequest){
   if(!isOwnOrigin(req))return json({detail:"Invalid request origin."},403);
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
   const body=await req.json().catch(()=>null);if(!body||typeof body!=="object")return json({detail:"Invalid request body."},400);
-  const day=Number(body.day||DAY);if(!Number.isInteger(day)||day<1||day>60||!(await isDayUnlocked(day,student)))return json({detail:"This Listening task is unavailable."},403);
+  const day=Number(body.day||DAY);if(!Number.isInteger(day)||day<1||day>60||!(await isDayUnlocked(day,student,"listening",body.action!=="start")))return json({detail:"This Listening task is unavailable."},403);
   if(isMockDay(day))return json({detail:"Use the Full Mock flow for this Sunday."},409);
   const content=await getContent(day);if(!content)return json({detail:"Listening material has not been published yet."},404);
   const action=String(body.action||"");

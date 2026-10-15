@@ -211,7 +211,7 @@ export default function AdminPage(){
      {studentMessage&&<p className="student-admin-message">{studentMessage}</p>}
      <div className="student-admin-list">{(dashboard?.students||[]).map((item:any)=><div className="student-admin-row" key={item.id}>
       <span className="student-admin-avatar">{(item.first_name?.[0]||"S")+(item.last_name?.[0]||"")}</span>
-      <div className="student-admin-name"><b>{item.first_name} {item.last_name}</b><small>@{item.username}</small>{liveById.get(item.id)&&<small className="student-live-line"><i className={liveById.get(item.id)?.status}/>{liveById.get(item.id)?.status} · {liveById.get(item.id)?.current_area}{liveById.get(item.id)?.day_number?" · Day "+String(liveById.get(item.id)?.day_number).padStart(2,"0"):""} · Today {duration(liveById.get(item.id)?.today_seconds||0)}</small>}</div>
+      <div className="student-admin-name"><b>{item.first_name} {item.last_name}</b><small>@{item.username}</small><small className="bill-note">{item.membership_label||"Free"}</small>{liveById.get(item.id)&&<small className="student-live-line"><i className={liveById.get(item.id)?.status}/>{liveById.get(item.id)?.status} · {liveById.get(item.id)?.current_area}{liveById.get(item.id)?.day_number?" · Day "+String(liveById.get(item.id)?.day_number).padStart(2,"0"):""} · Today {duration(liveById.get(item.id)?.today_seconds||0)}</small>}</div>
       <div className="student-admin-meta"><span>Target</span><b>{Number(item.target_band).toFixed(1)}</b></div>
       <em className={"student-status "+item.status}>{item.status}</em>
       <button type="button" className="student-delete-btn" disabled={studentBusy===item.id} onClick={()=>deleteStudent(item)}><Trash2 size={14}/>{studentBusy===item.id?"Deleting…":"Delete"}</button>

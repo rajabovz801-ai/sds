@@ -288,7 +288,7 @@ test("Speaking availability is driven by published day content and preserves the
 
 test("Speaking route validates date, owner, canonical question and payload size",()=>{
   const api=read("app/api/challenge-speaking/route.ts");
-  assert.match(api,/await isDayUnlocked\(day,student\)/);
+  assert.match(api,/await isDayUnlocked\(day,student(?:,"speaking",true)?\)/);
   assert.match(api,/\.eq\("student_id",student\.id\)/);
   assert.match(api,/contentQuestionList\(content\.payload\)\.find\(q=>q\.key===questionKey\)/);
   assert.match(api,/MAX_AUDIO_BYTES=8\*1024\*1024/);

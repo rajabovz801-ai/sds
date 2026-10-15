@@ -1,5 +1,6 @@
 export type ChallengeProgress={
  preview?:boolean;
+ membership?:{enforced:boolean;challenge_until:string|null;mock_dates:string[];trial_eligible:boolean};
  required_by_day?:Record<string,string[]>;
  completed?:Array<{day_number:number;module:string}>;
  completed_mock_days?:number[];
@@ -12,6 +13,12 @@ export function isChallengeMockDay(day:number){
 export function challengeDayUnlocked(day:number,stats:ChallengeProgress|null,today:string,now=Date.now()){
  if(!Number.isInteger(day)||day<1||day>60||!stats)return false;
  if(stats.preview)return true;
+ if(stats.membership?.enforced){
+   const date=new Date(Date.UTC(2026,9,day)),iso=date.toISOString().slice(0,10),m=stats.membership;
+   if(iso>today)return false;
+   if(date.getUTCDay()===0)return m.mock_dates.includes(iso);
+   return !!(m.challenge_until&&Date.parse(m.challenge_until)>now)||(m.trial_eligible&&day<=2);
+ }
  if(day===4&&now<Date.UTC(2026,9,4,5,0,0))return false;
  if(new Date(Date.UTC(2026,9,day)).toISOString().slice(0,10)>today)return false;
  // Sunday events are available independently of unfinished study days.

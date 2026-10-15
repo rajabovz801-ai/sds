@@ -1,3 +1,4 @@
+import {hasCompletedResult} from "@/lib/billing/server";
 import {NextRequest,NextResponse} from "next/server";
 import {randomInt} from "node:crypto";
 import {getStudent,getAdmin,isDayUnlocked,isOwnOrigin,isUuid,isPreview,sqlTable,type Student} from "../../../lib/ark60-content-auth";
@@ -10,11 +11,16 @@ type Question={term_id:string;options:string[]};
 const shuffle=<T,>(items:T[]):T[]=>{
  const a=items.slice();for(let i=a.length-1;i>0;i--){const j=randomInt(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;
 };
-async function getUnit(id:string,student:Student,requirePublished=true):Promise<Unit|null>{
+async function getUnit(id:string,student:Student,requirePublished=true,resume=false,review=false):Promise<Unit|null>{
  if(!isUuid(id))return null;
  const row=(await sqlTable("ark60_vocab_units","GET",
   "select=id,day_number,source_kind,source_ordinal,unit_number,source_title,pass_mark,status&id=eq."+id+"&limit=1"))[0] as Unit|undefined;
- if(!row||!(await isDayUnlocked(Number(row.day_number),student))||(requirePublished&&row.status!=="published"))return null;
+  if(!row||(requirePublished&&row.status!=="published"))return null;
+ if(!(await isDayUnlocked(Number(row.day_number),student,"vocabulary",resume))){
+   if(!review)return null;
+   const done=await sqlTable("ark60_vocab_attempts","GET","select=id&student_id=eq."+student.id+"&unit_id=eq."+id+"&status=eq.completed&limit=1");
+   if(!done.length)return null;
+ }
  return row;
 }
 async function terms(id:string):Promise<Term[]>{
@@ -26,7 +32,7 @@ async function getAttempt(id:string,student:Student){
  const attempt=(await sqlTable("ark60_vocab_attempts","GET",
   "select=id,student_id,unit_id,attempt_no,questions,answers,correct_count,status,started_at,finished_at&id=eq."+id+"&student_id=eq."+student.id+"&limit=1"))[0];
  if(!attempt)return null;
- const unit=await getUnit(attempt.unit_id,student);
+ const unit=await getUnit(attempt.unit_id,student,true,true,attempt.status==="completed");
  return unit?{attempt,unit}:null;
 }
 async function attemptForClient(a:any){
@@ -59,7 +65,7 @@ export async function GET(req:NextRequest){
  }
  const student=await getStudent(req);if(!student)return error("Sign in to your challenge account",401);
  if(action==="overview"){
-  const day=Number(params.get("day")||1);if(!(await isDayUnlocked(day,student)))return error("Day is locked",403);
+  const day=Number(params.get("day")||1);if(!(await isDayUnlocked(day,student,"vocabulary",true))&&!(await hasCompletedResult(student.id,day,"vocabulary")))return error("Challenge obunasi kerak",403);
   const units=await sqlTable("ark60_vocab_units","GET",
    "select=id,day_number,source_kind,source_ordinal,unit_number,source_title,pass_mark,status&day_number=eq."+day+"&status=eq.published&order=source_kind,source_ordinal,unit_number") as Unit[];
   if(!units.length)return json({day,units:[],word_count:0,completed_count:0});

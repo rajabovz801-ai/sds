@@ -1,3 +1,4 @@
+import {hasCompletedResult} from "@/lib/billing/server";
 import {NextRequest,NextResponse} from "next/server";
 import {getAdmin,getStudent,isDayUnlocked,isOwnOrigin,isPreview} from "@/lib/ark60-content-auth";
 import {getServiceSupabase} from "@/lib/supabase/server";
@@ -135,7 +136,7 @@ export async function GET(req:NextRequest){
   if(!student)return json({detail:"Please sign in."},401);
   const day=validDay(url.searchParams.get("day"));
   if(!day)return json({detail:"Speaking is not available for this day."},404);
-  if(!(await isDayUnlocked(day,student)))return json({detail:"This Speaking task is not available yet."},403);
+  if(!(await isDayUnlocked(day,student,"speaking",true))&&!(await hasCompletedResult(student.id,day,"speaking")))return json({detail:"This Speaking task is not available yet."},403);
   const content=await getContent(day);if(!content)return json({detail:"Speaking material has not been published yet."},404);
   if(isPreview(student))return json({content,attempt:null,preview:true});
   const attempt=await getAttempt(student.id,day);
@@ -158,7 +159,7 @@ export async function POST(req:NextRequest){
    const action=String(form.get("action")||"");
    if(action!=="upload")return json({detail:"Unknown upload action."},400);
    const day=validDay(form.get("day"));if(!day)return json({detail:"Invalid Speaking day."},400);
-   if(!(await isDayUnlocked(day,student)))return json({detail:"This Speaking task is not available yet."},403);
+   if(!(await isDayUnlocked(day,student,"speaking",true)))return json({detail:"This Speaking task is not available yet."},403);
    const content=await getContent(day);if(!content)return json({detail:"Speaking material has not been published yet."},404);
    const attemptId=String(form.get("attempt_id")||"");
    const questionKey=String(form.get("question_key")||"");
@@ -225,7 +226,7 @@ export async function POST(req:NextRequest){
 
   const student=await getStudent(req);if(!student)return json({detail:"Please sign in."},401);
   const day=validDay((body as AnyRow).day);if(!day)return json({detail:"Speaking is available only on Day 1, Day 2 and Day 3."},400);
-  if(!(await isDayUnlocked(day,student)))return json({detail:"This Speaking task is not available yet."},403);
+  if(!(await isDayUnlocked(day,student,"speaking",action!=="start")))return json({detail:"This Speaking task is not available yet."},403);
   const content=await getContent(day);if(!content)return json({detail:"Speaking material has not been published yet."},404);
 
   if(action==="start"){

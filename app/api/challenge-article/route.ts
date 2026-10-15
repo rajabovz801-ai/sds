@@ -26,7 +26,7 @@ export async function GET(req:NextRequest){
   if(!Number.isInteger(day)||day<1||day>60)return fail("Invalid day",400);
   const a=await article(day);return send({published:!!a,title:a?.title||null});
  }
- if(!(await isDayUnlocked(day,user)))return fail("This study day is locked",403);
+ if(!(await isDayUnlocked(day,user,"article",true)))return fail("This study day is locked",403);
  const a=await article(day);if(!a)return fail("Article has not been published",404);
  const [progress,units,words]=await Promise.all([
   sqlTable("ark60_article_progress","GET","select=last_page,visited_pages,completed_at&student_id=eq."+user.id+"&article_id=eq."+a.id+"&limit=1"),

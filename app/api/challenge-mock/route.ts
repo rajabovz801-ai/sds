@@ -1,6 +1,6 @@
 import {sanitizeMockSnapshot,liveLeaseActive} from "@/lib/mock-live";
 import {NextRequest,NextResponse} from "next/server";
-import {getAdmin,getStudent,isDayOpen,isOwnOrigin,isPreview} from "@/lib/ark60-content-auth";
+import {getAdmin,getStudent,isDayOpen,isDayUnlocked,isOwnOrigin,isPreview} from "@/lib/ark60-content-auth";
 import {getServiceSupabase} from "@/lib/supabase/server";
 
 export const runtime="nodejs";
@@ -400,6 +400,7 @@ export async function GET(req:NextRequest){
   if(!src)return json({detail:"Full Mock materials are not published yet."},404);
   if(!(await isDayOpen(day,student)))return json({detail:"This Full Mock is not open yet.",opens_at:mockOpensAt(day)},403);
   const preview=isPreview(student);let row=preview?null:await attempt(student.id,day);
+  if(!preview&&!["completed","assessing"].includes(row?.stage)&&!(await isDayUnlocked(day,student,"mock",true)))return json({detail:"Bu Full MOCK uchun tasdiqlangan ruxsat kerak.",billing_required:true},403);
   if(!preview&&row?.stage==="assessing"&&canRetryAssessment(row)){
    await retryFailedAssessments(src,day,1,student.id);
    row=await attempt(student.id,day);
@@ -421,6 +422,7 @@ export async function POST(req:NextRequest){
   if(action==="live_stop"){await stopMockLive(student.id,day);return json({ok:true})}
   if(!(await isDayOpen(day,student)))return json({detail:"This Full Mock is not open yet.",opens_at:mockOpensAt(day)},403);
 
+  if(!(await isDayUnlocked(day,student,"mock",!["start","start_listening","live_consent"].includes(action))))return json({detail:"Bu Full MOCK uchun tasdiqlangan ruxsat kerak.",billing_required:true},403);
   if(action==="live_consent"){
    const allowed=body.allowed===true;
    if(allowed&&!(await source(day,preview)))return json({detail:"Full Mock materials are not published yet."},404);

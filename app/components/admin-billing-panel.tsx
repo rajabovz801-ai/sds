@@ -1,104 +1,47 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, CreditCard, ExternalLink, RefreshCw, Search, ShieldCheck, Wallet, XCircle } from "lucide-react";
-import { BILLING_PLANS, formatSom, type BillingMethod, type BillingPlan } from "@/lib/billing/plans";
-import "../billing/billing.css";
-
-type AdminOrder = {
- id: string; order_code: string; plan_key: BillingPlan; price_uzs: number; payment_method: BillingMethod;
- status: "pending"|"approved"|"rejected"; created_at: string; admin_note: string|null;
- student: { id: string; first_name: string; last_name: string; username: string } | null;
-};
-type AdminCard = { method: BillingMethod; card_number: string; card_holder: string; enabled: boolean };
-type Payload = { orders: AdminOrder[]; cards: AdminCard[]; stats: { pending: number; approved: number; rejected: number; approved_uzs: number }; limited: boolean };
-type CardForm = { number: string; holder: string; enabled: boolean };
-const defaults: Record<BillingMethod,CardForm> = { uzcard: { number: "", holder: "", enabled: true }, humo: { number: "", holder: "", enabled: true } };
-
-export default function AdminBillingPanel() {
- const [data,setData] = useState<Payload|null>(null);
- const [forms,setForms] = useState<Record<BillingMethod,CardForm>>(defaults);
- const [filter,setFilter] = useState("pending");
- const [search,setSearch] = useState("");
- const [busy,setBusy] = useState("");
- const [note,setNote] = useState<Record<string,string>>({});
- const [message,setMessage] = useState("");
- const [loading,setLoading] = useState(true);
- async function load() {
-   setLoading(true);
-   try {
-     const res = await fetch("/api/admin/billing",{credentials:"same-origin",cache:"no-store"});
-     const body=await res.json();
-     if(!res.ok) throw Error(body.error||"Ma‘lumotlarni yuklab bo‘lmadi.");
-     setData(body);
-     setForms({
-       uzcard:{ number: body.cards.find((item:AdminCard)=>item.method==="uzcard")?.card_number||"", holder: body.cards.find((item:AdminCard)=>item.method==="uzcard")?.card_holder||"", enabled: body.cards.find((item:AdminCard)=>item.method==="uzcard")?.enabled??true },
-       humo:{ number: body.cards.find((item:AdminCard)=>item.method==="humo")?.card_number||"", holder: body.cards.find((item:AdminCard)=>item.method==="humo")?.card_holder||"", enabled: body.cards.find((item:AdminCard)=>item.method==="humo")?.enabled??true },
-     });
-     setMessage("");
-   } catch(e) { setMessage(e instanceof Error?e.message:"Billing panel xatoligi."); }
-   finally { setLoading(false); }
- }
- useEffect(()=>{void load();},[]);
- const visible=useMemo(()=>data?.orders.filter(order=>{
-   const matches=filter==="all"||order.status===filter;
-   const q=search.toLowerCase().trim();
-   return matches&&(!q||[order.student?.first_name,order.student?.last_name,order.student?.username,order.plan_key].some(value=>String(value||"").toLowerCase().includes(q)));
- })||[],[data,filter,search]);
- async function post(body:object) {
-   const res=await fetch("/api/admin/billing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-   const result=await res.json();
-   if(!res.ok)throw Error(result.error||"Amal bajarilmadi.");
- }
- async function review(order:AdminOrder,decision:"approved"|"rejected"){
-   if(decision==="approved"&&!window.confirm((order.student?.first_name||"O‘quvchi")+" uchun "+formatSom(order.price_uzs)+" uchun TELEGRAM CHEKI va BANK TUSHUMINI tekshirdingizmi? Tasdiqlansa paket ochiladi.")) return;
-   if(decision==="rejected"&&!note[order.id]?.trim()) { setMessage("Rad etish uchun sabab yozing."); return; }
-   if(decision==="rejected"&&!window.confirm((order.student?.first_name||"O‘quvchi")+" to‘lovini rad etasizmi?"))return;
-   setBusy(order.id);setMessage("");
-   try {await post({action:"review",order_id:order.id,decision,note:note[order.id]||""});await load();setMessage(decision==="approved"?"To‘lov tasdiqlandi, paket yozildi.":"To‘lov rad etildi.");}
-   catch(e){setMessage(e instanceof Error?e.message:"Tekshirib bo‘lmadi.");}
-   finally{setBusy("");}
- }
- async function saveCard(method:BillingMethod){
-   setBusy(method);setMessage("");
-   try {await post({action:"set_card",method,number:forms[method].number.replaceAll(" ",""),holder:forms[method].holder,enabled:forms[method].enabled});await load();setMessage(method.toUpperCase()+" karta ma‘lumotlari saqlandi.");}
-   catch(e){setMessage(e instanceof Error?e.message:"Kartani saqlab bo‘lmadi.");}
-   finally{setBusy("");}
- }
+import {useEffect,useState} from 'react';
+import {RefreshCw,Search,CheckCircle2,XCircle,ShieldCheck} from 'lucide-react';
+import {BILLING_PLANS,formatSom,type BillingMethod,type BillingPlan} from '@/lib/billing/plans';
+import {BILLING_LAUNCH} from '@/lib/billing/access-policy';
+import '../billing/billing.css';
+type Person={id:string;first_name:string;last_name:string;username:string;created_at:string};
+type Order={id:string;student_id:string;plan_key:BillingPlan;price_uzs:number;payment_method:BillingMethod;status:string;created_at:string;admin_note:string|null;mock_on:string|null;transaction_ref:string|null;student:Person|null};
+type Access={order_id:string|null;source_order_id:string|null;id:string;student_id:string;plan_key:string;starts_at:string;expires_at:string|null;mock_on:string|null;revoked_at:string|null};
+type Payload={orders:Order[];cards:{method:BillingMethod;card_number:string;card_holder:string;enabled:boolean}[];stats:Record<string,number>;students:Person[];events:{id:number;student_id:string;action:string;note:string|null;created_at:string}[];access:Access[];limited:boolean};
+const label=(s:string)=>({pending:'Kutilmoqda',approved:'Tasdiqlangan',rejected:'Rad etilgan',cancelled:'Bekor qilingan',revoked:'Tasdiq qaytarilgan',manual_grant:'Imtiyoz berilgan',manual_revoke:'Imtiyoz qaytarilgan'}[s]||s);
+const date=(s:string)=>new Date(s).toLocaleString('uz-UZ',{timeZone:'Asia/Tashkent'});
+const upcoming=()=>{const d=new Date(Math.max(Date.now(),Date.parse(BILLING_LAUNCH))+5*3600000);d.setUTCDate(d.getUTCDate()+((7-d.getUTCDay())%7));return d.toISOString().slice(0,10)};
+const name=(p:Person|null|undefined)=>p?[p.first_name,p.last_name].join(' '):'O‘quvchi';
+export default function AdminBillingPanel(){
+ const [data,setData]=useState<Payload|null>(null),[filter,setFilter]=useState('pending'),[search,setSearch]=useState(''),[busy,setBusy]=useState(''),[message,setMessage]=useState(''),[loading,setLoading]=useState(true);
+ const [notes,setNotes]=useState<Record<string,string>>({}),[mocks,setMocks]=useState<Record<string,string>>({}),[refs,setRefs]=useState<Record<string,string>>({});
+ const [cards,setCards]=useState<Record<string,{number:string;holder:string;enabled:boolean}>>({uzcard:{number:'',holder:'',enabled:true},humo:{number:'',holder:'',enabled:false}});
+ const [showSettings,setShowSettings]=useState(false),[showGrant,setShowGrant]=useState(false);
+ const [grant,setGrant]=useState({student_id:'',plan:'challenge',days:7,starts_at:new Date(Math.max(Date.now(),Date.parse(BILLING_LAUNCH))+5*3600000).toISOString().slice(0,16),mock_on:upcoming(),note:''});
+ async function load(){setLoading(true);try{const r=await fetch('/api/admin/billing',{cache:'no-store',credentials:'same-origin'});const j=await r.json();if(!r.ok)throw Error(j.error);setData(j);for(const c of j.cards||[])setCards(v=>({...v,[c.method]:{number:c.card_number,holder:c.card_holder,enabled:c.enabled}}))}catch(e){setMessage(e instanceof Error?e.message:'Yuklanmadi.')}finally{setLoading(false)}}
+ useEffect(()=>{void load();const focus=()=>void load();window.addEventListener('focus',focus);return()=>window.removeEventListener('focus',focus)},[]);
+ async function post(body:object){const r=await fetch('/api/admin/billing',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json();if(!r.ok)throw Error(j.error||'Amal bajarilmadi.');return j;}
+ async function run(key:string,body:object,success:string){setBusy(key);setMessage('');try{await post(body);await load();setMessage(success)}catch(e){setMessage(e instanceof Error?e.message:'Amal bajarilmadi.')}finally{setBusy('')}}
+ function activation(o:Order){return new Date(Math.max(Date.now(),Date.parse(BILLING_LAUNCH),...(data?.access||[]).filter(a=>a.student_id===o.student_id&&!a.revoked_at&&a.expires_at).map(a=>Date.parse(a.expires_at!)))).toISOString()}
+ function preview(o:Order){const start=activation(o),end=new Date(Date.parse(start)+7*86400000).toISOString();return (o.plan_key!=='mock'?'Challenge: '+date(start)+' → '+date(end)+'. ':'')+(o.plan_key!=='challenge'?'MOCK: '+(mocks[o.id]||o.mock_on||upcoming()):'MOCK kirmaydi.');}
+ function review(o:Order,decision:string){if(decision==='rejected'&&!(notes[o.id]||'').trim()){setMessage('Rad etish sababini yozing.');return}const text=decision==='approved'?name(o.student)+' · '+formatSom(o.price_uzs)+'\nTelegram cheki va bank tushumini tekshirdingizmi?\n'+preview(o):name(o.student)+' to‘lovini rad etasizmi?';if(window.confirm(text))void run(o.id,{action:'review',order_id:o.id,decision,note:notes[o.id]||'',mock_on:o.plan_key==='challenge'?null:mocks[o.id]||o.mock_on||upcoming(),transaction_ref:refs[o.id]||o.transaction_ref||null},decision==='approved'?'To‘lov tasdiqlandi. Ruxsat belgilangan muddatga yozildi.':'To‘lov rad etildi.');}
+ const q=search.toLowerCase().trim();
+ const visible=(data?.orders||[]).filter(o=>(filter==='all'||o.status===filter)&&(!q||[name(o.student),o.student?.username,BILLING_PLANS.find(p=>p.key===o.plan_key)?.name].some(s=>String(s||'').toLowerCase().includes(q))));
  return <section className="bill-page bill-admin">
-   <div className="bill-admin-head"><span className="bill-eyebrow">SUPER ADMIN · PAYMENT CONTROL</span><h1>To‘lovlar boshqaruvi</h1><p>Cheklar faqat Telegramda. Bu yerda buyurtma va bank tushumi tekshirilgach tasdiqlanadi.</p></div>
-   <div className="bill-admin-stats">
-     <div><span>⏳ Kutilmoqda</span><strong>{data?.stats.pending??"—"}</strong></div>
-     <div><span>✓ Tasdiqlangan</span><strong>{data?.stats.approved??"—"}</strong></div>
-     <div><span>✕ Rad etilgan</span><strong>{data?.stats.rejected??"—"}</strong></div>
-     <div><span>Jami tasdiqlangan</span><strong>{formatSom(data?.stats.approved_uzs??0)}</strong></div>
-   </div>
-   <div className="bill-section-head"><div><h2>To‘lov so‘rovlari</h2><p>Telegramdagi chekni o‘quvchining ism familiyasi, paketi, summasi va sana bilan solishtiring.</p></div><button className="bill-small-btn" onClick={()=>void load()} disabled={loading}><RefreshCw size={15}/> Yangilash</button></div>
-   <div className="bill-admin-filters">
-    <div className="bill-tabs">{[{key:"pending",name:"Kutilmoqda"},{key:"approved",name:"Tasdiqlangan"},{key:"rejected",name:"Rad etilgan"},{key:"all",name:"Barchasi"}].map(item=><button key={item.key} className={filter===item.key?"active":""} onClick={()=>setFilter(item.key)}>{item.name}</button>)}</div>
-    <label className="bill-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Ism, familiya yoki username"/></label>
-   </div>
-   {!!message&&<p className="bill-message" role="status">{message}</p>}
-   <section className="bill-box">
-    {!visible.length?<p className="bill-muted">{loading?"Yuklanmoqda...":"Bu bo‘limda so‘rov yo‘q."}</p>:<div className="bill-table-wrap"><table><thead><tr><th>O‘quvchi</th><th>Sana</th><th>Paket</th><th>Summa</th><th>Usul</th><th>Holat</th><th>Amal</th></tr></thead><tbody>{visible.map(order=><tr key={order.id}>
-      <td><b>{order.student?order.student.first_name+" "+order.student.last_name:"O‘quvchi"}</b><small className="bill-note">{order.student?.username||order.student?.id||""}</small></td>
-      <td><small className="bill-note">{new Date(order.created_at).toLocaleString("uz-UZ")}</small></td>
-      <td>{BILLING_PLANS.find(p=>p.key===order.plan_key)?.name}</td><td>{formatSom(order.price_uzs)}</td><td>{order.payment_method.toUpperCase()}</td>
-      <td><span className={"bill-status "+order.status}>{order.status==="pending"?"Kutilmoqda":order.status==="approved"?"Tasdiqlangan":"Rad etilgan"}</span>{order.admin_note&&<small className="bill-note">{order.admin_note}</small>}</td>
-      <td>{order.status==="pending"?<div className="bill-review-actions">
-          <label>Admin izohi<input maxLength={500} placeholder="Izoh (rad etishga majburiy)" value={note[order.id]||""} onChange={e=>setNote(v=>({...v,[order.id]:e.target.value}))}/></label>
-          <button className="approve" disabled={!!busy} onClick={()=>void review(order,"approved")}><CheckCircle2 size={15}/> Tasdiqlash</button>
-          <button className="reject" disabled={!!busy} onClick={()=>void review(order,"rejected")}><XCircle size={15}/> Rad etish</button>
-        </div>:<span className="bill-muted">Tekshirilgan</span>}</td>
-    </tr>)}</tbody></table></div>}
-    {data?.limited&&<p className="bill-muted">Oxirgi 200 ta to‘lov ko‘rsatilmoqda. Keyingi bosqichda sahifalash qo‘shiladi.</p>}
-   </section>
-   <div className="bill-section-head"><div><h2>UZCARD / HUMO sozlamalari</h2><p>To‘lov rekvizitlarini faqat Super Admin o‘zgartiradi.</p></div><a href="https://t.me/rustam_usmon0v" target="_blank" rel="noopener noreferrer" className="bill-small-btn"><ExternalLink size={14}/> Telegram lichka</a></div>
-   <div className="bill-admin-cards">{(["uzcard","humo"] as BillingMethod[]).map(method=><section className="bill-box" key={method}>
-      <h2><CreditCard size={19}/>{method.toUpperCase()}</h2><label className="bill-field">Karta raqami<input inputMode="numeric" value={forms[method].number} onChange={e=>setForms(v=>({...v,[method]:{...v[method],number:e.target.value}}))} placeholder="16 xonali karta raqami" maxLength={19}/></label>
-      <label className="bill-field">Karta egasi<input value={forms[method].holder} maxLength={100} onChange={e=>setForms(v=>({...v,[method]:{...v[method],holder:e.target.value}}))} placeholder="Ism familiya"/></label>
-      <label className="bill-check"><input type="checkbox" checked={forms[method].enabled} onChange={e=>setForms(v=>({...v,[method]:{...v[method],enabled:e.target.checked}}))}/> O‘quvchilar uchun faol</label>
-      <button className="bill-primary" disabled={!!busy} onClick={()=>void saveCard(method)}><ShieldCheck size={16}/> Saqlash</button>
-   </section>)}</div>
-   <p className="bill-caution"><Wallet size={17}/> Chek rasmlari bu panelga yuklanmaydi. To‘lov faqat bank hisobiga tushgani tekshirilgandan so‘ng tasdiqlanadi. Eski test natijalari va kirish huquqlari o‘zgarmaydi.</p>
+  <div className="bill-admin-head"><span className="bill-eyebrow">MEMBERSHIP CONTROL</span><h1>To‘lovlar va obunalar</h1><p>Chek Telegramda tekshiriladi. Chek yuborilgani sayt orqali avtomatik aniqlanmaydi. Pullik kirish: 19-oktabr 00:00 UZT.</p></div>
+  <div className="bill-admin-stats">{[['pending','Kutilmoqda'],['approved_uzs','Tasdiqlangan tushum'],['pending_uzs','Kutilayotgan summa'],['active_students','Faol obunachilar']].map(([key,title])=><div key={key}><span>{title}</span><strong>{key.includes('uzs')?formatSom(data?.stats[key]||0):data?.stats[key]??'—'}</strong></div>)}</div>
+  <div className="bill-section-head"><div><h2>To‘lov so‘rovlari</h2><p>Ism, username, summa va sanani Telegramdagi chek bilan solishtiring.</p></div><button className="bill-small-btn" disabled={loading} onClick={()=>void load()}><RefreshCw size={14}/> Yangilash</button></div>
+  <div className="bill-admin-filters"><div className="bill-tabs">{['pending','approved','rejected','cancelled','revoked','all'].map(s=><button key={s} onClick={()=>setFilter(s)} className={filter===s?'active':''}>{s==='all'?'Barchasi':label(s)}</button>)}</div><label className="bill-search"><Search size={15}/><input aria-label="O‘quvchini qidirish" placeholder="Ism familiya yoki username" value={search} onChange={e=>setSearch(e.target.value)}/></label></div>
+  {message&&<p className="bill-message" role="status">{message}</p>}
+  <section className="bill-box"><div className="bill-table-wrap"><table><thead><tr><th>O‘quvchi</th><th>Paket / Sana</th><th>Summa / Karta</th><th>Holat</th><th>Tekshirish</th></tr></thead><tbody>{visible.map(o=><tr key={o.id}>
+   <td><b>{name(o.student)}</b><small className="bill-note">{o.student?.username}</small></td><td>{BILLING_PLANS.find(p=>p.key===o.plan_key)?.name}<small className="bill-note">{date(o.created_at)}</small></td><td>{formatSom(o.price_uzs)}<small className="bill-note">{o.payment_method.toUpperCase()}</small></td><td><span className={'bill-status '+o.status}>{label(o.status)}</span>{o.admin_note&&<small className="bill-note">{o.admin_note}</small>}</td>
+   <td>{o.status==='pending'||o.status==='approved'?<div className="bill-review-actions"><label>Admin izohi<input maxLength={500} placeholder="Sabab / izoh" value={notes[o.id]||''} onChange={e=>setNotes(v=>({...v,[o.id]:e.target.value}))}/></label>
+    {o.status==='pending'?<><label>Bank tranzaksiya raqami (bo‘lsa)<input maxLength={100} value={refs[o.id]||''} onChange={e=>setRefs(v=>({...v,[o.id]:e.target.value}))}/></label>{o.plan_key!=='challenge'&&<label>MOCK sanasi<input type="date" value={mocks[o.id]||o.mock_on||upcoming()} onChange={e=>setMocks(v=>({...v,[o.id]:e.target.value}))}/></label>}<small className="bill-note">{preview(o)}</small><button className="approve" disabled={!!busy} onClick={()=>review(o,'approved')}><CheckCircle2 size={14}/> Tasdiqlash</button><button className="reject" disabled={!!busy} onClick={()=>review(o,'rejected')}><XCircle size={14}/> Rad etish</button></>:<button className="reject" disabled={!!busy} onClick={()=>{if((notes[o.id]||'').trim().length<3){setMessage('Tasdiqni qaytarish sababini yozing.');return}if(window.confirm('Bu to‘lovga tegishli ruxsatni qaytarasizmi? Natijalar o‘chmaydi. Pul avtomatik qaytarilmaydi.'))void run(o.id,{action:'revoke',order_id:o.id,note:notes[o.id]},'Ruxsat qaytarildi. Natijalar saqlangan.')}}>Xato tasdiqni qaytarish</button>}
+   </div>:<span className="bill-muted">Yakunlangan</span>}</td>
+  </tr>)}</tbody></table></div>{!visible.length&&<p className="bill-muted">{loading?'Yuklanmoqda…':'Bu holatda so‘rov yo‘q.'}</p>}{data?.limited&&<p className="bill-muted">Oxirgi 200 ta so‘rov ko‘rsatilgan. Yuqoridagi umumiy hisob barcha to‘lovlardan olingan.</p>}</section>
+  <div className="bill-section-head"><button className="bill-small-btn" onClick={()=>setShowGrant(x=>!x)}>Qo‘lda imtiyoz berish</button><button className="bill-small-btn" onClick={()=>setShowSettings(x=>!x)}>UZCARD / HUMO sozlamalari</button></div>
+  {showGrant&&<section className="bill-box"><h2>Imtiyozli kirish</h2><p className="bill-muted">Bu bank tushumi sifatida hisoblanmaydi. Sabab audit tarixida saqlanadi.</p><div className="bill-admin-cards"><label className="bill-field">O‘quvchi<select value={grant.student_id} onChange={e=>setGrant(v=>({...v,student_id:e.target.value}))}><option value="">Tanlang</option>{data?.students.map(p=><option key={p.id} value={p.id}>{name(p)} · {p.username}</option>)}</select></label><label className="bill-field">Paket<select value={grant.plan} onChange={e=>setGrant(v=>({...v,plan:e.target.value}))}>{BILLING_PLANS.map(p=><option key={p.key} value={p.key}>{p.name}</option>)}</select></label><label className="bill-field">Boshlanish (O‘zbekiston vaqti)<input type="datetime-local" value={grant.starts_at} onChange={e=>setGrant(v=>({...v,starts_at:e.target.value}))}/></label><label className="bill-field">Kunlar<input type="number" min={1} max={60} value={grant.days} onChange={e=>setGrant(v=>({...v,days:Number(e.target.value)}))}/></label>{grant.plan!=='challenge'&&<label className="bill-field">MOCK sanasi<input type="date" value={grant.mock_on} onChange={e=>setGrant(v=>({...v,mock_on:e.target.value}))}/></label>}<label className="bill-field">Sabab<input maxLength={500} value={grant.note} onChange={e=>setGrant(v=>({...v,note:e.target.value}))}/></label></div><button className="bill-primary" disabled={!!busy||!grant.student_id||!grant.starts_at||grant.note.trim().length<3} onClick={()=>{if(window.confirm(name(data?.students.find(p=>p.id===grant.student_id))+' uchun imtiyoz berasizmi?'))void run('grant',{action:'grant',...grant,starts_at:new Date(grant.starts_at+':00+05:00').toISOString()},'Imtiyoz yozildi.')}}><ShieldCheck size={16}/> Imtiyozni saqlash</button><div className="bill-table-wrap"><table><thead><tr><th>Imtiyoz egasi</th><th>Muddat / MOCK</th><th>Amal</th></tr></thead><tbody>{data?.access.filter(a=>!a.order_id&&!a.source_order_id&&!a.revoked_at).map(a=><tr key={a.id}><td>{name(data.students.find(p=>p.id===a.student_id))}</td><td>{date(a.starts_at)}{a.expires_at?' → '+date(a.expires_at):''}{a.mock_on?' · MOCK '+a.mock_on:''}</td><td><button className="bill-small-btn" disabled={!!busy} onClick={()=>{const reason=window.prompt('Imtiyozni qaytarish sababi:');if(reason&&reason.trim().length>=3)void run(a.id,{action:'revoke_grant',access_id:a.id,note:reason},'Imtiyoz qaytarildi. Natijalar saqlangan.')}}>Imtiyozni qaytarish</button></td></tr>)}</tbody></table></div></section>}
+  {showSettings&&<div className="bill-admin-cards">{(['uzcard','humo'] as BillingMethod[]).map(method=><section key={method} className="bill-box"><h2>{method.toUpperCase()}</h2><label className="bill-field">Karta raqami<input inputMode="numeric" maxLength={19} value={cards[method].number} onChange={e=>setCards(v=>({...v,[method]:{...v[method],number:e.target.value}}))}/></label><label className="bill-field">Karta egasi<input maxLength={100} value={cards[method].holder} onChange={e=>setCards(v=>({...v,[method]:{...v[method],holder:e.target.value}}))}/></label><label className="bill-check"><input type="checkbox" checked={cards[method].enabled} onChange={e=>setCards(v=>({...v,[method]:{...v[method],enabled:e.target.checked}}))}/> O‘quvchilar uchun faol</label><button className="bill-primary" disabled={!!busy} onClick={()=>void run(method,{action:'set_card',method,...cards[method]},'Karta sozlamalari saqlandi.')}>Saqlash</button></section>)}</div>}
+  <section className="bill-box bill-history"><h2>O‘zgarishlar tarixi</h2><div className="bill-table-wrap"><table><thead><tr><th>Vaqt (UZT)</th><th>O‘quvchi</th><th>Amal</th><th>Izoh</th></tr></thead><tbody>{data?.events.map(e=><tr key={e.id}><td>{date(e.created_at)}</td><td>{name(data.students.find(p=>p.id===e.student_id))}</td><td>{label(e.action)}</td><td>{e.note||'—'}</td></tr>)}</tbody></table></div></section>
  </section>;
 }

@@ -1,3 +1,4 @@
+import {hasCompletedResult} from "@/lib/billing/server";
 import {NextRequest,NextResponse} from "next/server";
 import {createHash} from "node:crypto";
 import {isDayUnlocked} from "@/lib/ark60-content-auth";
@@ -80,9 +81,10 @@ export async function GET(req:NextRequest){
   }))});
  }
  const user=await viewer(req);if(!user)return err("Please sign in",401);
- const day=Number(url.searchParams.get("day"));if(!(await isDayUnlocked(day,user as any)))return err("This study day is locked",403);
+ const day=Number(url.searchParams.get("day"));const freshAccess=await isDayUnlocked(day,user as any,"reading");const canStudy=freshAccess||await isDayUnlocked(day,user as any,"reading",true);if(!canStudy&&!(await hasCompletedResult(String(user.id),day,"reading")))return err("Challenge obunasi kerak",403);
  const rows=await catalogue(day);const attempts=user.username===previewName?[]:await completed(String(user.id),day);
- if(action==="list")return NextResponse.json({day,preview:user.username===previewName,passages:rows.filter((r:J)=>r.status==="published").map((r:J)=>({id:r.id,ordinal:r.ordinal,title:r.title,completed:attempts.find((a:J)=>a.passage_id===r.id)||null,locked:r.ordinal===2&&user.username!==previewName&&!attempts.some((a:J)=>a.ordinal===1)})),draft_count:rows.filter((r:J)=>r.status==="draft").length});
+ const resumable=new Set<string>();if(!freshAccess)for(const r of rows)if(await db("rpc/ark60_billing_can_resume_reading","POST","",{p_student:user.id,p_passage:r.id}))resumable.add(String(r.id));
+ if(action==="list")return NextResponse.json({day,preview:user.username===previewName,passages:rows.filter((r:J)=>r.status==="published").map((r:J)=>({id:r.id,ordinal:r.ordinal,title:r.title,completed:attempts.find((a:J)=>a.passage_id===r.id)||null,locked:(!freshAccess&&!resumable.has(String(r.id))&&!attempts.some((a:J)=>a.passage_id===r.id))||r.ordinal===2&&user.username!==previewName&&!attempts.some((a:J)=>a.ordinal===1)})),draft_count:rows.filter((r:J)=>r.status==="draft").length});
  if(action!=="passage")return err("Unknown action",404);
  if(isMockDay(day))return err("Use the Full Mock flow for this Sunday.",409);
  const id=url.searchParams.get("id")||"";if(!idValid(id))return err("Invalid passage");
@@ -98,6 +100,7 @@ export async function GET(req:NextRequest){
   if(!attempt)return err("Unable to locate your saved answers",404);
   return NextResponse.json({passage:safePassage(passage),completed:prior,review:reviewFor(passage,attempt)});
  }
+ if(!freshAccess&&!resumable.has(id))return err("Challenge obunasi kerak",403);
  const began=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
  return NextResponse.json({passage:safePassage(passage),timer:timerState(began)});
  }catch(e){console.error("reading GET",e);return err("Unable to load reading materials",503)}
@@ -109,7 +112,9 @@ export async function POST(req:NextRequest){
  const user=await viewer(req);if(!user)return err("Please sign in",401);
  const b=await req.json();const day=Number(b.day),id=String(b.passage_id||"");
  if(isMockDay(day))return err("Use the Full Mock flow for this Sunday.",409);
- if(!(await isDayUnlocked(day,user as any))||!idValid(id))return err("Invalid day or passage",403);
+ const freshAccess=await isDayUnlocked(day,user as any,"reading");
+ const resumeAccess=b.action!=="start"&&idValid(id)&&await db("rpc/ark60_billing_can_resume_reading","POST","",{p_student:user.id,p_passage:id});
+ if((!freshAccess&&!resumeAccess)||!idValid(id))return err("Invalid day or passage",403);
  const row=(await db("ark60_reading_passages","GET","select=id,day_number,ordinal,questions,answer_key,analysis,status&id=eq."+id+"&day_number=eq."+day+"&status=eq.published&limit=1"))[0];
  if(!row)return err("Passage unavailable",404);
  const prev=user.username===previewName?[]:await completed(String(user.id),day);
@@ -129,7 +134,7 @@ export async function POST(req:NextRequest){
     is_running:b.action!=="pause",elapsed_seconds:elapsed
    }});
   }
-  if(b.action!=="pause"){
+  if(b.action!=="pause"&&freshAccess){
    await db("ark60_reading_starts","POST","on_conflict=student_id,passage_id",
     {student_id:user.id,passage_id:id},"resolution=ignore-duplicates");
   }
@@ -171,6 +176,7 @@ export async function POST(req:NextRequest){
   });
  }
  let start=(await db("ark60_reading_starts","GET","select=started_at,active_seconds,resumed_at,is_running&student_id=eq."+user.id+"&passage_id=eq."+id+"&limit=1"))[0];
+ if(!start&&!freshAccess)return err("Challenge obunasi kerak",403);
  if(!start){
   // Backward-compatibility for students who opened Reading before auto-start was deployed.
   // Never reject their answers just because the older tab did not create a timer row.

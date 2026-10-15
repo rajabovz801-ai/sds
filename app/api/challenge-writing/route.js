@@ -1,3 +1,4 @@
+import {hasCompletedResult} from "@/lib/billing/server";
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import PDFDocument from "pdfkit";
@@ -280,7 +281,7 @@ export async function GET(request) {
   if (!student && !admin) return json({ detail: "Please sign in." }, 401);
   const day = validDay(url.searchParams.get("day"));
   if (!day) return json({ detail: "No daily Writing task is scheduled for this day." }, 404);
-  if (!admin && student && !(await isDayUnlocked(day, student))) return json({ detail: "This Writing task is not available yet." }, 403);
+  if (!admin && student && !(await isDayUnlocked(day, student,"writing", true)) && !(await hasCompletedResult(student.id,day,"writing"))) return json({ detail: "This Writing task is not available yet." }, 403);
   const content = await getContent(day);
   if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
 
@@ -328,7 +329,7 @@ export async function POST(request) {
     if (!student) return json({ detail: "Please sign in." }, 401);
     const day = validDay(body.day);
     if (!day) return json({ detail: "No daily Writing task is scheduled for this day." }, 400);
-    if (!(await isDayUnlocked(day, student))) return json({ detail: "This Writing task is not available yet." }, 403);
+    if (!(await isDayUnlocked(day, student,"writing", false))) return json({ detail: "This Writing task is not available yet." }, 403);
     const content = await getContent(day);
     if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
     if (student.username === PREVIEW_USERNAME) return json({ ok: true, preview: true, visit: null });
@@ -402,7 +403,7 @@ export async function POST(request) {
     if (!student) return json({ detail: "Please sign in." }, 401);
     const day = validDay(body.day);
     if (!day) return json({ detail: "No daily Writing task is scheduled for this day." }, 400);
-    if (!(await isDayUnlocked(day, student))) return json({ detail: "This Writing task is not available yet." }, 403);
+    if (!(await isDayUnlocked(day, student,"writing", true))) return json({ detail: "This Writing task is not available yet." }, 403);
     const content = await getContent(day);
     if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
 
@@ -482,7 +483,7 @@ export async function POST(request) {
   if (!student) return json({ detail: "Please sign in." }, 401);
   const day = validDay(body.day);
   if (!day) return json({ detail: "No daily Writing task is scheduled for this day." }, 400);
-  if (!(await isDayUnlocked(day, student))) return json({ detail: "This Writing task is not available yet." }, 403);
+  if (!(await isDayUnlocked(day, student,"writing", true))) return json({ detail: "This Writing task is not available yet." }, 403);
   const content = await getContent(day);
   if (!content) return json({ detail: "Writing material has not been published yet." }, 404);
   const answer = String(body.answer || "").trim();

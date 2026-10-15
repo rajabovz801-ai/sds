@@ -13,6 +13,7 @@ type Student={
 };
 type Completed={day_number:number;module:string;score:number|null;band:number|null;review_status:string};
 export type HubStats={
+ membership?:import("@/lib/billing/access-policy").Membership;
  student:Student;today_seconds:number;active_seconds:number;coins:number;
  by_module:Record<string,number>;completed:Completed[];required_by_day:Record<string,string[]>;completed_mock_days?:number[];preview?:boolean;
 };

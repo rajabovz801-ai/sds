@@ -1,6 +1,7 @@
 import "server-only";
 import {createHash} from "node:crypto";
 import type {NextRequest} from "next/server";
+import {membershipDayAllowed,type Membership} from "./billing/access-policy";
 import {challengeDayUnlocked,isChallengeMockDay} from "./ark60-day-access";
 
 export type Student={id:string;username:string;first_name:string;last_name:string;status:string};
@@ -13,7 +14,7 @@ export const VALID_DAYS=new Set([1,2,3,5,6,7,8,9,10,12,13,14,15,16,17]);
 export const isUuid=(s:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 export async function sqlTable(table:string,method="GET",query="",body?:unknown,prefer=""){
  if(!KEY)throw Error("Server database key missing");
- if(!/^(ark60_[a-z_]+|rpc\/(ark60_vocab_submit_answer|ark60_student_dashboard_summary))$/.test(table))throw Error("Unknown table");
+ if(!/^(ark60_[a-z_]+|rpc\/(ark60_vocab_submit_answer|ark60_student_dashboard_summary|ark60_billing_[a-z_]+))$/.test(table))throw Error("Unknown table");
  const resp=await fetch(BASE+"/rest/v1/"+table+(query?"?"+query:""),{
    method,cache:"no-store",headers:{
     apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json",
@@ -48,9 +49,20 @@ export function isDayOpen(n:number,user:Student){
  const iso=new Date(Date.UTC(2026,9,n)).toISOString().slice(0,10);
  return iso<=todayInTashkent();
 }
-export async function isDayUnlocked(n:number,user:Student){
+export async function membershipForStudent(user:Student):Promise<Membership>{
+ const result=await sqlTable("rpc/ark60_billing_snapshot","POST","",{p_student:user.id});
+ return result;
+}
+export async function isDayUnlocked(n:number,user:Student,module="",resume=false){
  if(!isDayOpen(n,user))return false;
- if(isPreview(user)||n===1||isChallengeMockDay(n))return true;
+ if(isPreview(user))return true;
+ const membership=await membershipForStudent(user);
+ if(membership.enforced){
+   if(membershipDayAllowed(n,membership))return true;
+   if(resume&&module)return (await sqlTable("rpc/ark60_billing_can_study","POST","",{p_student:user.id,p_day:n,p_module:module,p_resume:true}))===true;
+   return false;
+ }
+ if(n===1||isChallengeMockDay(n))return true;
  const [rows,mocks]=await Promise.all([
   sqlTable("rpc/ark60_student_dashboard_summary","POST","",{p_student:user.id,p_today:todayInTashkent()}),
   n>4?sqlTable("ark60_mock_attempts","GET","select=day_number&student_id=eq."+user.id+"&stage=eq.completed&day_number=lt."+n):Promise.resolve([])

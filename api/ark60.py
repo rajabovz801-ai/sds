@@ -232,6 +232,10 @@ def day_unlocked_for_user(user,day_num):
         return False
     if day_num==4 and now()<datetime(2026,10,4,5,0,tzinfo=timezone.utc):
         return False
+    if today().isoformat()>="2026-10-19":
+        membership=db("POST","rpc/ark60_billing_snapshot",payload={"p_student":user["id"]})
+        if membership.get("enforced"):
+            return db("POST","rpc/ark60_billing_can_study",payload={"p_student":user["id"],"p_day":day_num}) is True
     if day_num==1 or d.weekday()==6:
         return True
     rows=db("POST","rpc/ark60_student_dashboard_summary",payload={"p_student":user["id"],"p_today":str(today())})
@@ -281,7 +285,8 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
             "coins":0 if preview else int(summary.get("coins") or 0),
             "required_by_day":summary.get("required_by_day") or {},
             "completed_mock_days":mock_days,
-            "preview":preview
+            "preview":preview,
+            "membership":db("POST","rpc/ark60_billing_snapshot",payload={"p_student":user["id"]})
         }
     if action=="reward_center":
         user=require_student(request)
@@ -353,7 +358,7 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         if not day_unlocked_for_user(user,day):
             raise HTTPException(status_code=403,detail="Finish all required tasks from earlier days first")
         available=["listening","reading","writing"] if d.weekday()==6 else ["reading","listening","article","vocabulary","writing","speaking"]
-        rows=db("GET","ark60_content",{"select":"module,title,payload","day_number":"eq."+str(day),"status":"eq.published","limit":6})
+        rows=db("GET","ark60_content",{"select":"module,title","day_number":"eq."+str(day),"status":"eq.published","limit":6})
         return {"day":day,"date":str(d),"mock":d.weekday()==6,"modules":available,"published":rows,"preview":user.get("username")=="rustam7"}
     if action=="admin_me":
         return {"admin":require_admin(request)}
@@ -470,9 +475,17 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
             if seen<=60:
                 if interaction<=90: online_now+=1
                 else: idle_now+=1
+        students=summary.get("students") or []
+        rights=db("GET","ark60_billing_access",{"select":"student_id,starts_at,expires_at,mock_on,revoked_at","limit":2000})
+        for person in students:
+            owned=[r for r in rights if r.get("student_id")==person.get("id") and not r.get("revoked_at")]
+            challenge=[r for r in owned if str(r.get("starts_at") or "")<=stamp.isoformat() and r.get("expires_at") and datetime.fromisoformat(r["expires_at"].replace("Z","+00:00"))>stamp]
+            mocks=[r for r in owned if str(r.get("starts_at") or "")<=stamp.isoformat() and str(r.get("mock_on") or "")>=str(today())]
+            scheduled=any(datetime.fromisoformat(r["starts_at"].replace("Z","+00:00"))>stamp for r in owned)
+            person["membership_label"]="All Access" if challenge and mocks else "Challenge" if challenge else "MOCK" if mocks else "Boshlanishi kutilmoqda" if scheduled else "Muddati tugagan" if owned else "Bepul sinov" if str(person.get("created_at") or "")>="2026-10-18T19:00:00" else "Free"
         return {
             "admin":admin,
-            "students":summary.get("students") or [],
+            "students":students,
             "total_students":int(summary.get("total_students") or 0),
             "active_today":int(summary.get("active_today") or 0),
             "today_seconds":int(summary.get("today_seconds") or 0),
@@ -780,6 +793,8 @@ async def actions(request:Request,response:Response):
         if user.get("username")=="rustam7":
             return {"ok":True,"preview":True,"added_seconds":0}
         day_status(day)
+        if today()>=date(2026,10,19) and not db("POST","rpc/ark60_billing_can_study",payload={"p_student":user["id"],"p_day":day,"p_module":module,"p_resume":True}):
+            raise HTTPException(status_code=403,detail="Faol obuna kerak")
         today_d=today()
         # Record actual date of activity, not the original course date for late work.
         if module=="reading":

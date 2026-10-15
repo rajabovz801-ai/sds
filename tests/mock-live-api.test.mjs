@@ -12,7 +12,7 @@ function setup({student=null,admin=null,live=null,origin=true}={}){
  new Function('require','exports','module',code)(name=>{
   if(name==='next/server')return {NextResponse:{json:(body,init)=>({body,status:init.status})}};
   if(name==='@/lib/mock-live')return liveModule;
-  if(name==='@/lib/ark60-content-auth')return {getStudent:async()=>student,getAdmin:async()=>admin,isOwnOrigin:()=>origin,isDayOpen:async()=>true,isPreview:()=>false};
+  if(name==='@/lib/ark60-content-auth')return {getStudent:async()=>student,getAdmin:async()=>admin,isOwnOrigin:()=>origin,isDayUnlocked:async()=>true,isDayOpen:async()=>true,isPreview:()=>false};
   if(name==='@/lib/supabase/server')return {getServiceSupabase:()=>db};
   throw Error(name);
  },mod.exports,mod);

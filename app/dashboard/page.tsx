@@ -1,6 +1,7 @@
 "use client";
 import {challengeDayUnlocked} from "../../lib/ark60-day-access";
 import LoadingIndicator from "../components/loading-indicator";
+import {MembershipNotice,MembershipLock} from "../components/membership-notice";
 import BillingPanel from "../components/billing-panel";
 
 import AnimatedBackButton from "../components/animated-back-button";
@@ -79,6 +80,9 @@ export default function Dashboard(){
  const [previewMockDay,setPreviewMockDay]=useState<number|null>(null);
  const [view,setView]=useState("Dashboard");
  const [sidebar,setSidebar]=useState(false);
+ const [lockedDay,setLockedDay]=useState<number|null>(null);
+ useEffect(()=>{const q=new URLSearchParams(location.search);if(q.get("view")==="Billing")setView("Billing")},[]);
+ useEffect(()=>{if(lockedDay===null)return;const close=(e:KeyboardEvent)=>{if(e.key==="Escape")setLockedDay(null)};window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close)},[lockedDay]);
  const [month,setMonth]=useState<"all"|"oct"|"nov">("oct");
  const [stats,setStats]=useState<StudentStats|null>(null);
  const [authChecked,setAuthChecked]=useState(false);
@@ -229,6 +233,8 @@ export default function Dashboard(){
    </header>
 
    <main className={"learning-content workspace-"+view.toLowerCase().replaceAll(" ","-")}>
+    {view!=="Billing"&&<MembershipNotice membership={stats?.membership} onBilling={()=>setView("Billing")} onTrial={()=>location.assign("/day/1")}/>}
+    {lockedDay!==null&&<div className="membership-overlay" role="dialog" aria-modal="true" aria-label="Paket kerak"><MembershipLock day={lockedDay} membership={stats?.membership} onClose={()=>setLockedDay(null)}/></div>}
     {loadError&&stats&&<div role="status" className="dashboard-live-warning"><span>{loadError} Live stats may be temporarily out of date.</span><button type="button" className="dashboard-inline-retry" onClick={()=>setRetryCount(value=>value+1)}>Retry</button></div>}
 
     {view==="Dashboard"?<>
@@ -267,13 +273,13 @@ export default function Dashboard(){
         return <div key={name} className={"detail-item dashboard-task "+(done?"task-completed ":"")+(planLive?"task-ready":"task-pending")}>
          <span className={"task-icon "+tone}>{["Reading","Listening","Writing","Article","Vocabulary","Speaking"].includes(name)?<WorkspaceArt name={"module-"+name.toLowerCase()} className="module-task-art"/>:<Icon size={19} strokeWidth={1.8}/>}</span>
          <div className="task-copy"><strong>{name}<span className="task-coin-badge"><Coins size={11}/> +1 coin</span></strong><small>{detail}</small></div>
-         <button type="button" className={"task-action "+(planLive?"can-open":"future")+" "+(done?"completed":"")} disabled={!planLive} onClick={()=>{if(planLive)window.location.assign(moduleHref(planDayNumber,name))}}>
+         <button type="button" className={"task-action "+(planLive?"can-open":"future")+" "+(done?"completed":"")} disabled={!planLive&&!done&&!(stats?.membership?.enforced&&unlocked(planDay,today))} onClick={()=>{if(planLive||done)window.location.assign(moduleHref(planDayNumber,name));else setLockedDay(planDayNumber)}}>
           {done?"Completed":planLive?"Start":"Locked"}{done?<CheckCircle2 size={15}/>:planLive?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
          </button>
         </div>;
        }):<div className="today-empty"><CalendarDays size={22}/><div><b>No published tasks yet</b><p>When materials are published, they will appear here automatically.</p></div></div>}
       </div>
-      <div className="today-panel-footer"><span>{planLive?"Your unfinished published tasks stay available after their original day.":"This day unlocks on "+format(planDay.date,{day:"numeric",month:"long"})+"."}</span><button onClick={()=>{setSelected(planDayNumber);setView("60-Day Plan")}}>Open 60-Day Plan <ChevronRight size={14}/></button></div>
+      <div className="today-panel-footer"><span>{planLive?"Your unfinished published tasks stay available after their original day.":stats?.membership?.enforced&&unlocked(planDay,today)?"Ushbu kun uchun faol paket kerak.":"This day unlocks on "+format(planDay.date,{day:"numeric",month:"long"})+"."}</span><button onClick={()=>{setSelected(planDayNumber);setView("60-Day Plan")}}>Open 60-Day Plan <ChevronRight size={14}/></button></div>
      </section>
     </>:view==="60-Day Plan"?<>
      <div className="page-heading plan-heading">
@@ -310,12 +316,12 @@ export default function Dashboard(){
         return <div key={name} className={"detail-item "+(done?"task-completed ":"")+(ready?"task-ready":"task-pending")}>
          <span className={"task-icon "+tone}>{["Reading","Listening","Writing","Article","Vocabulary","Speaking"].includes(name)?<WorkspaceArt name={"module-"+name.toLowerCase()} className="module-task-art"/>:<Icon size={19} strokeWidth={1.8}/>}</span>
          <div className="task-copy"><strong>{name}{moduleReady(name)&&<span className="task-coin-badge"><Coins size={11}/> +1 coin</span>}</strong><small>{moduleReady(name)?detail:"Material not published yet"}</small></div>
-         <button type="button" className={"task-action "+(ready?"can-open":"future")+" "+(done?"completed":"")} disabled={!ready} title={!live?"Available on "+format(chosen.date,{day:"numeric",month:"long"}):!moduleReady(name)?"Material not published yet":"Open "+name} onClick={()=>{if(ready)window.location.assign(moduleHref(chosen.n,name))}}>
+         <button type="button" className={"task-action "+(ready?"can-open":"future")+" "+(done?"completed":"")} disabled={!ready&&!done&&!(stats?.membership?.enforced&&unlocked(chosen,today)&&moduleReady(name))} title={!live?(stats?.membership?.enforced&&unlocked(chosen,today)?"Faol paket kerak":"Available on "+format(chosen.date,{day:"numeric",month:"long"})):!moduleReady(name)?"Material not published yet":"Open "+name} onClick={()=>{if(ready||done)window.location.assign(moduleHref(chosen.n,name));else setLockedDay(chosen.n)}}>
           {done?"Completed":ready?"Start":live?"Soon":"Locked"}{done?<CheckCircle2 size={15}/>:ready?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
          </button>
         </div>;
        })}</div>
-       <div className="day-detail-footer"><div><span>DAY STATUS</span><b>{live?(chosenRequired.length?chosenRequired.length+" published modules":"Materials pending upload"):"Available on "+format(chosen.date,{day:"numeric",month:"short"})}</b></div><button disabled={!live} className="detail-btn" onClick={()=>{if(live)location.href="/day/"+chosen.n}}>{live?"View study day":"Future day locked"}<ChevronRight size={16}/></button></div>
+       <div className="day-detail-footer"><div><span>DAY STATUS</span><b>{live?(chosenRequired.length?chosenRequired.length+" published modules":"Materials pending upload"):"Available on "+format(chosen.date,{day:"numeric",month:"short"})}</b></div><button disabled={!live&&!(stats?.membership?.enforced&&unlocked(chosen,today))} className="detail-btn" onClick={()=>{if(live)location.href="/day/"+chosen.n;else setLockedDay(chosen.n)}}>{live?"View study day":stats?.membership?.enforced&&unlocked(chosen,today)?"Paket tanlash":"Future day locked"}<ChevronRight size={16}/></button></div>
       </aside>
      </div>
 

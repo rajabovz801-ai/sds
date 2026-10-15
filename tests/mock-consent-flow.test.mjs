@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import ts from 'typescript';
 
 const code=ts.transpileModule(fs.readFileSync('app/api/challenge-mock/route.ts','utf8')+'\nexport {retryFailedAssessments};',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
-function setup({allowed=false,stage='listening',preview=false,open=true,stopped=false,stopDuringHeartbeat=false}={}){
+function setup({allowed=false,stage='listening',preview=false,open=true,stopped=false,stopDuringHeartbeat=false,membershipAllowed=true}={}){
  const calls=[];let live={allowed,heartbeat_at:stopped?'1970-01-01T00:00:00.000Z':new Date().toISOString(),viewed_at:new Date().toISOString(),snapshot:{stage:'reading'},snapshot_at:new Date().toISOString()};
  const row={id:'attempt',stage,student_id:'student',day_number:4};
  const db={from(table){let patch=null,upsert=false,queue=false;const filters={};
@@ -30,7 +30,7 @@ function setup({allowed=false,stage='listening',preview=false,open=true,stopped=
  new Function('require','exports','module',code)(name=>{
   if(name==='next/server')return {NextResponse:{json:(body,init)=>({body,status:init.status})}};
   if(name==='@/lib/mock-live')return {liveLeaseActive:()=>true,sanitizeMockSnapshot:v=>v};
-  if(name==='@/lib/ark60-content-auth')return {getStudent:async()=>({id:'student'}),isOwnOrigin:()=>true,isDayOpen:async()=>open,isPreview:()=>preview};
+  if(name==='@/lib/ark60-content-auth')return {getStudent:async()=>({id:'student'}),isOwnOrigin:()=>true,isDayUnlocked:async()=>membershipAllowed,isDayOpen:async()=>open,isPreview:()=>preview};
   if(name==='@/lib/supabase/server')return {getServiceSupabase:()=>db};
   throw Error(name);
  },mod.exports,mod);
@@ -73,4 +73,18 @@ test('Student retry checks target their own result while admin retries can proce
  assert.equal(student.calls[0].filters.student_id,'student');
  const admin=setup();await admin.retryFailedAssessments({},4,2);
  assert.equal(admin.calls[0].filters.student_id,undefined);
+});
+
+
+test('A learner without a mock ticket cannot start, consent, upload live data or load materials',async()=>{
+ for(const action of ['start','start_listening','live_consent','live_heartbeat','submit_writing']){
+  const api=setup({allowed:true,membershipAllowed:false});
+  const response=await api.POST({json:async()=>({action,day:4,allowed:true})});
+  assert.equal(response.status,403,action);
+  assert.equal(response.body.billing_required,true);
+ }
+ const api=setup({membershipAllowed:false});
+ const response=await api.GET({url:'https://example.test/api/challenge-mock?day=4'});
+ assert.equal(response.status,403);
+ assert.equal(response.body.billing_required,true);
 });
