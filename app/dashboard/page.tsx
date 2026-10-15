@@ -1,6 +1,7 @@
 "use client";
 import {challengeDayUnlocked} from "../../lib/ark60-day-access";
 import LoadingIndicator from "../components/loading-indicator";
+import BillingPanel from "../components/billing-panel";
 
 import AnimatedBackButton from "../components/animated-back-button";
 import {WorkspaceArt} from "../components/workspace-art";
@@ -10,7 +11,7 @@ import {useEffect,useMemo,useState} from "react";
 import {CHALLENGE_RESUME_STORAGE_KEY,parseChallengeResume,type ChallengeResume} from "../../lib/ark60-resume";
 import {
  LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,
- LockKeyhole,Clock3,ChevronRight,Menu,X,Bell,CircleHelp,CheckCircle2,Sun,Moon,Coins,ShieldCheck
+ LockKeyhole,Clock3,ChevronRight,Menu,X,Bell,CircleHelp,CheckCircle2,Sun,Moon,Coins,ShieldCheck,CreditCard
 } from "lucide-react";
 
 type Day={n:number,date:Date,mock:boolean};
@@ -193,7 +194,8 @@ export default function Dashboard(){
   {name:"Dashboard",icon:LayoutDashboard},
   {name:"60-Day Plan",icon:CalendarDays},
   {name:"Progress",icon:ChartNoAxesCombined},
-  {name:"Leaderboard",icon:Trophy}
+  {name:"Leaderboard",icon:Trophy},
+  {name:"Billing",icon:CreditCard}
  ];
  const visible=month==="all"?DAYS:DAYS.filter(x=>month==="oct"?x.date.getUTCMonth()===9:x.date.getUTCMonth()===10);
 
@@ -318,7 +320,7 @@ export default function Dashboard(){
      </div>
 
      <section className="bottom-insights"><article><div className="insight-icon"><ShieldCheck size={20}/></div><div><b>Calendar-based access</b><p>Each day unlocks at 00:00 Uzbekistan time. Previous unfinished days remain available.</p></div></article><article><div className="insight-icon"><Clock3 size={20}/></div><div><b>Active study tracking</b><p>Only visible, recently active supported study time is recorded.</p></div></article></section>
-    </>:view==="Leaderboard"&&stats?<LeaderboardPanel studentId={stats.student.id} cosmetics={stats.student.cosmetics} preview={stats.preview}/>:view==="Progress"&&stats?<ProgressPanel stats={stats} completedDays={completedDays}/>:view==="Profile"&&stats?<ProfilePanel stats={stats} onStudent={student=>setStats(prev=>prev?{...prev,student:{...prev.student,...student}}:prev)} onCoins={coins=>setStats(prev=>prev?{...prev,coins}:prev)} onLogout={exit}/>:<section className="empty-view"><div className="empty-icon"><Bell size={31}/></div><h1>{view}</h1><p>This section is not available yet.</p><AnimatedBackButton onClick={()=>setView("Dashboard")} ariaLabel="Back to dashboard"/></section>}
+    </>:view==="Billing"?<BillingPanel/>:view==="Leaderboard"&&stats?<LeaderboardPanel studentId={stats.student.id} cosmetics={stats.student.cosmetics} preview={stats.preview}/>:view==="Progress"&&stats?<ProgressPanel stats={stats} completedDays={completedDays}/>:view==="Profile"&&stats?<ProfilePanel stats={stats} onStudent={student=>setStats(prev=>prev?{...prev,student:{...prev.student,...student}}:prev)} onCoins={coins=>setStats(prev=>prev?{...prev,coins}:prev)} onLogout={exit}/>:<section className="empty-view"><div className="empty-icon"><Bell size={31}/></div><h1>{view}</h1><p>This section is not available yet.</p><AnimatedBackButton onClick={()=>setView("Dashboard")} ariaLabel="Back to dashboard"/></section>}
    </main>
   </div>
 
