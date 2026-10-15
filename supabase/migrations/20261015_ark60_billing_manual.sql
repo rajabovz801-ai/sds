@@ -60,6 +60,11 @@ alter table public.ark60_billing_orders enable row level security;
 alter table public.ark60_billing_access enable row level security;
 alter table public.ark60_billing_audit enable row level security;
 -- Service-role access only. Requests are authenticated by application APIs.
+revoke all on public.ark60_billing_cards, public.ark60_billing_orders,
+  public.ark60_billing_access, public.ark60_billing_audit from anon, authenticated;
+grant select, insert, update, delete on public.ark60_billing_cards, public.ark60_billing_orders,
+  public.ark60_billing_access, public.ark60_billing_audit to service_role;
+grant usage, select on sequence public.ark60_billing_audit_id_seq to service_role;
 
 create or replace function public.ark60_review_billing_order(
  p_order_id uuid, p_admin_id uuid, p_decision text, p_note text default ''
