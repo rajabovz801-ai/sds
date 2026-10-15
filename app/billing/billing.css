@@ -70,3 +70,24 @@
 .bill-check input{width:16px;height:16px}
 @media(max-width:1100px){.bill-summary{grid-template-columns:1fr}.bill-plans{grid-template-columns:1fr 1fr}.bill-plans>.bill-plan:last-child{grid-column:1/-1}.bill-admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.bill-hero{padding:20px;min-height:140px}.bill-hero img{width:90px;height:100px}.bill-hero h1{font-size:28px}.bill-plans,.bill-pay-grid,.bill-admin-cards{grid-template-columns:1fr}.bill-plans>.bill-plan:last-child{grid-column:auto}.bill-summary-card{padding:13px}.bill-admin-filters{flex-direction:column;align-items:stretch}.bill-tabs{width:100%}.bill-search input{width:100%}.bill-box{padding:15px}.bill-admin-stats strong{font-size:18px}}
+
+/* Billing uses explicit dark tokens instead of generated theme conversions. */
+html[data-ark-theme="dark"] .bill-page{--bill-ink:#eaf0f7;--bill-line:#30415a;--bill-muted:#a8bbd0;--bill-blue:#77a5ff;color:#eaf0f7}
+html[data-ark-theme="dark"] .bill-hero,html[data-ark-theme="dark"] .bill-admin-head{background:linear-gradient(115deg,#192940,#172234);border-color:#30415a}
+html[data-ark-theme="dark"] .bill-summary-card,html[data-ark-theme="dark"] .bill-plan,html[data-ark-theme="dark"] .bill-box,html[data-ark-theme="dark"] .bill-admin-stats>div{background:#172438;color:#eaf0f7;border-color:#30415a}
+html[data-ark-theme="dark"] .bill-plan.highlight{background:linear-gradient(140deg,#242d3c,#1a3147)}
+html[data-ark-theme="dark"] .bill-plan.chosen{border-color:#75a4ff}
+html[data-ark-theme="dark"] .bill-plan strong,html[data-ark-theme="dark"] .bill-hero h1,html[data-ark-theme="dark"] .bill-admin-head h1,html[data-ark-theme="dark"] .bill-page h2,html[data-ark-theme="dark"] .bill-price{color:#eaf0f7}
+html[data-ark-theme="dark"] .bill-summary-card small,html[data-ark-theme="dark"] .bill-summary-card div>span,html[data-ark-theme="dark"] .bill-plan-sub,html[data-ark-theme="dark"] .bill-muted,html[data-ark-theme="dark"] .bill-section-head p{color:#a8bbd0}
+html[data-ark-theme="dark"] .bill-card,html[data-ark-theme="dark"] .bill-pending{background:#213146;border-color:#3f5371;color:#eaf0f7}
+html[data-ark-theme="dark"] .bill-card button,html[data-ark-theme="dark"] .bill-pending button,html[data-ark-theme="dark"] .bill-small-btn{background:#23344c;border-color:#3b5680;color:#a7c7ff}
+html[data-ark-theme="dark"] .bill-card strong,html[data-ark-theme="dark"] .bill-card span,html[data-ark-theme="dark"] .bill-pending strong{color:#eaf0f7}
+html[data-ark-theme="dark"] .bill-methods button,html[data-ark-theme="dark"] .bill-tabs button{background:#1e3046;border-color:#375071;color:#b8cce4}
+html[data-ark-theme="dark"] .bill-methods button.current,html[data-ark-theme="dark"] .bill-tabs button.active{background:#2850a0;border-color:#638bdd;color:#fff}
+html[data-ark-theme="dark"] .bill-table-wrap th{background:#223248;color:#b8cce4}
+html[data-ark-theme="dark"] .bill-table-wrap td{border-color:#32425a;color:#eaf0f7}
+html[data-ark-theme="dark"] .bill-search,html[data-ark-theme="dark"] .bill-field input,html[data-ark-theme="dark"] .bill-review-actions input{background:#1b2b40;border-color:#3b506c;color:#edf4ff}
+html[data-ark-theme="dark"] .bill-search input{background:transparent;color:#edf4ff}
+html[data-ark-theme="dark"] .bill-caution{background:#20344e;border-color:#31567e;color:#b5d2ed}
+html[data-ark-theme="dark"] .bill-not-set{background:#3b3224;border-color:#705e3b;color:#f1d195}
+html[data-ark-theme="dark"] .bill-not-set a{color:#9bc3ff}
