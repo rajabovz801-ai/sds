@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const code = "ARK-" + Date.now().toString(36).toUpperCase() + "-" + randomBytes(4).toString("hex").toUpperCase();
     const { data: order, error } = await db.from("ark60_billing_orders").insert({
       student_id: student.id, order_code: code, plan_key: body.plan_key,
-      price_uzs: PLAN_LOOKUP[body.plan_key].price, payment_method: body.payment_method, status: "pending",
+      price_uzs: PLAN_LOOKUP[body.plan_key as keyof typeof PLAN_LOOKUP].price, payment_method: body.payment_method, status: "pending",
     }).select("id,order_code,plan_key,price_uzs,payment_method,status").single();
     if (error?.code === "23505") return send({ error: "Sizda kutilayotgan to‘lov bor. Sahifani yangilang." }, 409);
     if (error || !order) throw error || new Error("Could not create order");
