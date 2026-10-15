@@ -1,7 +1,7 @@
 "use client";
 import {challengeDayUnlocked} from "../../lib/ark60-day-access";
 import LoadingIndicator from "../components/loading-indicator";
-import {MembershipNotice,MembershipLock} from "../components/membership-notice";
+import {MembershipLock} from "../components/membership-notice";
 import BillingPanel from "../components/billing-panel";
 
 import AnimatedBackButton from "../components/animated-back-button";
@@ -233,7 +233,6 @@ export default function Dashboard(){
    </header>
 
    <main className={"learning-content workspace-"+view.toLowerCase().replaceAll(" ","-")}>
-    {view!=="Billing"&&<MembershipNotice membership={stats?.membership} onBilling={()=>setView("Billing")} onTrial={()=>location.assign("/day/1")}/>}
     {lockedDay!==null&&<div className="membership-overlay" role="dialog" aria-modal="true" aria-label="Paket kerak"><MembershipLock day={lockedDay} membership={stats?.membership} onClose={()=>setLockedDay(null)}/></div>}
     {loadError&&stats&&<div role="status" className="dashboard-live-warning"><span>{loadError} Live stats may be temporarily out of date.</span><button type="button" className="dashboard-inline-retry" onClick={()=>setRetryCount(value=>value+1)}>Retry</button></div>}
 

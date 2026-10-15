@@ -1,7 +1,6 @@
 "use client";
-import {MembershipNotice} from "./membership-notice";
 import type {Membership} from "@/lib/billing/access-policy";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarClock, CheckCircle2, ChevronRight, ClipboardCopy, CreditCard, Crown, ExternalLink, LoaderCircle, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
 import { BILLING_PLANS, formatSom, type BillingMethod, type BillingPlan } from "@/lib/billing/plans";
 import "../billing/billing.css";
@@ -20,17 +19,20 @@ export default function BillingPanel() {
  const [selected, setSelected] = useState<BillingPlan>("all_access");
  const [method, setMethod] = useState<BillingMethod>("uzcard");
  const [copied, setCopied] = useState("");
- const [confirmPay,setConfirmPay]=useState(false);
+ const [confirmation,setConfirmation]=useState<"pay"|"cancel"|null>(null);
+ const workingRef=useRef(false);
+ const refreshSequence=useRef(0);
 
  async function refresh() {
+   const sequence=++refreshSequence.current;
    setLoading(true);
    try {
      const res = await fetch("/api/billing", { credentials: "same-origin", cache: "no-store" });
      const body = await res.json();
      if (!res.ok) throw Error(body.error || "To‘lov ma’lumotlari ochilmadi.");
-     setData(body); setError("");
-   } catch (err) { setError(err instanceof Error ? err.message : "Xatolik yuz berdi."); }
-   finally { setLoading(false); }
+     if(sequence===refreshSequence.current){setData(body); setError("");}
+   } catch (err) { if(sequence===refreshSequence.current)setError(err instanceof Error ? err.message : "Xatolik yuz berdi."); }
+   finally { if(sequence===refreshSequence.current)setLoading(false); }
  }
  useEffect(() => {
   const plan=new URLSearchParams(location.search).get("plan");if(["challenge","mock","all_access"].includes(plan||""))setSelected(plan as BillingPlan);
@@ -50,12 +52,14 @@ export default function BillingPanel() {
    catch { setError("Nusxalash ishlamadi. Matnni qo‘lda nusxalang."); }
  }
  async function cancelOrder(){
-   if(!pending||!window.confirm("To‘lov so‘rovini bekor qilasizmi? Agar pul o‘tkazgan bo‘lsangiz, avval adminga yozing."))return;
-   setWorking(true);setError("");try{const res=await fetch("/api/billing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"cancel",order_id:pending.id})});const body=await res.json();if(!res.ok)throw Error(body.error);await refresh();setSuccess("So‘rov bekor qilindi. Kerakli paketni qayta tanlashingiz mumkin.")}catch(e){setError(e instanceof Error?e.message:"Bekor qilinmadi.")}finally{setWorking(false)}
+   if(!pending||workingRef.current)return;
+   workingRef.current=true;setConfirmation(null);
+   setWorking(true);setError("");try{const res=await fetch("/api/billing",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"cancel",order_id:pending.id})});const body=await res.json();if(!res.ok)throw Error(body.error);await refresh();setSuccess("So‘rov bekor qilindi. Kerakli paketni qayta tanlashingiz mumkin.")}catch(e){setError(e instanceof Error?e.message:"Bekor qilinmadi.")}finally{workingRef.current=false;setWorking(false)}
  }
  const statusLabel=(status:string)=>({approved:"Tasdiqlangan",rejected:"Rad etilgan",pending:"Kutilmoqda",cancelled:"Bekor qilingan",revoked:"Tasdiq qaytarilgan"}[status]||status);
  async function createOrder() {
-   setConfirmPay(false);
+   if(workingRef.current||pending||!card)return;
+   workingRef.current=true;setConfirmation(null);
    setWorking(true); setError(""); setSuccess("");
    try {
      const res = await fetch("/api/billing", {
@@ -66,9 +70,9 @@ export default function BillingPanel() {
      if (!res.ok) throw Error(body.error || "So‘rov yuborilmadi.");
      setSuccess("To‘lovingiz tekshiruvga yuborildi. Endi chekni Telegram orqali adminga yuboring.");
      await refresh();
-     window.location.assign(telegramLink(body.order.plan_key, body.order.price_uzs));
+
    } catch (err) { setError(err instanceof Error ? err.message : "Xatolik yuz berdi."); }
-   finally { setWorking(false); }
+   finally { workingRef.current=false;setWorking(false); }
  }
  function telegramLink(planKey: BillingPlan, amount: number) {
    const student = data?.student;
@@ -76,8 +80,11 @@ export default function BillingPanel() {
    return "https://t.me/rustam_usmon0v?text=" + encodeURIComponent(text);
  }
  return <section className="bill-page bill-compact" aria-label="Billing va paketlar">
-   <MembershipNotice membership={data?.membership} onBilling={()=>document.getElementById("billing-plans")?.scrollIntoView({behavior:"smooth"})} onTrial={()=>location.assign("/day/1")}/>
-   {confirmPay&&<div className="membership-overlay" role="dialog" aria-modal="true" aria-label="To‘lovni tasdiqlash"><section className="membership-lock"><img src="/images/billing/premium-lock.png" alt="" width={150} height={120}/><h1>To‘lovni amalga oshirdingizmi?</h1><p>{selectedPlan.name} · <strong>{formatSom(selectedPlan.price)}</strong><br/>Keyingi qadamda chekni Telegram orqali adminga yuboring. To‘lovingiz admin tasdig‘idan so‘ng faollashadi.</p><button className="membership-primary" onClick={()=>void createOrder()}>Ha, chek yuboraman</button><button className="membership-secondary" onClick={()=>setConfirmPay(false)}>Orqaga</button></section></div>}
+   {confirmation&&<BillingConfirmation title={confirmation==='pay'?'To‘lovni amalga oshirdingizmi?':'So‘rovni bekor qilasizmi?'} onClose={()=>setConfirmation(null)}>
+     <p>{confirmation==='pay'?<>{selectedPlan.name} · <strong>{formatSom(selectedPlan.price)}</strong><br/>Tasdiqlang, keyin “Chekni adminga yuborish” tugmasi orqali chekni yuboring.</>:'Pul o‘tkazgan bo‘lsangiz, avval @rustam_usmon0v bilan bog‘laning.'}</p>
+     <button className="bill-primary" disabled={working} onClick={()=>void (confirmation==='pay'?createOrder():cancelOrder())}>{confirmation==='pay'?'To‘lovni tasdiqlash':'So‘rovni bekor qilish'}</button>
+     <button className="membership-secondary" onClick={()=>setConfirmation(null)}>Orqaga</button>
+   </BillingConfirmation>}
    <div className="bill-hero"><div><h1>Paketlar va to‘lovlar</h1><p>Paketingizni tanlang. To‘lang. Chekni adminga yuboring.</p></div><button className="bill-small-btn" onClick={()=>void refresh()} disabled={loading}><RefreshCw size={15}/> Yangilash</button></div>
    <div className="bill-summary">
      <div className="bill-summary-card"><span className="bill-icon blue"><Crown size={23}/></span><div><small>Joriy obuna</small><b>{active.length ? "Faol paket mavjud" : "Faol obuna yo‘q"}</b><span>{active.map(item => BILLING_PLANS.find(p=>p.key===item.plan_key)?.name).filter(Boolean).join(" · ") || "Paketni tanlang"}</span></div></div>
@@ -94,11 +101,11 @@ export default function BillingPanel() {
     <section className="bill-box">
       <h2><Wallet size={20}/> To‘lov ma’lumotlari</h2>
       <p className="bill-muted">Karta raqamini ko‘chirib, tanlangan paket summasini o‘tkazing.</p>
-      <div className="bill-methods">{(["uzcard","humo"] as BillingMethod[]).map(item=><button key={item} type="button" disabled={!!pending} className={displayMethod===item?"current":""} onClick={()=>setMethod(item)}>{item.toUpperCase()}</button>)}</div>
+      <div className="bill-methods">{(["uzcard","humo"] as BillingMethod[]).map(item=><button key={item} type="button" disabled={!!pending||!data?.cards.some(card=>card.method===item)} className={displayMethod===item?"current":""} onClick={()=>setMethod(item)}>{item.toUpperCase()}</button>)}</div>
       {card ? <div className="bill-card"><small>{displayMethod.toUpperCase()} · Karta raqami</small><strong>{card.card_number.replace(/(\d{4})(?=\d)/g,"$1 ")}</strong>{card.card_holder !== "Ko‘rsatilmagan" && <span>Karta egasi: {card.card_holder}</span>}<button type="button" aria-label="Karta raqamini nusxalash" onClick={()=>void copy(card.card_number,"card")}><ClipboardCopy size={19}/>{copied==="card"?"Nusxalandi":"Nusxalash"}</button></div> : <div className="bill-not-set">Karta rekvizitlari hali admin tomonidan kiritilmagan. <a href="https://t.me/rustam_usmon0v" target="_blank" rel="noopener noreferrer">Adminga murojaat qiling.</a></div>}
       {selectedPlan.key!=="challenge"&&<p className="bill-muted">Full MOCK: {pending?.mock_on||(()=>{const start=Math.max(Date.now(),Date.parse(data?.membership.launch_at||"2026-10-19T00:00:00+05:00"));const d=new Date(start+5*3600000);d.setUTCDate(d.getUTCDate()+((7-d.getUTCDay())%7));return d.toISOString().slice(0,10)})()}</p>}
       <div className="bill-order-amount"><span>Tanlangan paket: <b>{selectedPlan.name}</b></span><strong>{formatSom(selectedPlan.price)}</strong></div>
-      {!pending&&<button className="bill-primary" type="button" disabled={working||loading||!card} onClick={()=>setConfirmPay(true)}>{working?<LoaderCircle size={16}/>:<ShieldCheck size={17}/>} To‘lov qildim</button>}
+      {!pending&&<button className="bill-primary" type="button" disabled={working||loading||!card} onClick={()=>setConfirmation("pay")}>{working?<LoaderCircle size={16}/>:<ShieldCheck size={17}/>} To‘lov qildim</button>}
       {!!error&&<p className="bill-error" role="alert">{error}</p>}
       {!!success&&<p className="bill-success" role="status">{success}</p>}
     </section>
@@ -106,10 +113,10 @@ export default function BillingPanel() {
       <h2><ShieldCheck size={20}/> To‘lovni tasdiqlash</h2>
       <ol className="bill-steps">
         <li><b>1</b><span>Tanlangan paket summasini kartaga o‘tkazing.</span></li>
-        <li><b>2</b><span><strong>To‘lov qildim</strong> tugmasini bosing. Ochilgan Telegram chatiga chek va ism familiyangizni yuboring.</span></li>
+        <li><b>2</b><span><strong>To‘lov qildim</strong> tugmasini bosing. Keyin quyidagi tugma orqali Telegram’ga chekni yuboring.</span></li>
         <li><b>3</b><span>Admin chek va bank tushumini tekshirib, to‘lovni tasdiqlaydi.</span></li>
       </ol>
-      {pending&&<div className="bill-pending"><span>TASDIQ KUTILMOQDA</span><p>{formatSom(pending.price_uzs)} · {BILLING_PLANS.find(p=>p.key===pending.plan_key)?.name} · {pending.payment_method.toUpperCase()}</p><small>Chek yuborgan bo‘lsangiz, admin javobini kuting. Qayta to‘lamang.</small><button type="button" disabled={working} onClick={()=>void cancelOrder()}>Adashib bosdim — bekor qilish</button></div>}
+      {pending&&<div className="bill-pending"><span>TASDIQ KUTILMOQDA</span><p>{formatSom(pending.price_uzs)} · {BILLING_PLANS.find(p=>p.key===pending.plan_key)?.name} · {pending.payment_method.toUpperCase()}</p><small>Chek yuborgan bo‘lsangiz, admin javobini kuting. Qayta to‘lamang.</small><button type="button" disabled={working} onClick={()=>setConfirmation("cancel")}>Adashib bosdim — bekor qilish</button></div>}
       <a className="bill-telegram" href={pending?telegramLink(pending.plan_key,pending.price_uzs):"https://t.me/rustam_usmon0v"} target="_blank" rel="noopener noreferrer"><ExternalLink size={18}/> {pending?"Chekni adminga yuborish":"Adminga murojaat"} <ChevronRight size={16}/></a>
       <p className="bill-muted bill-contact">@rustam_usmon0v</p>
       <p className="bill-caution">Chek faqat Telegramga yuboriladi. Paket admin tasdig‘idan so‘ng faollashadi.</p>
@@ -117,4 +124,19 @@ export default function BillingPanel() {
    </div>
    <section className="bill-box bill-history"><h2>To‘lovlar tarixi</h2>{!data?.orders?.length?<p className="bill-muted">{loading?"Yuklanmoqda...":"Hozircha to‘lov so‘rovlari yo‘q."}</p>:<div className="bill-table-wrap"><table><thead><tr><th>Paket</th><th>Summa</th><th>Sana</th><th>Holat</th></tr></thead><tbody>{data.orders.map(item=><tr key={item.id}><td>{BILLING_PLANS.find(p=>p.key===item.plan_key)?.name}</td><td>{formatSom(item.price_uzs)}</td><td>{item.created_at?new Date(item.created_at).toLocaleDateString("uz-UZ",{timeZone:"Asia/Tashkent"}):"—"}</td><td><span className={"bill-status "+item.status}>{statusLabel(item.status)}</span>{item.admin_note&&<small className="bill-note">{item.admin_note}</small>}</td></tr>)}</tbody></table></div>}</section>
   </section>;
+}
+
+function BillingConfirmation({title,onClose,children}:{title:string;onClose:()=>void;children:React.ReactNode}){
+ const ref=useRef<HTMLDialogElement>(null);
+ useEffect(()=>{
+  const dialog=ref.current;if(!dialog)return;
+  const body=document.body;const overflow=body.style.overflow,padding=body.style.paddingRight;
+  const gap=window.innerWidth-document.documentElement.clientWidth;
+  body.style.paddingRight=(parseFloat(getComputedStyle(body).paddingRight)+gap)+'px';body.style.overflow='hidden';
+  dialog.showModal();
+  return()=>{dialog.close();body.style.overflow=overflow;body.style.paddingRight=padding};
+ },[]);
+ return <dialog ref={ref} className="bill-confirm" aria-label={title} onCancel={onClose} onClick={e=>{if(e.target===e.currentTarget){const r=e.currentTarget.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)onClose()}}}>
+  <h2><ShieldCheck size={22}/>{title}</h2>{children}
+ </dialog>;
 }
