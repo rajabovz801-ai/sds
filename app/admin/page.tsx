@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
 import MockLiveView from "./mock/mock-live-view";
+import AdminBillingPanel from "../components/admin-billing-panel";
 import "./mock/mock-admin.css";
 import AnimatedBackButton from "../components/animated-back-button";
 import {useEffect,useMemo,useState} from "react";
-import {LayoutDashboard,Users,CalendarDays,FileText,Mic,ChartNoAxesCombined,Trophy,Clock3,Settings,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Bell,Menu,X,ShieldCheck,ChevronRight,CheckCircle2,LockKeyhole,LogOut,UserPlus,UserCog,Eye,EyeOff,Trash2} from "lucide-react";
+import {LayoutDashboard,Users,CalendarDays,FileText,Mic,ChartNoAxesCombined,Trophy,Clock3,Settings,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Bell,Menu,X,ShieldCheck,ChevronRight,CheckCircle2,LockKeyhole,LogOut,UserPlus,UserCog,Eye,EyeOff,Trash2,CreditCard} from "lucide-react";
 
 type Admin={id:string;display_name:string;username:string;role:"super_admin"|"admin";status?:string;created_at?:string};
 type DashboardData={admin:Admin;students:any[];total_students:number;active_today:number;today_seconds:number;pending_writing:number;pending_speaking:number;pending_requests:number;online_now?:number;idle_now?:number};
@@ -153,7 +154,7 @@ export default function AdminPage(){
 
 
  const sections=useMemo(()=>[
-  {name:"Overview",icon:LayoutDashboard},{name:"Reading results",icon:BookOpen},{name:"Listening results",icon:Headphones},{name:"Full Mock results",icon:ChartNoAxesCombined},{name:"Requests",icon:UserPlus},{name:"Students",icon:Users},{name:"Writing inbox",icon:FileText},{name:"Speaking inbox",icon:Mic},{name:"Leaderboard",icon:Trophy},{name:"Study time",icon:Clock3},
+  {name:"Overview",icon:LayoutDashboard},{name:"Reading results",icon:BookOpen},{name:"Listening results",icon:Headphones},{name:"Full Mock results",icon:ChartNoAxesCombined},{name:"Requests",icon:UserPlus},...(admin?.role==="super_admin"?[{name:"To‘lovlar",icon:CreditCard}]:[]),{name:"Students",icon:Users},{name:"Writing inbox",icon:FileText},{name:"Speaking inbox",icon:Mic},{name:"Leaderboard",icon:Trophy},{name:"Study time",icon:Clock3},
   ...(admin?.role==="super_admin"?[{name:"Admins",icon:UserCog}]:[])
  ],[admin?.role]);
  const liveById=useMemo(()=>new Map(liveRows.map(row=>[row.student_id,row])),[liveRows]);
@@ -187,7 +188,7 @@ export default function AdminPage(){
   <div className="learning-main"><header className="learning-topbar"><div className="topbar-left"><button className="menu-toggle" aria-label="Open navigation" onClick={()=>setMobile(true)}><Menu size={20}/></button><b className="topbar-section">{view}</b><div className="topbar-line"/><span className="topbar-status"><span className="status-pulse"/> Course starts 1 October</span></div><div className="topbar-right"><span className="time-chip"><Clock3 size={15}/>{clock||"--:--:--"} <small>UZT</small></span><button className="top-icon admin-bell" onClick={()=>setView("Notifications")} aria-label="Notifications"><Bell size={18}/>{((dashboard?.pending_writing||0)+(dashboard?.pending_speaking||0))>0&&<span>{(dashboard?.pending_writing||0)+(dashboard?.pending_speaking||0)}</span>}</button><span className="profile-chip"><span>{admin.display_name.slice(0,2).toUpperCase()}</span> {admin.display_name} · {admin.role==="super_admin"?"Super Admin":"Admin"}</span></div></header>
    {liveStudent&&<aside className="admin-live-drawer" role="dialog" aria-modal="true" aria-label="Student live mock"><header><div><b>{liveStudent.full_name}</b><small>@{liveStudent.username}</small></div><button onClick={()=>setLiveStudent(null)} aria-label="Close live mock"><X size={20}/></button></header>{courseDays.find(d=>d.n===liveStudent.day_number)?.mock?<MockLiveView day={liveStudent.day_number!} studentId={liveStudent.student_id}/>:<p>This student is not currently on a Full Mock day.</p>}</aside>}
    <main className="learning-content"><div className="page-heading admin-page-heading"><div className="hero-copy"><div className="section-eyebrow"><ShieldCheck size={16}/> ADMINISTRATION <span className="eyebrow-line"/></div><h1>{view==="Overview"?"Course control centre":view}</h1><p>ARK IELTS · 60-day challenge · 1 October – 29 November 2026</p></div></div>
-   {view==="Overview"?<>
+   {view==="To‘lovlar"&&admin.role==="super_admin"?<AdminBillingPanel/>:view==="Overview"?<>
     <div className="kpi-row"><div className="kpi-card"><div><span>REGISTERED STUDENTS</span><b>{dashboard?.total_students??0}</b><small>Active course accounts</small></div><Users size={22}/></div><div className="kpi-card"><div><span>ONLINE NOW</span><b>{dashboard?.online_now??liveRows.filter(x=>x.status==="online").length}</b><small>{dashboard?.idle_now??liveRows.filter(x=>x.status==="idle").length} idle</small></div><span className="admin-online-icon"><i/></span></div><div className="kpi-card"><div><span>WRITING TO REVIEW</span><b>{dashboard?.pending_writing??0}</b><small>Inside 72-hour inbox</small></div><FileText size={22}/></div><div className="kpi-card kpi-highlight"><div><span>SPEAKING TO REVIEW</span><b>{dashboard?.pending_speaking??0}</b><small>Inside 72-hour inbox</small></div><Mic size={22}/></div></div>
     {!!dashboard?.pending_requests&&<div className="requests-summary"><div><span><UserPlus size={18}/></span><div><b>Student registration requests</b><p>{dashboard.pending_requests} awaiting your approval.</p></div></div><button onClick={()=>setView("Requests")}>Review requests <ChevronRight size={15}/></button></div>}
     <section className="admin-live-activity">
