@@ -2,9 +2,6 @@
 import {challengeDayUnlocked} from "../../lib/ark60-day-access";
 import LoadingIndicator from "../components/loading-indicator";
 import {MembershipLock} from "../components/membership-notice";
-import ExperienceWorkspace,{ShopSoon} from "../components/experience/workspace";
-import {ExperienceAvatar} from "../components/experience/cosmetics";
-import type {ExperienceData,ExperienceState} from "../../lib/experience/core";
 import BillingPanel from "../components/billing-panel";
 
 import AnimatedBackButton from "../components/animated-back-button";
@@ -15,7 +12,7 @@ import {useEffect,useMemo,useState} from "react";
 import {CHALLENGE_RESUME_STORAGE_KEY,parseChallengeResume,type ChallengeResume} from "../../lib/ark60-resume";
 import {
  LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,
- LockKeyhole,Clock3,ChevronRight,Menu,X,Bell,CircleHelp,CheckCircle2,Sun,Moon,Coins,ShieldCheck,CreditCard,ShoppingBag,Palette,ListChecks,Users,NotebookTabs
+ LockKeyhole,Clock3,ChevronRight,Menu,X,Bell,CircleHelp,CheckCircle2,Sun,Moon,Coins,ShieldCheck,CreditCard
 } from "lucide-react";
 
 type Day={n:number,date:Date,mock:boolean};
@@ -82,11 +79,9 @@ export default function Dashboard(){
  const [selected,setSelected]=useState(1);
  const [previewMockDay,setPreviewMockDay]=useState<number|null>(null);
  const [view,setView]=useState("Dashboard");
- const [experience,setExperience]=useState<ExperienceState|null>(null);
- useEffect(()=>{const sync=(e:Event)=>{const j=(e as CustomEvent<ExperienceData>).detail;if(j?.enabled)setExperience(j.state)};window.addEventListener("ark-experience-change",sync);return()=>window.removeEventListener("ark-experience-change",sync)},[]);
  const [sidebar,setSidebar]=useState(false);
  const [lockedDay,setLockedDay]=useState<number|null>(null);
- useEffect(()=>{const q=new URLSearchParams(location.search);if(["Billing","Shop","Themes","Mistakes","Vocabulary","Friends","Insights"].includes(q.get("view")||""))setView(q.get("view")!)},[]);
+ useEffect(()=>{const q=new URLSearchParams(location.search);if(q.get("view")==="Billing")setView("Billing")},[]);
  useEffect(()=>{if(lockedDay===null)return;const close=(e:KeyboardEvent)=>{if(e.key==="Escape")setLockedDay(null)};window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close)},[lockedDay]);
  const [month,setMonth]=useState<"all"|"oct"|"nov">("oct");
  const [stats,setStats]=useState<StudentStats|null>(null);
@@ -204,9 +199,7 @@ export default function Dashboard(){
   {name:"60-Day Plan",icon:CalendarDays},
   {name:"Progress",icon:ChartNoAxesCombined},
   {name:"Leaderboard",icon:Trophy},
-  {name:"Billing",icon:CreditCard},
-  {name:"Shop",icon:ShoppingBag},
-  ...(preview?[{name:"Themes",icon:Palette},{name:"Mistakes",icon:ListChecks},{name:"Vocabulary",icon:NotebookTabs},{name:"Friends",icon:Users},{name:"Insights",icon:ChartNoAxesCombined}]:[])
+  {name:"Billing",icon:CreditCard}
  ];
  const visible=month==="all"?DAYS:DAYS.filter(x=>month==="oct"?x.date.getUTCMonth()===9:x.date.getUTCMonth()===10);
 
@@ -217,10 +210,10 @@ export default function Dashboard(){
   <aside className={"learning-sidebar "+(sidebar?"open":"")}>
    <div className="learning-brand learning-brand-minimal"><button className="mobile-close" aria-label="Close menu" onClick={()=>setSidebar(false)}><X size={18}/></button></div>
    <div className="side-overline">WORKSPACE</div>
-   <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{name==="Shop"&&!preview&&<small className="ex-nav-soon">Soon</small>}{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
+   <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom">
     <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><WorkspaceArt name="reward-chest" className="sidebar-chest"/><div><b>Daily reward</b><small>Grow your reward collection</small></div><ChevronRight size={14}/></button>
-    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}>{preview&&experience?<ExperienceAvatar state={experience}/>:<RewardAvatar className="user-avatar" avatar={stats?.student.cosmetics?.avatar} initials={initials}/>}<div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
+    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
    </div>
   </aside>
 
@@ -233,7 +226,7 @@ export default function Dashboard(){
      <span className={"topbar-status "+(preview?"preview-mode":"")}><span className="status-pulse"/> {preview?"Preview mode":currentDay?"Day "+currentDay+" of 60":"Challenge opens 1 October"}</span>
     </div>
     <div className="topbar-right">
-     <button className="coins-chip" onClick={()=>preview?setView("Shop"):setRewardOpen(true)} aria-label={preview?"Open Shop":"Open rewards"}><Coins size={15}/> {preview&&experience?experience.wallet:stats?.coins??0}{preview&&experience&&<small className="ex-top-wallet-label">sinov</small>}</button>
+     <button className="coins-chip" onClick={()=>setRewardOpen(true)} aria-label="Open rewards"><Coins size={15}/> {stats?.coins??0}</button>
      <button className="top-icon theme-toggle" aria-label={theme==="dark"?"Switch to light mode":"Switch to dark mode"} title={theme==="dark"?"Light mode":"Dark mode"} onClick={()=>setTheme(v=>v==="dark"?"light":"dark")}>{theme==="dark"?<Sun size={18}/>:<Moon size={18}/>}</button>
      <button aria-label="Notifications" className="top-icon" onClick={()=>location.assign("/notifications")}><Bell size={18}/></button>
     </div>
@@ -243,7 +236,7 @@ export default function Dashboard(){
     {lockedDay!==null&&<div className="membership-overlay" role="dialog" aria-modal="true" aria-label="Paket kerak"><MembershipLock day={lockedDay} membership={stats?.membership} onClose={()=>setLockedDay(null)}/></div>}
     {loadError&&stats&&<div role="status" className="dashboard-live-warning"><span>{loadError} Live stats may be temporarily out of date.</span><button type="button" className="dashboard-inline-retry" onClick={()=>setRetryCount(value=>value+1)}>Retry</button></div>}
 
-    {preview&&["Dashboard","Shop","Themes","Mistakes","Vocabulary","Friends","Insights"].includes(view)?<ExperienceWorkspace view={view} navigate={setView}/>:view==="Shop"?<ShopSoon/>:view==="Dashboard"?<>
+    {view==="Dashboard"?<>
      <div className="page-heading dashboard-heading">
       <WorkspaceArt name="wolf-study" className="dashboard-mascot"/>
       <div className="hero-copy">
