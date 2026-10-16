@@ -11,6 +11,6 @@ Architecture: isolated service-only sandbox state plus atomic RPC, one authentic
 - [x] Add theme provider validated by API and dataset-scoped CSS. Preview reversible; route changes clear preview; actual exam pages use plain readable surfaces and no motion.
 - [x] Generate original Forest/Library/Aurora/fox/owl assets, optimize PNGs, add provenance. Existing icon library supplies other cosmetics.
 - [x] Integrate owner navigation and student Shop Soon. Browser check owner, student, buy/equip/refill/reload, all categories, mobile overflow, keyboard dialog, theme cancel.
-- [ ] Commit/push GitHub, verify Vercel READY and unauthenticated API denial. Tests/build completed.
+- [x] Commit/push GitHub, verify Vercel READY and unauthenticated API denial. Tests/build completed.
 
 Review focus: multiple-tab stale purchases, client-forged owner flag, last-item filtering and empty inventory, logout/theme leakage, reduced-motion/exam readability.
