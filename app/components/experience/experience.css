@@ -29,7 +29,6 @@ html[data-ex-theme]:not([data-ex-theme="classic"]) :is(.ch-layout,.aa-shell,.vv-
 html[data-ex-theme]:not([data-ex-theme="classic"]) :is(.ch-sidebar,.aa-topbar,.ls-topbar,.sp-topbar,.cr-header,.writing-topbar,.vv-topbar){background:var(--ex-surface)!important;border-color:var(--ex-border)!important;color:var(--ex-text)!important}
 html[data-ex-theme]:not([data-ex-theme="classic"]) :is(.aa-topbar,.ls-topbar,.sp-topbar,.cr-header,.writing-topbar,.vv-topbar) :is(button,a,strong,span){color:var(--ex-text)!important}
 html[data-ex-theme]:not([data-ex-theme="classic"]) :is(.ch-nav-item,.ch-brand-name,.ch-sidebar-label){color:var(--ex-text)!important}
-html[data-ex-theme]:not([data-ex-theme="classic"]) :is(.cr-pane,.aa-reader,.writing-source-pane,.writing-answer-pane){background:#fff;color:#17232f}
 html[data-ark-theme="dark"][data-ex-theme="classic"] .ex-workspace{--ex-ink:#e4edf8;--ex-muted:#adbbce;--ex-bg:#18263a;--ex-line:#34465e}
 html[data-ex-theme]:not([data-ex-theme="classic"]) .learning-main{background:color-mix(in srgb,var(--ex-surface) 89%,transparent)!important;backdrop-filter:blur(1px)}
 /* Global heading polish has higher specificity; theme headings must follow the active palette. */
