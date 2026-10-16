@@ -980,3 +980,13 @@
   .aa-shell .aa-work-copy h2 { font-size: 16px; }
   .aa-shell .aa-grid { height: clamp(430px,69dvh,710px); }
 }
+
+/* One document scroll on every viewport; progress follows the final lines. */
+.aa-shell .aa-grid{height:auto;min-height:0;align-items:start}
+.aa-shell .aa-reader{height:auto;overflow:visible;padding-top:22px}
+.aa-shell .aa-vocab{position:sticky;top:70px;height:calc(100dvh - 90px);max-height:760px}
+.aa-shell .aa-article-section{scroll-margin-top:80px}
+.aa-shell .aa-text{line-height:1.8!important;max-width:74ch}
+.aa-shell .aa-section-heading{margin-bottom:14px}
+.aa-shell .aa-article-section+.aa-article-section{margin-top:22px;padding-top:22px}
+@media(max-width:850px){.aa-shell .aa-grid{height:auto;display:block}.aa-shell .aa-reader{display:none;height:auto;overflow:visible}.aa-shell .aa-reader.aa-mobile-visible{display:block}.aa-shell .aa-vocab{display:none;position:static;height:auto;max-height:none}.aa-shell .aa-vocab.aa-mobile-visible{display:flex}.aa-shell .aa-words{max-height:none;overflow:visible}.aa-shell .aa-mobile-tabs{position:sticky;top:54px}.aa-shell .aa-text{font-size:17px!important;line-height:1.75!important}}

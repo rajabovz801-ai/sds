@@ -8,8 +8,8 @@ test("Article presents all sections as one scrollable reading flow",()=>{
   const page=read("app/day/[day]/article/page.tsx");
   assert.match(page,/pages\.map\(\(section,i\)=>/);
   assert.match(page,/data-article-section=\{section\.page\}/);
-  assert.match(page,/new IntersectionObserver/);
-  assert.match(page,/action:"page",day,page:/);
+  assert.match(page,/window\.addEventListener\('scroll'/);
+  assert.match(page,/action:"page",day,\.\.\.packet/);
   assert.doesNotMatch(page,/<nav className="aa-pages"/);
   assert.doesNotMatch(page,/Next page|Previous/);
 });

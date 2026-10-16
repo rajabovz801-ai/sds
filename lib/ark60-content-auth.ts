@@ -14,7 +14,7 @@ export const VALID_DAYS=new Set([1,2,3,5,6,7,8,9,10,12,13,14,15,16,17]);
 export const isUuid=(s:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 export async function sqlTable(table:string,method="GET",query="",body?:unknown,prefer=""){
  if(!KEY)throw Error("Server database key missing");
- if(!/^(ark60_[a-z_]+|rpc\/(ark60_vocab_submit_answer|ark60_student_dashboard_summary|ark60_billing_[a-z_]+))$/.test(table))throw Error("Unknown table");
+ if(!/^(ark60_[a-z_]+|rpc\/(ark60_vocab_submit_answer|ark60_article_save_progress|ark60_student_dashboard_summary|ark60_billing_[a-z_]+))$/.test(table))throw Error("Unknown table");
  const resp=await fetch(BASE+"/rest/v1/"+table+(query?"?"+query:""),{
    method,cache:"no-store",headers:{
     apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json",
