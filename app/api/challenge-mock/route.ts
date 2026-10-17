@@ -98,17 +98,27 @@ function gradeListening(payload:Obj,answers:Record<string,string>){
 function sanitizeReading(input:any){
  const out:Record<string,string>={};for(let q=1;q<=40;q++)out[String(q)]=String(input?.[String(q)]??"").trim().slice(0,160);return out;
 }
+function readingAnswerReview(passages:Obj[],answers:Record<string,string>){
+ return passages.flatMap(p=>{
+  const used=new Map<string,Set<string>>();
+  return (p.questions||[]).map((q:Obj,i:number)=>{
+   const submitted=String(answers[q.number]||""),given=norm(submitted);
+   const key=p.answer_key[i]||[],correct=Array.isArray(key)?key:[key];
+   const group=typeof q.answer_group==="string"?q.answer_group:"";
+   const seen=group?(used.get(group)||new Set<string>()):null;
+   const valid=!!given&&correct.some((v:any)=>norm(v)===given)&&(!seen||!seen.has(given));
+   if(valid&&seen){seen.add(given);used.set(group,seen)}
+   return {number:q.number,question:q.text,submitted,correct,status:!given?"empty":valid?"correct":"wrong"};
+  });
+ });
+}
 function gradeReading(passages:Obj[],answers:Record<string,string>){
- let score=0;const part_scores:number[]=[];
- for(const passage of passages){
-  const qs=Array.isArray(passage.questions)?passage.questions:[],key=Array.isArray(passage.answer_key)?passage.answer_key:[];
-  let part=0;
-  for(let i=0;i<qs.length;i++){
-   const q=qs[i],valid=Array.isArray(key[i])?key[i]:[key[i]],given=norm(answers[String(q.number)]);
-   if(given&&valid.some((v:any)=>norm(v)===given)){score++;part++}
-  }
-  part_scores.push(part);
- }
+ const review=readingAnswerReview(passages,answers);
+ const score=review.filter((r:Obj)=>r.status==="correct").length;
+ const part_scores=passages.map(p=>{
+  const numbers=new Set((p.questions||[]).map((q:Obj)=>q.number));
+  return review.filter((r:Obj)=>numbers.has(r.number)&&r.status==="correct").length;
+ });
  return {score,band:readingBand(score),part_scores};
 }
 function answerReview(src:Obj,lAnswers:Obj,rAnswers:Obj){
@@ -123,10 +133,7 @@ function answerReview(src:Obj,lAnswers:Obj,rAnswers:Obj){
   if(valid&&seen&&group){seen.add(given);used.set(group[0],seen)}
   return {number,submitted,correct,status:!given?"empty":valid?"correct":"wrong"};
  });
- const reading=src.reading.flatMap((p:Obj)=>p.questions.map((q:Obj,i:number)=>{
-  const submitted=String(rAnswers[q.number]||""),given=norm(submitted),correct=p.answer_key[i]||[];
-  return {number:q.number,question:q.text,submitted,correct,status:!given?"empty":correct.some((v:any)=>norm(v)===given)?"correct":"wrong"};
- }));
+ const reading=readingAnswerReview(src.reading,rAnswers);
  return {listening,reading};
 }
 
@@ -200,7 +207,7 @@ async function gradeWriting(task1:string,task2:string,content:Obj){
 TASK 1 PROMPT:
 ${t1.prompt||""}
 ${(t1.instructions||[]).join("\n")}
-${t1.visual?"\nTASK 1 REFERENCE DATA:\n"+JSON.stringify(t1.visual):""}
+${t1.visual?"\nTASK 1 REFERENCE DATA:\n"+JSON.stringify(t1.visual.kind==="image"?t1.visual.reference_data:t1.visual):""}
 
 STUDENT TASK 1:
 ${task1}
