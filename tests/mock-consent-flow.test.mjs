@@ -29,6 +29,8 @@ function setup({allowed=false,stage='listening',preview=false,open=true,stopped=
  const mod={exports:{}};
  new Function('require','exports','module',code)(name=>{
   if(name==='next/server')return {NextResponse:{json:(body,init)=>({body,status:init.status})}};
+  if(name==='@/lib/mock-access')return {mockEntryForStudent:async()=> 'allowed'};
+  if(name==='@/lib/mock-access-policy')return {requiresPersonalMockCode:day=>day===18,personalMockOpensAt:()=> '2026-10-18T09:00:00+05:00'};
   if(name==='@/lib/mock-live')return {liveLeaseActive:()=>true,sanitizeMockSnapshot:v=>v};
   if(name==='@/lib/ark60-content-auth')return {getStudent:async()=>({id:'student'}),isOwnOrigin:()=>true,isDayUnlocked:async()=>membershipAllowed,isDayOpen:async()=>open,isPreview:()=>preview};
   if(name==='@/lib/supabase/server')return {getServiceSupabase:()=>db};

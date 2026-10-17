@@ -3582,6 +3582,32 @@ html[data-ark-theme="dark"] .admin-live-drawer>header button {
     border: 1px solid #29384A;
     background: #101925
 }
+html[data-ark-theme="dark"] .ma-code-panel {
+    background: #152131;
+    border: 1px solid #29384A;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] .ma-code-controls input,html[data-ark-theme="dark"] .ma-code-controls select {
+    border: 1px solid #29384A;
+    background: #0F1926;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] .ma-code-panel button {
+    border: 1px solid #29384A;
+    background: #152131;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] .ma-code-actions button:first-child {
+    background: #3B73E8;
+    color: #EAF0F7
+}
+html[data-ark-theme="dark"] .ma-new-code {
+    border: 1px solid #385E91;
+    background: #152131
+}
+html[data-ark-theme="dark"] .ma-code-panel th,html[data-ark-theme="dark"] .ma-code-panel td {
+    border-bottom: 1px solid #29384A
+}
 html[data-ark-theme="dark"] .sa-shell {
     background: #0F1926;
     color: #EAF0F7

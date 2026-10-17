@@ -11,6 +11,8 @@ function setup({student=null,admin=null,live=null,origin=true}={}){
  const mod={exports:{}};
  new Function('require','exports','module',code)(name=>{
   if(name==='next/server')return {NextResponse:{json:(body,init)=>({body,status:init.status})}};
+  if(name==='@/lib/mock-access')return {mockEntryForStudent:async()=> 'allowed'};
+  if(name==='@/lib/mock-access-policy')return {requiresPersonalMockCode:day=>day===18,personalMockOpensAt:()=> '2026-10-18T09:00:00+05:00'};
   if(name==='@/lib/mock-live')return liveModule;
   if(name==='@/lib/ark60-content-auth')return {getStudent:async()=>student,getAdmin:async()=>admin,isOwnOrigin:()=>origin,isDayUnlocked:async()=>true,isDayOpen:async()=>true,isPreview:()=>false};
   if(name==='@/lib/supabase/server')return {getServiceSupabase:()=>db};

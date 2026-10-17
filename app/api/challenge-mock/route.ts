@@ -1,3 +1,5 @@
+import {mockEntryForStudent} from "@/lib/mock-access";
+import {requiresPersonalMockCode,personalMockOpensAt} from "@/lib/mock-access-policy";
 import {sanitizeMockSnapshot,liveLeaseActive} from "@/lib/mock-live";
 import {NextRequest,NextResponse} from "next/server";
 import {getAdmin,getStudent,isDayOpen,isDayUnlocked,isOwnOrigin,isPreview} from "@/lib/ark60-content-auth";
@@ -23,11 +25,13 @@ function validMockDay(value:any){
  return new Date(START_UTC+(day-1)*DAY_MS).getUTCDay()===0?day:null;
 }
 function mockStartMs(day:number){
+ if(requiresPersonalMockCode(day))return Date.parse(personalMockOpensAt(day)!);
  if(day===4)return Date.UTC(2026,9,4,5,0,0); // first live mock: 10:00 Asia/Tashkent
  const date=new Date(START_UTC+(day-1)*DAY_MS);
  return Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),date.getUTCDate()-1,19,0,0); // 00:00 Asia/Tashkent
 }
 function mockOpensAt(day:number){
+ if(requiresPersonalMockCode(day))return personalMockOpensAt(day)!;
  if(day===4)return "2026-10-04T10:00:00+05:00";
  const date=new Date(START_UTC+(day-1)*DAY_MS);
  const y=date.getUTCFullYear(),m=String(date.getUTCMonth()+1).padStart(2,"0"),d=String(date.getUTCDate()).padStart(2,"0");
@@ -373,7 +377,15 @@ export async function GET(req:NextRequest){
   }
   const viewer=await getStudent(req);
   let src:Obj|null=null;
-  if(!action.startsWith("admin_"))src=viewer&&isPreview(viewer)?await source(day,true):await source(day);
+  if(requiresPersonalMockCode(day)&&!action.startsWith("admin_")){
+   const preview=!!viewer&&isPreview(viewer),opened=Date.now()>=mockStartMs(day);
+   if(action==="availability")return json({published:preview||opened,open:preview||opened,opens_at:mockOpensAt(day),code_required:!preview});
+   if(!viewer)return json({detail:"Please sign in."},401);
+   const entry=await mockEntryForStudent(day,viewer);
+   if(entry==="scheduled")return json({detail:"Mock 18-oktabr soat 09:00 da ochiladi (Toshkent vaqti).",scheduled:true,opens_at:mockOpensAt(day)},403);
+   if(entry==="code_required")return json({detail:"Shaxsiy kirish kodingizni kiriting.",code_required:true,opens_at:mockOpensAt(day)},403);
+   src=await source(day,true);
+  }else if(!action.startsWith("admin_"))src=viewer&&isPreview(viewer)?await source(day,true):await source(day);
   if(action==="availability"){
    const start=mockStartMs(day);
    return json({published:!!src,open:!!src&&(!!viewer&&isPreview(viewer)||Date.now()>=start),opens_at:mockOpensAt(day)});
@@ -391,7 +403,7 @@ export async function GET(req:NextRequest){
     const materials=url.searchParams.get("content")==="1"?await source(day,true):null;
     return json({available:true,snapshot:live.snapshot,updated_at:live.snapshot_at,...(materials?{content:{listening:safeListening(materials.listening.payload),reading:materials.reading.map(safeReading),writing:safeWriting(materials.writing.payload)}}:{})});
    }
-   if(action==="admin_list"){src=await source(day);if(src)await retryFailedAssessments(src,day,2)}
+   if(action==="admin_list"){src=await source(day,requiresPersonalMockCode(day));if(src)await retryFailedAssessments(src,day,2)}
    const db=getServiceSupabase();
    const {data,error}=await db.from("ark60_mock_attempts").select("*").eq("day_number",day).order("updated_at",{ascending:false});
    if(error)throw error;
@@ -407,7 +419,7 @@ export async function GET(req:NextRequest){
   if(!src)return json({detail:"Full Mock materials are not published yet."},404);
   if(!(await isDayOpen(day,student)))return json({detail:"This Full Mock is not open yet.",opens_at:mockOpensAt(day)},403);
   const preview=isPreview(student);let row=preview?null:await attempt(student.id,day);
-  if(!preview&&!["completed","assessing"].includes(row?.stage)&&!(await isDayUnlocked(day,student,"mock",true)))return json({detail:"Bu Full MOCK uchun tasdiqlangan ruxsat kerak.",billing_required:true},403);
+  if(!requiresPersonalMockCode(day)&&!preview&&!["completed","assessing"].includes(row?.stage)&&!(await isDayUnlocked(day,student,"mock",true)))return json({detail:"Bu Full MOCK uchun tasdiqlangan ruxsat kerak.",billing_required:true},403);
   if(!preview&&row?.stage==="assessing"&&canRetryAssessment(row)){
    await retryFailedAssessments(src,day,1,student.id);
    row=await attempt(student.id,day);
@@ -427,12 +439,17 @@ export async function POST(req:NextRequest){
   const action=String(body.action||""),preview=isPreview(student),db=getServiceSupabase();
   // Exit must still clear live content if the scheduled day has since closed.
   if(action==="live_stop"){await stopMockLive(student.id,day);return json({ok:true})}
+  if(requiresPersonalMockCode(day)){
+   const entry=await mockEntryForStudent(day,student);
+   if(entry==="scheduled")return json({detail:"This Full Mock opens at 09:00 Tashkent time.",scheduled:true,opens_at:mockOpensAt(day)},403);
+   if(entry==="code_required")return json({detail:"Shaxsiy kirish kodingizni kiriting.",code_required:true},403);
+  }
   if(!(await isDayOpen(day,student)))return json({detail:"This Full Mock is not open yet.",opens_at:mockOpensAt(day)},403);
 
-  if(!(await isDayUnlocked(day,student,"mock",!["start","start_listening","live_consent"].includes(action))))return json({detail:"Bu Full MOCK uchun tasdiqlangan ruxsat kerak.",billing_required:true},403);
+  if(!requiresPersonalMockCode(day)&&!(await isDayUnlocked(day,student,"mock",!["start","start_listening","live_consent"].includes(action))))return json({detail:"Bu Full MOCK uchun tasdiqlangan ruxsat kerak.",billing_required:true},403);
   if(action==="live_consent"){
    const allowed=body.allowed===true;
-   if(allowed&&!(await source(day,preview)))return json({detail:"Full Mock materials are not published yet."},404);
+   if(allowed&&!(await source(day,preview||requiresPersonalMockCode(day))))return json({detail:"Full Mock materials are not published yet."},404);
    const {error}=await db.from("ark60_mock_live").upsert({student_id:student.id,day_number:day,allowed,snapshot:null,snapshot_at:null,viewed_at:null,heartbeat_at:new Date().toISOString()},{onConflict:"student_id,day_number"});if(error)throw error;
    return json({ok:true,allowed});
   }
@@ -443,7 +460,7 @@ export async function POST(req:NextRequest){
    const {error:saveError}=await db.from("ark60_mock_live").update({heartbeat_at:stamp,...(snapshot?{snapshot,snapshot_at:stamp}:!watching?{snapshot:null,snapshot_at:null}:{})}).eq("student_id",student.id).eq("day_number",day).eq("allowed",true).eq("heartbeat_at",live.heartbeat_at);if(saveError)throw saveError;
    return json({ok:true,watching});
   }
-  const src=await source(day,isPreview(student));if(!src)return json({detail:"Full Mock materials are not published yet."},404);
+  const src=requiresPersonalMockCode(day)?await source(day,true):await source(day,isPreview(student));if(!src)return json({detail:"Full Mock materials are not published yet."},404);
   if(["start","start_listening","live_resume"].includes(action)){
    const {data:consent,error}=await db.from("ark60_mock_live").select("allowed").eq("student_id",student.id).eq("day_number",day).maybeSingle();if(error)throw error;
    if(!consent?.allowed)return json({detail:"Allow mock view before starting this Full Mock."},403);
