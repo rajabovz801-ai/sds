@@ -10,7 +10,7 @@ export async function POST(req){try{
  await destination();
  const ip=cleanIp(req),since=new Date(Date.now()-10*60*1000).toISOString();
  const {count,error:limitError}=await db().from("cefr_speaking_web_sessions").select("id",{head:true,count:"exact"}).eq("ip_hash",ip).gte("created_at",since);
- if(limitError)throw limitError;if((count||0)>=5)return response(req,{error:"Too many exams started. Please try again later."},429);
+ if(limitError)throw limitError;if((count||0)>=60)return response(req,{error:"Too many exams started. Please try again later."},429);
  const token=newToken();const {data,error}=await db().from("cefr_speaking_web_sessions").insert({candidate_name:name,token_hash:digest(token),ip_hash:ip}).select("id,expires_at").single();if(error)throw error;
  return response(req,{ok:true,sessionId:data.id,sessionToken:token,expiresAt:data.expires_at});
  }catch(e){console.error("CEFR start error",e);return response(req,{error:"The exam server is temporarily unavailable."},503)}}
