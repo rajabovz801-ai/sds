@@ -9,9 +9,9 @@ export async function POST(req){try{
  if(!(audio instanceof File)||audio.size<512||audio.size>11*1024*1024)return response(req,{error:"Invalid audio file size"},400);
  const [part,num,question,seconds]=TASKS[index],duration=Math.round(Number(f.get("durationSeconds")||seconds));
  if(duration<1||duration>seconds+10)return response(req,{error:"Invalid audio duration"},400);
- const sb=db(),existing=await sb.from("cefr_speaking_web_answers").select("id,status,storage_path").eq("session_id",s.id).eq("question_index",index).maybeSingle();if(existing.error)throw existing.error;
+ const sb=db(),existing=await sb.from("cefr_speaking_web_answers").select("id,status,storage_path,updated_at").eq("session_id",s.id).eq("question_index",index).maybeSingle();if(existing.error)throw existing.error;
  if(existing.data?.status==="sent")return response(req,{ok:true,alreadySent:true});
- if(existing.data?.status==="pending")return response(req,{error:"This answer is being delivered. Please retry shortly."},409);
+ if(existing.data?.status==="pending" && Date.now()-Date.parse(existing.data.updated_at)<65000)return response(req,{error:"This answer is being delivered. Please retry shortly."},409);
  let audioBuf,mime,ext;const incomingMime=(audio.type||"").split(";")[0].toLowerCase();
  if(incomingMime==="audio/wav"||incomingMime==="audio/wave"||incomingMime==="audio/x-wav"){audioBuf=await wavToMp3(await audio.arrayBuffer());mime="audio/mpeg";ext="mp3";}
  else if(incomingMime==="audio/mp4"){audioBuf=Buffer.from(await audio.arrayBuffer());mime="audio/mp4";ext="m4a";}
