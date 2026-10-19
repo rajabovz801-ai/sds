@@ -512,7 +512,7 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         modules={
             "Reading":state(reading,2),
             "Article":state(articles,1),
-            "Vocabulary":state(vocab,6)
+            "Vocabulary":state(vocab)
         }
         for name in ("Listening","Writing","Speaking"):
             rows=[x for x in generic if x.get("module")==name.lower()]

@@ -13,3 +13,13 @@ export function readingPassageForDay(day: number): 1 | 2 | 3 | null {
   }
   return (((regularDayIndex - 1) % 3) + 1) as 1 | 2 | 3;
 }
+
+
+type VocabularySource={day_number:number;source_kind:string;source_ordinal:number};
+export function vocabularySourceLabel(unit:VocabularySource){
+ return unit.source_kind==='article'?'Article':`Reading · Passage ${readingPassageForDay(unit.day_number)||1} · Practice ${unit.source_ordinal}`;
+}
+
+export function vocabularyUnitsReady(units:ReadonlyArray<{word_count:number}>){
+ return units.length>0&&units.every(unit=>unit.word_count===20);
+}
