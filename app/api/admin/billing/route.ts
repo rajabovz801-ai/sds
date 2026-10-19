@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
           msg.includes("Sunday")?"Mock uchun to‘g‘ri yakshanba sanasini tanlang.":
           msg.includes("Active student")?"O‘quvchi faol emas.":
           msg.includes("Receipt ID")?"Bu chek identifikatori boshqa to‘lovga tegishli.":
+          error.code==="42702"?"To‘lovni qayd qilishda baza ustunlarida konflikt yuz berdi. Administratorga xabar bering.":
           "Naqd to‘lov yozilmadi. Ma’lumotlar yoki mavjud ruxsatlarni tekshiring.";
         return send({error:detail},409);
       }

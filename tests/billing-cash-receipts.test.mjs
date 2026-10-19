@@ -24,6 +24,16 @@ test("a combined package cannot be bought via cash or bank",()=>{
  assert.match(file("lib/billing/plans.ts"),/key: "challenge"/);
  assert.doesNotMatch(file("lib/billing/plans.ts"),/key: "all_access"/);
 });
+test("cash column collisions are removed and admin displays issued access",()=>{
+ const fix=file("supabase/migrations/20261019_cash_billing_fix_column_ambiguity.sql");
+ assert.match(fix,/o\.plan_key in \(p_plan,'all_access'\)/);
+ assert.match(fix,/max\(a\.expires_at\)/);
+ assert.match(fix,/a\.mock_on=v_mock/);
+ const cash=file("app/components/admin-billing-panel.tsx");
+ assert.match(cash,/\[filter,setFilter\]=useState\('all'\)/);
+ assert.match(cash,/Berilgan obunalar/);
+ assert.match(cash,/visibleGrants\.map/);
+});
 test("day 1 and day 2 trial remains but mock stays separate",()=>{
  const access=file("lib/billing/access-policy.ts");
  assert.match(access,/membership\.trial_eligible&&day<=2/);
