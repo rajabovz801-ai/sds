@@ -51,6 +51,35 @@ export async function POST(request: NextRequest) {
     const input = await request.json().catch(() => null);
     if (!input || typeof input !== "object") return send({ error: "Invalid body." }, 400);
     const db = getServiceSupabase();
+    if (input.action === "record_cash") {
+      const uuid=(v:unknown)=>typeof v==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+      if (!uuid(input.student_id)||!uuid(input.request_id)||
+          !["challenge","mock"].includes(input.plan)||
+          input.confirmed!==true||typeof input.note!=="string"||
+          input.note.trim().length<3||input.note.length>500||
+          (input.plan==="challenge"&&input.mock_on!=null)||
+          (input.plan==="mock"&&(typeof input.mock_on!=="string"||!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.mock_on)))) {
+        return send({error:"O‘quvchi, naqd pul tasdig‘i, paket yoki ma’lumotlar noto‘g‘ri."},400);
+      }
+      const {data,error}=await db.rpc("ark60_billing_record_cash",{
+        p_admin:admin.id,p_student:input.student_id,p_plan:input.plan,
+        p_request_id:input.request_id,p_mock:input.plan==="mock"?input.mock_on:null,
+        p_note:input.note.trim()
+      });
+      if(error){
+        const msg=String(error.message||"");
+        const detail=msg.includes("Pending payment")?"Bu o‘quvchida oldingi to‘lov so‘rovi kutilmoqda. Avval uni tekshiring yoki rad eting.":
+          msg.includes("MOCK payment already")?"Bu o‘quvchida shu Mock uchun avvaldan ruxsat bor.":
+          msg.includes("Sunday")?"Mock uchun to‘g‘ri yakshanba sanasini tanlang.":
+          msg.includes("Active student")?"O‘quvchi faol emas.":
+          msg.includes("Receipt ID")?"Bu chek identifikatori boshqa to‘lovga tegishli.":
+          "Naqd to‘lov yozilmadi. Ma’lumotlar yoki mavjud ruxsatlarni tekshiring.";
+        return send({error:detail},409);
+      }
+      const receipt=Array.isArray(data)?data[0]:data;
+      if(!receipt?.order_id)return send({error:"To‘lov tasdig‘ini tekshirib bo‘lmadi. Ro‘yxatni yangilang."},503);
+      return send({ok:true,receipt});
+    }
     if (input.action === "review") {
       if (!/^[0-9a-f-]{36}$/i.test(String(input.order_id || "")) ||
           !["approved", "rejected"].includes(input.decision) ||

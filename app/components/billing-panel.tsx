@@ -6,7 +6,7 @@ import { BILLING_PLANS, formatSom, type BillingMethod, type BillingPlan } from "
 import "../billing/billing.css";
 
 type Card = { method: BillingMethod; card_number: string; card_holder: string };
-type Order = { mock_on?:string|null; id: string; order_code: string; plan_key: string; price_uzs: number; payment_method: BillingMethod; status: string; created_at?: string; admin_note?: string | null };
+type Order = { mock_on?:string|null; id: string; order_code: string; plan_key: string; price_uzs: number; payment_method: BillingMethod|'cash'; status: string; created_at?: string; admin_note?: string | null };
 type Access = { plan_key: string; starts_at: string; expires_at: string | null; mock_on: string | null };
 type Data = { membership:Membership; student: { first_name: string; last_name: string; username: string }; cards: Card[]; orders: Order[]; access: Access[]; telegram: string };
 
