@@ -190,11 +190,12 @@ export default function Dashboard(){
  const planLive=progressUnlocked(planDayNumber,stats,today,clock);
 
  const chosen=DAYS[selected-1];
- const live=progressUnlocked(chosen.n,stats,today,clock);
+ const personalMockEntry=chosen.n===18&&unlocked(chosen,today)&&clock>=Date.UTC(2026,9,18,4,0,0);
+ const live=personalMockEntry||progressUnlocked(chosen.n,stats,today,clock);
  // Day 18 uses student-bound personal codes. Its material rows are intentionally draft,
  // so regular published-module counts must never hide the code-entry navigation.
  // The /api/challenge-mock gate independently checks the redeemed code on every request.
- const chosenRequired=chosen.n===18&&unlocked(chosen,today)
+ const chosenRequired=personalMockEntry
    ?["listening","reading","writing"]
    :preview&&previewMockDay===chosen.n?["listening","reading","writing"]:stats?.required_by_day?.[String(chosen.n)]||[];
  const display=useMemo(()=>modulesFor(chosen),[chosen]);
@@ -313,7 +314,7 @@ export default function Dashboard(){
       </section>
 
       <aside className="detail-panel" id="day-detail">
-       <div className="day-details-top"><div className="detail-overline">{chosen.mock?"FULL IELTS MOCK":"DAILY TRAINING PLAN"}</div><div className="day-row"><h2>Day {String(chosen.n).padStart(2,"0")}</h2><span className="day-inline-date">{format(chosen.date,{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</span><span className={"detail-status "+(live?"ready":"locked")}>{live?"Available":"Locked"}</span></div><p>{chosen.n===18?"18-oktabr Mock: administrator bergan shaxsiy kod bilan kiring. Kod hali ishlatilmagan bo‘lsa, uni Mock sahifasida kiriting.":chosen.mock?"Complete the published mock sections for this date.":"Complete the published modules for this study day."}</p><div className="detail-subhead"><span>{chosenRequired.length?chosenRequired.length+" published task"+(chosenRequired.length===1?"":"s"):"Materials not published yet"}</span><span>{chosen.mock?"Full Mock":"IELTS practice"}</span></div></div>
+       <div className="day-details-top"><div className="detail-overline">{chosen.mock?"FULL IELTS MOCK":"DAILY TRAINING PLAN"}</div><div className="day-row"><h2>Day {String(chosen.n).padStart(2,"0")}</h2><span className="day-inline-date">{format(chosen.date,{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</span><span className={"detail-status "+(live?"ready":"locked")}>{live?"Available":"Locked"}</span></div><p>{chosen.n===18?"18-oktabr Mock: administrator bergan shaxsiy kod bilan kiring. Kod hali ishlatilmagan bo‘lsa, uni Mock sahifasida kiriting.":chosen.mock?"Complete the published mock sections for this date.":"Complete the published modules for this study day."}</p><div className="detail-subhead"><span>{chosenRequired.length?chosenRequired.length+" published task"+(chosenRequired.length===1?"":"s"):"Materials not published yet"}</span><span>{chosen.mock?"Full Mock":"IELTS practice"}</span></div>{personalMockEntry&&<a className="detail-btn" href="/day/18/mock">18-oktabr Mock · shaxsiy kodni kiritish <ChevronRight size={16}/></a>}</div>
        <div className="detail-list">{display.map(({name,detail,icon:Icon,tone})=>{
         const ready=live&&moduleReady(name);
         const done=stats?.completed.some(x=>x.day_number===chosen.n&&x.module===name.toLowerCase());
