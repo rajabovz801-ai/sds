@@ -1,0 +1,116 @@
+[
+  {
+    "id": "5fa2fa7f-c31b-5c97-9fe4-95c9364f3934",
+    "day_number": 19,
+    "module": "writing",
+    "title": "Day 19 · Writing Task 1",
+    "status": "draft",
+    "payload": {
+      "task_type": "task1",
+      "duration_seconds": 1200,
+      "min_words": 150,
+      "prompt": "The graph below shows the changes in the birth rates for women in 6 different age groups in the UK from 1973 to 2008.",
+      "instructions": [
+        "Summarise the information by selecting and reporting the main features and make comparisons where relevant."
+      ],
+      "source_file": "Writing Mock.pdf",
+      "source_page": 1,
+      "visual_kind": "/writing/day19-task1.webp",
+      "image_url": "/writing/day19-task1.webp"
+    }
+  },
+  {
+    "id": "8e64d099-176e-5226-954c-1205d97f0646",
+    "day_number": 20,
+    "module": "writing",
+    "title": "Day 20 · Writing Task 2",
+    "status": "draft",
+    "payload": {
+      "task_type": "task2",
+      "duration_seconds": 2400,
+      "min_words": 250,
+      "prompt": "The best way to increase road transport safety is to make vehicle drivers take a driving test each year.\n\nTo what extent do you agree or disagree?",
+      "instructions": [
+        "Give reasons for your answer and include any relevant examples from your own knowledge or experience."
+      ],
+      "source_file": "Writing Mock-2.pdf",
+      "source_page": 2
+    }
+  },
+  {
+    "id": "b0561589-871a-5009-99b4-f1f556a981e1",
+    "day_number": 21,
+    "module": "writing",
+    "title": "Day 21 · Writing Task 1",
+    "status": "draft",
+    "payload": {
+      "task_type": "task1",
+      "duration_seconds": 1200,
+      "min_words": 150,
+      "prompt": "The tables below give information about the consumption and production of potatoes in different world regions in 2006.",
+      "instructions": [
+        "Summarise the information by selecting and reporting the main features and make comparisons where relevant."
+      ],
+      "source_file": "Writing Mock-3.pdf",
+      "source_page": 1,
+      "visual_kind": "/writing/day21-task1.webp",
+      "image_url": "/writing/day21-task1.webp"
+    }
+  },
+  {
+    "id": "3d787688-765d-5214-9c8e-3fc3076dad23",
+    "day_number": 22,
+    "module": "writing",
+    "title": "Day 22 · Writing Task 2",
+    "status": "draft",
+    "payload": {
+      "task_type": "task2",
+      "duration_seconds": 2400,
+      "min_words": 250,
+      "prompt": "Some people work for the same organisation all their working life. Others think that it is better to work for different organisations.\n\nDiscuss both these views and give your own opinion.",
+      "instructions": [
+        "Give reasons for your answer and include any relevant examples from your own knowledge or experience."
+      ],
+      "source_file": "Task 1 - Mock 1.pdf",
+      "source_page": 3
+    }
+  },
+  {
+    "id": "bbab82da-53f3-587d-b974-5839fce0862a",
+    "day_number": 23,
+    "module": "writing",
+    "title": "Day 23 · Writing Task 1",
+    "status": "draft",
+    "payload": {
+      "task_type": "task1",
+      "duration_seconds": 1200,
+      "min_words": 150,
+      "prompt": "The graph and table below show the average monthly temperatures and the average number of hours of sunshine per year in three major cities.",
+      "instructions": [
+        "Summarise the information by selecting and reporting the main features and make comparisons where relevant."
+      ],
+      "source_file": "Writing - Mock 2.pdf",
+      "source_page": 1,
+      "visual_kind": "/writing/day23-task1.webp",
+      "image_url": "/writing/day23-task1.webp"
+    }
+  },
+  {
+    "id": "e74881fa-3a69-5f4e-b205-6f7a527698b3",
+    "day_number": 24,
+    "module": "writing",
+    "title": "Day 24 · Writing Task 2",
+    "status": "draft",
+    "payload": {
+      "task_type": "task2",
+      "duration_seconds": 2400,
+      "min_words": 250,
+      "prompt": "Car ownership has increased so rapidly over the past thirty years that many cities in the world are now 'one big traffic jam'.\n\nHow true do you think this statement is?\n\nWhat measures can governments take to discourage people from using their cars?",
+      "instructions": [
+        "Give reasons for your answer and include any relevant examples from your own knowledge or experience."
+      ],
+      "source_file": "Writing - Mock 3.pdf",
+      "source_page": 4
+    }
+  }
+]
