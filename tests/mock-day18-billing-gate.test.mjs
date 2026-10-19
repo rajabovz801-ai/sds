@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import ts from 'typescript';
+import {createRequire} from 'node:module';
+const require = createRequire(import.meta.url);
 
 function compile(path, dependencies = {}) {
   const module = {exports: {}};
