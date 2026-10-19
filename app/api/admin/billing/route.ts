@@ -57,6 +57,11 @@ export async function POST(request: NextRequest) {
           typeof input.note !== "string" || input.note.length > 500) {
         return send({ error: "Invalid review details." }, 400);
       }
+      if(input.decision==="approved"){
+        const {data:order,error:orderError}=await db.from("ark60_billing_orders").select("plan_key").eq("id",input.order_id).maybeSingle();
+        if(orderError)throw orderError;
+        if(order?.plan_key==="all_access")return send({error:"All Access eski kombinatsiya paketini tasdiqlab bo‘lmaydi. To‘lov o‘tkazilgan bo‘lsa, o‘quvchi bilan alohida kelishing; yangi Challenge va Full MOCK buyurtmalari alohida rasmiylashtiriladi."},409);
+      }
       const { data, error } = await db.rpc("ark60_billing_review_v2", {
         p_order: input.order_id, p_admin: admin.id,
         p_decision: input.decision, p_note: input.note, p_mock:input.mock_on||null, p_bank_ref:input.transaction_ref||null,
@@ -77,7 +82,7 @@ export async function POST(request: NextRequest) {
       return send({ok:true});
     }
     if(input.action==="grant"){
-      if(!/^[0-9a-f-]{36}$/i.test(String(input.student_id||""))||!["challenge","mock","all_access"].includes(input.plan)||!Number.isInteger(input.days)||input.days<1||input.days>60||typeof input.note!=="string"||input.note.trim().length<3||!Number.isFinite(Date.parse(input.starts_at)))return send({error:"Imtiyoz ma’lumotlarini tekshiring."},400);
+      if(!/^[0-9a-f-]{36}$/i.test(String(input.student_id||""))||!["challenge","mock"].includes(input.plan)||!Number.isInteger(input.days)||input.days<1||input.days>60||typeof input.note!=="string"||input.note.trim().length<3||!Number.isFinite(Date.parse(input.starts_at)))return send({error:"Imtiyoz ma’lumotlarini tekshiring."},400);
       const {error}=await db.rpc("ark60_billing_grant",{p_admin:admin.id,p_student:input.student_id,p_plan:input.plan,p_start:input.starts_at,p_days:input.days,p_mock:input.mock_on||null,p_note:input.note.slice(0,500)});
       if(error)return send({error:"Imtiyoz berilmadi. Sana va o‘quvchini tekshiring."},409);
       return send({ok:true});

@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     const local=new Date(Math.max(Date.now(),Date.parse(membership.launch_at||"2026-10-19T00:00:00+05:00"))+5*3600000);
     local.setUTCDate(local.getUTCDate()+((7-local.getUTCDay())%7));
     const mockOn=body.plan_key==="challenge"?null:local.toISOString().slice(0,10);
-    if(mockOn&&mockOn>"2026-11-29")return send({error:"Challenge uchun yangi MOCK sanasi yo‘q. Adminga murojaat qiling."},409);
+    if(mockOn&&mockOn>"2026-11-29")return send({error:"Full MOCK uchun yangi sana yo‘q. Adminga murojaat qiling."},409);
     if(mockOn){const ticket=await db.from("ark60_billing_access").select("id").eq("student_id",student.id).eq("mock_on",mockOn).is("revoked_at",null).limit(1);if(ticket.error)throw ticket.error;if(ticket.data?.length)return send({error:"Ushbu MOCK uchun ruxsatingiz bor. Challenge muddatini uzaytirish uchun Challenge paketini tanlang."},409);}
     const code = "ARK-" + Date.now().toString(36).toUpperCase() + "-" + randomBytes(4).toString("hex").toUpperCase();
     const { data: order, error } = await db.from("ark60_billing_orders").insert({
