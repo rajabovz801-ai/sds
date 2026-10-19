@@ -5,6 +5,7 @@ import {hasCompletedResult} from "@/lib/billing/server";
 import { getStudent } from "@/lib/ark60-content-auth";
 import { getServiceSupabase } from "@/lib/supabase/server";
 import { BILLING_PLANS, isBillingMethod, isBillingPlan, PLAN_LOOKUP } from "@/lib/billing/plans";
+import {requiresPersonalMockCode,personalMockOpensAt} from "@/lib/mock-access-policy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,9 +27,16 @@ export async function GET(request: NextRequest) {
       if(!Number.isInteger(day)||day<1||day>60||!["","reading","listening","writing","speaking","article","vocabulary","mock"].includes(module))return send({error:"Invalid study day"},400);
       const membership=await membershipForStudent(student);
       const future=new Date(Date.UTC(2026,9,day)).toISOString().slice(0,10)>todayInTashkent();
-      const allowed=isPreview(student)||(!future&&(!membership.enforced||await isDayUnlocked(day,student,module,true)));
+      // The old Day 18 Full Mock uses a student-bound personal code, not a
+      // calendar billing ticket. Permit navigation to its code-entry screen.
+      // The separate challenge-mock API validates the code BEFORE exam content
+      // or attempts can be read/written. Normal MOCK Sundays stay paywalled.
+      const codeEntryOnly=requiresPersonalMockCode(day)&&
+        (module===""||module==="mock")&&!future&&
+        Date.now()>=Date.parse(personalMockOpensAt(day)!);
+      const allowed=isPreview(student)||codeEntryOnly||(!future&&(!membership.enforced||await isDayUnlocked(day,student,module,true)));
       const reviewOnly=!allowed&&!future&&await hasCompletedResult(student.id,day,module);
-      return send({allowed:allowed||reviewOnly,review_only:reviewOnly,membership,future,day});
+      return send({allowed:allowed||reviewOnly,review_only:reviewOnly,membership,future,day,code_entry_only:codeEntryOnly});
     }
     const db = getServiceSupabase();
     const [cards, orders, access, membership] = await Promise.all([
