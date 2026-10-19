@@ -19,6 +19,8 @@ Validation:
 - Every unit has 20 terms and 20 distinct translations.
 - All 12 Vocabulary quizzes were exercised through the actual database submit-answer function (240 answers, 20/20 each), in a rolled-back transaction. No test results were retained.
 - TypeScript checks and Next.js production build passed.
+- All 12 passages were answered through the live teacher-preview UI: each scored 13/13 or 14/14 as appropriate; both paired-question papers also accepted reversed answer order. Total: 160/160. Results and evidence views opened.
+- Published day-page navigation and both Vocabulary source cards were checked. Source progress totals now reflect the actual number of units.
 - Existing published content before day 19 is untouched.
 
 Small compatibility fixes: Vocabulary labels now share the complete Reading schedule. Day availability checks complete published Vocabulary units rather than requiring exactly six units; incomplete units remain unavailable. Admin content status no longer assumes a fixed six-unit pack.
