@@ -6,8 +6,8 @@ import { BILLING_PLANS, formatSom, type BillingMethod, type BillingPlan } from "
 import "../billing/billing.css";
 
 type Card = { method: BillingMethod; card_number: string; card_holder: string };
-type Order = { mock_on?:string|null; id: string; order_code: string; plan_key: BillingPlan; price_uzs: number; payment_method: BillingMethod; status: string; created_at?: string; admin_note?: string | null };
-type Access = { plan_key: BillingPlan; starts_at: string; expires_at: string | null; mock_on: string | null };
+type Order = { mock_on?:string|null; id: string; order_code: string; plan_key: string; price_uzs: number; payment_method: BillingMethod; status: string; created_at?: string; admin_note?: string | null };
+type Access = { plan_key: string; starts_at: string; expires_at: string | null; mock_on: string | null };
 type Data = { membership:Membership; student: { first_name: string; last_name: string; username: string }; cards: Card[]; orders: Order[]; access: Access[]; telegram: string };
 
 export default function BillingPanel() {
@@ -74,7 +74,7 @@ export default function BillingPanel() {
    } catch (err) { setError(err instanceof Error ? err.message : "Xatolik yuz berdi."); }
    finally { workingRef.current=false;setWorking(false); }
  }
- function telegramLink(planKey: BillingPlan, amount: number) {
+ function telegramLink(planKey: string, amount: number) {
    const student = data?.student;
    const text = ["To‘lov qildim.", "Ism familiya: " + [student?.first_name, student?.last_name].filter(Boolean).join(" "), "Saytdagi username: " + (student?.username || ""), "Paket: " + (BILLING_PLANS.find(p => p.key === planKey)?.name || "All Access (eski paket)"), "Summa: " + formatSom(amount), "To‘lov chekini ilova qilaman."].join("\n");
    return "https://t.me/rustam_usmon0v?text=" + encodeURIComponent(text);
