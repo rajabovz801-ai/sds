@@ -7358,7 +7358,7 @@ html[data-ark-theme="dark"] .writing-loading,html[data-ark-theme="dark"] .writin
 html[data-ark-theme="dark"] .writing-loading>a {
     color: #E8C56A
 }
-html[data-ark-theme="dark"] .writing-finish section {
+html[data-ark-theme="dark"] .writing-finish>section {
     background: #152131;
     border: 1px solid #29384A;
     box-shadow: 0 16px 42px #00000026

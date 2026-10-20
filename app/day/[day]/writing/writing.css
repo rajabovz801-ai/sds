@@ -57,7 +57,7 @@
 .writing-loading>span{font-family:Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:.05em}
 .writing-loading>b{font-size:14px}
 .writing-loading>a{margin-top:4px;color:#8f5a20;text-decoration:none;font-size:12px;font-weight:700}
-.writing-finish section{width:min(640px,100%);background:#fff;border:1px solid #e1e4e8;border-radius:14px;padding:36px;box-shadow:0 16px 42px rgba(28,34,42,.07)}
+.writing-finish>section{width:min(640px,100%);background:#fff;border:1px solid #e1e4e8;border-radius:14px;padding:36px;box-shadow:0 16px 42px rgba(28,34,42,.07)}
 .writing-finish-icon{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:#eef8f1;color:#26734a}
 .writing-finish small{display:block;margin-top:18px;font-size:10px;letter-spacing:.13em;color:#946025;font-weight:800}
 .writing-finish h1{font:700 31px/1.2 Georgia,"Times New Roman",serif;margin:8px 0 8px}
@@ -99,7 +99,7 @@
  .writing-editor-wrap textarea{font-size:16px;line-height:1.7;padding:20px 16px 24px}
  .writing-editor-lock b{font-size:22px}
  .writing-editor-footer{padding:0 14px}
- .writing-finish section{padding:28px 20px}
+ .writing-finish>section{padding:28px 20px}
  .writing-result-strip{grid-template-columns:1fr}
 }
 
