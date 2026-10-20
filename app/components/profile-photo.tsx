@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import {Camera,Lock,X} from 'lucide-react';
-export function ProBadge({active}:{active?:boolean}){return active?<span className="pro-badge" aria-label="PRO obunachi">PRO</span>:null}
+import {Camera,Crown,Lock,X} from 'lucide-react';
+export function ProBadge({active}:{active?:boolean}){return active?<span className="pro-badge" aria-label="PRO obunachi" title="PRO obunachi"><Crown size={11} strokeWidth={2} aria-hidden="true"/><span>PRO</span></span>:null}
 export function ProfilePhoto({pro,photo,onSaved}:{pro:boolean;photo?:string|null;onSaved:(url:string|null)=>void}){
  const input=useRef<HTMLInputElement>(null),canvas=useRef<HTMLCanvasElement>(null);
  const [source,setSource]=useState(''),[image,setImage]=useState<HTMLImageElement|null>(null),[zoom,setZoom]=useState(1),[x,setX]=useState(0),[y,setY]=useState(0),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
