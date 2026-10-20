@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useState,type CSSProperties} from 'react';
 import {Check,Leaf,Lock,Sunrise,Waves,Award,MoonStar} from 'lucide-react';
-export type CosmeticState={theme?:string|null;avatar?:string|null;badge?:string|null;unlocked?:{themes:string[];avatars:string[];decorations:boolean;badges:string[]}};
+export type CosmeticState={pro?:boolean;photo_url?:string|null;photo_enabled?:boolean;theme?:string|null;avatar?:string|null;badge?:string|null;unlocked?:{themes:string[];avatars:string[];decorations:boolean;badges:string[]}};
 export const THEMES=[{id:'dawn',name:'Dawn',description:'A fresh start in warm mountain light',color:'#b16f45',Icon:Sunrise},{id:'ocean',name:'Ocean',description:'Calm blue water and open horizons',color:'#247c92',Icon:Waves},{id:'forest',name:'Forest',description:'Quiet woodland and soft morning mist',color:'#497961',Icon:Leaf},{id:'night-sky',name:'Night Sky',description:'Moonlit mountains and a quiet starry sky',color:'#5967a5',Icon:MoonStar}];
 const AVATARS=[{id:'boy',name:'Navy hoodie'},{id:'girl',name:'Ponytail'},{id:'girl-hijab',name:'Navy hijab'}];
 export function cosmeticCSS(style?:CosmeticState):CSSProperties{
@@ -14,8 +14,9 @@ export function ThemeMark({theme,className=''}:{theme?:string|null;className?:st
 export function RewardDecoration({theme,className=''}:{theme?:string|null;className?:string}){
  return THEMES.some(t=>t.id===theme)?<img className={'reward-decoration '+className} src={'/images/rewards/'+theme+'-decor.png'} alt="" aria-hidden="true"/>:null;
 }
-export function RewardAvatar({avatar,initials,className=''}:{avatar?:string|null;initials:string;className?:string}){
- return <span className={'reward-avatar '+className}>{AVATARS.some(a=>a.id===avatar)?<img src={'/images/rewards/'+avatar+'.png'} alt="Selected avatar"/>:initials}</span>;
+export function RewardAvatar({avatar,photo,initials,className=''}:{avatar?:string|null;photo?:string|null;initials:string;className?:string}){
+ const [failedPhoto,setFailedPhoto]=useState<string|null>(null);
+ return <span className={'reward-avatar '+className}>{photo&&photo!==failedPhoto?<img src={photo} alt="Profil rasmi" onError={()=>setFailedPhoto(photo)}/>:AVATARS.some(a=>a.id===avatar)?<img src={'/images/rewards/'+avatar+'.png'} alt="Selected avatar"/>:initials}</span>;
 }
 export function StyleCollection({state,onApplied,preview=false,compact=false}:{compact?:boolean;state:CosmeticState;onApplied:(s:CosmeticState)=>void;preview?:boolean}){
  const [theme,setTheme]=useState(state.theme||''),[avatar,setAvatar]=useState(state.avatar||''),[badge,setBadge]=useState(state.badge||''),[saving,setSaving]=useState(false),[message,setMessage]=useState('');

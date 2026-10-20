@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 type Day={n:number,date:Date,mock:boolean};
+import {ProBadge} from "../components/profile-photo";
 import {RewardAvatar,type CosmeticState} from "../components/reward-style";
 
 type StudentStats=HubStats;
@@ -219,7 +220,7 @@ export default function Dashboard(){
    <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom">
     <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><WorkspaceArt name="reward-chest" className="sidebar-chest"/><div><b>Daily reward</b><small>Grow your reward collection</small></div><ChevronRight size={14}/></button>
-    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
+    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" photo={stats?.student.cosmetics?.photo_url} avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"} <ProBadge active={stats?.student.cosmetics?.pro}/></b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
    </div>
   </aside>
 

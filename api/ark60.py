@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 from fastapi import FastAPI, Request, Response, HTTPException
 
 from lib.ark60_rewards import reward_for_day, unlocks, style_allowed
+from lib.ark60_pro import active_pro, visible_style
 
 app = FastAPI(title="ARK IELTS 60-day API", version="1.1.0")
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL", "https://svdigxqdivcmljirjwhk.supabase.co").rstrip("/")
@@ -76,10 +77,11 @@ def reward_progress(user):
 
 def cosmetic_state(user, count=None):
     count = reward_progress(user) if count is None else count
-    rows = db("GET", "ark60_cosmetics", {"select":"theme,avatar,badge", "student_id":"eq."+user["id"], "limit":1})
+    rows = db("GET", "ark60_cosmetics", {"select":"theme,avatar,badge,photo_url,photo_enabled", "student_id":"eq."+user["id"], "limit":1})
     state = rows[0] if rows else {"theme":None,"avatar":None,"badge":None}
     state["unlocked"] = unlocks(count)
-    return state
+    access = db("GET", "ark60_billing_access", {"select":"expires_at", "student_id":"eq."+user["id"], "revoked_at":"is.null", "plan_key":"in.(challenge,all_access)", "starts_at":"lte."+now().isoformat(), "expires_at":"gt."+now().isoformat(), "limit":1})
+    return visible_style(state, active_pro({"challenge_until":access[0]["expires_at"]}) if access else False)
 
 def enrich_reward(center, user):
     count = int(center.get("claimed_days") or 0)
@@ -317,10 +319,12 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
             presence=db("GET","ark60_presence",{"select":"student_id,last_seen_at,last_interaction_at","limit":500})
         except HTTPException:
             presence=[]
-        styles=db("GET","ark60_cosmetics",{"select":"student_id,theme,avatar,badge","limit":500})
+        styles=db("GET","ark60_cosmetics",{"select":"student_id,theme,avatar,badge,photo_url,photo_enabled","limit":500})
         style_map={x["student_id"]:x for x in styles}
+        paid=db("GET","ark60_billing_access",{"select":"student_id", "revoked_at":"is.null", "plan_key":"in.(challenge,all_access)", "starts_at":"lte."+now().isoformat(), "expires_at":"gt."+now().isoformat(), "limit":5000})
+        pro_ids={x["student_id"] for x in paid}
         for item in board:
-            item["cosmetics"]=style_map.get(item.get("student_id"),{})
+            item["cosmetics"]=visible_style(style_map.get(item.get("student_id"),{}), item.get("student_id") in pro_ids)
         pmap={x.get("student_id"):x for x in presence}
         stamp=now()
         current=None
@@ -629,7 +633,7 @@ async def actions(request:Request,response:Response):
         badge=data.get("badge") or None
         if not style_allowed(count,theme,avatar) or (badge is not None and badge not in unlocks(count)["badges"]):
             raise HTTPException(status_code=403,detail="Claim the matching reward before applying this style.")
-        db("POST","ark60_cosmetics",params={"on_conflict":"student_id"},payload={"student_id":user["id"],"theme":theme,"avatar":avatar,"badge":badge,"updated_at":now().isoformat()},prefer="resolution=merge-duplicates,return=minimal")
+        db("POST","ark60_cosmetics",params={"on_conflict":"student_id"},payload={"student_id":user["id"],"theme":theme,"avatar":avatar,"badge":badge,"photo_enabled":False,"updated_at":now().isoformat()},prefer="resolution=merge-duplicates,return=minimal")
         return {"ok":True,"cosmetics":cosmetic_state(user,count),"preview":reward_demo_allowed(user)}
     if action=="update_profile":
         user=require_student(request)
