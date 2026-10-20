@@ -103,7 +103,7 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
 
    {message?<div className="hub-error">{message}</div>:loading?<LoadingIndicator full={false}/>:sorted.length?<>
    <div className={"lb-podium lb-podium-"+Math.min(3,top.length)} aria-label={periodLabel+" top students"}>
-    {top.map(row=><article className={"lb-podium-card rank-"+row.rank+" "+(row.student_id===studentId?"me ":"")} key={row.student_id}>
+    {top.map((row,index)=><article style={{gridArea:["first","second","third"][index]}} className={"lb-podium-card rank-"+row.rank+" "+(row.student_id===studentId?"me ":"")} key={row.student_id}>
      <div className="lb-award-row">{row.rank===1?<WorkspaceArt name="crown" className="lb-crown"/>:<span className="lb-crown-space" aria-hidden="true"/>}
      <RewardAvatar className="lb-avatar" photo={row.cosmetics?.photo_url} avatar={row.cosmetics?.avatar} initials={initials(row)}/>{row.cosmetics?.badge&&<Award className="lb-earned-badge" size={16} aria-label={row.cosmetics.badge}/>}
      <RankMedal rank={row.rank}/></div>
