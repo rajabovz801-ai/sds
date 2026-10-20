@@ -261,8 +261,6 @@ export default function Dashboard(){
       <div className="kpi-card kpi-highlight"><div><span>COINS</span><b>{stats?.coins??0}</b><small>Total coins earned</small></div><Coins size={23}/></div>
      </div>
 
-     {stats&&<WeeklyGrowth pro={!!stats.student.cosmetics?.pro}/>}
-
      {resumeLocation&&<section className="resume-card" aria-label="Continue your last lesson">
       <div className="resume-card__copy">
        <h2>Continue your last lesson</h2>
@@ -271,7 +269,7 @@ export default function Dashboard(){
       <a className="resume-card__action" href={resumeLocation.href}>Continue <ChevronRight size={16}/></a>
      </section>}
 
-     <section className="today-panel">
+     <section className="today-panel" id="dashboard-today-plan">
       <div className="today-panel-head">
        <div><span className="section-eyebrow">{currentDay?"TODAY'S PLAN":preview?"PREVIEW DAY":"NEXT STUDY DAY"}</span><h2>Day {String(planDayNumber).padStart(2,"0")} · {format(planDay.date,{weekday:"long",day:"numeric",month:"long"})}</h2><p>{planRequired.length?planRequired.length+" published task"+(planRequired.length===1?"":"s")+" ready for this day.":"Materials have not been published for this day yet."}</p></div>
        <div className="today-progress"><strong>{planDone}/{planRequired.length||0}</strong><span>completed</span></div>
@@ -280,7 +278,7 @@ export default function Dashboard(){
        {planModules.length?planModules.map(({name,detail,icon:Icon,tone})=>{
         const done=stats?.completed.some(x=>x.day_number===planDayNumber&&x.module===name.toLowerCase());
         return <div key={name} className={"detail-item dashboard-task "+(done?"task-completed ":"")+(planLive?"task-ready":"task-pending")}>
-         <span className={"task-icon "+tone}>{["Reading","Listening","Writing","Article","Vocabulary","Speaking"].includes(name)?<WorkspaceArt name={"module-"+name.toLowerCase()} className="module-task-art"/>:<Icon size={19} strokeWidth={1.8}/>}</span>
+         <span className={"task-icon "+tone}><Icon size={20} strokeWidth={1.8}/></span>
          <div className="task-copy"><strong>{name}<span className="task-coin-badge"><Coins size={11}/> +1 coin</span></strong><small>{detail}</small></div>
          <button type="button" className={"task-action "+(planLive?"can-open":"future")+" "+(done?"completed":"")} disabled={!planLive&&!done&&!(stats?.membership?.enforced&&unlocked(planDay,today))} onClick={()=>{if(planLive||done)window.location.assign(moduleHref(planDayNumber,name));else setLockedDay(planDayNumber)}}>
           {done?"Completed":planLive?"Start":"Locked"}{done?<CheckCircle2 size={15}/>:planLive?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
@@ -290,6 +288,7 @@ export default function Dashboard(){
       </div>
       <div className="today-panel-footer"><span>{planLive?"Your unfinished published tasks stay available after their original day.":stats?.membership?.enforced&&unlocked(planDay,today)?"Ushbu kun uchun faol paket kerak.":"This day unlocks on "+format(planDay.date,{day:"numeric",month:"long"})+"."}</span><button onClick={()=>{setSelected(planDayNumber);setView("60-Day Plan")}}>Open 60-Day Plan <ChevronRight size={14}/></button></div>
      </section>
+     {stats&&<WeeklyGrowth pro={!!stats.student.cosmetics?.pro} onOpenPlan={()=>document.getElementById("dashboard-today-plan")?.scrollIntoView({behavior:"smooth",block:"start"})}/>}
     </>:view==="60-Day Plan"?<>
      <div className="page-heading plan-heading">
       <WorkspaceArt name="wolf-plan" className="plan-mascot"/>
