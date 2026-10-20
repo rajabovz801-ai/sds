@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 from fastapi import FastAPI, Request, Response, HTTPException
 
 from lib.ark60_rewards import reward_for_day, unlocks, style_allowed
-from lib.ark60_pro import active_pro, visible_style
+from lib.ark60_pro import active_pro, visible_style, owner_profile
 
 app = FastAPI(title="ARK IELTS 60-day API", version="1.1.0")
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL", "https://svdigxqdivcmljirjwhk.supabase.co").rstrip("/")
@@ -81,7 +81,7 @@ def cosmetic_state(user, count=None):
     state = rows[0] if rows else {"theme":None,"avatar":None,"badge":None}
     state["unlocked"] = unlocks(count)
     access = db("GET", "ark60_billing_access", {"select":"expires_at", "student_id":"eq."+user["id"], "revoked_at":"is.null", "plan_key":"in.(challenge,all_access)", "starts_at":"lte."+now().isoformat(), "expires_at":"gt."+now().isoformat(), "limit":1})
-    return visible_style(state, active_pro({"challenge_until":access[0]["expires_at"]}) if access else False)
+    return visible_style(state, owner_profile(user.get("username")) or (active_pro({"challenge_until":access[0]["expires_at"]}) if access else False))
 
 def enrich_reward(center, user):
     count = int(center.get("claimed_days") or 0)
@@ -324,7 +324,7 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         paid=db("GET","ark60_billing_access",{"select":"student_id", "revoked_at":"is.null", "plan_key":"in.(challenge,all_access)", "starts_at":"lte."+now().isoformat(), "expires_at":"gt."+now().isoformat(), "limit":5000})
         pro_ids={x["student_id"] for x in paid}
         for item in board:
-            item["cosmetics"]=visible_style(style_map.get(item.get("student_id"),{}), item.get("student_id") in pro_ids)
+            item["cosmetics"]=visible_style(style_map.get(item.get("student_id"),{}), item.get("student_id") in pro_ids or owner_profile(item.get("username")))
         pmap={x.get("student_id"):x for x in presence}
         stamp=now()
         current=None

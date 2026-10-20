@@ -92,7 +92,7 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
  return <section className="hub-panel leaderboard-v2">
   <div className="hub-heading lb-heading"><div><small>LIVE COURSE DATA</small><h1>Leaderboard</h1><p>Rankings are based on earned coins and active study time.</p></div><WorkspaceArt name="wolf-trophy" className="hub-mascot"/></div>
 
-  {preview&&<article className="demo-leaderboard-card"><RewardAvatar avatar={cosmetics?.avatar} initials="RU"/><div><b>Rustam</b><small>Preview account · Not ranked</small></div><span className="demo-label">TRY DEMO</span></article>}
+  {preview&&<article className="demo-leaderboard-card"><RewardAvatar photo={cosmetics?.photo_url} avatar={cosmetics?.avatar} initials="RU"/><div><b>Rustam <ProBadge active={cosmetics?.pro}/></b><small>Preview account · Not ranked</small></div><span className="demo-label">TRY DEMO</span></article>}
   <div className="lb-board">
    {sorted.some(row=>row.status==="online")&&<div className="lb-live-strip"><span><i/>{sorted.filter(row=>row.status==="online").length} student{sorted.filter(row=>row.status==="online").length===1?"":"s"} online now</span><div>{sorted.filter(row=>row.status==="online").slice(0,3).map(row=><b key={row.student_id}>{row.full_name}</b>)}</div></div>}
    <div className="lb-period-tabs" aria-label="Leaderboard period">

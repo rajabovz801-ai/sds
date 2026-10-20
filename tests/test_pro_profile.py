@@ -1,8 +1,14 @@
 import unittest
 from datetime import datetime, timezone
-from lib.ark60_pro import active_pro, visible_style
+from lib.ark60_pro import active_pro, visible_style, owner_profile
 
 class ProProfileTests(unittest.TestCase):
+    def test_owner_accounts_only(self):
+        self.assertTrue(owner_profile("rustam7"))
+        self.assertTrue(owner_profile("rustam_usmonov_4f42fb15"))
+        self.assertFalse(owner_profile("rustam"))
+        self.assertFalse(owner_profile("student"))
+
     def test_existing_paid_challenge_is_pro(self):
         self.assertTrue(active_pro({'challenge_until':'2026-10-27T00:00:00Z'}, datetime(2026,10,20,tzinfo=timezone.utc)))
     def test_mock_trial_and_expired_are_not_pro(self):

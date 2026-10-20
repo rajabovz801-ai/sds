@@ -12,3 +12,7 @@ def active_pro(membership, at=None):
 
 def visible_style(style, pro):
     return {**style, 'pro': pro, 'photo_url': style.get('photo_url') if pro and style.get('photo_enabled', True) else None}
+
+
+def owner_profile(username):
+    return username in {"rustam7", "rustam_usmonov_4f42fb15"}
