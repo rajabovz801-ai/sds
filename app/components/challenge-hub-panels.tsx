@@ -25,7 +25,7 @@ type LeaderStatus="online"|"idle"|"offline";
 type LeaderPeriod="week"|"30d"|"all";
 type LeaderRow={cosmetics?:CosmeticState;student_id:string;full_name:string;username:string;coins:number;active_seconds:number;status:LeaderStatus;rank:number};
 
-const fmt=(s:number)=>{const n=Math.max(0,Math.floor(Number(s)||0));const h=Math.floor(n/3600),m=Math.floor((n%3600)/60);return h?h+"h "+String(m).padStart(2,"0")+"m":m+"m"};
+const fmt=(s:number)=>{if(!s)return "—";if(s<60)return "<1 min";const n=Math.max(0,Math.floor(Number(s)||0));const h=Math.floor(n/3600),m=Math.floor((n%3600)/60);return h?h+"h "+String(m).padStart(2,"0")+"m":m+"m"};
 const moduleLabel=(m:string)=>m==="daily"?"Daily reward":m==="profile"?"Profile completion":m.split("_").map(x=>x[0]?.toUpperCase()+x.slice(1)).join(" ");
 
 export function RewardModal({open,onClose,onBalance,onStyle}:{open:boolean;onClose:()=>void;onBalance:(n:number)=>void;onStyle:(s:CosmeticState)=>void}){
@@ -105,9 +105,9 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
    <div className={"lb-podium lb-podium-"+Math.min(3,top.length)} aria-label={periodLabel+" top students"}>
     {top.map(row=><article className={"lb-podium-card rank-"+row.rank+" "+(row.student_id===studentId?"me ":"")} key={row.student_id}>
      <div className="lb-award-row">{row.rank===1?<WorkspaceArt name="crown" className="lb-crown"/>:<span className="lb-crown-space" aria-hidden="true"/>}
-     <RewardAvatar className="lb-avatar" photo={row.cosmetics?.photo_url} avatar={row.cosmetics?.avatar} initials={initials(row)}/>
+     <RewardAvatar className="lb-avatar" photo={row.cosmetics?.photo_url} avatar={row.cosmetics?.avatar} initials={initials(row)}/>{row.cosmetics?.badge&&<Award className="lb-earned-badge" size={16} aria-label={row.cosmetics.badge}/>}
      <RankMedal rank={row.rank}/></div>
-     <h2>{row.full_name} <ProBadge active={row.cosmetics?.pro}/>{row.cosmetics?.badge&&<Award size={14} aria-label={row.cosmetics.badge}/>}</h2>
+     <h2 className="identity-name-row"><span className="identity-name" title={row.full_name}>{row.full_name}</span><ProBadge active={row.cosmetics?.pro}/></h2>
      <p>@{row.username}{row.student_id===studentId?" · You":""}</p>
      <span className={"lb-status lb-podium-status "+row.status}><i aria-hidden="true"/>{statusLabel(row.status)}</span>
      <div className="lb-podium-metrics"><span><Coins size={15}/><b>{row.coins}</b><small>Coins</small></span><span><Clock3 size={15}/><b>{fmt(row.active_seconds)}</b><small>Study time</small></span></div>
@@ -118,14 +118,14 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
     <div className="lb-table-head"><span>#</span><span>Student</span><span>Coins</span><span>Study time</span><span>Status</span></div>
     {table.map(row=><div className={"lb-table-row "+(row.student_id===studentId?"me ":"")} key={row.student_id}>
      <b className="lb-table-rank">{row.rank}</b>
-     <div className="lb-table-person"><RewardAvatar className="lb-mini-avatar" photo={row.cosmetics?.photo_url} avatar={row.cosmetics?.avatar} initials={initials(row)}/><div><b>{row.full_name} <ProBadge active={row.cosmetics?.pro}/></b><small>@{row.username}{row.student_id===studentId?" · You":""}</small></div></div>
+     <div className="lb-table-person"><RewardAvatar className="lb-mini-avatar" photo={row.cosmetics?.photo_url} avatar={row.cosmetics?.avatar} initials={initials(row)}/><div><b className="identity-name-row"><span className="identity-name" title={row.full_name}>{row.full_name}</span><ProBadge active={row.cosmetics?.pro}/></b><small>@{row.username}{row.student_id===studentId?" · You":""}</small></div></div>
      <strong><Coins size={14}/>{row.coins}</strong>
      <strong><Clock3 size={14}/>{fmt(row.active_seconds)}</strong>
      <span className={"lb-status "+row.status}><i/>{statusLabel(row.status)}</span>
     </div>)}
    </div>}
 
-   {current&&current.rank>10&&<div className="lb-current-row"><span>Your rank</span><b>#{current.rank}</b><div><RewardAvatar className="lb-mini-avatar" photo={current.cosmetics?.photo_url} avatar={current.cosmetics?.avatar} initials={initials(current)}/><span><strong>{current.full_name} <ProBadge active={current.cosmetics?.pro}/></strong><small>@{current.username}</small></span></div><span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span></div>}
+   {current&&sorted.findIndex(row=>row.student_id===studentId)>=10&&<div className="lb-current-row"><span>Your rank</span><b>#{current.rank}</b><div><RewardAvatar className="lb-mini-avatar" photo={current.cosmetics?.photo_url} avatar={current.cosmetics?.avatar} initials={initials(current)}/><span><strong className="identity-name-row"><span className="identity-name" title={current.full_name}>{current.full_name}</span><ProBadge active={current.cosmetics?.pro}/></strong><small>@{current.username}</small></span></div><span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span></div>}
   </>:<div className="hub-empty"><Trophy size={28}/><b>No leaderboard activity in this period yet.</b><p>Earn coins or record active study time to appear here.</p></div>}
   </div>
  </section>;
@@ -152,7 +152,8 @@ export function ProfilePanel({stats,onStudent,onCoins,onLogout}:{stats:HubStats;
  }
  async function logoutAll(){if(!window.confirm("Sign out this account on every device?"))return;try{await fetch("/api/ark60",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout_all"})})}finally{onLogout()}}
  const initials=(s.first_name[0]+s.last_name[0]).toUpperCase();
- return <section className="profile-page"><div className={"profile-hero-card "+(s.cosmetics?.theme?"has-reward-theme":"")} style={cosmeticCSS(s.cosmetics)}>{s.cosmetics?.theme&&<div className="profile-scene-cover">{s.cosmetics?.unlocked?.decorations&&<RewardDecoration theme={s.cosmetics.theme}/>}</div>}<RewardAvatar className="profile-big-avatar" photo={s.cosmetics?.photo_url} avatar={s.cosmetics?.avatar} initials={initials}/><div className="profile-main-copy"><h1>{s.first_name} {s.last_name} <ProBadge active={s.cosmetics?.pro}/> <ThemeMark theme={s.cosmetics?.theme}/></h1>{s.cosmetics?.badge&&<span className="reward-name-badge"><Award size={14}/>{s.cosmetics.badge.replace("day-","Day ")}</span>}<p>@{s.username} <i>{s.cosmetics?.pro?"PRO obunachi":"Student"}</i></p></div><div className="profile-summary"><div><span>TARGET BAND</span><b>{Number(s.target_band).toFixed(1)}</b></div><div><span>COINS EARNED</span><b>{stats.coins}</b></div><div><span>EXAM DATE</span><b>{s.exam_date||"Not set"}</b></div></div></div>
+ return <section className="profile-page"><div className={"profile-hero-card "+(s.cosmetics?.theme?"has-reward-theme":"")} style={cosmeticCSS(s.cosmetics)}>{s.cosmetics?.theme&&<div className="profile-scene-cover">{s.cosmetics?.unlocked?.decorations&&<RewardDecoration theme={s.cosmetics.theme}/>}</div>}<RewardAvatar className="profile-big-avatar" photo={s.cosmetics?.photo_url} avatar={s.cosmetics?.avatar} initials={initials}/><div className="profile-main-copy"><h1 className="profile-identity-row"><span>{s.first_name} {s.last_name}</span> <ProBadge active={s.cosmetics?.pro}/> <ThemeMark theme={s.cosmetics?.theme}/></h1>{s.cosmetics?.badge&&<span className="reward-name-badge"><Award size={14}/>{s.cosmetics.badge.replace("day-","Day ")}</span>}<p>@{s.username} <i>{["rustam7","rustam_usmonov_4f42fb15"].includes(s.username)?"PRO · Owner":s.cosmetics?.pro?"PRO obunachi":"Student"}</i></p></div><div className="profile-summary"><div><span>TARGET BAND</span><b>{Number(s.target_band).toFixed(1)}</b></div><div><span>COINS EARNED</span><b>{stats.coins}</b></div><div><span>EXAM DATE</span><b>{s.exam_date||"Not set"}</b></div></div></div>
+  {s.cosmetics?.pro&&stats.membership?.challenge_until&&!["rustam7","rustam_usmonov_4f42fb15"].includes(s.username)&&<p className="profile-pro-expiry">PRO amal qiladi: {new Date(stats.membership.challenge_until).toLocaleDateString("uz-UZ",{timeZone:"Asia/Tashkent",day:"numeric",month:"long",year:"numeric"})} gacha</p>}
   <ProfilePhoto pro={!!s.cosmetics?.pro} photo={s.cosmetics?.photo_url} onSaved={photo_url=>onStudent({...s,cosmetics:{...s.cosmetics,photo_url,photo_enabled:!!photo_url}})}/>
   <div className="profile-tabs" role="tablist" aria-label="Profile settings"><button role="tab" aria-selected={profileTab==="details"} onClick={()=>setProfileTab("details")}>Details</button><button role="tab" aria-selected={profileTab==="appearance"} onClick={()=>setProfileTab("appearance")}>Appearance</button></div>
   <div hidden={profileTab!=="appearance"} className="profile-appearance"><StyleCollection compact state={s.cosmetics||{}} preview={stats.preview} onApplied={cosmetics=>onStudent({...s,cosmetics})}/></div>

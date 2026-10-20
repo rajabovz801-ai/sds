@@ -15,6 +15,7 @@ from fastapi import FastAPI, Request, Response, HTTPException
 
 from lib.ark60_rewards import reward_for_day, unlocks, style_allowed
 from lib.ark60_pro import active_pro, visible_style, owner_profile
+from lib.ark60_weekly import weekly_progress, rank_coins
 
 app = FastAPI(title="ARK IELTS 60-day API", version="1.1.0")
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL", "https://svdigxqdivcmljirjwhk.supabase.co").rstrip("/")
@@ -75,13 +76,18 @@ def reward_progress(user):
     rows = db("GET", "ark60_daily_rewards", {"select":"id", "student_id":"eq."+user["id"], "limit":60})
     return len(rows)
 
+def profile_pro(user):
+    if owner_profile(user.get("username")):
+        return True
+    access = db("GET", "ark60_billing_access", {"select":"expires_at", "student_id":"eq."+user["id"], "revoked_at":"is.null", "plan_key":"in.(challenge,all_access)", "starts_at":"lte."+now().isoformat(), "expires_at":"gt."+now().isoformat(), "limit":1})
+    return bool(access) and active_pro({"challenge_until":access[0]["expires_at"]})
+
 def cosmetic_state(user, count=None):
     count = reward_progress(user) if count is None else count
     rows = db("GET", "ark60_cosmetics", {"select":"theme,avatar,badge,photo_url,photo_enabled", "student_id":"eq."+user["id"], "limit":1})
     state = rows[0] if rows else {"theme":None,"avatar":None,"badge":None}
     state["unlocked"] = unlocks(count)
-    access = db("GET", "ark60_billing_access", {"select":"expires_at", "student_id":"eq."+user["id"], "revoked_at":"is.null", "plan_key":"in.(challenge,all_access)", "starts_at":"lte."+now().isoformat(), "expires_at":"gt."+now().isoformat(), "limit":1})
-    return visible_style(state, owner_profile(user.get("username")) or (active_pro({"challenge_until":access[0]["expires_at"]}) if access else False))
+    return visible_style(state, profile_pro(user))
 
 def enrich_reward(center, user):
     count = int(center.get("claimed_days") or 0)
@@ -301,6 +307,15 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         center=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
         center["preview"]=False
         return enrich_reward(center,user)
+    if action=="weekly_progress":
+        user=require_student(request)
+        if not profile_pro(user):
+            raise HTTPException(status_code=403,detail="Haftalik o‘sish PRO obunachilar uchun.")
+        start=(datetime.combine(today()-timedelta(days=6),datetime.min.time(),tzinfo=TZ)).isoformat()
+        reading=db("GET","ark60_reading_attempts",{"select":"score,total,submitted_at","student_id":"eq."+user["id"],"submitted_at":"gte."+start,"order":"submitted_at.asc","limit":1000})
+        # Include earlier first attempts so repeats inside this week cannot masquerade as new tests.
+        listening=db("GET","ark60_listening_attempts",{"select":"day_number,score,submitted_at","student_id":"eq."+user["id"],"status":"eq.submitted","order":"submitted_at.asc","limit":1000})
+        return weekly_progress(reading,listening,today())
     if action=="leaderboard":
         user=require_student(request)
         period=str(request.query_params.get("period","all")).strip().lower()
@@ -328,8 +343,8 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         pmap={x.get("student_id"):x for x in presence}
         stamp=now()
         current=None
-        for idx,item in enumerate(board):
-            item["rank"]=idx+1
+        rank_coins(board)
+        for item in board:
             p=pmap.get(item.get("student_id")) or {}
             seen_age=10**9
             interaction_age=10**9

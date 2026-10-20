@@ -1,5 +1,6 @@
 "use client";
 import {challengeDayUnlocked} from "../../lib/ark60-day-access";
+import WeeklyGrowth from "../components/weekly-growth";
 import LoadingIndicator from "../components/loading-indicator";
 import {MembershipLock} from "../components/membership-notice";
 import BillingPanel from "../components/billing-panel";
@@ -24,7 +25,7 @@ type ModuleCard={name:string;detail:string;icon:typeof BookOpen;tone:string;time
 
 function duration(seconds:number){
  const s=Math.max(0,Math.floor(seconds));
- return Math.floor(s/3600)+"h "+String(Math.floor((s%3600)/60)).padStart(2,"0")+"m";
+ return s===0?"0 min":s<60?"<1 min":s<3600?Math.floor(s/60)+" min":Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m";
 }
 
 const DAYS:Day[]=Array.from({length:60},(_,i)=>{
@@ -220,7 +221,7 @@ export default function Dashboard(){
    <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom">
     <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><WorkspaceArt name="reward-chest" className="sidebar-chest"/><div><b>Daily reward</b><small>Grow your reward collection</small></div><ChevronRight size={14}/></button>
-    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" photo={stats?.student.cosmetics?.photo_url} avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><b>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"} <ProBadge active={stats?.student.cosmetics?.pro}/></b><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
+    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" photo={stats?.student.cosmetics?.photo_url} avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><span className="identity-name-row"><b className="identity-name" title={stats?stats.student.first_name+" "+stats.student.last_name:"Student"}>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><ProBadge active={stats?.student.cosmetics?.pro}/></span><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
    </div>
   </aside>
 
@@ -255,10 +256,12 @@ export default function Dashboard(){
      </div>
 
      <div className="kpi-row dashboard-kpis">
-      <div className="kpi-card"><div><span>COURSE PROGRESS</span><b>{completedDays} <i>/ 60</i></b><small>Days completed</small></div><ChartNoAxesCombined size={22}/></div>
+      <div className="kpi-card"><div><span>COURSE PROGRESS</span><b>{completedDays} <i>/ 60</i></b><small>Days completed</small><progress className="course-progress-line" value={completedDays} max={60} aria-label="Completed challenge days"/></div><ChartNoAxesCombined size={22}/></div>
       <div className="kpi-card"><div><span>TODAY’S STUDY TIME</span><b>{stats?duration(stats.today_seconds):"—"}</b><small>{stats?"Total "+duration(stats.active_seconds):"Starts after sign-in"}</small></div><Clock3 size={22}/></div>
-      <div className="kpi-card kpi-highlight"><div><span>COINS</span><b>{stats?.coins??0}</b><small>Earn +1 for each completed task</small></div><Coins size={23}/></div>
+      <div className="kpi-card kpi-highlight"><div><span>COINS</span><b>{stats?.coins??0}</b><small>Total coins earned</small></div><Coins size={23}/></div>
      </div>
+
+     {stats&&<WeeklyGrowth pro={!!stats.student.cosmetics?.pro}/>}
 
      {resumeLocation&&<section className="resume-card" aria-label="Continue your last lesson">
       <div className="resume-card__copy">
