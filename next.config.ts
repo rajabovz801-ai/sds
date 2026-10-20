@@ -9,7 +9,7 @@ const nextConfig:NextConfig={
  reactStrictMode:true,
  poweredByHeader:false,
  serverExternalPackages:["pdfkit"],
- outputFileTracingIncludes:{"/api/telegram":["./node_modules/pdfkit/js/data/*.afm"]},
+ outputFileTracingIncludes:{"/api/challenge-writing":["./public/writing/**/*","./public/images/mock/*writing*"],"/api/telegram":["./node_modules/pdfkit/js/data/*.afm"]},
  async headers(){return [{source:"/:path*",headers:securityHeaders}]}
 };
 export default nextConfig;
