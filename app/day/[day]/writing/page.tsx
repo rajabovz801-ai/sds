@@ -5,6 +5,7 @@ import AnimatedBackButton from "../../../components/animated-back-button";
 import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {useEffect,useMemo,useRef,useState,type CSSProperties} from "react";
 import {CheckCircle2,Clock3,Pause,Play,Send,ShieldCheck,Maximize2,Minimize2} from "lucide-react";
+import WritingResult from "./WritingResult";
 import TaskVisual from "./TaskVisual";
 import "./writing.css";
 
@@ -44,6 +45,14 @@ export default function WritingPage(){
      }else if(Number.isFinite(Number(saved.remaining)))setRemaining(Math.max(0,Number(saved.remaining)));
     }
    }}catch(e){if(live)setError(e instanceof Error?e.message:"Writing task could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day]);
+
+ useEffect(()=>{
+  const submission=data?.submission;
+  if(!submission||submission.review_status==="preview"||submission.review_status==="reviewed"||submission.payload?.ai_assessment)return;
+  let active=true;let timer:ReturnType<typeof setTimeout>;let count=0;
+  async function check(){try{const r=await fetch(`/api/challenge-writing?day=${day}`,{cache:"no-store",credentials:"same-origin"});const obj=await r.json();if(active&&r.ok&&obj.submission)setData(prev=>prev?{...prev,submission:obj.submission}:prev)}catch{}finally{if(active&&++count<60)timer=setTimeout(check,5000)}}
+  timer=setTimeout(check,2000);return()=>{active=false;clearTimeout(timer)};
+ },[day,data?.submission?.id,data?.submission?.payload?.ai_assessment,data?.submission?.review_status]);
 
  useEffect(()=>{
   if(!data||data.submission||data.preview)return;
@@ -124,12 +133,13 @@ export default function WritingPage(){
 
  if(loading)return <LoadingIndicator/>;
  if(error||!data)return <main className="writing-loading"><span>ARK EDUCATION</span><b>{error||"Writing task unavailable."}</b><AnimatedBackButton href={`/day/${day}`} ariaLabel="Back to study day"/></main>;
- if(data.submission)return <main className="writing-finish"><section><div className="writing-finish-icon"><CheckCircle2 size={34}/></div><small>DAY {String(day).padStart(2,"0")} · {taskLabel.toUpperCase()}</small><h1>Writing submitted</h1><p>{data.submission.review_status==="preview"?"Preview submission completed. Nothing was saved to student results.":"Your response has been submitted. Your result will be available soon."}</p><div className="writing-result-strip"><span>STATUS<b>{data.submission.review_status==="reviewed"?"Checked":data.submission.review_status==="preview"?"Preview only":"Pending review"}</b></span><span>WORDS<b>{String(data.submission.payload?.word_count||words||"—")}</b></span>{data.submission.review_status==="reviewed"&&<span>BAND<b>{data.submission.band??"—"}</b></span>}</div>{data.submission.review_status==="reviewed"&&data.submission.review_feedback&&<div className="writing-feedback"><b>Teacher feedback</b><p>{data.submission.review_feedback}</p></div>}<AnimatedBackButton href={`/day/${day}`} ariaLabel="Back to study day"/></section></main>;
+ async function retryAssessment(){setSending(true);setMessage("");try{const r=await fetch("/api/challenge-writing",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"retry_assessment",day})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Please try again later.");window.location.reload()}catch(e){setMessage(e instanceof Error?e.message:"Please try again later.")}finally{setSending(false)}}
+ if(data.submission)return <main className="writing-finish"><section><small>DAY {String(day).padStart(2,"0")} · {taskLabel.toUpperCase()}</small><h1>Writing submitted</h1><WritingResult submission={data.submission} onRetry={retryAssessment} retrying={sending}/>{message&&<p role="status">{message}</p>}<AnimatedBackButton href={`/day/${day}`} ariaLabel="Back to study day"/></section></main>;
 
  const p=data.content.payload;
  return <main className="writing-shell"><StudyTimeHeartbeat day={day} module="writing"/>
   <header className="writing-topbar"><div className="writing-back-slot"><AnimatedBackButton onClick={goBack} ariaLabel="Back to study day"/></div><div className="writing-top-center"><span>DAY {String(day).padStart(2,"0")}</span><b>{taskLabel}</b></div><div className="writing-top-meta"><strong className={remaining<=300&&started&&remaining>0?"urgent":""}><Clock3 size={16}/>{formatTime(remaining)}</strong><button className="writing-fullscreen" type="button" aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFullscreen}>{fullScreen?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
-  <section className="writing-toolbar"><div><span className="writing-rule">{p.min_words}+ words · {Math.round(p.duration_seconds/60)} minutes</span></div><div className="writing-controls">{!started?<button className="primary" onClick={begin} disabled={remaining<=0}><Play size={16}/> Start timer</button>:<button onClick={togglePause} disabled={remaining<=0}>{remaining<=0?<><Clock3 size={16}/> Time up</>:paused?<><Play size={16}/> Resume timer</>:<><Pause size={16}/> Pause timer</>}</button>}<button className="submit" onClick={()=>submit(false)} disabled={sending||!answer.trim()}><Send size={16}/>{sending?"Submitting…":"Submit"}</button>{!answer.trim()&&<small className="writing-submit-hint">Write an answer to submit</small>}</div></section>
+  <section className="writing-toolbar"><div><span className="writing-rule">{p.min_words}+ words · {Math.round(p.duration_seconds/60)} minutes</span></div><div className="writing-controls">{!started?<button className="primary" onClick={begin} disabled={remaining<=0}><Play size={16}/> Start timer</button>:<button onClick={togglePause} disabled={remaining<=0}>{remaining<=0?<><Clock3 size={16}/> Time up</>:paused?<><Play size={16}/> Resume timer</>:<><Pause size={16}/> Pause timer</>}</button>}<button className="submit" onClick={()=>submit(false)} disabled={sending||!answer.trim()}><Send size={16}/>{sending?"Saving response…":"Submit"}</button>{!answer.trim()&&<small className="writing-submit-hint">Write an answer to submit</small>}</div></section>
   <div ref={splitRef} className="writing-stage" style={{"--writing-split":split+"%"} as CSSProperties}>
    <section className="writing-task-pane"><div className="writing-pane-head"><span>QUESTION</span></div><div className="writing-paper"><p className="writing-time-note">You should spend about {Math.round(p.duration_seconds/60)} minutes on this task.</p>{p.task_type==="task2"&&<p className="writing-topic-note">Write about the following topic:</p>}<div className="writing-prompt">{p.prompt}</div>{p.task_type==="task1"&&p.visual_kind&&<figure className="writing-visual"><TaskVisual kind={p.visual_kind}/></figure>}{(p.instructions||[]).map((line,i)=><p key={i} className="writing-instruction">{line}</p>)}<p className="writing-min">Write at least {p.min_words} words.</p></div></section>
    <div className="writing-divider" role="separator" aria-label="Resize question and answer panels" aria-orientation="vertical" aria-valuemin={30} aria-valuemax={65} aria-valuenow={Math.round(split)} tabIndex={0} onKeyDown={e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();setSplit(v=>Math.max(30,Math.min(65,v+(e.key==="ArrowRight"?2:-2))))}}} onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);e.preventDefault()}} onPointerMove={e=>{if(!e.currentTarget.hasPointerCapture(e.pointerId))return;const r=splitRef.current?.getBoundingClientRect();if(r)setSplit(Math.max(30,Math.min(65,(e.clientX-r.left)/r.width*100)))}} onPointerUp={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId)}}><span/></div>

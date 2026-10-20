@@ -1,4 +1,5 @@
 import {hasCompletedResult} from "@/lib/billing/server";
+import { after } from "next/server";
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import PDFDocument from "pdfkit";
@@ -478,6 +479,22 @@ export async function POST(request) {
     return json({ ok: true, submission: data });
   }
 
+  if (action === "retry_assessment") {
+    const student = await studentFromRequest(request);
+    if (!student) return json({detail:"Please sign in."},401);
+    const day=validDay(body.day);
+    const {data:row}=await supabase.from("ark60_submissions").select("id,student_id,day_number,module,payload,review_status,submitted_at").eq("student_id",student.id).eq("day_number",day).eq("module","writing").maybeSingle();
+    if(!row)return json({detail:"Submission not found."},404);
+    if(row.payload?.ai_assessment||row.review_status==="reviewed")return json({ok:true});
+    const stamp=row.payload?.ai_retry_at||row.payload?.ai_assessed_at||row.submitted_at;
+    if(Date.now()-Date.parse(stamp)<300000)return json({detail:"Please wait five minutes before retrying."},429);
+    const nextPayload={...row.payload,ai_status:"pending",ai_retry_at:new Date().toISOString()};
+    const {data:claimed,error}=await supabase.from("ark60_submissions").update({payload:nextPayload}).eq("id",row.id).filter("payload","eq",JSON.stringify(row.payload)).select("id").maybeSingle();
+    if(error||!claimed)return json({detail:"Assessment is already being updated."},409);
+    after(async()=>{try{await assessArk60Submission({...row,payload:nextPayload})}catch(e){console.error("Writing retry failed",String(e))}});
+    return json({ok:true});
+  }
+
   if (action !== "submit") return json({ detail: "Unknown action." }, 400);
   const student = await studentFromRequest(request);
   if (!student) return json({ detail: "Please sign in." }, 401);
@@ -493,6 +510,8 @@ export async function POST(request) {
   const durationSeconds = Math.max(0, Math.min(durationLimit || 3600, Math.floor(Number(body.duration_seconds) || 0)));
   const payload = {
     task_type: content.payload?.task_type || "writing",
+    visual_kind: content.payload?.visual_kind || "",
+    ai_status: "pending",
     title: content.title,
     prompt: content.payload?.prompt || "",
     answer,
@@ -540,11 +559,9 @@ export async function POST(request) {
       .is("left_at", null);
   }
 
-  let ai_result = null;
-  try {
-    ai_result = data ? await assessArk60Submission(data) : null;
-  } catch (e) {
-    console.error("Daily Writing AI assessment failed after submit", e);
-  }
-  return json({ ok: true, submission: data, ai_result });
+  after(async () => {
+    try { if(data) await assessArk60Submission(data); }
+    catch(e) { console.error("Daily Writing assessment failed", String(e)); }
+  });
+  return json({ ok: true, submission: data });
 }
