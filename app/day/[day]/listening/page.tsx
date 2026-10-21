@@ -195,52 +195,62 @@ export default function ListeningPage(){
  }
 
  async function startTest(){
+  // Restore the original student flow: show questions immediately on Start.
+  // Audio begins from the same user tap, without blocking the exam screen.
   if(startPendingRef.current)return;
   startPendingRef.current=true;
-  const audio=audioRef.current;
-  if(!audio){setMessage("Audio is unavailable. Please reopen Listening.");startPendingRef.current=false;return}
   setMessage("");
+  setAttemptId("");
+  setStartedAt("");
+  setAnswers({});
+  setSection(1);setCurrentQuestion(1);setElapsed(0);setAudioPart(0);
   setAudioStatus("loading");
-  // Browsers require play() to be triggered by the actual Start button tap.
-  // Never wait indefinitely for a third-party audio host or media decoder.
-  const playTimeoutMs=10000;
-  let startTimer:ReturnType<typeof setTimeout>|undefined;
-  let playbackStarted=false;
-  try{
-   if(audio.error)audio.load();
-   audio.currentTime=0;
-   const playPromise=audio.play();
-   if(!document.fullscreenElement)void document.documentElement.requestFullscreen?.().catch(()=>{});
-   await Promise.race([
-    playPromise,
-    new Promise<never>((_,reject)=>{
-     startTimer=setTimeout(()=>reject(new Error("The audio server is not responding. Please try again later.")),playTimeoutMs);
-    })
-   ]);
-   playbackStarted=true;
-   setAudioStatus("playing");
-   // The exam is opened only after audio playback has actually started.
-   const abort=new AbortController();
-   const apiTimer=setTimeout(()=>abort.abort(),12000);
-   let res:Response;
+  startedRef.current=true;
+  setStarted(true);
+
+  const audio=audioRef.current;
+  if(audio){
    try{
-    res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day}),signal:abort.signal});
-   }finally{clearTimeout(apiTimer)}
+    if(audio.error)audio.load();
+    audio.currentTime=0;
+    void audio.play().then(()=>{
+     if(startedRef.current)setAudioStatus("playing");
+    }).catch(()=>{
+     if(startedRef.current){
+      setAudioStatus("error");
+      setMessage("Audio could not load. Check your connection and contact the teacher.");
+     }
+    });
+   }catch{
+    setAudioStatus("error");
+    setMessage("Audio could not load. Check your connection and contact the teacher.");
+   }
+  }else{
+   setAudioStatus("error");
+   setMessage("Audio is unavailable. Please contact the teacher.");
+  }
+  if(!document.fullscreenElement)void document.documentElement.requestFullscreen?.().catch(()=>{});
+
+  try{
+   const res=await fetch("/api/challenge-listening",{
+    method:"POST",credentials:"same-origin",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"start",day})
+   });
    const obj=await res.json();
    if(!res.ok)throw new Error(obj.detail||"Could not start Listening.");
    const a=obj.attempt as Attempt;
-   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers({});setStartedAt(a.started_at);setStarted(true);startedRef.current=true;
-   setSection(1);setCurrentQuestion(1);setElapsed(0);setAudioPart(0);setAudioStatus("playing");
+   setAttemptId(a.id);
+   setAttemptNumber(Number(a.attempt_number||1));
+   setStartedAt(a.started_at);
   }catch(e){
-   audio.pause();
-   try{audio.currentTime=0}catch{}
-   if(!playbackStarted)setAudioStatus("error");
-   const reason=e instanceof Error?e.message:"Could not start Listening.";
-   setMessage(reason.includes("AbortError")?"Test connection timed out. Please try again.":reason);
-   // A media error must not trap the learner in an empty fullscreen intro.
+   audio?.pause();
+   startedRef.current=false;
+   setStarted(false);
+   setAudioStatus("idle");
+   setMessage(e instanceof Error?e.message:"Could not start Listening.");
    if(document.fullscreenElement)void document.exitFullscreen?.().catch(()=>{});
   }finally{
-   if(startTimer!==undefined)clearTimeout(startTimer);
    startPendingRef.current=false;
   }
  }
@@ -345,7 +355,7 @@ export default function ListeningPage(){
   <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">{started||reviewMode?"Listening":""}</div><div className="ls-top-actions">{started&&!reviewMode&&<span className={"ls-audio-state "+audioStatus}><Volume2 size={14}/>{audioStatus==="ended"?"Audio finished":audioStatus==="error"?"Audio unavailable":audioStatus==="resume"?"Audio interrupted":audioStatus==="loading"?"Loading audio":"Playing"} {started&&<i>{secLabel(elapsed)}</i>}</span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
 
   {!started&&!reviewMode&&message&&<div className="ls-message" role="status">{message}</div>}
-  {!started&&!reviewMode&&<LessonEntry kind="Listening" day={day} summary="4 sections · 40 questions" preview={data.preview} pending={audioStatus==="loading"} notice="Leaving restarts the test." check={<button className={ui.check} onClick={checkSound}><Volume2 size={16}/> Check sound</button>} onStart={startTest} instructions="The recording plays once. Leaving before submission restarts the audio and clears unfinished answers. Submit to save your result."/>}
+  {!started&&!reviewMode&&<LessonEntry kind="Listening" day={day} summary="4 sections · 40 questions" preview={data.preview} notice="Leaving restarts the test." check={<button className={ui.check} onClick={checkSound}><Volume2 size={16}/> Check sound</button>} onStart={startTest} instructions="The recording plays once. Leaving before submission restarts the audio and clears unfinished answers. Submit to save your result."/>}
 
   {(started||reviewMode)&&<>
    
