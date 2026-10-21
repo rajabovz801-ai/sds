@@ -13,7 +13,8 @@ const urls = [
  ["literal-name-download", "https://archive.org/download/test-20154/TEST%252520154.mp3"],
  ["metadata", "https://archive.org/metadata/test-20154"],
  ["previous-listening", "https://ia601600.us.archive.org/6/items/test-204-ready/TEST_204_ready.mp3"],
- ["public-connectivity", "https://www.google.com/robots.txt"]
+ ["public-connectivity", "https://www.google.com/robots.txt"],
+ ["mkl021-html", "https://murodkamilov.uz/listening/mkl021/"]
 ] as const;
 
 async function inspect(name: string, url: string) {
@@ -28,7 +29,12 @@ async function inspect(name: string, url: string) {
    length:res.headers.get("content-length"), range:res.headers.get("content-range"),
    finalUrl:res.url
   };
-  if(name==="metadata" && res.ok) {
+  if(name==="mkl021-html" && res.ok) {
+   const html=await res.text();
+   result.htmlLength=html.length;
+   result.mp3Paths=Array.from(new Set((html.match(/(?:https?:[^"\x27\\s<>]+|\\/[A-Za-z0-9_?%&=+\\/.-]+)\\.(?:mp3|m4a)(?:\\?[^"\x27\\s<>]*)?/gi)||[]))).slice(0,50);
+   result.audioTags=(html.match(/.{0,150}<audio.{0,250}/gis)||[]).slice(0,10);
+  } else if(name==="metadata" && res.ok) {
    const meta=await res.json();
    result.files=(meta.files||[]).map((x:any)=>({name:x.name,size:x.size,source:x.source,format:x.format})).filter((x:any)=>/mp3|audio|154/i.test(x.name||"")).slice(0,30);
   } else {
