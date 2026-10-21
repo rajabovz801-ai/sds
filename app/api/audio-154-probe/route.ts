@@ -14,7 +14,11 @@ const urls = [
  ["metadata", "https://archive.org/metadata/test-20154"],
  ["previous-listening", "https://ia601600.us.archive.org/6/items/test-204-ready/TEST_204_ready.mp3"],
  ["public-connectivity", "https://www.google.com/robots.txt"],
- ["mkl021-html", "https://murodkamilov.uz/listening/mkl021/"]
+ ["mkl021-html", "https://murodkamilov.uz/listening/mkl021/"],
+ ["mkl-audio1", "https://murodkamilov.uz/listening/mkl021/audio/section1.mp3"],
+ ["mkl-audio2", "https://murodkamilov.uz/listening/mkl021/audio/section2.mp3"],
+ ["mkl-audio3", "https://murodkamilov.uz/listening/mkl021/audio/section3.mp3"],
+ ["mkl-audio4", "https://murodkamilov.uz/listening/mkl021/audio/section4.mp3"]
 ] as const;
 
 async function inspect(name: string, url: string) {
