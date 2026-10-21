@@ -12,7 +12,7 @@ import {Check,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Eraser,Headphones,Loc
 import "./listening.css";
 
 type Token=string|{q:number};
-type Payload={test_code:string;audio_url:string;total_questions:number;audio_once:boolean;sections:any[]};
+type Payload={test_code:string;audio_url:string;audio_urls?:string[];total_questions:number;audio_once:boolean;sections:any[]};
 type ReviewItem={number:number;submitted:string;correct:string[];status:"correct"|"wrong"|"empty"};
 type Attempt={id:string;attempt_number:number;status:string;answers:Record<string,string>;started_at:string;submitted_at?:string|null;elapsed_seconds:number;part_scores?:number[]|null;score?:number|null;band?:number|null;review?:ReviewItem[]};
 type ApiData={content:{title:string;payload:Payload};attempt:Attempt|null;preview:boolean};
@@ -37,6 +37,7 @@ export default function ListeningPage(){
  const [message,setMessage]=useState("");
  const [saving,setSaving]=useState(false);
  const [audioStatus,setAudioStatus]=useState<"idle"|"loading"|"playing"|"resume"|"error"|"ended">("idle");
+ const [audioPart,setAudioPart]=useState(0);
  const [result,setResult]=useState<Result|null>(null);
  const [review,setReview]=useState<ReviewItem[]|null>(null);
  const [reviewMode,setReviewMode]=useState(false);
@@ -53,6 +54,10 @@ export default function ListeningPage(){
  const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
 
  const payload=data?.content.payload;
+ // Most Listening tests provide a single MP3. Day 20 TEST 154 can instead
+ // provide four compatible section recordings, played sequentially once.
+ const audioTracks=(payload?.audio_urls?.length?payload.audio_urls:[payload?.audio_url||""]).filter(Boolean);
+ const audioSrc=audioTracks[audioPart]||audioTracks[0]||"";
  const sections=payload?.sections||[];
  const currentSection=sections.find((s:any)=>Number(s.number)===section);
   const answeredCount=Object.values(answers).filter(v=>String(v).trim().length>0).length;
@@ -94,7 +99,7 @@ export default function ListeningPage(){
  },[started,startedAt]);
 
  useEffect(()=>{
-  if(!started||!payload?.audio_url||!audioRef.current)return;
+  if(!started||!audioSrc||!audioRef.current)return;
   const audio=audioRef.current;
   let cancelled=false;
   // Play only once automatically. After browser autoplay rejection, an explicit
@@ -115,7 +120,7 @@ export default function ListeningPage(){
    audio.addEventListener("canplay",requestPlayback,{once:true});
   }
   return()=>{cancelled=true;audio.removeEventListener("canplay",requestPlayback)};
- },[started,payload?.audio_url]);
+ },[started,audioSrc]);
 
  // Clear unfinished answers when the learner leaves the page. A lost exit
  // request is safe: the next Start resets the attempt again on the server.
@@ -194,7 +199,7 @@ export default function ListeningPage(){
    const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});
    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not start Listening.");
    const a=obj.attempt as Attempt;
-   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers({});setStartedAt(a.started_at);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);setElapsed(0);setAudioStatus("loading");
+   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers({});setStartedAt(a.started_at);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);setElapsed(0);setAudioPart(0);setAudioStatus("loading");
    try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.()}catch{}
   }catch(e){setMessage(e instanceof Error?e.message:"Could not start Listening.")}
  }
@@ -206,7 +211,7 @@ export default function ListeningPage(){
    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not start another Listening attempt.");
    const a=obj.attempt as Attempt;
    setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||attemptNumber+1));setAnswers({});setStartedAt(a.started_at);setElapsed(0);
-   setResult(null);setReview(null);setReviewMode(false);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);setAudioStatus("loading");
+   setResult(null);setReview(null);setReviewMode(false);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);setAudioPart(0);setAudioStatus("loading");
    setData(prev=>prev?{...prev,attempt:a}:prev);
    try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.()}catch{}
   }catch(e){setMessage(e instanceof Error?e.message:"Could not start another Listening attempt.")}
@@ -218,6 +223,7 @@ export default function ListeningPage(){
   // A direct tap retains the user activation mobile browsers require.
   if(audio.ended){setAudioStatus("ended");return}
   try{
+   if(audio.error)audio.load();
    await audio.play();setAudioStatus("playing");setMessage("");
   }catch(e){
    const name=e instanceof DOMException?e.name:"";
@@ -312,7 +318,7 @@ export default function ListeningPage(){
 
  return <main className={"ls-shell "+(reviewMode?"reviewing":!started?"ls-shell--intro":"")}>
   <StudyTimeHeartbeat day={day} module="listening"/>
-  <audio ref={audioRef} preload="auto" src={payload.audio_url} onPlay={()=>setAudioStatus("playing")} onEnded={()=>setAudioStatus("ended")} onError={()=>{if(startedRef.current){setAudioStatus("error");setMessage("Audio could not load. Check your internet connection, then reopen this Listening task.")}}} onPause={()=>{if(startedRef.current&&audioStatus==="playing"&&!audioRef.current?.ended)setAudioStatus("resume")}}/>
+  <audio ref={audioRef} preload="auto" src={audioSrc} onPlay={()=>setAudioStatus("playing")} onEnded={()=>{if(audioPart+1<audioTracks.length){setAudioPart(audioPart+1);setAudioStatus("loading");setMessage("")}else setAudioStatus("ended")}} onError={()=>{if(startedRef.current){setAudioStatus("error");setMessage("Audio could not load. Check your internet connection, then reopen this Listening task.")}}} onPause={()=>{if(startedRef.current&&audioStatus==="playing"&&!audioRef.current?.ended)setAudioStatus("resume")}}/>
   <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">{started||reviewMode?"Listening":""}</div><div className="ls-top-actions">{started&&!reviewMode&&<span className={"ls-audio-state "+audioStatus}><Volume2 size={14}/>{audioStatus==="ended"?"Audio finished":audioStatus==="error"?"Audio unavailable":audioStatus==="resume"?"Tap to play audio":audioStatus==="loading"?"Loading audio":"Playing"} {started&&<i>{secLabel(elapsed)}</i>}</span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
 
   {!started&&!reviewMode&&message&&<div className="ls-message" role="status">{message}</div>}
