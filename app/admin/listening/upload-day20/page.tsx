@@ -1,0 +1,2 @@
+import Day20AudioUploader from "../day20-audio-uploader";
+export default function Page(){return <main style={{minHeight:"100vh",background:"#f5f7f9",padding:"28px 18px"}}><section style={{maxWidth:900,margin:"auto"}}><a href="/admin/listening">← Back to Listening reports</a><h1>Day 20 · TEST 154 Audio</h1><p>Upload the verified MP3 directly to Supabase Storage.</p><Day20AudioUploader/></section></main>}
