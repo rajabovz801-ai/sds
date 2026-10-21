@@ -11,7 +11,9 @@ const urls = [
  ["single-encoded-download", "https://archive.org/download/test-20154/TEST%20154.mp3"],
  ["single-encoded-origin", "https://ia600702.us.archive.org/24/items/test-20154/TEST%20154.mp3"],
  ["literal-name-download", "https://archive.org/download/test-20154/TEST%252520154.mp3"],
- ["metadata", "https://archive.org/metadata/test-20154"]
+ ["metadata", "https://archive.org/metadata/test-20154"],
+ ["previous-listening", "https://ia601600.us.archive.org/6/items/test-204-ready/TEST_204_ready.mp3"],
+ ["public-connectivity", "https://www.google.com/robots.txt"]
 ] as const;
 
 async function inspect(name: string, url: string) {
@@ -40,7 +42,7 @@ async function inspect(name: string, url: string) {
    }
   }
   return result;
- } catch(e) {return {name,error:String(e)}}
+ } catch(e) {return {name,error:String(e),cause:String((e as any)?.cause||""),code:(e as any)?.cause?.code||null}}
 }
 export async function GET() {
  const results=await Promise.all(urls.map(([n,u])=>inspect(n,u)));
