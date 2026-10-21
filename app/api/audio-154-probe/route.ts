@@ -33,7 +33,7 @@ async function inspect(name: string, url: string) {
    const html=await res.text();
    result.htmlLength=html.length;
    result.mp3Paths=Array.from(new Set(html.match(/[A-Za-z0-9_/:.%?&=+~-]+[.]mp3/gi)||[])).slice(0,50);
-   result.audioTags=(html.match(/.{0,150}<audio.{0,250}/gis)||[]).slice(0,10);
+   result.audioTags=(html.match(/.{0,150}<audio.{0,250}/gi)||[]).slice(0,10);
   } else if(name==="metadata" && res.ok) {
    const meta=await res.json();
    result.files=(meta.files||[]).map((x:any)=>({name:x.name,size:x.size,source:x.source,format:x.format})).filter((x:any)=>/mp3|audio|154/i.test(x.name||"")).slice(0,30);
