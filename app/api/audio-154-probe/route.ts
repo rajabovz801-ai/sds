@@ -32,7 +32,7 @@ async function inspect(name: string, url: string) {
   if(name==="mkl021-html" && res.ok) {
    const html=await res.text();
    result.htmlLength=html.length;
-   result.mp3Paths=Array.from(new Set((html.match(/(?:https?:[^"\x27\\s<>]+|\\/[A-Za-z0-9_?%&=+\\/.-]+)\\.(?:mp3|m4a)(?:\\?[^"\x27\\s<>]*)?/gi)||[]))).slice(0,50);
+   result.mp3Paths=Array.from(new Set(html.match(/[A-Za-z0-9_/:.%?&=+~-]+[.]mp3/gi)||[])).slice(0,50);
    result.audioTags=(html.match(/.{0,150}<audio.{0,250}/gis)||[]).slice(0,10);
   } else if(name==="metadata" && res.ok) {
    const meta=await res.json();
