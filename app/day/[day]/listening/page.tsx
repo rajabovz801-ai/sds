@@ -345,7 +345,7 @@ export default function ListeningPage(){
   <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">{started||reviewMode?"Listening":""}</div><div className="ls-top-actions">{started&&!reviewMode&&<span className={"ls-audio-state "+audioStatus}><Volume2 size={14}/>{audioStatus==="ended"?"Audio finished":audioStatus==="error"?"Audio unavailable":audioStatus==="resume"?"Audio interrupted":audioStatus==="loading"?"Loading audio":"Playing"} {started&&<i>{secLabel(elapsed)}</i>}</span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
 
   {!started&&!reviewMode&&message&&<div className="ls-message" role="status">{message}</div>}
-  {!started&&!reviewMode&&<LessonEntry kind="Listening" day={day} summary="4 sections · 40 questions" preview={data.preview} notice="Leaving restarts the test." check={<button className={ui.check} onClick={checkSound}><Volume2 size={16}/> Check sound</button>} onStart={startTest} instructions="The recording plays once. Leaving before submission restarts the audio and clears unfinished answers. Submit to save your result."/>}
+  {!started&&!reviewMode&&<LessonEntry kind="Listening" day={day} summary="4 sections · 40 questions" preview={data.preview} pending={audioStatus==="loading"} notice="Leaving restarts the test." check={<button className={ui.check} onClick={checkSound}><Volume2 size={16}/> Check sound</button>} onStart={startTest} instructions="The recording plays once. Leaving before submission restarts the audio and clears unfinished answers. Submit to save your result."/>}
 
   {(started||reviewMode)&&<>
    
