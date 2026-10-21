@@ -18,7 +18,8 @@ const urls = [
  ["mkl-audio1", "https://murodkamilov.uz/listening/mkl021/audio/section1.mp3"],
  ["mkl-audio2", "https://murodkamilov.uz/listening/mkl021/audio/section2.mp3"],
  ["mkl-audio3", "https://murodkamilov.uz/listening/mkl021/audio/section3.mp3"],
- ["mkl-audio4", "https://murodkamilov.uz/listening/mkl021/audio/section4.mp3"]
+ ["mkl-audio4", "https://murodkamilov.uz/listening/mkl021/audio/section4.mp3"],
+ ["catbox-day20", "https://files.catbox.moe/h4j35t.mp3"]
 ] as const;
 
 async function inspect(name: string, url: string) {
