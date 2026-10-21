@@ -49,6 +49,7 @@ export default function ListeningPage(){
  const audioRef=useRef<HTMLAudioElement|null>(null);
  const saveTimer=useRef<number|null>(null);
  const startedRef=useRef(false);
+ const startPendingRef=useRef(false);
  const selectionRangeRef=useRef<Range|null>(null);
  const paperRef=useRef<HTMLElement|null>(null);
  const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
@@ -194,31 +195,53 @@ export default function ListeningPage(){
  }
 
  async function startTest(){
+  if(startPendingRef.current)return;
+  startPendingRef.current=true;
   const audio=audioRef.current;
-  if(!audio){setMessage("Audio is unavailable. Please reopen Listening.");return}
+  if(!audio){setMessage("Audio is unavailable. Please reopen Listening.");startPendingRef.current=false;return}
   setMessage("");
-  // User gesture is preserved because play() is called before any await.
-  // Never start the server attempt unless playback actually begins.
+  setAudioStatus("loading");
+  // Browsers require play() to be triggered by the actual Start button tap.
+  // Never wait indefinitely for a third-party audio host or media decoder.
+  const playTimeoutMs=10000;
+  let startTimer:ReturnType<typeof setTimeout>|undefined;
+  let playbackStarted=false;
   try{
    if(audio.error)audio.load();
    audio.currentTime=0;
-   const startedPlayback=audio.play();
+   const playPromise=audio.play();
    if(!document.fullscreenElement)void document.documentElement.requestFullscreen?.().catch(()=>{});
-   await startedPlayback;
-  }catch{
-   setAudioStatus("error");
-   setMessage("The recording could not start. Check your internet connection and reopen Listening.");
-   return;
-  }
-  try{
-   const res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});
-   const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not start Listening.");
+   await Promise.race([
+    playPromise,
+    new Promise<never>((_,reject)=>{
+     startTimer=setTimeout(()=>reject(new Error("The audio server is not responding. Please try again later.")),playTimeoutMs);
+    })
+   ]);
+   playbackStarted=true;
+   setAudioStatus("playing");
+   // The exam is opened only after audio playback has actually started.
+   const abort=new AbortController();
+   const apiTimer=setTimeout(()=>abort.abort(),12000);
+   let res:Response;
+   try{
+    res=await fetch("/api/challenge-listening",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day}),signal:abort.signal});
+   }finally{clearTimeout(apiTimer)}
+   const obj=await res.json();
+   if(!res.ok)throw new Error(obj.detail||"Could not start Listening.");
    const a=obj.attempt as Attempt;
-   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers({});setStartedAt(a.started_at);setStarted(true);startedRef.current=true;setSection(1);setCurrentQuestion(1);setElapsed(0);setAudioPart(0);setAudioStatus("playing");
+   setAttemptId(a.id);setAttemptNumber(Number(a.attempt_number||1));setAnswers({});setStartedAt(a.started_at);setStarted(true);startedRef.current=true;
+   setSection(1);setCurrentQuestion(1);setElapsed(0);setAudioPart(0);setAudioStatus("playing");
   }catch(e){
    audio.pause();
    try{audio.currentTime=0}catch{}
-   setMessage(e instanceof Error?e.message:"Could not start Listening.");
+   if(!playbackStarted)setAudioStatus("error");
+   const reason=e instanceof Error?e.message:"Could not start Listening.";
+   setMessage(reason.includes("AbortError")?"Test connection timed out. Please try again.":reason);
+   // A media error must not trap the learner in an empty fullscreen intro.
+   if(document.fullscreenElement)void document.exitFullscreen?.().catch(()=>{});
+  }finally{
+   if(startTimer!==undefined)clearTimeout(startTimer);
+   startPendingRef.current=false;
   }
  }
  async function retryTest(){
