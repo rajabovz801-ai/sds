@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 850" role="img" aria-label="Hollies supermarket floor plan with sections A to J">
+<rect width="800" height="850" fill="white"/><style>text{font-family:Arial,Helvetica,sans-serif;fill:#171717}.area{font-size:30px;font-weight:700;text-anchor:middle}.small{font-size:15px;text-anchor:middle;font-weight:600}.room{fill:white;stroke:#242424;stroke-width:4;stroke-linejoin:round}.shelf{fill:white;stroke:#242424;stroke-width:3}.thin{stroke:#242424;stroke-width:3;fill:none}</style>
+<text x="400" y="40" font-size="30" font-weight="700" text-anchor="middle">Hollies supermarket</text>
+<rect x="25" y="72" width="750" height="738" fill="none" stroke="#222" stroke-width="4"/>
+<path class="room" d="M45 103 L115 103 L115 187 L45 187 Z"/><text class="area" x="81" y="156">A</text>
+<path class="room" d="M125 112 H475 V271 H125 Z"/><text class="area" x="300" y="193">B</text>
+<path class="room" d="M475 112 H694 V271 H475 Z"/><text class="area" x="585" y="193">C</text>
+<path d="M122 105 l20 -25 m20 0 l20 25 M444 270 l12 14 l12 -14 M686 102 l16 -22 m25 0 l15 22" stroke="#222" stroke-width="4" fill="none"/>
+<rect class="room" x="727" y="98" width="30" height="106"/><text class="small" transform="translate(744 150) rotate(90)">EXIT</text>
+<path class="room" d="M44 315 H165 V445 H44 Z"/><text class="small" x="105" y="395">Bakery</text>
+<path class="room" d="M44 445 H165 V544 L44 633 Z"/><text class="area" x="115" y="496">E</text><text class="small" x="95" y="554">Cafe</text>
+<rect class="shelf" x="215" y="315" width="352" height="34"/><line class="thin" x1="400" y1="315" x2="400" y2="349"/><text class="small" x="309" y="338">Drinks</text><text class="small" x="488" y="338">Frozen goods</text>
+<rect class="shelf" x="215" y="367" width="352" height="32"/><text class="small" x="390" y="389">Clothing</text>
+<rect class="shelf" x="215" y="418" width="352" height="32"/><line class="thin" x1="385" y1="418" x2="385" y2="450"/><text class="small" x="296" y="439">Household</text><text class="small" x="474" y="439">Cleaning</text>
+<rect class="shelf" x="215" y="469" width="352" height="33"/><text class="small" x="389" y="492">Tinned goods</text>
+<circle class="room" cx="676" cy="374" r="53"/><text class="area" x="676" y="386">D</text>
+<path class="room" d="M628 465 H740 V529 H628 Z"/><text class="area" x="685" y="506">F</text>
+<path class="room" d="M647 530 H739 V590 H647 Z"/><text class="area" x="693" y="572">G</text>
+<path class="room" d="M220 533 L572 533 L394 661 Z"/><line class="thin" x1="394" y1="533" x2="394" y2="661"/><text class="small" x="334" y="584">Dairy</text><text class="small" x="474" y="578">Vegetables</text><text class="small" x="474" y="597">and fruits</text>
+<path class="room" d="M566 658 H737 V708 H566 V690 H594 V658 Z"/><text class="area" x="673" y="695">H</text>
+<path class="room" d="M96 658 L255 733 L235 770 L76 696 Z"/><text class="small" transform="translate(163 710) rotate(24)">Checkout tills</text>
+<rect class="shelf" x="45" y="640" width="81" height="45"/><text class="small" x="85" y="658">Newspaper</text><text class="small" x="85" y="674">magazines</text>
+<circle class="room" cx="167" cy="746" r="50"/><text class="area" x="167" y="756">I</text>
+<path class="room" d="M730 718 H760 V799 H730 Z"/><text class="area" x="745" y="769">J</text>
+<rect class="room" x="45" y="715" width="29" height="84"/><text class="small" transform="translate(64 755) rotate(90)">EXIT</text>
+<path d="M230 807 H591 M263 807 l17 -15 l17 15 M326 807 l17 -15 l17 15 M392 807 l17 -15 l17 15 M459 807 l17 -15 l17 15" fill="none" stroke="#222" stroke-width="4"/>
+<text x="417" y="790" text-anchor="middle" font-size="15" font-weight="700">CUSTOMER ENTRANCE</text>
+</svg>
