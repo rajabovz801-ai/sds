@@ -9,7 +9,7 @@ import WritingResult from "./WritingResult";
 import TaskVisual from "./TaskVisual";
 import "./writing.css";
 
-type WritingContent={id:string;day_number:number;title:string;payload:{task_type:"task1"|"task2";duration_seconds:number;min_words:number;prompt:string;visual_kind?:string;instructions?:string[]}};
+type WritingContent={id:string;day_number:number;title:string;payload:{task_type:"task1"|"task2";duration_seconds:number;min_words:number;prompt:string;visual_kind?:string;revision?:string;instructions?:string[]}};
 type Submission={id:string;submitted_at:string;band:number|null;review_status:string;review_feedback:string|null;reviewed_at:string|null;payload?:Record<string,unknown>};
 type Draft={answer:string;duration_seconds:number;timer_started:boolean;timer_paused:boolean;remaining_seconds:number;updated_at:string};
 type ApiData={content:WritingContent;submission:Submission|null;draft?:Draft|null;draft_scope?:string|null;preview?:boolean};
@@ -26,11 +26,11 @@ export default function WritingPage(){
  const [answer,setAnswer]=useState(""),[started,setStarted]=useState(false),[paused,setPaused]=useState(false),[remaining,setRemaining]=useState(0),[sending,setSending]=useState(false),[message,setMessage]=useState(""),[fullScreen,setFullScreen]=useState(false);
  const timerRef=useRef<number|null>(null),draftSaveRef=useRef<number|null>(null),lastDraftSyncRef=useRef(0),lastTick=useRef(Date.now());
  const visitIdRef=useRef<string|null>(null),visitBusyRef=useRef(false);
- const storageKey=data?.draft_scope?`ark60-writing-${data.draft_scope}-day-${day}`:"";
+ const storageKey=data?.draft_scope?`ark60-writing-${data.draft_scope}-day-${day}-${data.content?.payload?.revision||"v1"}`:"";
 
  useEffect(()=>{let live=true;(async()=>{setLoading(true);setError("");try{const r=await fetch(`/api/challenge-writing?day=${day}`,{credentials:"same-origin",cache:"no-store"});const obj:ApiData=await r.json();if(!r.ok)throw new Error((obj as any).detail||"Writing task could not be loaded.");if(!live)return;setData(obj);const duration=Number(obj.content?.payload?.duration_seconds||0);setRemaining(duration);setAnswer("");setStarted(false);setPaused(false);
    if(!obj.submission){
-    const scopedKey=obj.draft_scope?`ark60-writing-${obj.draft_scope}-day-${day}`:"";
+    const scopedKey=obj.draft_scope?`ark60-writing-${obj.draft_scope}-day-${day}-${obj.content?.payload?.revision||"v1"}`:"";
     let local:any=null;try{const raw=scopedKey?localStorage.getItem(scopedKey):null;if(raw)local=JSON.parse(raw)}catch{}
     const server=obj.draft?{answer:obj.draft.answer,started:obj.draft.timer_started,paused:obj.draft.timer_paused,remaining:obj.draft.remaining_seconds,savedAt:Date.parse(obj.draft.updated_at)||0}:null;
     const localStamp=Number(local?.savedAt)||0,serverStamp=Number(server?.savedAt)||0;
