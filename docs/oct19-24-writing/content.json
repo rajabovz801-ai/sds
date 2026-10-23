@@ -61,18 +61,20 @@
     "id": "3d787688-765d-5214-9c8e-3fc3076dad23",
     "day_number": 22,
     "module": "writing",
-    "title": "Day 22 · Writing Task 2",
+    "title": "Day 22 · Writing Task 1",
     "status": "draft",
     "payload": {
-      "task_type": "task2",
-      "duration_seconds": 2400,
-      "min_words": 250,
-      "prompt": "Some people work for the same organisation all their working life. Others think that it is better to work for different organisations.\n\nDiscuss both these views and give your own opinion.",
+      "task_type": "task1",
+      "duration_seconds": 1200,
+      "min_words": 150,
+      "prompt": "The table below shows the solutions to traffic congestion in cities suggested by urban planners and by ordinary residents.",
       "instructions": [
-        "Give reasons for your answer and include any relevant examples from your own knowledge or experience."
+        "Summarise the information by selecting and reporting the main features and make comparisons where relevant."
       ],
-      "source_file": "Task 1 - Mock 1.pdf",
-      "source_page": 3
+      "source_file": "User-provided traffic congestion table (23 October 2026)",
+      "visual_kind": "/writing/day22-task1.svg",
+      "image_url": "/writing/day22-task1.svg",
+      "revision": "day22-traffic-table-v2"
     }
   },
   {
