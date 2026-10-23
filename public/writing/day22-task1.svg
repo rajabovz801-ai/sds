@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="524" viewBox="0 0 1000 524" role="img" aria-labelledby="title desc">
+<title id="title">Solutions to traffic congestion proposed by urban planners and ordinary residents</title>
+<desc id="desc">Urban planners: Build more metro lines; Improve public transport; Charge drivers to enter the city centre; Create smart traffic light systems; Limit the number of cars per household. Ordinary residents: Make bus tickets cheaper; Share rides with colleagues; Improve public transport; Build more cycle lanes; Work from home more often. Improve public transport is proposed by both groups.</desc>
+<rect width="1000" height="524" fill="#ffffff"/>
+<rect x="2" y="2" width="996" height="520" fill="white" stroke="#666666" stroke-width="3"/>
+<rect x="3" y="3" width="994" height="65" fill="#f7f7f7"/>
+<g fill="none" stroke="#777777" stroke-width="2">
+<path d="M500 2V522 M2 68H998 M2 156H998 M2 244H998 M2 332H998 M2 420H998"/>
+</g>
+<g font-family="Arial, Helvetica, sans-serif" fill="#252525">
+<text x="20" y="44" font-size="30" font-weight="700" font-style="italic">Urban Planners</text>
+<text x="520" y="44" font-size="30" font-weight="700" font-style="italic">Ordinary Residents</text>
+<g font-size="25">
+<text x="20" y="121">Build More Metro Lines</text>
+<text x="520" y="121">Make Bus Tickets Cheaper</text>
+<rect x="13" y="185" width="338" height="35" rx="9" fill="#b6f17a"/>
+<text x="20" y="212">Improve Public Transport</text>
+<text x="520" y="212">Share Rides with Colleagues</text>
+<text x="20" y="282">Charge Drivers to Enter the City</text>
+<text x="20" y="315">Centre</text>
+<rect x="513" y="273" width="338" height="35" rx="9" fill="#b6f17a"/>
+<text x="520" y="300">Improve Public Transport</text>
+<text x="20" y="383">Create Smart Traffic Light Systems</text>
+<text x="520" y="383">Build More Cycle Lanes</text>
+<text x="20" y="467">Limit the Number of Cars per</text>
+<text x="20" y="501">Household</text>
+<text x="520" y="470">Work from Home More Often</text>
+</g>
+</g>
+</svg>
