@@ -51,7 +51,7 @@ export default function AdminFullMock(){
  return <main className="ma-shell">
   <header className="ma-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>{mockDate(day,true).toUpperCase()} · FULL MOCK RESULTS</span></div><button onClick={()=>load()} disabled={loading}><RefreshCcw size={15}/> Refresh</button></header>
   <section className="ma-hero"><div><small>LIVE ADMIN RESULTS</small><h1>{mockDate(day)} Full Mock</h1><p>Listening and Reading appear as soon as each section is submitted. Writing appears after AI assessment. Students still see scores only after the full mock is complete.</p></div><div className="ma-live"><i/><span>Auto refresh · 5s</span><b>{lastUpdated||"--:--:--"}</b></div></section>
-  {day===18&&<MockCodePanel key={day} day={day}/>}
+  {[18,25].includes(day)&&<MockCodePanel key={day} day={day}/>}
   <section className="ma-kpis"><article><Headphones/><span>LISTENING SUBMITTED</span><b>{listeningDone}</b></article><article><BookOpen/><span>READING SUBMITTED</span><b>{readingDone}</b></article><article><CheckCircle2/><span>FULLY COMPLETED</span><b>{completed}</b></article><article><UserRound/><span>STARTED MOCK</span><b>{rows.length}</b></article></section>
   <section className="ma-toolbar"><div><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search student…"/></div><span className="ma-day-picker"><select aria-label="Full Mock day" value={day} onChange={e=>setDay(Number(e.target.value))}>{MOCK_DAYS.map(d=><option key={d} value={d}>Day {String(d).padStart(2,"0")} · {mockDate(d,true)}</option>)}</select><b>{mockDate(day).toUpperCase()} · DAY {String(day).padStart(2,"0")}</b></span></section>
   {message&&<p className="ma-message">{message}</p>}

@@ -16,7 +16,7 @@ export default function MockCodePanel({day}:{day:number}){
  const filtered=people.filter(p=>(p.first_name+' '+p.last_name+' '+p.username).toLowerCase().includes(search.trim().toLowerCase()));
  const active=new Map(codes.filter(c=>!c.revoked_at).map(c=>[c.student_id,c]));
  const current=active.get(student);
- return <section className="ma-code-panel"><div className="ma-table-head"><div><small>SHAXSIY KIRISH KODLARI</small><h2>18-oktabr · 09:00 · Toshkent vaqti</h2></div><button onClick={()=>load()}>Yangilash</button></div>
+ return <section className="ma-code-panel"><div className="ma-table-head"><div><small>SHAXSIY KIRISH KODLARI</small><h2>{day}-oktabr · 09:00 · Toshkent vaqti</h2></div><button onClick={()=>load()}>Yangilash</button></div>
   <p>O‘quvchining to‘lovini tekshiring, keyin uning akkauntiga bog‘langan kod yarating. Yangi kod faqat shu oynada ko‘rsatiladi.</p>
   <div className="ma-code-controls"><input aria-label="Kod uchun o‘quvchini qidirish" placeholder="Ism yoki username bo‘yicha qidirish" value={search} onChange={e=>{setSearch(e.target.value);setStudent('');setPaid(false);setCreated(null)}}/><select aria-label="Kod uchun o‘quvchi" value={student} onChange={e=>{setStudent(e.target.value);setPaid(false);setCreated(null)}}><option value="">O‘quvchini tanlang</option>{filtered.map(p=><option key={p.id} value={p.id}>{p.first_name} {p.last_name} · @{p.username}</option>)}</select></div>
   <label className="ma-paid-confirm"><input type="checkbox" checked={paid} onChange={e=>setPaid(e.target.checked)}/> To‘lovini tekshirdim va tasdiqlayman</label>
