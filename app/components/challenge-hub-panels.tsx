@@ -2,7 +2,8 @@
 import {ProBadge,ProfilePhoto} from "./profile-photo";
 import LoadingIndicator from "./loading-indicator";
 
-import {useEffect,useMemo,useState} from "react";
+import {moduleCompletion,formatUzDate} from "../../lib/challenge-workspace";
+import {useEffect,useMemo,useState,useRef} from "react";
 import {BookOpen,Headphones,PenLine,Newspaper,NotebookPen,Mic,Award,Check,Clock3,Coins,LogOut,Save,Star,Trophy,X} from "lucide-react";
 
 import {WorkspaceArt,RankMedal} from "./workspace-art";
@@ -28,7 +29,9 @@ type LeaderRow={cosmetics?:CosmeticState;student_id:string;full_name:string;user
 const fmt=(s:number)=>{if(!s)return "—";if(s<60)return "<1 min";const n=Math.max(0,Math.floor(Number(s)||0));const h=Math.floor(n/3600),m=Math.floor((n%3600)/60);return h?h+"h "+String(m).padStart(2,"0")+"m":m+"m"};
 const moduleLabel=(m:string)=>m==="daily"?"Daily reward":m==="profile"?"Profile completion":m.split("_").map(x=>x[0]?.toUpperCase()+x.slice(1)).join(" ");
 
-export function RewardModal({open,onClose,onBalance,onStyle}:{open:boolean;onClose:()=>void;onBalance:(n:number)=>void;onStyle:(s:CosmeticState)=>void}){
+export function RewardModal({open,onClose,onOpenCollection,onBalance,onStyle}:{open:boolean;onClose:()=>void;onOpenCollection?:()=>void;onBalance:(n:number)=>void;onStyle:(s:CosmeticState)=>void}){
+ const modalRef=useRef<HTMLElement>(null);
+ useEffect(()=>{if(!open)return;const previous=document.activeElement as HTMLElement|null;const overflow=document.body.style.overflow;document.body.style.overflow="hidden";modalRef.current?.querySelector<HTMLButtonElement>("button")?.focus();const key=(event:KeyboardEvent)=>{if(event.key==="Escape")onClose();if(event.key!=="Tab")return;const nodes=Array.from(modalRef.current?.querySelectorAll<HTMLElement>("button:not(:disabled),a[href],select:not(:disabled)")||[]);const first=nodes[0],last=nodes.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus()}};document.addEventListener("keydown",key);return()=>{document.body.style.overflow=overflow;document.removeEventListener("keydown",key);previous?.focus()}},[open]);
  const [data,setData]=useState<RewardCenter|null>(null),[loading,setLoading]=useState(false),[message,setMessage]=useState(""),[demoDay,setDemoDay]=useState(8),[page,setPage]=useState(0);
  async function load(day=demoDay){setLoading(true);setMessage("");try{const r=await fetch("/api/ark60?action=reward_center&demo_day="+day,{credentials:"same-origin",cache:"no-store"});const j=await r.json();if(!r.ok)throw new Error(j.detail||"Could not load rewards.");setData(j);onBalance(Number(j.balance)||0);setPage(Math.floor(((j.claimed_today?j.claimed_days:j.next_day)-1)/7))}catch(e){setMessage(e instanceof Error?e.message:"Could not load rewards.")}finally{setLoading(false)}}
  useEffect(()=>{if(open)void load()},[open]);
@@ -40,22 +43,23 @@ export function RewardModal({open,onClose,onBalance,onStyle}:{open:boolean;onClo
  if(!open)return null;
  const active=data?.claimed_today?Math.max(1,data.claimed_days):data?.next_day||1;
  const gifts=(data?.catalog||[]).slice(page*7,page*7+7);
- return <div className="reward-backdrop" role="dialog" aria-modal="true" aria-label="Daily reward"><section className="reward-modal reward-modal-extended">
+ return <div className="reward-backdrop" role="dialog" aria-modal="true" aria-label="Daily reward"><section ref={modalRef} className="reward-modal reward-modal-extended">
   <button className="reward-close" onClick={onClose} aria-label="Close reward"><X size={20}/></button>
-  <WorkspaceArt name="reward-chest" className="reward-modal-chest"/><h2>A little reward, every day</h2><p>Coins, scenic themes, avatars and milestones. Your collection keeps growing.</p>
+  <WorkspaceArt name="reward-chest" className="reward-modal-chest"/><h2>Daily reward</h2><p>Claim today’s reward. View your styles and avatars in Profile → Appearance.</p>
   {data?.preview&&<div className="reward-demo-controls"><span><b>Rustam · Try demo</b><small>Simulated claims · real coin balance stays unchanged</small></span><label>Reward day<select value={demoDay} disabled={loading} onChange={e=>{const n=Number(e.target.value);setDemoDay(n);void load(n)}}>{[8,9,10,11,12,13,14,21,28,60].map(n=><option key={n} value={n}>Day {n}</option>)}</select></label><button disabled={loading} onClick={()=>void load(demoDay)}>Reset demo</button></div>}
   <div className="reward-progress-line"><b>{data?.claimed_days||0} rewards collected</b><span>Days {page*7+1}–{Math.min(60,page*7+7)}</span></div>
   <div className="reward-week">{gifts.map(g=><div key={g.day} className={"reward-day "+(g.day===active?"active ":"")+(g.day<=(data?.claimed_days||0)?"claimed":"")}><small>DAY {g.day}</small>{g.kind==="coins"?<span className="reward-mini-coin"><Star size={11} fill="currentColor"/></span>:g.kind==="theme"?<img className="reward-gift-thumb" src={'/images/rewards/'+(g.day===13?'night-sky':'dawn')+'.png'} alt={g.day===13?'Night Sky reward':'Theme and avatar reward'}/>:g.kind==="avatar"?<img className="reward-gift-avatar" src="/images/rewards/girl.png" alt="Avatar reward"/>:<Award size={23}/>}<b>{g.kind==="coins"?"+"+g.amount:g.kind==="decoration"?"Decor":g.kind[0].toUpperCase()+g.kind.slice(1)}</b>{g.day<=(data?.claimed_days||0)&&<Check size={13}/>}</div>)}</div>
   <div className="reward-page-nav"><button disabled={page===0} onClick={()=>setPage(p=>p-1)}>Previous</button><span>Rewards continue through day 60</span><button disabled={page>=8} onClick={()=>setPage(p=>p+1)}>Next</button></div>
   <button className="reward-claim" disabled={loading||!data||!!data.claimed_today} onClick={claim}>{loading?"Loading…":data?.claimed_today?"Today's reward claimed":"Claim "+(data?.next_reward.label||"reward")}</button>
   {message&&<div className="reward-message" role="status">{message}</div>}
-  {data&&<StyleCollection state={data.cosmetics} preview={data.preview} onApplied={style=>{setData(d=>d?{...d,cosmetics:style}:d);onStyle(style)}}/>}
-  <div className="reward-history-head"><span>Balance: <b>{data?.balance??0}</b> <Coins size={13}/></span><b>Coin history</b></div><div className="reward-history">{!data?.history?.length&&<p>Complete a task to start your coin history.</p>}{(data?.history||[]).slice(0,12).map(e=><div key={e.id}><span><b>{moduleLabel(e.module)}</b><small>Day {e.day_number} · {e.kind.replaceAll("_"," ")}</small></span><strong>+{e.amount}</strong></div>)}</div>
+  {data&&onOpenCollection&&<button className="reward-collection-link" onClick={onOpenCollection}>Open my collection →</button>}
+  <div className="reward-history-head"><span>Balance: <b>{data?.balance??0}</b> <Coins size={13}/></span><b>Coin history</b></div><div className="reward-history">{!data?.history?.length&&<p>Complete a task to start your coin history.</p>}{(data?.history||[]).slice(0,5).map(e=><div key={e.id}><span><b>{moduleLabel(e.module)}</b><small>Day {e.day_number} · {e.kind.replaceAll("_"," ")}</small></span><strong>+{e.amount}</strong></div>)}</div>
  </section></div>;
 }
 
 export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:string;cosmetics?:CosmeticState;preview?:boolean}){
  const [rows,setRows]=useState<LeaderRow[]>([]),[period,setPeriod]=useState<LeaderPeriod>("week"),[loading,setLoading]=useState(true),[message,setMessage]=useState("");
+ const [periodStart,setPeriodStart]=useState<string|null>(null);
 
  useEffect(()=>{
   let live=true;
@@ -66,7 +70,7 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
     const r=await fetch("/api/ark60?action=leaderboard&period="+period,{credentials:"same-origin",cache:"no-store"});
     const j=await r.json();
     if(!r.ok)throw new Error(j.detail||"Could not load leaderboard.");
-    if(live){setRows(j.leaderboard||[]);setMessage("")}
+    if(live){setRows(j.leaderboard||[]);setPeriodStart(j.period_start||null);setMessage("")}
    }catch(e){
     if(live)setMessage(e instanceof Error?e.message:"Could not load leaderboard.");
    }finally{
@@ -83,18 +87,21 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
 
  const sorted=useMemo(()=>rows.map(row=>row.student_id===studentId?{...row,cosmetics:cosmetics||row.cosmetics}:row).sort((a,b)=>b.coins-a.coins||b.active_seconds-a.active_seconds||a.full_name.localeCompare(b.full_name)),[rows,studentId,cosmetics]);
  const top=sorted.slice(0,3);
- const table=sorted.slice(3,10);
+ const table=sorted.slice(3);
+ const online=sorted.filter(row=>row.status==="online");
  const current=sorted.find(row=>row.student_id===studentId);
  const initials=(row:LeaderRow)=>row.full_name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()).join("")||"ST";
  const statusLabel=(status:LeaderStatus)=>status==="online"?"Online":status==="idle"?"Idle":"Offline";
  const periodLabel=period==="week"?"This week":period==="30d"?"Last 30 days":"All time";
 
  return <section className="hub-panel leaderboard-v2">
-  <div className="hub-heading lb-heading"><div><small>LIVE COURSE DATA</small><h1>Leaderboard</h1><p>Rankings are based on earned coins and active study time.</p></div><WorkspaceArt name="wolf-trophy" className="hub-mascot"/></div>
+  <div className="hub-heading lb-heading"><div><small>LIVE COURSE DATA</small><h1>Leaderboard</h1><p>Ranked by coins. Equal coins share a rank; study time orders tied students.</p></div><WorkspaceArt name="wolf-trophy" className="hub-mascot"/></div>
 
   {preview&&<article className="demo-leaderboard-card"><RewardAvatar photo={cosmetics?.photo_url} avatar={cosmetics?.avatar} initials="RU"/><div><b>Rustam <ProBadge active={cosmetics?.pro}/></b><small>Preview account · Not ranked</small></div><span className="demo-label">TRY DEMO</span></article>}
   <div className="lb-board">
-   {sorted.some(row=>row.status==="online")&&<div className="lb-live-strip"><span><i/>{sorted.filter(row=>row.status==="online").length} student{sorted.filter(row=>row.status==="online").length===1?"":"s"} online now</span><div>{sorted.filter(row=>row.status==="online").slice(0,3).map(row=><b key={row.student_id}>{row.full_name}</b>)}</div></div>}
+   {sorted.some(row=>row.status==="online")&&<div className="lb-live-strip"><span><i/>{sorted.filter(row=>row.status==="online").length} student{sorted.filter(row=>row.status==="online").length===1?"":"s"} online now</span><div>{sorted.filter(row=>row.status==="online").slice(0,3).map(row=><b key={row.student_id}>{row.full_name}</b>)}{online.length>3&&<b>+{online.length-3} more</b>}</div></div>}
+   {periodStart&&<p className="lb-period-range">From {new Date(periodStart+"T00:00:00Z").toLocaleDateString("en-GB",{timeZone:"UTC",day:"numeric",month:"short",year:"numeric"})} · Uzbekistan time</p>}
+   {current&&<p className="lb-your-rank">Your rank: <b>#{current.rank}</b> · {periodLabel}</p>}
    <div className="lb-period-tabs" aria-label="Leaderboard period">
     <button className={period==="week"?"active":""} onClick={()=>setPeriod("week")}>This week</button>
     <button className={period==="30d"?"active":""} onClick={()=>setPeriod("30d")}>Last 30 days</button>
@@ -125,7 +132,7 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
     </div>)}
    </div>}
 
-   {current&&sorted.findIndex(row=>row.student_id===studentId)>=10&&<div className="lb-current-row"><span>Your rank</span><b>#{current.rank}</b><div><RewardAvatar className="lb-mini-avatar" photo={current.cosmetics?.photo_url} avatar={current.cosmetics?.avatar} initials={initials(current)}/><span><strong className="identity-name-row"><span className="identity-name" title={current.full_name}>{current.full_name}</span><ProBadge active={current.cosmetics?.pro}/></strong><small>@{current.username}</small></span></div><span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span></div>}
+
   </>:<div className="hub-empty"><Trophy size={28}/><b>No leaderboard activity in this period yet.</b><p>Earn coins or record active study time to appear here.</p></div>}
   </div>
  </section>;
@@ -134,26 +141,32 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
 export function ProgressPanel({stats,completedDays}:{stats:HubStats;completedDays:number}){
  const modules=["reading","listening","writing","article","vocabulary","speaking"];
  const icons:Record<string,typeof BookOpen>={reading:BookOpen,listening:Headphones,writing:PenLine,article:Newspaper,vocabulary:NotebookPen,speaking:Mic};
- const total=stats.completed.length,required=Object.values(stats.required_by_day||{}).reduce((n,x)=>n+x.length,0);
- return <section className="hub-panel progress-v2"><div className="hub-heading"><div><small>REAL ACTIVITY</small><h1>Your progress</h1><p>Only saved challenge activity is counted here.</p></div><WorkspaceArt name="wolf-progress" className="hub-mascot"/></div>
+ const requirements=stats.required_by_day||{};
+ const completion=modules.map(module=>moduleCompletion(module,requirements,stats.completed));
+ const pending=Object.entries(requirements).flatMap(([day,modules])=>modules.filter(module=>!stats.completed.some(item=>item.day_number===Number(day)&&item.module===module)).map(module=>({day:Number(day),module})));
+ const total=completion.reduce((n,x)=>n+x.done,0),required=completion.reduce((n,x)=>n+x.total,0);
+ return <section className="hub-panel progress-v2"><div className="hub-heading"><div><small>REAL ACTIVITY</small><h1>Your progress</h1><p>Completion of published tasks · Study time is shown separately.</p></div><WorkspaceArt name="wolf-progress" className="hub-mascot"/></div>
   <div className="hub-kpis"><article><span>Completed days</span><b>{completedDays}<small>/60</small></b><WorkspaceArt name="calendar"/></article><article><span>Completed tasks</span><b>{total}<small>/{required||"—"}</small></b><WorkspaceArt name="checklist"/></article><article><span>Total study time</span><b>{fmt(stats.active_seconds)}</b><WorkspaceArt name="clock"/></article><article><span>Coins earned</span><b>{stats.coins}</b><WorkspaceArt name="coins"/></article></div>
-  <div className="module-progress-list">{modules.map(m=>{const Icon=icons[m];const count=stats.completed.filter(x=>x.module===m).length;const seconds=Number(stats.by_module?.[m]||0);return <div key={m}><span className="module-progress-name"><Icon size={24} strokeWidth={1.8} aria-hidden="true"/>{moduleLabel(m)}</span><div className="module-progress-bar"><i style={{width:Math.min(100,Math.max(count?8:0,(seconds/3600)*12))+"%"}}/></div><b>{count} tasks · {fmt(seconds)}</b></div>})}</div>
+  <div className="module-progress-list">{modules.map(m=>{const Icon=icons[m];const progress=moduleCompletion(m,requirements,stats.completed);const count=progress.done;const seconds=Number(stats.by_module?.[m]||0);return <div key={m}><span className="module-progress-name"><Icon size={24} strokeWidth={1.8} aria-hidden="true"/>{moduleLabel(m)}</span><div className="module-progress-bar" role="progressbar" aria-label={moduleLabel(m)+" completed tasks"} aria-valuenow={count} aria-valuemin={0} aria-valuemax={progress.total||1}><i style={{width:progress.percent+"%"}}/></div><b>{count}/{progress.total} tasks · {fmt(seconds)}</b></div>})}</div>
+  <p className="progress-time-note">Study times are rounded down to whole minutes in each row.</p>
+  {pending.length>0&&<div className="progress-pending"><h2>{pending.length} published tasks remaining</h2><div>{pending.slice(0,12).map(item=><a key={item.day+item.module} href={"/day/"+item.day}>Day {item.day} · {moduleLabel(item.module)}</a>)}</div>{pending.length>12&&<p>Open the 60-Day Plan to see all remaining tasks.</p>}</div>}
  </section>;
 }
 
-export function ProfilePanel({stats,onStudent,onCoins,onLogout}:{stats:HubStats;onStudent:(s:Student)=>void;onCoins:(n:number)=>void;onLogout:()=>void}){
+export function ProfilePanel({stats,onStudent,onCoins,onLogout,initialTab="details",collectionRequest=0}:{collectionRequest?:number;initialTab?:"details"|"appearance";stats:HubStats;onStudent:(s:Student)=>void;onCoins:(n:number)=>void;onLogout:()=>void}){
  const s=stats.student;
- const [profileTab,setProfileTab]=useState<"details"|"appearance">("details");
+ const [profileTab,setProfileTab]=useState<"details"|"appearance">(initialTab);
  const [form,setForm]=useState({first_name:s.first_name||"",last_name:s.last_name||"",date_of_birth:s.date_of_birth||"",gender:s.gender||"",english_level:s.english_level||"",target_band:String(s.target_band||""),exam_date:s.exam_date||""});
+ useEffect(()=>setProfileTab(initialTab),[initialTab,collectionRequest]);
  const [saving,setSaving]=useState(false),[message,setMessage]=useState("");
  async function save(){
   setSaving(true);setMessage("");
   try{const r=await fetch("/api/ark60",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"update_profile",...form,target_band:Number(form.target_band)})});const j=await r.json();if(!r.ok)throw new Error(j.detail||"Could not save profile.");onStudent(j.student);if(j.profile_bonus_awarded){onCoins(stats.coins+1);setMessage("Changes saved · +1 coin earned.")}else setMessage("Changes saved.")}catch(e){setMessage(e instanceof Error?e.message:"Could not save profile.")}finally{setSaving(false)}
  }
- async function logoutAll(){if(!window.confirm("Sign out this account on every device?"))return;try{await fetch("/api/ark60",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout_all"})})}finally{onLogout()}}
- const initials=(s.first_name[0]+s.last_name[0]).toUpperCase();
- return <section className="profile-page"><div className={"profile-hero-card "+(s.cosmetics?.theme?"has-reward-theme":"")} style={cosmeticCSS(s.cosmetics)}>{s.cosmetics?.theme&&<div className="profile-scene-cover">{s.cosmetics?.unlocked?.decorations&&<RewardDecoration theme={s.cosmetics.theme}/>}</div>}<RewardAvatar className="profile-big-avatar" photo={s.cosmetics?.photo_url} avatar={s.cosmetics?.avatar} initials={initials}/><div className="profile-main-copy"><h1 className="profile-identity-row"><span>{s.first_name} {s.last_name}</span> <ProBadge active={s.cosmetics?.pro}/> <ThemeMark theme={s.cosmetics?.theme}/></h1>{s.cosmetics?.badge&&<span className="reward-name-badge"><Award size={14}/>{s.cosmetics.badge.replace("day-","Day ")}</span>}<p>@{s.username} <i>{["rustam7","rustam_usmonov_4f42fb15"].includes(s.username)?"PRO · Owner":s.cosmetics?.pro?"PRO obunachi":"Student"}</i></p></div><div className="profile-summary"><div><span>TARGET BAND</span><b>{Number(s.target_band).toFixed(1)}</b></div><div><span>COINS EARNED</span><b>{stats.coins}</b></div><div><span>EXAM DATE</span><b>{s.exam_date||"Not set"}</b></div></div></div>
-  {s.cosmetics?.pro&&stats.membership?.challenge_until&&!["rustam7","rustam_usmonov_4f42fb15"].includes(s.username)&&<p className="profile-pro-expiry">PRO amal qiladi: {new Date(stats.membership.challenge_until).toLocaleDateString("uz-UZ",{timeZone:"Asia/Tashkent",day:"numeric",month:"long",year:"numeric"})} gacha</p>}
+ async function logoutAll(){if(!window.confirm("Sign out this account on every device?"))return;try{const response=await fetch("/api/ark60",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout_all"})});if(!response.ok)throw new Error("Could not sign out all devices. Please try again.");onLogout()}catch(error){setMessage(error instanceof Error?error.message:"Could not sign out all devices.")}}
+ const initials=((s.first_name[0]||"")+(s.last_name[0]||"")).toUpperCase();
+ return <section className="profile-page"><div className={"profile-hero-card "+(s.cosmetics?.theme?"has-reward-theme":"")} style={cosmeticCSS(s.cosmetics)}>{s.cosmetics?.theme&&<div className="profile-scene-cover">{s.cosmetics?.unlocked?.decorations&&<RewardDecoration theme={s.cosmetics.theme}/>}</div>}<RewardAvatar className="profile-big-avatar" photo={s.cosmetics?.photo_url} avatar={s.cosmetics?.avatar} initials={initials}/><div className="profile-main-copy"><h1 className="profile-identity-row"><span>{s.first_name} {s.last_name}</span> <ProBadge active={s.cosmetics?.pro}/> <ThemeMark theme={s.cosmetics?.theme}/></h1>{s.cosmetics?.badge&&<span className="reward-name-badge"><Award size={14}/>{s.cosmetics.badge.replace("day-","Reward day ")}</span>}<p>@{s.username} <i>{["rustam7","rustam_usmonov_4f42fb15"].includes(s.username)?"PRO · Owner":"Student"}</i></p></div><div className="profile-summary"><div><span>TARGET BAND</span><b>{Number(s.target_band).toFixed(1)}</b></div><div><span>COINS EARNED</span><b>{stats.coins}</b></div><div><span>EXAM DATE</span><b>{s.exam_date?formatUzDate(s.exam_date):"Not set"}</b></div></div></div>
+  {s.cosmetics?.pro&&stats.membership?.challenge_until&&!["rustam7","rustam_usmonov_4f42fb15"].includes(s.username)&&<p className="profile-pro-expiry">PRO amal qiladi: {formatUzDate(stats.membership.challenge_until)} gacha</p>}
   <ProfilePhoto pro={!!s.cosmetics?.pro} photo={s.cosmetics?.photo_url} onSaved={photo_url=>onStudent({...s,cosmetics:{...s.cosmetics,photo_url,photo_enabled:!!photo_url}})}/>
   <div className="profile-tabs" role="tablist" aria-label="Profile settings"><button role="tab" aria-selected={profileTab==="details"} onClick={()=>setProfileTab("details")}>Details</button><button role="tab" aria-selected={profileTab==="appearance"} onClick={()=>setProfileTab("appearance")}>Appearance</button></div>
   <div hidden={profileTab!=="appearance"} className="profile-appearance"><StyleCollection compact state={s.cosmetics||{}} preview={stats.preview} onApplied={cosmetics=>onStudent({...s,cosmetics})}/></div>

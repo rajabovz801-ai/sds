@@ -1,0 +1,130 @@
+/* Challenge workspace: constrain intrinsic grid widths, retain readable type. */
+.learning-shell {grid-template-columns:240px minmax(0,1fr)}
+.learning-shell .learning-sidebar {min-width:0;width:100%;padding:20px 12px 12px;overflow-x:hidden;height:100dvh}
+.learning-shell .learning-brand-minimal {min-height:0;padding:0;border:0;margin:0}
+.learning-shell .side-overline {font-size:12px;padding:0 10px;margin:4px 0 18px;color:var(--ark-ink)}
+.side-overline small {display:block;font-size:9px;letter-spacing:.12em;color:var(--ark-muted);margin-top:5px}
+.learning-shell .learning-nav {min-width:0}
+.learning-shell .learning-nav button {min-height:42px;padding:10px;font-size:13px}
+.learning-shell .sidebar-bottom {margin-top:auto;min-width:0;width:100%;grid-template-columns:minmax(0,1fr);padding-top:24px}
+.learning-shell .sidebar-bottom>button {width:100%;min-width:0;max-width:100%;gap:8px;padding:10px!important}
+.learning-shell .sidebar-bottom>button>div {min-width:0;flex:1;overflow:hidden}
+.learning-shell .sidebar-bottom>button>svg {flex:none;width:12px}
+.learning-shell .sidebar-bottom .identity-name-row {flex-wrap:wrap;gap:3px 5px}
+.learning-shell .sidebar-bottom .identity-name {flex:1 1 100%;font-size:12px!important;max-width:100%}
+.learning-shell .sidebar-bottom small {font-size:11px!important;line-height:1.5;white-space:normal}
+.learning-shell .sidebar-chest {width:36px;height:36px;flex:none}
+.learning-shell .user-avatar {width:32px;height:32px;flex:none}
+.learning-shell .learning-topbar {height:58px;padding:0 24px}
+.learning-shell .learning-content {padding:24px;max-width:1440px;margin:0 auto;width:100%;min-width:0}
+.learning-shell .page-heading {margin-bottom:16px;min-height:100px}
+.learning-shell .hub-heading {padding:0 0 18px;min-height:115px;margin-bottom:16px;align-items:center}
+.learning-shell .hub-heading h1,.learning-shell .plan-heading h1 {font-family:inherit;font-size:30px;letter-spacing:-.035em;margin:6px 0}
+.learning-shell .hub-heading p,.learning-shell .plan-heading p {font-size:13px;line-height:1.6}
+.learning-shell .hub-mascot,.learning-shell .plan-mascot {width:110px;height:110px;object-fit:contain}
+.learning-shell .hub-panel {max-width:1100px;padding:0;margin:0 auto;background:transparent!important;border:0}
+.learning-shell .dashboard-heading {min-height:114px;padding:18px 20px}
+.learning-shell .dashboard-mascot {height:108px;width:140px;right:90px}
+.learning-shell .dashboard-heading h1 {font-size:30px}
+.learning-shell .dashboard-kpis .kpi-card {min-height:92px;padding:12px 16px}
+.learning-shell .task-action.completed {background:var(--ark-neutral)!important;color:var(--ark-ink)!important;border:1px solid var(--ark-border)!important;box-shadow:none}
+.learning-shell .study-layout {align-items:start;gap:16px}
+.learning-shell .calendar-panel {padding:16px;min-width:0}
+.learning-shell .panel-title-row {gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.learning-shell .calendar-panel h2 {font-family:inherit;font-size:20px}
+.learning-shell .cal-title-stack p {font-size:12px;line-height:1.5}
+.learning-shell .cal-cell {min-width:0;min-height:70px;padding:7px}
+.learning-shell .cal-cell>b {font-size:12px}
+.learning-shell .cal-upper {font-size:10px;gap:2px}
+.learning-shell .cal-count {font-size:9px;white-space:nowrap}
+.learning-shell .mock-label {font-size:9px}
+.learning-shell .calendar-legend {flex-wrap:wrap;gap:8px 12px;font-size:10px;line-height:1.5}
+.learning-shell .day-row {flex-wrap:wrap;gap:8px}
+.learning-shell .day-row h2 {font-family:inherit;font-size:25px}
+.learning-shell .day-inline-date {font-size:12px}
+.learning-shell .detail-panel {padding:16px;min-width:0}
+.learning-shell .detail-item {min-height:64px;padding:10px;gap:9px}
+.learning-shell .detail-item .task-icon {width:35px;height:35px;flex:none}
+.learning-shell .detail-item .task-copy strong {font-size:13px!important;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.learning-shell .detail-item .task-copy small {font-size:11px!important;line-height:1.5}
+.learning-shell .detail-item .task-action {font-size:12px!important;padding:8px 10px;min-height:36px;flex:none}
+.learning-shell .hub-kpis {gap:10px;margin-bottom:12px}
+.learning-shell .hub-kpis article {min-width:0;padding:14px;min-height:90px}
+.learning-shell .hub-kpis article>img {width:42px;height:42px;right:12px;top:22px}
+.learning-shell .hub-kpis b {font-family:inherit;font-size:25px;margin-top:10px}
+.learning-shell .hub-kpis span {font-size:12px}
+.learning-shell .module-progress-list>div {padding:14px;gap:14px}
+.learning-shell .module-progress-name {font-size:13px;min-width:120px}
+.learning-shell .module-progress-list>div>b {font-size:11px;min-width:150px;text-align:right}
+.learning-shell .lb-board {margin-top:0}
+.learning-shell .lb-podium {gap:12px;padding:16px}
+.learning-shell .lb-board .lb-podium-card,.learning-shell .lb-board .lb-podium-card.rank-1 {padding:12px;min-height:0;border-radius:12px}
+.learning-shell .lb-award-row {min-height:94px}
+.learning-shell .lb-crown,.learning-shell .lb-crown-space {height:20px;width:24px}
+.learning-shell .lb-board .lb-podium-card .lb-avatar {height:48px;width:48px}
+.learning-shell .lb-rank-medal {height:28px;width:28px}
+.learning-shell .lb-podium-metrics {margin-top:10px;padding-top:9px}
+.learning-shell .lb-live-strip {flex-wrap:wrap;gap:8px;padding:10px 14px}
+.learning-shell .lb-live-strip>div {display:flex;flex-wrap:wrap;gap:10px;font-size:11px}
+.learning-shell .weekly-chart-wrap {max-width:900px;margin:8px auto 0}
+.learning-shell .weekly-chart {max-height:none;height:auto;max-width:100%;aspect-ratio:720/235}
+.learning-shell .weekly-metrics {margin-top:12px}
+.learning-shell .weekly-growth {padding:18px}
+.learning-shell .profile-page {max-width:1000px}
+html body .learning-shell .profile-hero-card {padding:16px;gap:10px 14px;border-radius:16px}
+html body .learning-shell .profile-scene-cover {height:85px;margin:-16px -16px 0}
+html body .learning-shell .profile-hero-card .profile-big-avatar {width:58px;height:58px;margin-top:0;border-radius:50%}
+html body .learning-shell .profile-main-copy h1 {font-family:inherit;font-size:23px;line-height:1.3}
+html body .learning-shell .profile-summary>div {padding:9px 12px;border-radius:10px}
+html body .learning-shell .profile-summary b {font-family:inherit;font-size:18px}
+.learning-shell .profile-photo-card {padding:12px 16px;margin:12px 0;border-radius:12px;gap:10px;background:var(--ark-panel);border-color:var(--ark-border)}
+.learning-shell .profile-photo-card .profile-eyebrow {display:none}
+.learning-shell .profile-photo-card h3 {font-size:14px;margin:0}
+.learning-shell .profile-photo-card p {font-size:11px;margin:3px 0}
+.learning-shell .profile-photo-actions button {padding:9px 12px;font-size:12px}
+.learning-shell .profile-tabs {margin:14px 0 10px;padding-bottom:8px}
+html body .learning-shell .profile-fields>label {padding:10px;gap:6px}
+html body .learning-shell .profile-fields input,html body .learning-shell .profile-fields select {height:38px;font-size:13px}
+.learning-shell .reward-backdrop {padding:16px;overscroll-behavior:contain}
+.learning-shell .reward-modal-extended {width:min(620px,100%);max-height:calc(100dvh - 32px);padding:22px;overscroll-behavior:contain;background:var(--ark-panel);color:var(--ark-ink)}
+.learning-shell .reward-modal-chest {width:48px;height:40px;margin:0 auto 8px}
+.learning-shell .reward-modal-extended>h2 {font-family:inherit;font-size:23px;margin:0}
+.learning-shell .reward-modal-extended>p {font-size:12px;margin:8px auto 16px;line-height:1.5}
+.learning-shell .reward-modal-extended .reward-day {min-height:88px;padding:8px 3px;gap:6px}
+.learning-shell .reward-progress-line {font-size:11px}
+.learning-shell .reward-page-nav {margin:8px 0}
+.learning-shell .reward-claim {margin-top:12px;min-height:40px;padding:10px;font-size:12px}
+.reward-collection-link {display:block;margin:12px auto;background:transparent;border:0;color:var(--ark-primary);cursor:pointer;font:inherit;font-size:12px;padding:6px}
+.learning-shell .reward-history {max-height:145px;overflow:auto}
+.learning-shell .reward-history>div {padding:8px 0}
+.learning-shell .reward-history-head {margin-top:12px}
+.learning-shell .bill-page {max-width:1120px;margin:0 auto;padding:0}
+.learning-shell .bill-summary-card>div>span {display:block!important;font-size:11px;line-height:1.5;color:var(--ark-muted)}
+.learning-shell .bill-plans {grid-template-columns:repeat(2,minmax(0,1fr))}
+.learning-shell .bill-plan {padding:14px}
+.learning-shell .bill-plan .bill-price {font-size:23px}
+.learning-shell .bill-box {padding:16px}
+.learning-shell .bill-methods button {white-space:normal}
+@media(max-width:1000px){.learning-shell{grid-template-columns:215px minmax(0,1fr)}.learning-shell .learning-content{padding:18px}.learning-shell .study-layout{grid-template-columns:1fr}.learning-shell .dashboard-mascot{display:none}.learning-shell .hub-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:710px){.learning-shell{grid-template-columns:minmax(0,1fr)}.learning-shell .learning-sidebar{width:min(280px,86vw)}.learning-shell .learning-content{padding:16px 12px}.learning-shell .learning-topbar{padding:0 12px}.learning-shell .hub-heading{min-height:86px}.learning-shell .hub-mascot,.learning-shell .plan-mascot{width:76px;height:76px}.learning-shell .hub-heading h1,.learning-shell .plan-heading h1{font-size:25px}.learning-shell .profile-details-grid{grid-template-columns:1fr}.learning-shell .profile-main-copy h1{font-size:20px!important}.learning-shell .profile-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.learning-shell .profile-summary span{font-size:9px}.learning-shell .profile-summary b{font-size:14px!important;overflow-wrap:anywhere}.learning-shell .profile-account-card{flex-wrap:wrap}.learning-shell .module-progress-list>div{flex-wrap:wrap;gap:9px;display:flex}.learning-shell .module-progress-bar{flex:1;min-width:70px}.learning-shell .module-progress-list>div>b{width:100%;text-align:left}.learning-shell .cal-cell{padding:5px 3px;min-height:65px}.learning-shell .cal-cell>b{font-size:10px}.learning-shell .cal-upper{font-size:8px}.learning-shell .mock-label{font-size:8px}.learning-shell .bill-plans,.learning-shell .bill-pay-grid{grid-template-columns:1fr}.learning-shell .reward-modal-extended{padding:18px 12px}.learning-shell .reward-modal-extended .reward-week{grid-template-columns:repeat(7,minmax(0,1fr));overflow:visible;gap:4px}.learning-shell .reward-modal-extended .reward-day{min-height:78px;gap:5px}.learning-shell .reward-day small{font-size:8px!important}.learning-shell .reward-day b{font-size:10px!important}.learning-shell .reward-gift-thumb{width:28px}.learning-shell .reward-page-nav span{font-size:9px}.learning-shell .reward-history{max-height:110px}.learning-shell .typewriter-title{white-space:normal}.learning-shell .today-task-list{grid-template-columns:1fr}}
+.lb-your-rank,.lb-period-range {margin:0;padding:8px 14px;font-size:12px;color:var(--ark-muted)}
+.progress-time-note {font-size:11px;color:var(--ark-muted);margin:10px 0}
+.progress-pending {padding:16px;border:1px solid var(--ark-border);background:var(--ark-panel);border-radius:12px;margin-top:16px}
+.progress-pending h2 {font-family:inherit;font-size:15px;margin:0 0 12px}
+.progress-pending>div {display:flex;flex-wrap:wrap;gap:8px}
+.progress-pending a {font-size:12px;padding:8px 10px;border:1px solid var(--ark-border);border-radius:8px;color:var(--ark-primary)}
+.progress-pending p {font-size:12px;color:var(--ark-muted)}
+.learning-shell .hub-kpis article>.workspace-art {width:40px;height:44px}
+.learning-shell .reward-modal-extended .reward-day {min-width:0}
+.learning-shell .rank-medal {width:28px;height:28px}
+@media(max-width:710px){.learning-shell .cal-upper{font-size:9px!important}.learning-shell .cal-cell>b{font-size:11px!important}.learning-shell .mock-label{font-size:9px!important}.learning-shell .calendar-legend>span{font-size:11px!important}.learning-shell .weekday-row span{font-size:10px!important}}
+.learning-shell .detail-list {min-width:0;grid-template-columns:minmax(0,1fr)}
+.learning-shell .detail-item {min-width:0;max-width:100%}
+@media(max-width:480px){.learning-shell .detail-item{display:grid;grid-template-columns:35px minmax(0,1fr);gap:8px}.learning-shell .detail-item .task-copy{min-width:0}.learning-shell .detail-item .task-action{grid-column:2;justify-self:start}.learning-shell .detail-item .task-coin-badge{white-space:normal}}
+.learning-shell .bill-page.bill-compact .bill-plans {grid-template-columns:repeat(2,minmax(0,1fr))}
+.learning-shell .module-progress-list>div {grid-template-columns:130px minmax(60px,1fr) 180px}
+.learning-shell .module-progress-list>div>b {white-space:nowrap;font-size:12px!important}
+.learning-shell .detail-btn:disabled {background:var(--ark-neutral)!important;color:var(--ark-muted)!important;border-color:var(--ark-border)!important;box-shadow:none;cursor:not-allowed}
+.learning-shell .mock-label {font-size:10px!important;line-height:1.35}
+.learning-shell .mock-label>span {display:block;font-size:9px;opacity:.8}
+@media(max-width:710px){.learning-shell .bill-page.bill-compact .bill-plans {grid-template-columns:minmax(0,1fr)}.learning-shell .module-progress-list>div>b{white-space:normal}.learning-shell .mock-label{font-size:8px!important}.learning-shell .mock-label>span{font-size:8px}}

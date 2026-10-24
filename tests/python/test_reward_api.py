@@ -32,6 +32,7 @@ class RewardAPITests(unittest.TestCase):
         if endpoint=='rpc/ark60_student_leaderboard_period':
             return [{'student_id':'other-student','full_name':'Other Student','username':'other','coins':40,'active_seconds':120}]
         if endpoint=='ark60_presence': return []
+        if endpoint=='ark60_billing_access': return []
         if endpoint=='ark60_cosmetics':
             if params and params.get('select','').startswith('student_id'):
                 return [{'student_id':'other-student','theme':'forest','avatar':'girl','badge':None}]
