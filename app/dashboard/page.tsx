@@ -1,4 +1,6 @@
 "use client";
+import {canResume} from "../../lib/challenge-workspace";
+import "./workspace-compact.css";
 import {challengeDayUnlocked} from "../../lib/ark60-day-access";
 import WeeklyGrowth from "../components/weekly-growth";
 import LoadingIndicator from "../components/loading-indicator";
@@ -92,6 +94,8 @@ export default function Dashboard(){
  const [retryCount,setRetryCount]=useState(0);
  const [resumeLocation,setResumeLocation]=useState<ChallengeResume|null>(null);
  const [rewardOpen,setRewardOpen]=useState(false);
+ const [openAppearance,setOpenAppearance]=useState(false);
+ const [collectionRequest,setCollectionRequest]=useState(0);
  const [theme,setTheme]=useState<"light"|"dark">("light");
  const [themeReady,setThemeReady]=useState(false);
  const [typedWelcome,setTypedWelcome]=useState("");
@@ -107,7 +111,10 @@ export default function Dashboard(){
     if(res.status===401){window.location.replace("/");return}
     if(!res.ok)throw new Error("Could not load your challenge data.");
     const obj=await res.json();
-    if(mounted){setStats(obj);setLoadError("")}
+    if(mounted){
+     try{const owner=localStorage.getItem("ark60-resume-owner");if(owner!==obj.student.id){localStorage.removeItem(CHALLENGE_RESUME_STORAGE_KEY);setResumeLocation(null)}localStorage.setItem("ark60-resume-owner",obj.student.id)}catch{}
+     setStats(obj);setLoadError("")
+    }
    }catch(e){
     if(mounted)setLoadError(e instanceof Error?e.message:"Could not load your challenge data.");
    }finally{
@@ -143,7 +150,7 @@ export default function Dashboard(){
 
  useEffect(()=>{
   const d=DAYS.find(x=>x.date.toISOString().slice(0,10)===today);
-  if(d)setSelected(d.n);
+  if(d){setSelected(d.n);setMonth(d.date.getUTCMonth()===10?"nov":"oct")}
  },[today]);
 
  useEffect(()=>{
@@ -184,7 +191,7 @@ export default function Dashboard(){
  const initials=stats?(stats.student.first_name[0]+stats.student.last_name[0]).toUpperCase():"AR";
  const currentDay=DAYS.find(x=>x.date.toISOString().slice(0,10)===today)?.n||0;
  const preview=Boolean(stats?.preview);
- const planDayNumber=currentDay||1;
+ const planDayNumber=currentDay||(today>"2026-11-29"?60:1);
  const planDay=DAYS[planDayNumber-1];
  const planRequired=stats?.required_by_day?.[String(planDayNumber)]||[];
  const planModules=modulesFor(planDay).filter(x=>planRequired.includes(x.name.toLowerCase()));
@@ -217,11 +224,11 @@ export default function Dashboard(){
  return <div className={"learning-shell "+(theme==="dark"?"theme-dark":"theme-light")}><StudentPresence area="Dashboard"/>
   <aside className={"learning-sidebar "+(sidebar?"open":"")}>
    <div className="learning-brand learning-brand-minimal"><button className="mobile-close" aria-label="Close menu" onClick={()=>setSidebar(false)}><X size={18}/></button></div>
-   <div className="side-overline">WORKSPACE</div>
-   <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
+   <div className="side-overline">ARK EDUCATION <small>IELTS CHALLENGE</small></div>
+   <nav className="learning-nav">{navigation.map(({name,icon:Icon})=><button key={name} aria-current={view===name?"page":undefined} className={view===name?"active":""} onClick={()=>{setView(name);setSidebar(false)}}><Icon size={18} strokeWidth={1.85}/><span>{name}</span>{view===name&&<ChevronRight size={14}/>}</button>)}</nav>
    <div className="sidebar-bottom">
-    <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><WorkspaceArt name="reward-chest" className="sidebar-chest"/><div><b>Daily reward</b><small>Grow your reward collection</small></div><ChevronRight size={14}/></button>
-    <button className="user-tile sidebar-profile-tile" onClick={()=>{setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" photo={stats?.student.cosmetics?.photo_url} avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><span className="identity-name-row"><b className="identity-name" title={stats?stats.student.first_name+" "+stats.student.last_name:"Student"}>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><ProBadge active={stats?.student.cosmetics?.pro}/></span><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
+    <button className="sidebar-reward-btn" onClick={()=>{setRewardOpen(true);setSidebar(false)}}><WorkspaceArt name="reward-chest" className="sidebar-chest"/><div><b>Daily reward</b><small>Open daily rewards</small></div><ChevronRight size={14}/></button>
+    <button aria-label="Profile and settings" className="user-tile sidebar-profile-tile" onClick={()=>{setOpenAppearance(false);setView("Profile");setSidebar(false)}}><RewardAvatar className="user-avatar" photo={stats?.student.cosmetics?.photo_url} avatar={stats?.student.cosmetics?.avatar} initials={initials}/><div><span className="identity-name-row"><b className="identity-name" title={stats?stats.student.first_name+" "+stats.student.last_name:"Student"}>{stats?stats.student.first_name+" "+stats.student.last_name:"Student"}</b><ProBadge active={stats?.student.cosmetics?.pro}/></span><small>{stats?"Target band · "+Number(stats.student.target_band).toFixed(1):"Profile"}</small></div><ChevronRight size={14}/></button>
    </div>
   </aside>
 
@@ -261,7 +268,7 @@ export default function Dashboard(){
       <div className="kpi-card kpi-highlight"><div><span>COINS</span><b>{stats?.coins??0}</b><small>Total coins earned</small></div><Coins size={23}/></div>
      </div>
 
-     {resumeLocation&&<section className="resume-card" aria-label="Continue your last lesson">
+     {resumeLocation&&stats&&progressUnlocked(resumeLocation.day,stats,today,clock)&&canResume(resumeLocation,stats.required_by_day,stats.completed)&&<section className="resume-card" aria-label="Continue your last lesson">
       <div className="resume-card__copy">
        <h2>Continue your last lesson</h2>
        <p>Day {String(resumeLocation.day).padStart(2,"0")} · {resumeLocation.area==="Day"?"Daily plan":resumeLocation.area}</p>
@@ -279,14 +286,14 @@ export default function Dashboard(){
         const done=stats?.completed.some(x=>x.day_number===planDayNumber&&x.module===name.toLowerCase());
         return <div key={name} className={"detail-item dashboard-task "+(done?"task-completed ":"")+(planLive?"task-ready":"task-pending")}>
          <span className={"task-icon "+tone}><Icon size={20} strokeWidth={1.8}/></span>
-         <div className="task-copy"><strong>{name}<span className="task-coin-badge"><Coins size={11}/> +1 coin</span></strong><small>{detail}</small></div>
+         <div className="task-copy"><strong>{name}<span className="task-coin-badge"><Coins size={11}/> Completion +1 coin</span></strong><small>{detail}</small></div>
          <button type="button" className={"task-action "+(planLive?"can-open":"future")+" "+(done?"completed":"")} disabled={!planLive&&!done&&!(stats?.membership?.enforced&&unlocked(planDay,today))} onClick={()=>{if(planLive||done)window.location.assign(moduleHref(planDayNumber,name));else setLockedDay(planDayNumber)}}>
-          {done?"Completed":planLive?"Start":"Locked"}{done?<CheckCircle2 size={15}/>:planLive?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
+          {done?"View result":planLive?"Start":"Locked"}{done?<CheckCircle2 size={15}/>:planLive?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
          </button>
         </div>;
        }):<div className="today-empty"><CalendarDays size={22}/><div><b>No published tasks yet</b><p>When materials are published, they will appear here automatically.</p></div></div>}
       </div>
-      <div className="today-panel-footer"><span>{planLive?"Your unfinished published tasks stay available after their original day.":stats?.membership?.enforced&&unlocked(planDay,today)?"Ushbu kun uchun faol paket kerak.":"This day unlocks on "+format(planDay.date,{day:"numeric",month:"long"})+"."}</span><button onClick={()=>{setSelected(planDayNumber);setView("60-Day Plan")}}>Open 60-Day Plan <ChevronRight size={14}/></button></div>
+      <div className="today-panel-footer"><span>{planLive?"Your unfinished published tasks stay available after their original day.":stats?.membership?.enforced&&unlocked(planDay,today)?"Ushbu kun uchun faol paket kerak.":unlocked(planDay,today)?"Complete earlier published tasks to unlock this day.":"This day unlocks on "+format(planDay.date,{day:"numeric",month:"long"})+"."}</span><button onClick={()=>{setSelected(planDayNumber);setView("60-Day Plan")}}>Open 60-Day Plan <ChevronRight size={14}/></button></div>
      </section>
      {stats&&<WeeklyGrowth pro={!!stats.student.cosmetics?.pro} onOpenPlan={()=>document.getElementById("dashboard-today-plan")?.scrollIntoView({behavior:"smooth",block:"start"})}/>}
     </>:view==="60-Day Plan"?<>
@@ -305,15 +312,19 @@ export default function Dashboard(){
         {visible.map(d=>{
          const required=stats?.required_by_day?.[String(d.n)]||[];
          const cells=modulesFor(d);
-         return <button key={d.n} className={"cal-cell "+(d.mock?"sunday ":"")+(selected===d.n?"selected ":"")+(today===d.date.toISOString().slice(0,10)?"is-today ":"")} onClick={()=>setSelected(d.n)} aria-label={"Day "+d.n+" "+format(d.date,{day:"numeric",month:"long"})+(d.mock?" Full Mock":"")}>
-          <span className="cal-upper"><span>Day {d.n}</span>{progressUnlocked(d.n,stats,today,clock)?<CheckCircle2 size={11}/>:<LockKeyhole size={11}/>}</span>
+         const doneCount=required.filter(module=>stats?.completed.some(x=>x.day_number===d.n&&x.module===module)).length;
+         const dayComplete=required.length>0&&doneCount===required.length;
+         const dateOpen=unlocked(d,today);
+         const canOpen=progressUnlocked(d.n,stats,today,clock);
+         return <button key={d.n} className={"cal-cell "+(d.mock?"sunday ":"")+(selected===d.n?"selected ":"")+(today===d.date.toISOString().slice(0,10)?"is-today ":"")} title={dayComplete?"Completed":canOpen?"Available · "+doneCount+"/"+required.length+" completed":dateOpen?"Access required":"Future day"} onClick={()=>setSelected(d.n)} aria-label={"Day "+d.n+" "+format(d.date,{day:"numeric",month:"long"})+(d.mock?" Full Mock":"")}>
+          <span className="cal-upper"><span>Day {d.n}</span>{dayComplete?<CheckCircle2 size={12} aria-label="All published tasks completed"/>:!dateOpen?<LockKeyhole size={11}/>:<span className="cal-count">{doneCount}/{required.length}</span>}</span>
           <b>{format(d.date,{day:"numeric",month:"short"})}</b>
-          <div className="cal-dots">{cells.map((m,i)=><i key={i} className={required.includes(m.name.toLowerCase())?m.tone:"muted"}/>)}</div>
-          {d.mock&&<small className="mock-label">FULL MOCK</small>}
+          <div className="cal-dots">{cells.map((m,i)=><i key={i} title={m.name+(required.includes(m.name.toLowerCase())?(stats?.completed.some(x=>x.day_number===d.n&&x.module===m.name.toLowerCase())?" · Completed":" · Published"):" · Not published")} className={required.includes(m.name.toLowerCase())?m.tone:"muted"}/>)}</div>
+          {d.mock&&<small className="mock-label"><span>Day {d.n}</span> FULL MOCK</small>}
          </button>;
         })}
        </div>
-       <div className="calendar-legend"><span><i className="dot-small purple"/>Published</span><span><i className="dot-small muted"/>Not published</span><span><Sun size={13}/> Sunday mock</span></div>
+       <div className="calendar-legend">{regular.map(m=><span key={m.name}><i className={"dot-small "+m.tone}/>{m.name}</span>)}<span><i className="dot-small muted"/>Not published</span><span><Sun size={13}/> Sunday mock</span></div>
       </section>
 
       <aside className="detail-panel" id="day-detail">
@@ -323,21 +334,21 @@ export default function Dashboard(){
         const done=stats?.completed.some(x=>x.day_number===chosen.n&&x.module===name.toLowerCase());
         return <div key={name} className={"detail-item "+(done?"task-completed ":"")+(ready?"task-ready":"task-pending")}>
          <span className={"task-icon "+tone}>{["Reading","Listening","Writing","Article","Vocabulary","Speaking"].includes(name)?<WorkspaceArt name={"module-"+name.toLowerCase()} className="module-task-art"/>:<Icon size={19} strokeWidth={1.8}/>}</span>
-         <div className="task-copy"><strong>{name}{moduleReady(name)&&<span className="task-coin-badge"><Coins size={11}/> +1 coin</span>}</strong><small>{moduleReady(name)?detail:"Material not published yet"}</small></div>
+         <div className="task-copy"><strong>{name}{moduleReady(name)&&<span className="task-coin-badge"><Coins size={11}/> Completion +1 coin</span>}</strong><small>{moduleReady(name)?detail:"Material not published yet"}</small></div>
          <button type="button" className={"task-action "+(ready?"can-open":"future")+" "+(done?"completed":"")} disabled={!ready&&!done&&!(stats?.membership?.enforced&&unlocked(chosen,today)&&moduleReady(name))} title={!live?(stats?.membership?.enforced&&unlocked(chosen,today)?"Faol paket kerak":"Available on "+format(chosen.date,{day:"numeric",month:"long"})):!moduleReady(name)?"Material not published yet":"Open "+name} onClick={()=>{if(ready||done)window.location.assign(moduleHref(chosen.n,name));else setLockedDay(chosen.n)}}>
-          {done?"Completed":ready?"Start":live?"Soon":"Locked"}{done?<CheckCircle2 size={15}/>:ready?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
+          {done?"View result":ready?"Start":live?"Soon":"Locked"}{done?<CheckCircle2 size={15}/>:ready?<ChevronRight size={15}/>:<LockKeyhole size={13}/>}
          </button>
         </div>;
        })}</div>
-       <div className="day-detail-footer"><div><span>DAY STATUS</span><b>{live?(chosenRequired.length?chosenRequired.length+" published modules":"Materials pending upload"):"Available on "+format(chosen.date,{day:"numeric",month:"short"})}</b></div><button disabled={!live&&!(stats?.membership?.enforced&&unlocked(chosen,today))} className="detail-btn" onClick={()=>{if(live)location.href="/day/"+chosen.n;else setLockedDay(chosen.n)}}>{live?"View study day":stats?.membership?.enforced&&unlocked(chosen,today)?"Paket tanlash":"Future day locked"}<ChevronRight size={16}/></button></div>
+       <div className="day-detail-footer"><div><span>DAY STATUS</span><b>{live?(chosenRequired.length?chosenRequired.length+" published modules":"Materials pending upload"):unlocked(chosen,today)?(stats?.membership?.enforced?"Active package required":"Earlier tasks incomplete"):"Available on "+format(chosen.date,{day:"numeric",month:"short"})}</b></div><button disabled={!live&&!(stats?.membership?.enforced&&unlocked(chosen,today))} className="detail-btn" onClick={()=>{if(live)location.href="/day/"+chosen.n;else setLockedDay(chosen.n)}}>{live?"View study day":stats?.membership?.enforced&&unlocked(chosen,today)?"Paket tanlash":unlocked(chosen,today)?"Complete earlier tasks":"Future day locked"}<ChevronRight size={16}/></button></div>
       </aside>
      </div>
 
      <section className="bottom-insights"><article><div className="insight-icon"><ShieldCheck size={20}/></div><div><b>Calendar-based access</b><p>Each day unlocks at 00:00 Uzbekistan time. Previous unfinished days remain available.</p></div></article><article><div className="insight-icon"><Clock3 size={20}/></div><div><b>Active study tracking</b><p>Only visible, recently active supported study time is recorded.</p></div></article></section>
-    </>:view==="Billing"?<BillingPanel/>:view==="Leaderboard"&&stats?<LeaderboardPanel studentId={stats.student.id} cosmetics={stats.student.cosmetics} preview={stats.preview}/>:view==="Progress"&&stats?<ProgressPanel stats={stats} completedDays={completedDays}/>:view==="Profile"&&stats?<ProfilePanel stats={stats} onStudent={student=>setStats(prev=>prev?{...prev,student:{...prev.student,...student}}:prev)} onCoins={coins=>setStats(prev=>prev?{...prev,coins}:prev)} onLogout={exit}/>:<section className="empty-view"><div className="empty-icon"><Bell size={31}/></div><h1>{view}</h1><p>This section is not available yet.</p><AnimatedBackButton onClick={()=>setView("Dashboard")} ariaLabel="Back to dashboard"/></section>}
+    </>:view==="Billing"?<BillingPanel/>:view==="Leaderboard"&&stats?<LeaderboardPanel studentId={stats.student.id} cosmetics={stats.student.cosmetics} preview={stats.preview}/>:view==="Progress"&&stats?<ProgressPanel stats={stats} completedDays={completedDays}/>:view==="Profile"&&stats?<ProfilePanel collectionRequest={collectionRequest} initialTab={openAppearance?"appearance":"details"} stats={stats} onStudent={student=>setStats(prev=>prev?{...prev,student:{...prev.student,...student}}:prev)} onCoins={coins=>setStats(prev=>prev?{...prev,coins}:prev)} onLogout={exit}/>:<section className="empty-view"><div className="empty-icon"><Bell size={31}/></div><h1>{view}</h1><p>This section is not available yet.</p><AnimatedBackButton onClick={()=>setView("Dashboard")} ariaLabel="Back to dashboard"/></section>}
    </main>
   </div>
 
-  <RewardModal onStyle={(cosmetics:CosmeticState)=>setStats(prev=>prev?{...prev,student:{...prev.student,cosmetics}}:prev)} open={rewardOpen} onClose={()=>setRewardOpen(false)} onBalance={coins=>setStats(prev=>prev?{...prev,coins}:prev)}/>
+  <RewardModal onStyle={(cosmetics:CosmeticState)=>setStats(prev=>prev?{...prev,student:{...prev.student,cosmetics}}:prev)} open={rewardOpen} onOpenCollection={()=>{setRewardOpen(false);setView("Profile");setOpenAppearance(true);setCollectionRequest(n=>n+1)}} onClose={()=>setRewardOpen(false)} onBalance={coins=>setStats(prev=>prev?{...prev,coins}:prev)}/>
  </div>;
 }

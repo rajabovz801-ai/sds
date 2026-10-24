@@ -1,4 +1,5 @@
 "use client";
+import {formatUzDate} from "../../lib/challenge-workspace";
 import type {Membership} from "@/lib/billing/access-policy";
 import { useEffect, useRef, useState } from "react";
 import { CalendarClock, CheckCircle2, ChevronRight, ClipboardCopy, CreditCard, Crown, ExternalLink, LoaderCircle, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
@@ -42,6 +43,7 @@ export default function BillingPanel() {
  const pendingOrder = data?.orders.find(item => item.status === "pending");
  const displayPlan = pendingOrder && BILLING_PLANS.some(plan=>plan.key===pendingOrder.plan_key) ? pendingOrder.plan_key : selected;
  const displayMethod = pendingOrder?.payment_method || method;
+ useEffect(()=>{if(!pendingOrder&&data&&!data.cards.some(card=>card.method===method)&&data.cards[0])setMethod(data.cards[0].method)},[data,pendingOrder,method]);
  const card = data?.cards.find(item => item.method === displayMethod);
  const pending = data?.orders.find(item => item.status === "pending");
  const selectedPlan = BILLING_PLANS.find(item => item.key === displayPlan)!;
@@ -87,9 +89,9 @@ export default function BillingPanel() {
    </BillingConfirmation>}
    <div className="bill-hero"><div><h1>Paketlar va to‘lovlar</h1><p>Challenge — tasdiqdan boshlab 7 kun. Yakshanba ham sanaladi, ammo Full MOCK alohida to‘lanadi.</p></div><button className="bill-small-btn" onClick={()=>void refresh()} disabled={loading}><RefreshCw size={15}/> Yangilash</button></div>
    <div className="bill-summary">
-     <div className="bill-summary-card"><span className="bill-icon blue"><Crown size={23}/></span><div><small>Joriy obuna</small><b>{active.length ? "Faol paket mavjud" : "Faol obuna yo‘q"}</b><span>{active.map(item => (BILLING_PLANS.find(p=>p.key===item.plan_key)?.name||"All Access (eski paket)")).filter(Boolean).join(" · ") || "Paketni tanlang"}</span></div></div>
-     <div className="bill-summary-card"><span className="bill-icon green"><CalendarClock size={23}/></span><div><small>Obuna muddati</small><b>{active.find(item=>item.expires_at)?.expires_at ? new Date(active.find(item=>item.expires_at)!.expires_at!).toLocaleDateString("uz-UZ",{timeZone:"Asia/Tashkent"}) : "—"}</b><span>7 kunlik Challenge paketlari</span></div></div>
-     <div className="bill-summary-card"><span className="bill-icon purple"><CreditCard size={23}/></span><div><small>So‘nggi to‘lov</small><b>{pending ? "Tasdiq kutilmoqda" : data?.orders[0] ? statusLabel(data.orders[0].status) : "Hali mavjud emas"}</b><span>To‘lov faqat admin tasdig‘idan keyin faollashadi</span></div></div>
+     <div className="bill-summary-card"><span className="bill-icon blue"><Crown size={23}/></span><div><small>Joriy obuna</small><b>{active.length ? active.map(item=>BILLING_PLANS.find(p=>p.key===item.plan_key)?.name||"All Access").join(" · ") : "Faol obuna yo‘q"}</b><span>{active.map(item => (BILLING_PLANS.find(p=>p.key===item.plan_key)?.name||"All Access (eski paket)")).filter(Boolean).join(" · ") || "Paketni tanlang"}</span></div></div>
+     <div className="bill-summary-card"><span className="bill-icon green"><CalendarClock size={23}/></span><div><small>Obuna muddati</small><b>{active.find(item=>item.expires_at)?.expires_at ? formatUzDate(active.find(item=>item.expires_at)!.expires_at!) : "—"}</b><span>7 kunlik Challenge paketlari</span></div></div>
+     <div className="bill-summary-card"><span className="bill-icon purple"><CreditCard size={23}/></span><div><small>So‘nggi to‘lov</small><b>{pending ? "Tasdiq kutilmoqda" : data?.orders[0] ? statusLabel(data.orders[0].status) : "Hali mavjud emas"}</b><span>{data?.orders[0]?formatSom(data.orders[0].price_uzs)+" · "+formatUzDate(data.orders[0].created_at):"To‘lov admin tasdig‘idan keyin faollashadi"}</span></div></div>
    </div>
    <div className="bill-plans" id="billing-plans">{BILLING_PLANS.map(plan => <button type="button" key={plan.key} disabled={!!pending} aria-pressed={displayPlan===plan.key} onClick={()=>setSelected(plan.key)} className={"bill-plan "+(displayPlan===plan.key?"chosen ":"")}>
       <div className="bill-plan-top"><img className="bill-art" src={"/images/billing/"+plan.key+".png"} alt="" width={80} height={80}/><div><strong>{plan.name}</strong><div className="bill-price">{formatSom(plan.price)}</div><small>{plan.period}</small></div></div>
@@ -100,7 +102,7 @@ export default function BillingPanel() {
     <section className="bill-box">
       <h2><Wallet size={20}/> To‘lov ma’lumotlari</h2>
       <p className="bill-muted">Karta raqamini ko‘chirib, tanlangan paket summasini o‘tkazing.</p>
-      <div className="bill-methods">{(["uzcard","humo"] as BillingMethod[]).map(item=><button key={item} type="button" disabled={!!pending||!data?.cards.some(card=>card.method===item)} className={displayMethod===item?"current":""} onClick={()=>setMethod(item)}>{item.toUpperCase()}</button>)}</div>
+      <div className="bill-methods">{(["uzcard","humo"] as BillingMethod[]).map(item=><button key={item} type="button" disabled={!!pending||!data?.cards.some(card=>card.method===item)} className={displayMethod===item?"current":""} onClick={()=>setMethod(item)}>{item.toUpperCase()}{data&&!data.cards.some(card=>card.method===item)&&" · mavjud emas"}</button>)}</div>
       {card ? <div className="bill-card"><small>{displayMethod.toUpperCase()} · Karta raqami</small><strong>{card.card_number.replace(/(\d{4})(?=\d)/g,"$1 ")}</strong>{card.card_holder !== "Ko‘rsatilmagan" && <span>Karta egasi: {card.card_holder}</span>}<button type="button" aria-label="Karta raqamini nusxalash" onClick={()=>void copy(card.card_number,"card")}><ClipboardCopy size={19}/>{copied==="card"?"Nusxalandi":"Nusxalash"}</button></div> : <div className="bill-not-set">Karta rekvizitlari hali admin tomonidan kiritilmagan. <a href="https://t.me/rustam_usmon0v" target="_blank" rel="noopener noreferrer">Adminga murojaat qiling.</a></div>}
       {selectedPlan.key!=="challenge"&&<p className="bill-muted">Full MOCK: {pending?.mock_on||(()=>{const start=Math.max(Date.now(),Date.parse(data?.membership.launch_at||"2026-10-19T00:00:00+05:00"));const d=new Date(start+5*3600000);d.setUTCDate(d.getUTCDate()+((7-d.getUTCDay())%7));return d.toISOString().slice(0,10)})()}</p>}
       <div className="bill-order-amount"><span>Tanlangan paket: <b>{selectedPlan.name}</b></span><strong>{formatSom(selectedPlan.price)}</strong></div>
@@ -122,7 +124,7 @@ export default function BillingPanel() {
       <p className="bill-caution">Chek faqat Telegramga yuboriladi. Paket admin tasdig‘idan so‘ng faollashadi.</p>
     </section>
    </div>
-   <section className="bill-box bill-history"><h2>To‘lovlar tarixi</h2>{!data?.orders?.length?<p className="bill-muted">{loading?"Yuklanmoqda...":"Hozircha to‘lov so‘rovlari yo‘q."}</p>:<div className="bill-table-wrap"><table><thead><tr><th>Paket</th><th>Summa</th><th>Sana</th><th>Holat</th></tr></thead><tbody>{data.orders.map(item=><tr key={item.id}><td>{(BILLING_PLANS.find(p=>p.key===item.plan_key)?.name||"All Access (eski paket)")}</td><td>{formatSom(item.price_uzs)}</td><td>{item.created_at?new Date(item.created_at).toLocaleDateString("uz-UZ",{timeZone:"Asia/Tashkent"}):"—"}</td><td><span className={"bill-status "+item.status}>{statusLabel(item.status)}</span>{item.admin_note&&<small className="bill-note">{item.admin_note}</small>}</td></tr>)}</tbody></table></div>}</section>
+   <section className="bill-box bill-history"><h2>To‘lovlar tarixi</h2>{!data?.orders?.length?<p className="bill-muted">{loading?"Yuklanmoqda...":"Hozircha to‘lov so‘rovlari yo‘q."}</p>:<div className="bill-table-wrap"><table><thead><tr><th>Paket</th><th>Summa</th><th>Sana</th><th>Holat</th></tr></thead><tbody>{data.orders.map(item=><tr key={item.id}><td>{(BILLING_PLANS.find(p=>p.key===item.plan_key)?.name||"All Access (eski paket)")}</td><td>{formatSom(item.price_uzs)}</td><td>{formatUzDate(item.created_at)}</td><td><span className={"bill-status "+item.status}>{statusLabel(item.status)}</span>{item.admin_note&&<small className="bill-note">{item.admin_note}</small>}</td></tr>)}</tbody></table></div>}</section>
   </section>;
 }
 
