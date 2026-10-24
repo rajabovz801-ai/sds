@@ -87,7 +87,8 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
 
  const sorted=useMemo(()=>rows.map(row=>row.student_id===studentId?{...row,cosmetics:cosmetics||row.cosmetics}:row).sort((a,b)=>b.coins-a.coins||b.active_seconds-a.active_seconds||a.full_name.localeCompare(b.full_name)),[rows,studentId,cosmetics]);
  const top=sorted.slice(0,3);
- const table=sorted.slice(3);
+ const table=sorted.slice(3,10);
+ const outsideTopTen=sorted.findIndex(row=>row.student_id===studentId)>=10;
  const online=sorted.filter(row=>row.status==="online");
  const current=sorted.find(row=>row.student_id===studentId);
  const initials=(row:LeaderRow)=>row.full_name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()).join("")||"ST";
@@ -132,7 +133,11 @@ export function LeaderboardPanel({studentId,cosmetics,preview=false}:{studentId:
     </div>)}
    </div>}
 
-
+   {current&&outsideTopTen&&<div className="lb-current-row" aria-label="Your leaderboard position">
+    <span>Your rank</span><b>#{current.rank}</b>
+    <div><RewardAvatar className="lb-mini-avatar" photo={current.cosmetics?.photo_url} avatar={current.cosmetics?.avatar} initials={initials(current)}/><span><strong className="identity-name-row"><span className="identity-name" title={current.full_name}>{current.full_name}</span><ProBadge active={current.cosmetics?.pro}/></strong><small>@{current.username} · You</small></span></div>
+    <span><Coins size={14}/>{current.coins}</span><span><Clock3 size={14}/>{fmt(current.active_seconds)}</span><span className={"lb-status "+current.status}><i/>{statusLabel(current.status)}</span>
+   </div>}
   </>:<div className="hub-empty"><Trophy size={28}/><b>No leaderboard activity in this period yet.</b><p>Earn coins or record active study time to appear here.</p></div>}
   </div>
  </section>;
