@@ -199,9 +199,9 @@ export default function Dashboard(){
  const planLive=progressUnlocked(planDayNumber,stats,today,clock);
 
  const chosen=DAYS[selected-1];
- const personalMockEntry=chosen.n===18&&unlocked(chosen,today)&&clock>=Date.UTC(2026,9,18,4,0,0);
+ const personalMockEntry=[18,25].includes(chosen.n)&&unlocked(chosen,today)&&clock>=Date.UTC(2026,9,chosen.n,4,0,0);
  const live=personalMockEntry||progressUnlocked(chosen.n,stats,today,clock);
- // Day 18 uses student-bound personal codes. Its material rows are intentionally draft,
+ // Days 18 and 25 use student-bound personal codes. Its material rows are intentionally draft,
  // so regular published-module counts must never hide the code-entry navigation.
  // The /api/challenge-mock gate independently checks the redeemed code on every request.
  const chosenRequired=personalMockEntry
