@@ -243,7 +243,7 @@ export default function FullMockPage(){
   for(const q of passage?.questions||[]){const last=groups[groups.length-1];if(!last||last[0]?.instruction!==q.instruction)groups.push([q]);else last.push(q)}
   const partAnswered=(passage?.questions||[]).filter(q=>rAnswers[String(q.number)]).length;
   const totalAnswered=Object.values(rAnswers).filter(Boolean).length;
-  return <main className="cr-shell mock-reading-shell">{confirmation}
+  return <main className={"cr-shell mock-reading-shell"+(day===25?" mock-reading-day25":"")}>{confirmation}
    <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div></div><div className="cr-head-end"><span className="cr-head-practice">FULL MOCK · PART {String(rPassage).padStart(2,"0")}</span><button className="cr-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
    <div className="cr-instructions"><div><small>FULL MOCK · IELTS READING</small><p>3 passages <span>·</span> 40 questions <span>·</span> 60-minute countdown</p></div><div className="cr-tools"></div></div>
    <div className="cr-mobile-tabs"><button className={rTab==="passage"?"active":""} onClick={()=>setRTab("passage")}>Passage</button><button className={rTab==="questions"?"active":""} onClick={()=>setRTab("questions")}>Questions</button></div>
