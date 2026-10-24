@@ -70,7 +70,7 @@
 .learning-shell .weekly-chart {max-height:none;height:auto;max-width:100%;aspect-ratio:720/235}
 .learning-shell .weekly-metrics {margin-top:12px}
 .learning-shell .weekly-growth {padding:18px}
-.learning-shell .profile-page {max-width:1000px}
+.learning-shell .profile-page {width:100%;max-width:820px;margin-inline:auto}
 html body .learning-shell .profile-hero-card {padding:16px;gap:10px 14px;border-radius:16px}
 html body .learning-shell .profile-scene-cover {height:85px;margin:-16px -16px 0}
 html body .learning-shell .profile-hero-card .profile-big-avatar {width:58px;height:58px;margin-top:0;border-radius:50%}
@@ -128,3 +128,18 @@ html body .learning-shell .profile-fields input,html body .learning-shell .profi
 .learning-shell .mock-label {font-size:10px!important;line-height:1.35}
 .learning-shell .mock-label>span {display:block;font-size:9px;opacity:.8}
 @media(max-width:710px){.learning-shell .bill-page.bill-compact .bill-plans {grid-template-columns:minmax(0,1fr)}.learning-shell .module-progress-list>div>b{white-space:normal}.learning-shell .mock-label{font-size:8px!important}.learning-shell .mock-label>span{font-size:8px}}
+
+/* Align rank labels to the circular face in each original medal asset. */
+.learning-shell .lb-award-row .rank-medal {width:34px;height:auto;aspect-ratio:142/149}
+.learning-shell .lb-award-row .rank-medal-2 {aspect-ratio:144/155}
+.learning-shell .lb-award-row .rank-medal-3 {aspect-ratio:129/147}
+.learning-shell .lb-award-row .rank-medal>.workspace-art {inset:0;transform:none;width:100%;height:100%;object-fit:fill}
+.learning-shell .lb-award-row .rank-medal>b {inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);height:1em;width:1em;padding:0;font-size:12px;line-height:1;display:grid;place-items:center}
+.learning-shell .lb-award-row .rank-medal-1:has(.workspace-art)>b {left:59.2%;top:38.9%}
+.learning-shell .lb-award-row .rank-medal-2:has(.workspace-art)>b {left:50%;top:39.4%}
+.learning-shell .lb-award-row .rank-medal-3:has(.workspace-art)>b {left:48.8%;top:40.8%}
+.learning-shell .lb-current-row {grid-template-columns:auto auto minmax(0,1fr) auto auto auto}
+.learning-shell .lb-current-row>div {min-width:0}
+.learning-shell .lb-current-row>div>span {min-width:0}
+.learning-shell .lb-current-row .identity-name {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:710px){.learning-shell .lb-current-row{grid-template-columns:auto auto minmax(0,1fr);gap:8px}.learning-shell .lb-current-row>span:nth-last-child(-n+3){grid-row:2}.learning-shell .lb-current-row>div{grid-column:3;grid-row:1}.learning-shell .lb-current-row .lb-mini-avatar{display:none}}
