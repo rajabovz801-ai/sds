@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1074 947" role="img" aria-label="Forest Lake Campsite map: Car park, community hall, Lakeside Drive, a lake, and labeled places A through H">
+<title>Forest Lake Campsite</title>
+<rect width="1074" height="947" fill="#fff"/>
+<g fill="none" stroke="#3c3e40" stroke-width="3.7" stroke-linejoin="round" stroke-linecap="round">
+<rect x="12" y="12" width="1050" height="923"/>
+<path d="M80 12V251H199V12M80 97H199M199 12V935M260 12V251H731V12M260 69H444V251M260 154H444M790 12V251H1062M790 12V251M920 72H1046V205H920Z"/>
+<path d="M80 307H199V426H80Z M31 654H164V790H31Z"/>
+<path d="M260 311H734V389 C637 383 625 471 545 488 C474 505 492 441 421 431 C331 417 331 501 260 494 Z M260 311V494 M415 311V426"/>
+<path d="M792 311H882V449 C863 431 819 395 792 395 Z M792 311H1062"/>
+<path d="M260 548V935M827 775H1042V894H827Z"/>
+<path d="M791 390 C845 398 886 476 939 508 C995 541 1029 547 1062 557"/>
+<path d="M791 438 C839 461 871 538 932 572 C990 600 1035 610 1062 620"/>
+<path d="M257 550 C285 528 308 555 342 523 C389 474 449 463 489 493 C524 520 516 548 570 531 C626 511 654 448 726 439 C795 426 829 450 863 492 C877 511 874 573 851 622 C832 658 798 679 748 704 C726 758 674 816 621 806 C579 799 525 772 510 747 C479 707 443 760 399 761 C355 762 383 719 348 704 C282 689 242 648 242 609 C242 574 245 561 257 550 Z"/>
+</g>
+<g font-family="Arial,Helvetica,sans-serif" fill="#292d30" font-size="31" font-weight="700" text-anchor="middle">
+<text x="141" y="48">Car</text><text x="141" y="76">park</text>
+<text x="141" y="183">B</text><text x="352" y="127">A</text><text x="352" y="214">C</text>
+<text x="984" y="142">D</text><text x="142" y="379">E</text>
+<text x="837" y="370">F</text><text x="98" y="731">G</text><text x="937" y="849">H</text>
+</g>
+<g font-family="Arial,Helvetica,sans-serif" fill="#333" font-size="25" font-weight="700" text-anchor="middle">
+<text x="339" y="371">Community</text><text x="339" y="399">hall</text>
+</g>
+<text x="886" y="514" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#383838" transform="rotate(33 886 514)">Lakeside Drive</text>
+<g fill="none" stroke="#b9bdbc" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M 54 550L58 593M42 557L27 538M58 566L82 549"/>
+<path d="M58 541 C24 522 25 494 62 490 C91 497 82 521 70 535" stroke-dasharray="10 9"/>
+<path d="M151 554L150 596 M150 567L134 552 M150 565L163 550"/>
+<path d="M153 541 C111 523 116 492 147 486 C179 493 180 526 162 539" stroke-dasharray="12 9"/>
+<path d="M91 860L93 911M92 877L69 861M92 877L111 863"/>
+<path d="M92 854 C41 837 44 795 78 798 C117 790 135 839 99 856" stroke-dasharray="11 10"/>
+<path d="M538 162L541 197M541 178L519 161M542 178L560 160"/>
+<path d="M541 160 C504 146 509 117 538 118 C572 115 589 147 551 161" stroke-dasharray="10 9"/>
+<path d="M667 177L665 220 M667 191L647 176M667 191L686 177"/>
+<path d="M668 167 C628 144 641 135 671 144 C697 128 722 161 695 176" stroke-dasharray="10 10"/>
+<path d="M649 72L648 112M649 83L634 68M650 84L666 68"/>
+<path d="M649 50 C618 52 615 75 634 90 C653 102 689 72 674 52 C663 35 632 30 625 55"/>
+<path d="M849 167L848 215M849 187L828 165M850 187L871 170"/>
+<path d="M849 158 C810 145 810 117 837 118 C869 116 877 147 857 162" stroke-dasharray="10 10"/>
+<path d="M894 78L894 119M894 95L880 79M894 96L907 83"/>
+<path d="M893 76 C860 62 869 29 897 34 C923 37 922 67 904 78" stroke-dasharray="9 10"/>
+<path d="M877 715L877 751M877 729L864 713M877 729L895 711"/>
+<path d="M877 708 C837 694 837 674 869 671 C900 674 908 699 889 710" stroke-dasharray="9 9"/>
+<path d="M976 690L978 727M978 700L958 686M978 700L996 684"/>
+<path d="M976 683 C944 669 947 639 977 646 C999 643 1012 666 991 680" stroke-dasharray="10 9"/>
+</g>
+</svg>
