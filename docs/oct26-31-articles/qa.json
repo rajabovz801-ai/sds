@@ -1,0 +1,39 @@
+{
+  "articles": 6,
+  "vocabulary_units": 12,
+  "vocabulary_terms": 240,
+  "terms_per_article": 40,
+  "terms_per_unit": 20,
+  "previous_terms_checked": 3000,
+  "duplicate_lemma_keys": 0,
+  "duplicate_family_keys": 0,
+  "source_text_preserved": "PASS",
+  "source_presence": "PASS",
+  "unit_structure": "PASS",
+  "schedule": [
+    {
+      "day_number": 26,
+      "title": "Nintendo"
+    },
+    {
+      "day_number": 27,
+      "title": "The Year Without Summer"
+    },
+    {
+      "day_number": 28,
+      "title": "Building Palm Jumeirah"
+    },
+    {
+      "day_number": 29,
+      "title": "The Global Banana Trade"
+    },
+    {
+      "day_number": 30,
+      "title": "The Silk Weavers of Margilan"
+    },
+    {
+      "day_number": 31,
+      "title": "The Rediscovery of Herculaneum"
+    }
+  ]
+}
