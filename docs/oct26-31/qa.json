@@ -1,0 +1,76 @@
+{
+  "passages": 12,
+  "questions": 160,
+  "vocabulary_terms": 480,
+  "vocabulary_units": 24,
+  "terms_per_passage": 40,
+  "terms_per_unit": 20,
+  "previous_vocabulary_terms_checked": 2520,
+  "duplicate_keys": 0,
+  "source_presence": "PASS",
+  "answer_ranges": "PASS",
+  "gap_word_limits": "PASS",
+  "evidence_quotes": "PASS",
+  "schedule": [
+    {
+      "day_number": 26,
+      "ordinal": 1,
+      "title": "Dust and the American West"
+    },
+    {
+      "day_number": 26,
+      "ordinal": 2,
+      "title": "Dyes and fabric dyeing"
+    },
+    {
+      "day_number": 27,
+      "ordinal": 1,
+      "title": "Effects of changes in world population"
+    },
+    {
+      "day_number": 27,
+      "ordinal": 2,
+      "title": "Farmers"
+    },
+    {
+      "day_number": 28,
+      "ordinal": 1,
+      "title": "First Memories"
+    },
+    {
+      "day_number": 28,
+      "ordinal": 2,
+      "title": "Game theory"
+    },
+    {
+      "day_number": 29,
+      "ordinal": 1,
+      "title": "The early history of olive oil"
+    },
+    {
+      "day_number": 29,
+      "ordinal": 2,
+      "title": "Evolution of the Calculator"
+    },
+    {
+      "day_number": 30,
+      "ordinal": 1,
+      "title": "Flood control in the USA"
+    },
+    {
+      "day_number": 30,
+      "ordinal": 2,
+      "title": "Growing food in cities"
+    },
+    {
+      "day_number": 31,
+      "ordinal": 1,
+      "title": "Global warming in New Zealand"
+    },
+    {
+      "day_number": 31,
+      "ordinal": 2,
+      "title": "How a prehistoric predator took to the skies"
+    }
+  ]
+}
