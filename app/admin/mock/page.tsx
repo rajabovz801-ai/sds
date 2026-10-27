@@ -1,7 +1,8 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
 import {BookOpen,CheckCircle2,Clock3,FileText,Headphones,PenLine,RefreshCcw,Search,UserRound,X} from "lucide-react";
-import AnimatedBackButton from "../../components/animated-back-button";
+import AnimatedBackButton from "../admin-back";
+import ReportNav from "../report-nav";
 import "./mock-admin.css";
 import MockCodePanel from "./mock-code-panel";
 import MockLiveView from "./mock-live-view";
@@ -49,16 +50,16 @@ export default function AdminFullMock(){
  const readingDone=rows.filter(r=>r.reading_score!=null).length;
  const listeningDone=rows.filter(r=>r.listening_score!=null).length;
  return <main className="ma-shell">
-  <header className="ma-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>{mockDate(day,true).toUpperCase()} · FULL MOCK RESULTS</span></div><button onClick={()=>load()} disabled={loading}><RefreshCcw size={15}/> Refresh</button></header>
+  <header className="ma-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>{mockDate(day,true).toUpperCase()} · FULL MOCK RESULTS</span></div><button onClick={()=>load()} disabled={loading}><RefreshCcw size={15}/> Refresh</button></header><ReportNav/>
   <section className="ma-hero"><div><small>LIVE ADMIN RESULTS</small><h1>{mockDate(day)} Full Mock</h1><p>Listening and Reading appear as soon as each section is submitted. Writing appears after AI assessment. Students still see scores only after the full mock is complete.</p></div><div className="ma-live"><i/><span>Auto refresh · 5s</span><b>{lastUpdated||"--:--:--"}</b></div></section>
-  {[18,25].includes(day)&&<MockCodePanel key={day} day={day}/>}
+  {[18,25].includes(day)&&<details className="ma-access-details"><summary>Manage mock access · personal entry codes</summary><MockCodePanel key={day} day={day}/></details>}
   <section className="ma-kpis"><article><Headphones/><span>LISTENING SUBMITTED</span><b>{listeningDone}</b></article><article><BookOpen/><span>READING SUBMITTED</span><b>{readingDone}</b></article><article><CheckCircle2/><span>FULLY COMPLETED</span><b>{completed}</b></article><article><UserRound/><span>STARTED MOCK</span><b>{rows.length}</b></article></section>
   <section className="ma-toolbar"><div><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search student…"/></div><span className="ma-day-picker"><select aria-label="Full Mock day" value={day} onChange={e=>setDay(Number(e.target.value))}>{MOCK_DAYS.map(d=><option key={d} value={d}>Day {String(d).padStart(2,"0")} · {mockDate(d,true)}</option>)}</select><b>{mockDate(day).toUpperCase()} · DAY {String(day).padStart(2,"0")}</b></span></section>
   {message&&<p className="ma-message">{message}</p>}
   {teacherPreview&&<button className="ma-preview-button" onClick={()=>setSelected({id:"teacher-preview",student_id:teacherPreview.id,student:teacherPreview,stage:"listening",started_at:new Date().toISOString(),day_number:day,status:"in_progress",listening_score:null,listening_band:null,listening_part_scores:null,listening_submitted_at:null,reading_score:null,reading_band:null,reading_part_scores:null,reading_submitted_at:null,writing_band:null,writing_assessment:null,writing_task1:"",writing_task2:"",writing_submitted_at:null,grading_error:null,updated_at:new Date().toISOString(),completed_at:null})}>Open @{teacherPreview.username} · teacher live preview</button>}
   <section className="ma-table-wrap">
    <div className="ma-table-head"><div><small>SECTION-BY-SECTION RESULTS</small><h2>Student progress and scores</h2></div><span>{visible.length} students</span></div>
-   <div className="ma-overflow"><table><thead><tr><th>Student</th><th>Listening /40</th><th>L Band</th><th>Reading /40</th><th>R Band</th><th>Writing</th><th>Mock Overall</th><th>Status</th></tr></thead><tbody>
+   <p className="ma-formula">Overall = (Listening + Reading + Writing) ÷ 3, rounded to the nearest 0.5. Speaking is excluded. Completed means these three sections are finished.</p><div className="ma-overflow"><table><thead><tr><th>Student</th><th>Listening /40</th><th>L Band</th><th>Reading /40</th><th>R Band</th><th>Writing</th><th title="Mean of Listening, Reading and Writing; rounded to the nearest 0.5. Speaking excluded.">Mock Overall · 3 skills</th><th>Status</th></tr></thead><tbody>
     {loading&&!rows.length?<tr><td colSpan={8} className="ma-empty">Loading live mock results…</td></tr>:visible.length?visible.map(r=>{const st=status(r),ov=overall(r);return <tr key={r.id} onClick={()=>setSelected(r)}>
      <td><b>{r.student?r.student.first_name+" "+r.student.last_name:"Student"}</b><small>@{r.student?.username||"student"}</small></td>
      <td className={r.listening_score!=null?"ready":""}>{r.listening_score!=null?r.listening_score+"/40":"—"}<small>{r.listening_submitted_at?when(r.listening_submitted_at):""}</small></td>
@@ -72,7 +73,7 @@ export default function AdminFullMock(){
    </tbody></table></div>
   </section>
   {selected&&<div className="ma-modal-bg" onMouseDown={e=>{if(e.target===e.currentTarget)setSelected(null)}}><section className="ma-modal">
-   <header><div><small>{mockDate(day,true).toUpperCase()} · FULL MOCK</small><h2>{selected.student?selected.student.first_name+" "+selected.student.last_name:"Student"}</h2><p>@{selected.student?.username||"student"} · Started {when(selected.started_at)}</p></div><button onClick={()=>setSelected(null)}><X size={18}/></button></header>
+   <header><div><small>{mockDate(day,true).toUpperCase()} · FULL MOCK</small><h2>{selected.student?selected.student.first_name+" "+selected.student.last_name:"Student"}</h2><p>@{selected.student?.username||"student"} · Started {when(selected.started_at)}</p></div><button aria-label="Close student results" onClick={()=>setSelected(null)}><X size={18}/></button></header>
    <div className="ma-modal-body">
     <MockLiveView day={day} studentId={selected.student_id}/>
     <div className="ma-section-card"><div><Headphones/><h3>Listening</h3></div><strong>{selected.listening_score!=null?selected.listening_score+"/40":"Not submitted"}</strong><span>{selected.listening_band!=null?"Band "+band(selected.listening_band):"—"}</span>{selected.listening_part_scores&&<small>Sections: {selected.listening_part_scores.join(" · ")}</small>}</div>

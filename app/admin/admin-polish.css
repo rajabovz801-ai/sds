@@ -1,0 +1,104 @@
+/* Admin routes only. Student styles and shared Back component are untouched. */
+.ark-admin-scope{--admin-font:Arial,Helvetica,system-ui,sans-serif;font-family:var(--admin-font);font-size:14px;line-height:1.5}
+html body .ark-admin-scope :is(.admin-v2,.cr-admin,.la-shell,.wa-shell,.sa-shell,.ma-shell){font-family:var(--admin-font);font-size:14px}
+html body .ark-admin-scope :is(h1,h2,h3,h4,button,input,select,textarea){font-family:var(--admin-font)}
+html body .ark-admin-scope :is(.admin-page-heading h1,.cr-a-heading h1,.la-hero h1,.wa-hero h1,.sa-hero h1,.ma-hero h1){font-size:28px;line-height:1.25;letter-spacing:-.035em;margin:6px 0 8px;font-weight:700}
+html body .ark-admin-scope :is(.student-admin-head h2,.admin-role-head h2,.admin-live-metrics h2,.admin-live-activity h2,.bill-section-head h2,.bill-box h2,.student-request-head h2,.admin-notification-panel h2){font-family:var(--admin-font);font-size:19px;line-height:1.35;letter-spacing:-.02em;margin:4px 0 6px}
+html body .ark-admin-scope :is(.la-detail-head h2,.wa-detail-head h2,.sa-detail-head h2,.ma-modal h2,.cr-detail-head h2){font-size:21px;line-height:1.35;letter-spacing:-.02em}
+html body .ark-admin-scope :is(.section-eyebrow,.side-overline,.bill-eyebrow){font-size:11px!important;letter-spacing:.08em}
+html body .ark-admin-scope :is(.hero-copy p,.la-hero p,.wa-hero p,.sa-hero p,.ma-hero p){font-size:13px!important;line-height:1.6;color:#64748b}
+html body .ark-admin-scope :is(.la-top>div b,.wa-top>div b,.sa-top>div b){font-family:var(--admin-font);font-size:13px}
+html body .ark-admin-scope :is(.la-top>div span,.wa-top>div span,.sa-top>div span,.ma-top>div span){font-size:11px!important;letter-spacing:.08em}
+html body .ark-admin-scope :is(.wa-tabs button,.sa-tabs button){font-size:12px;min-height:34px;padding:7px 12px}
+html body .ark-admin-scope :is(.la-person small,.wa-person small,.wa-person em,.sa-person small,.sa-person em,.wa-state,.sa-status,.wa-metrics small,.sa-expiry){font-size:12px!important;letter-spacing:normal;line-height:1.5}
+html body .ark-admin-scope :is(.wa-person b,.sa-person b,.la-person b){font-size:14px!important;line-height:1.45}
+html body .ark-admin-scope :is(.la-toolbar input,.wa-search input,.sa-search input,.wa-review select,.wa-review textarea,.sa-review select,.sa-review textarea){font:14px var(--admin-font);min-height:38px}
+html body .ark-admin-scope :is(.la-hero,.wa-hero,.sa-hero,.ma-hero){max-width:1280px;margin:0 auto;padding:24px 24px 16px;gap:18px}
+html body .ark-admin-scope :is(.la-layout,.wa-layout,.sa-layout){max-width:1280px;grid-template-columns:minmax(270px,350px) minmax(0,1fr);padding:0 24px 40px;gap:16px}
+html body .ark-admin-scope :is(.la-toolbar,.wa-toolbar,.sa-toolbar){max-width:1280px;padding:0 24px 14px;flex-wrap:wrap}
+html body .ark-admin-scope :is(.wa-kpis b,.sa-kpis b,.la-summary b){font-size:21px;line-height:1.3}
+html body .ark-admin-scope :is(.wa-kpis span,.sa-kpis span,.la-summary span){font-size:12px!important;min-width:90px;padding:10px 12px}
+html body .ark-admin-scope :is(.wa-top,.sa-top,.la-top,.ma-top,.cr-admin-top){height:60px;position:sticky;top:0;z-index:40;padding-inline:24px;gap:12px}
+html body .ark-admin-scope .admin-back{display:inline-flex;align-items:center;gap:8px;justify-self:start;width:max-content;min-height:36px;padding:8px 12px;border:1px solid #dce3ed;border-radius:8px;background:#fff;color:#254467;text-decoration:none;font:600 13px/1.3 var(--admin-font);letter-spacing:normal;transition:background .15s,border-color .15s;white-space:nowrap}
+html body .ark-admin-scope .admin-back:hover{background:#f0f5ff;border-color:#a9bfdf}
+.ark-admin-scope :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid #7299eb;outline-offset:3px}
+.ark-admin-scope .admin-report-nav{display:flex;gap:6px;flex-wrap:wrap;padding:10px 24px;border-bottom:1px solid #e5eaf2;background:#fff}
+.ark-admin-scope .admin-report-nav a{display:inline-flex;text-decoration:none;color:#53667e;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600}
+.ark-admin-scope .admin-report-nav a[aria-current=page]{background:#eaf1ff;color:#245bd6}
+.ark-admin-scope .admin-day-picker{display:flex;gap:8px;align-items:end;max-width:1232px;margin:0 auto 10px;padding:0 24px}
+.ark-admin-scope .admin-day-picker label{display:grid;gap:4px;flex:1;max-width:520px;color:#64748b;font-size:12px}
+.ark-admin-scope .admin-day-picker select{width:100%;min-height:38px;padding:7px 10px;background:#fff;color:#243b55;border:1px solid #d9e2ed;border-radius:8px;font-size:13px}
+.ark-admin-scope .admin-day-picker button{height:38px;width:36px;display:grid;place-items:center;background:#fff;color:#315982;border:1px solid #d9e2ed;border-radius:8px;cursor:pointer;flex:none}
+.ark-admin-scope .admin-day-picker button:disabled{opacity:.4;cursor:default}
+.ark-admin-scope .admin-day-history{max-width:1232px;margin:0 auto 16px;padding:0 24px}
+.ark-admin-scope .admin-day-history summary{font-size:12px;color:#526b8a;cursor:pointer;width:max-content;padding:3px 0}
+.ark-admin-scope .admin-day-history[open] summary{margin-bottom:12px}
+html body .ark-admin-scope :is(.wa-days,.sa-days,.la-days,.cr-a-days){flex-wrap:wrap;overflow:visible;padding:0;gap:7px;margin:0}
+html body .ark-admin-scope :is(.wa-days,.sa-days,.la-days,.cr-a-days) button{min-width:115px;min-height:64px;padding:9px 11px;flex:0 0 auto}
+html body .ark-admin-scope :is(.wa-days,.sa-days,.la-days,.cr-a-days) :is(span,b,small){font-size:12px!important}
+html body .ark-admin-scope .admin-v2{grid-template-columns:230px minmax(0,1fr)}
+html body .ark-admin-scope .admin-v2 .learning-sidebar{padding:18px 12px 12px;height:100dvh;scrollbar-width:thin}
+html body .ark-admin-scope .admin-v2 .learning-brand-minimal{padding:0;margin:0;border:0;min-height:0}
+html body .ark-admin-scope .admin-v2 .learning-nav{gap:3px}
+html body .ark-admin-scope .admin-v2 .learning-nav button{min-height:40px;padding:9px 12px;font-size:13px}
+html body .ark-admin-scope .admin-v2 .side-overline{margin:8px 0 12px;padding:0 12px}
+html body .ark-admin-scope .admin-v2 .sidebar-bottom{padding-top:14px}
+html body .ark-admin-scope .admin-v2 .learning-content{padding:24px 28px 44px;max-width:1450px}
+html body .ark-admin-scope .admin-v2 .learning-topbar{height:60px;padding:0 28px}
+html body .ark-admin-scope .admin-page-heading{min-height:0;margin-bottom:20px}
+html body .ark-admin-scope .admin-v2 .hero-copy{padding:0}
+html body .ark-admin-scope .admin-v2 .kpi-card{min-height:105px;padding:16px;gap:12px}
+html body .ark-admin-scope .admin-v2 .kpi-card b{font-family:var(--admin-font);font-size:27px;line-height:1.25;margin:5px 0}
+html body .ark-admin-scope .admin-v2 .kpi-card>div>span{font-size:11px!important;letter-spacing:.05em}
+html body .ark-admin-scope .admin-v2 .kpi-card small{font-size:12px!important}
+html body .ark-admin-scope .admin-v2 .kpi-card>svg{width:42px;height:42px;padding:10px}
+html body .ark-admin-scope .student-admin-row{grid-template-columns:38px minmax(0,1fr) 70px auto auto;padding:14px 0;gap:14px}
+html body .ark-admin-scope .student-status{justify-self:start;font-size:11px!important;letter-spacing:normal;white-space:nowrap}
+html body .ark-admin-scope .student-delete-btn{width:auto;min-height:34px;padding:7px 10px;font-size:12px}
+.ark-admin-scope .admin-student-search{display:grid;gap:5px;color:#64748b;font-size:12px;max-width:400px;margin:14px 0 4px}
+.ark-admin-scope .admin-student-search input{padding:9px 11px;border:1px solid #dce3ed;border-radius:8px;min-width:0;font-size:14px}
+.ark-admin-scope .admin-muted{display:block;font-size:11px;font-weight:400;color:#697a8e}
+html body .ark-admin-scope .live-row{font-size:13px}
+html body .ark-admin-scope .live-row.head{font-size:11px}
+.ark-admin-scope .admin-warning{display:block;color:#9c5c13;background:#fff6e8;border:1px solid #efddbd;border-radius:6px;padding:5px 8px;font-size:12px;line-height:1.5;margin-top:5px}
+.ark-admin-scope .admin-queue-note{max-width:1232px;margin:0 auto 12px;padding:0 24px;color:#64748b;font-size:12px}
+.ark-admin-scope .admin-audio-error{display:block;color:#b23838;font-size:12px;margin-top:5px}
+html body .ark-admin-scope .sa-row.urgent{border-color:#e5a954;background:#fffaf2}
+html body .ark-admin-scope .sa-row.urgent .sa-expiry{color:#9c5c13;font-weight:700}
+html body .ark-admin-scope .sa-player audio{max-width:100%;width:270px;height:38px}
+html body .ark-admin-scope .sa-answer{grid-template-columns:minmax(0,1fr) auto;gap:16px}
+html body .ark-admin-scope .ma-access-details{max-width:1184px;margin:0 auto 16px;border:1px solid #dce3ed;border-radius:10px;background:#fff}
+.ark-admin-scope .ma-access-details>summary{padding:12px 16px;cursor:pointer;font-size:13px;font-weight:600;color:#355477}
+html body .ark-admin-scope .ma-code-panel{padding:16px;border:0;margin:0}
+html body .ark-admin-scope .ma-code-panel .ma-table-head{padding:0 0 12px}
+html body .ark-admin-scope .ma-code-panel h2{font-size:17px}
+html body .ark-admin-scope .ma-kpis article{min-height:90px;padding:14px}
+html body .ark-admin-scope .ma-kpis b{font-size:25px}
+.ark-admin-scope .ma-formula{font-size:12px;color:#64748b;margin:0;padding:10px 19px;border-bottom:1px solid #e7edf4}
+html body .ark-admin-scope .bill-admin-head{padding:12px 16px;margin-bottom:14px}
+html body .ark-admin-scope .bill-admin-head h1{display:none}
+html body .ark-admin-scope .bill-admin-head p{font-size:13px;margin:5px 0}
+html body .ark-admin-scope .bill-admin-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+html body .ark-admin-scope .bill-admin-stats>div{padding:12px 14px;min-height:76px}
+html body .ark-admin-scope .bill-admin-stats strong{font-family:var(--admin-font);font-size:23px;line-height:1.3}
+html body .ark-admin-scope .bill-box{padding:16px}
+.ark-admin-scope .bill-access-details{margin:16px 0}
+.ark-admin-scope .bill-access-details>summary{cursor:pointer;font-size:14px;font-weight:600;color:#355477;padding:10px 0}
+.ark-admin-scope .bill-quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+html body .ark-admin-scope .bill-admin .bill-primary{font-size:13px;min-height:38px;padding:9px 14px}
+html body .ark-admin-scope .bill-summary-card b{font-family:var(--admin-font);font-size:21px}
+html body .ark-admin-scope .cr-a-content{max-width:1280px;margin:24px auto;padding:0 24px 44px}
+html body .ark-admin-scope .cr-a-content>.admin-day-picker,html body .ark-admin-scope .cr-a-content>.admin-day-history{padding:0}
+html body .ark-admin-scope .cr-a-stats>div{min-height:92px;padding:14px}
+html body .ark-admin-scope .cr-a-stats strong{font-size:24px;letter-spacing:-.02em}
+@media(max-width:1000px){html body .ark-admin-scope :is(.la-layout,.wa-layout,.sa-layout){grid-template-columns:minmax(240px,300px) minmax(0,1fr)}html body .ark-admin-scope .sa-answer{grid-template-columns:1fr}html body .ark-admin-scope .admin-role-layout{grid-template-columns:1fr}html body .ark-admin-scope .student-admin-row{grid-template-columns:36px minmax(0,1fr) auto}.ark-admin-scope .student-admin-meta{grid-column:2}.ark-admin-scope .student-status{grid-column:2}.ark-admin-scope .student-delete-btn{grid-column:3;grid-row:1/4}}
+@media(max-width:710px){html body .ark-admin-scope .admin-v2{grid-template-columns:1fr}html body .ark-admin-scope .admin-v2 .learning-content{padding:20px 13px 35px}html body .ark-admin-scope .admin-v2 .learning-topbar{padding:0 13px}html body .ark-admin-scope :is(.la-layout,.wa-layout,.sa-layout){grid-template-columns:1fr;padding:0 12px 32px}html body .ark-admin-scope :is(.la-hero,.wa-hero,.sa-hero,.ma-hero){padding:20px 12px 14px;flex-direction:column;align-items:stretch}html body .ark-admin-scope :is(.la-toolbar,.wa-toolbar,.sa-toolbar){padding:0 12px 14px}html body .ark-admin-scope :is(.la-top,.wa-top,.sa-top,.ma-top,.cr-admin-top){padding:0 12px;grid-template-columns:1fr auto;min-height:56px;height:auto}html body .ark-admin-scope :is(.la-top>div,.wa-top>div,.sa-top>div,.ma-top>div,.la-top>span,.cr-admin-top>strong){display:none}.ark-admin-scope .admin-report-nav{padding:8px 12px;gap:2px}.ark-admin-scope .admin-report-nav a{padding:6px 9px}.ark-admin-scope .admin-day-picker,.ark-admin-scope .admin-day-history{padding:0 12px}.ark-admin-scope .admin-queue-note{padding:0 12px}.ark-admin-scope .ma-access-details{margin:0 12px 14px}html body .ark-admin-scope .bill-admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}html body .ark-admin-scope .bill-admin-stats strong{font-size:20px}html body .ark-admin-scope .cr-a-content{padding:0 12px 32px}html body .ark-admin-scope :is(.admin-page-heading h1,.cr-a-heading h1,.la-hero h1,.wa-hero h1,.sa-hero h1,.ma-hero h1){font-size:25px}.ark-admin-scope .wa-list,.ark-admin-scope .sa-list,.ark-admin-scope .la-list{max-height:340px;overflow:auto}.ark-admin-scope .wa-review,.ark-admin-scope .sa-review{grid-template-columns:1fr!important}}
+/* Some legacy global rules assign serif fonts directly to spans and links. */
+html body .ark-admin-scope *{font-family:Arial,Helvetica,system-ui,sans-serif!important}
+html body .ark-admin-scope .admin-v2 :is(.student-admin-head h2,.admin-live-metrics>header h2){display:none}
+html body .ark-admin-scope .sa-player small{letter-spacing:normal;text-transform:none}
+.ark-admin-scope .admin-inline-link{display:inline-block;margin-left:6px;font-size:12px;color:#245bd6;text-decoration:underline}
+
+/* Account status and target remain visible on small screens. */
+html body .ark-admin-scope .student-admin-meta{display:block}
+html body .ark-admin-scope .student-admin-row .student-status{display:inline-flex}

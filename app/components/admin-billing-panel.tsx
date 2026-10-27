@@ -16,7 +16,7 @@ export default function AdminBillingPanel(){
  const [data,setData]=useState<Payload|null>(null),[filter,setFilter]=useState('all'),[search,setSearch]=useState(''),[busy,setBusy]=useState(''),[message,setMessage]=useState(''),[loading,setLoading]=useState(true);
  const [notes,setNotes]=useState<Record<string,string>>({}),[mocks,setMocks]=useState<Record<string,string>>({}),[refs,setRefs]=useState<Record<string,string>>({});
  const [cards,setCards]=useState<Record<string,{number:string;holder:string;enabled:boolean}>>({uzcard:{number:'',holder:'',enabled:true},humo:{number:'',holder:'',enabled:false}});
- const [showSettings,setShowSettings]=useState(false),[showGrant,setShowGrant]=useState(false),[showCash,setShowCash]=useState(true);
+ const [showSettings,setShowSettings]=useState(false),[showGrant,setShowGrant]=useState(false),[showCash,setShowCash]=useState(false);
  const [cash,setCash]=useState({student_id:'',plan:'challenge' as BillingPlan,mock_on:upcoming(),note:'Naqd to‘lov qabul qilindi'});
  const [cashReceipt,setCashReceipt]=useState<{order_code:string;price_uzs:number;starts_at:string;expires_at:string|null;mock_on:string|null}|null>(null);
  const cashRequestRef=useRef<string|null>(null);
@@ -36,7 +36,7 @@ export default function AdminBillingPanel(){
   const preview=cash.plan==='challenge'?'7 kunlik Challenge':'Full MOCK '+cash.mock_on;
   const waiting=(data?.orders||[]).some(o=>o.student_id===cash.student_id&&o.status==='pending'&&(o.plan_key===cash.plan||o.plan_key==='all_access'));
   if(waiting){setMessage('Bu o‘quvchining eski to‘lov so‘rovi bor. Avval uni rad eting yoki tekshiring.');return}
-  if(!window.confirm(name(person)+'\\n'+preview+'\\nNaqd pul: '+formatSom(amount)+'\\n\\nPulni haqiqatda qabul qildingizmi? Bu amal to‘lovni kassaga yozadi va ruxsatni ochadi.'))return;
+  if(!window.confirm(name(person)+'\n'+preview+'\nNaqd pul: '+formatSom(amount)+'\n\nPulni haqiqatda qabul qildingizmi? Bu amal to‘lovni kassaga yozadi va ruxsatni ochadi.'))return;
   cashRequestRef.current ||= crypto.randomUUID();
   setBusy('cash');setMessage('');setCashReceipt(null);
   try{
@@ -68,6 +68,8 @@ export default function AdminBillingPanel(){
  return <section className="bill-page bill-admin">
   <div className="bill-admin-head"><span className="bill-eyebrow">MEMBERSHIP CONTROL</span><h1>To‘lovlar va obunalar</h1><p>Naqd pul yoki karta to‘lovini faqat qabul qilingandan keyin tasdiqlang. To‘lovni saqlagach chek raqami va ruxsat quyidagi ro‘yxatda ko‘rinadi.</p></div>
   <div className="bill-admin-stats">{[['pending','Kutilmoqda'],['approved_uzs','Jami tasdiqlangan tushum'],['cash_uzs','Naqd kassa'],['bank_uzs','Karta orqali'],['pending_uzs','Kutilayotgan summa'],['active_students','Faol obunachilar']].map(([key,title])=><div key={key}><span>{title}</span><strong>{key.includes('uzs')?formatSom(data?.stats[key]||0):data?.stats[key]??'—'}</strong></div>)}</div>
+  <div className="bill-quick-actions"><button type="button" className="bill-small-btn" onClick={()=>{setShowCash(true);document.getElementById("admin-cash-payment")?.scrollIntoView({behavior:"smooth",block:"start"})}}>Naqd to‘lov qabul qilish</button><a className="bill-small-btn" href="#admin-payment-requests">To‘lov so‘rovlari</a></div>
+  <details className="bill-access-details"><summary>Berilgan obunalar · {visibleGrants.length} ta ruxsat</summary>
   <div className="bill-section-head"><div><h2>Berilgan obunalar</h2><p>O‘quvchi so‘rov yuborishi shart emas. Admin orqali berilgan ruxsatlar ham shu yerda ko‘rinadi.</p></div><button type="button" className="bill-small-btn" onClick={()=>void load()}><RefreshCw size={14}/> Yangilash</button></div>
   <section className="bill-box"><div className="bill-table-wrap"><table><thead><tr><th>O‘quvchi</th><th>Paket</th><th>To‘lov</th><th>Boshlanish / tugash</th><th>Holat</th></tr></thead><tbody>
     {visibleGrants.map(a=>{const person=data?.students.find(p=>p.id===a.student_id);return <tr key={a.id}>
@@ -75,11 +77,12 @@ export default function AdminBillingPanel(){
       <td>{a.plan_key==='challenge'?'Challenge · 7 kun':a.plan_key==='mock'?'Full MOCK':'Eski paket'}</td>
       <td>{grantPayment(a)}</td>
       <td>{date(a.starts_at)}{a.expires_at?' → '+date(a.expires_at):a.mock_on?' · Mock '+a.mock_on:''}</td>
-      <td><b>{grantStatus(a)}</b></td>
+      <td><b>{grantStatus(a)}</b>{a.expires_at&&Date.parse(a.expires_at)>Date.now()&&<small className="bill-note">{Math.ceil((Date.parse(a.expires_at)-Math.max(Date.now(),Date.parse(a.starts_at)))/3600000)} soat {Date.parse(a.starts_at)>Date.now()?"davom etadi":"qoldi"}</small>}</td>
     </tr>})}
     {!visibleGrants.length&&<tr><td colSpan={5} className="bill-muted">{loading?'Ruxsatlar yuklanmoqda…':'Hozircha hech bir o‘quvchiga obuna berilmagan.'}</td></tr>}
   </tbody></table></div></section>
-  <div className="bill-section-head"><div><h2>Naqd pulni qabul qilish</h2><p>Faqat haqiqatda olingan pulni tasdiqlang. Challenge va MOCK — alohida to‘lovlar.</p></div><button type="button" className="bill-small-btn" onClick={()=>setShowCash(v=>!v)}>{showCash?'Yopish':'Naqd to‘lov + '}</button></div>
+  </details>
+  <div className="bill-section-head"><div><h2 id="admin-cash-payment">Naqd pulni qabul qilish</h2><p>Faqat haqiqatda olingan pulni tasdiqlang. Challenge va MOCK — alohida to‘lovlar.</p></div><button type="button" className="bill-small-btn" onClick={()=>setShowCash(v=>!v)}>{showCash?'Yopish':'Naqd to‘lov + '}</button></div>
   {showCash&&<section className="bill-box" aria-label="Naqd to‘lovni tasdiqlash">
     <div className="bill-admin-cards">
       <label className="bill-field">O‘quvchi
@@ -102,14 +105,14 @@ export default function AdminBillingPanel(){
     </div>
     <div className="bill-summary">
       <div className="bill-summary-card"><div><small>Qabul qilinadigan naqd pul</small><b>{formatSom(BILLING_PLANS.find(p=>p.key===cash.plan)?.price||0)}</b><span>O‘zgartirib bo‘lmaydigan paket narxi</span></div></div>
-      <div className="bill-summary-card"><div><small>{cash.plan==='challenge'?'7 kunlik ruxsat':'Full MOCK ruxsati'}</small><b>{cash.plan==='challenge'?'168 soat':cash.mock_on||'Sana tanlang'}</b><span>{cash.plan==='challenge'?date(new Date(cashStart).toISOString())+' → '+date(new Date(cashStart+7*86400000).toISOString()):'Challenge obunasi bu to‘lovga kirmaydi'}</span></div></div>
+      <div className="bill-summary-card"><div><small>{cash.plan==='challenge'?'7 kunlik ruxsat':'Full MOCK ruxsati'}</small><b>{cash.plan==='challenge'?'168 soat':cash.mock_on||'Sana tanlang'}</b><span>{!cash.student_id?'Muddatni ko‘rish uchun o‘quvchini tanlang':cash.plan==='challenge'?date(new Date(cashStart).toISOString())+' → '+date(new Date(cashStart+7*86400000).toISOString()):'Challenge obunasi bu to‘lovga kirmaydi'}</span></div></div>
     </div>
     {!!pendingCash.length&&<p className="bill-error" role="alert">Bu o‘quvchi uchun {pendingCash.length} ta eski to‘lov so‘rovi kutilmoqda. Avval quyidagi ro‘yxatdan ko‘rib chiqing.</p>}
     <p className="bill-muted">Naqd pul tasdiqlanganda avtomatik chek raqami, tushum va audit yoziladi. Avvalgi natijalar o‘zgarmaydi. Yangi ro‘yxatdan o‘tganlar uchun Day 1–2 bepul sinov saqlanadi.</p>
     <button type="button" className="bill-primary" disabled={!!busy||!cash.student_id||cash.note.trim().length<3||pendingCash.length>0||(cash.plan==='mock'&&!cash.mock_on)} onClick={()=>void confirmCash()}><CheckCircle2 size={16}/>{busy==='cash'?'Tasdiqlanmoqda…':'Naqd to‘lovni tasdiqlash'}</button>
     {cashReceipt&&<p className="bill-success" role="status">Tasdiqlandi! Chek: <b>{cashReceipt.order_code}</b> · {formatSom(cashReceipt.price_uzs)} · {cashReceipt.expires_at?'Challenge muddati: '+date(cashReceipt.starts_at)+' — '+date(cashReceipt.expires_at):'Full MOCK: '+cashReceipt.mock_on}</p>}
   </section>}
-  <div className="bill-section-head"><div><h2>To‘lov so‘rovlari</h2><p>Ism, username, summa va sanani Telegramdagi chek bilan solishtiring.</p></div><button className="bill-small-btn" disabled={loading} onClick={()=>void load()}><RefreshCw size={14}/> Yangilash</button></div>
+  <div className="bill-section-head"><div><h2 id="admin-payment-requests">To‘lov so‘rovlari</h2><p>Ism, username, summa va sanani Telegramdagi chek bilan solishtiring.</p></div><button className="bill-small-btn" disabled={loading} onClick={()=>void load()}><RefreshCw size={14}/> Yangilash</button></div>
   <div className="bill-admin-filters"><div className="bill-tabs">{['all','approved','pending','rejected','cancelled','revoked'].map(s=><button key={s} onClick={()=>setFilter(s)} className={filter===s?'active':''}>{s==='all'?'Barchasi':label(s)}</button>)}</div><label className="bill-search"><Search size={15}/><input aria-label="O‘quvchini qidirish" placeholder="Ism familiya yoki username" value={search} onChange={e=>setSearch(e.target.value)}/></label></div>
   {message&&<p className="bill-message" role="alert">{message}</p>}
   <section className="bill-box"><div className="bill-table-wrap"><table><thead><tr><th>O‘quvchi</th><th>Paket / Sana</th><th>Summa / Karta</th><th>Holat</th><th>Tekshirish</th></tr></thead><tbody>{visible.map(o=><tr key={o.id}>

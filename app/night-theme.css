@@ -3175,6 +3175,92 @@ html[data-ark-theme="dark"] .rank-medal:not(:has(.workspace-art)) {
 html[data-ark-theme="dark"] .lb-board .lb-podium-status.offline {
     color: #A7B6C8
 }
+html[data-ark-theme="dark"] body .ark-admin-scope :is(.hero-copy p,.la-hero p,.wa-hero p,.sa-hero p,.ma-hero p) {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] body .ark-admin-scope .admin-back {
+    border: 1px solid #29384A;
+    background: #152131;
+    color: #9CBFFF
+}
+html[data-ark-theme="dark"] body .ark-admin-scope .admin-back:hover {
+    background: #152131;
+    border-color: #29384A
+}
+html[data-ark-theme="dark"] .ark-admin-scope :is(button,a,input,select,textarea,summary):focus-visible {
+    outline: 3px solid #385E91
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-report-nav {
+    border-bottom: 1px solid #29384A;
+    background: #101925
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-report-nav a {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-report-nav a[aria-current=page] {
+    background: #101925;
+    color: #9CBFFF
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-day-picker label {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-day-picker select {
+    background: #0F1926;
+    color: #EAF0F7;
+    border: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-day-picker button {
+    background: #152131;
+    color: #9CBFFF;
+    border: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-day-history summary {
+    color: #9CBFFF
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-student-search {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-student-search input {
+    border: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-muted {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-warning {
+    color: #E8C56A;
+    background: #2D281C;
+    border: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-queue-note {
+    color: #A7B6C8
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-audio-error {
+    color: #F3A0A0
+}
+html[data-ark-theme="dark"] body .ark-admin-scope .sa-row.urgent {
+    border-color: #65542C;
+    background: #152131
+}
+html[data-ark-theme="dark"] body .ark-admin-scope .sa-row.urgent .sa-expiry {
+    color: #E8C56A
+}
+html[data-ark-theme="dark"] body .ark-admin-scope .ma-access-details {
+    border: 1px solid #29384A;
+    background: #152131
+}
+html[data-ark-theme="dark"] .ark-admin-scope .ma-access-details>summary {
+    color: #9CBFFF
+}
+html[data-ark-theme="dark"] .ark-admin-scope .ma-formula {
+    color: #A7B6C8;
+    border-bottom: 1px solid #29384A
+}
+html[data-ark-theme="dark"] .ark-admin-scope .bill-access-details>summary {
+    color: #9CBFFF
+}
+html[data-ark-theme="dark"] .ark-admin-scope .admin-inline-link {
+    color: #9CBFFF
+}
 html[data-ark-theme="dark"] .la-shell {
     background: #0F1926;
     color: #EAF0F7

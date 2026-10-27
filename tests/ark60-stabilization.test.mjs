@@ -369,7 +369,8 @@ test("Speaking admin inbox supports exact-question audio review and band feedbac
   assert.match(rootAdmin,/Speaking inbox/);
   assert.match(rootAdmin,/\/admin\/speaking/);
   assert.match(admin,/Play all answers/);
-  assert.match(admin,/audio controls/);
+  assert.match(admin,/AnswerAudio/);
+  assert.match(read("app/admin/speaking/answer-audio.tsx"),/<audio[^>]*controls/);
   assert.match(admin,/Overall Speaking Band/);
   assert.match(admin,/Teacher feedback/);
   assert.match(admin,/Audio expired/);

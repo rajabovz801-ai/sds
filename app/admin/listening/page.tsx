@@ -1,6 +1,8 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
-import AnimatedBackButton from "../../components/animated-back-button";
+import AnimatedBackButton from "../admin-back";
+import ReportNav from "../report-nav";
+import AdminDayPicker from "../day-picker";
 import {CheckCircle2,Clock3,Headphones,RefreshCw,Search,UserRound,XCircle} from "lucide-react";
 import "./listening-admin.css";
 
@@ -65,11 +67,11 @@ export default function AdminListening(){
  const avgBand=rows.length?(rows.reduce((a,r)=>a+Number(r.band||0),0)/rows.length).toFixed(1):"—";
 
  return <main className="la-shell">
-  <header className="la-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>LISTENING REPORTS</span></div><span>Day {String(selectedDay).padStart(2,"0")} · {selectedMeta?.title||"Listening"}</span></header>
+  <header className="la-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>LISTENING REPORTS</span></div><span>Day {String(selectedDay).padStart(2,"0")} · {selectedMeta?.title||"Listening"}</span></header><ReportNav/>
 
   <section className="la-hero"><div><small>AUTOMATIC RESULTS</small><h1>Listening results</h1><p>Choose a challenge day, then open any student result to review all submitted answers against the official answer key.</p></div><div className="la-summary"><span><b>{rows.length}</b>Attempts</span><span><b>{avgScore}</b> Avg / 40</span><span><b>{avgBand}</b> Avg band</span></div></section>
 
-  <section className="la-days" aria-label="Listening result days">{days.length?days.map(d=><button key={d.day_number} className={selectedDay===d.day_number?"active":""} onClick={()=>setSelectedDay(d.day_number)}><span>DAY {String(d.day_number).padStart(2,"0")}</span><b>{dayDate(d.day_number)}</b><small>{d.title} · {d.submission_count}</small></button>):<span className="la-no-days">No Listening submissions yet.</span>}</section>
+  <AdminDayPicker days={days.map(d=>({day:d.day_number,label:`Day ${d.day_number} · ${dayDate(d.day_number)} · ${d.title}`}))} value={selectedDay} onChange={setSelectedDay}/><details className="admin-day-history"><summary>Show day overview</summary><section className="la-days" aria-label="Listening result days">{days.length?days.map(d=><button key={d.day_number} className={selectedDay===d.day_number?"active":""} onClick={()=>setSelectedDay(d.day_number)}><span>DAY {String(d.day_number).padStart(2,"0")}</span><b>{dayDate(d.day_number)}</b><small>{d.title} · {d.submission_count}</small></button>):<span className="la-no-days">No Listening submissions yet.</span>}</section></details>
 
   <section className="la-toolbar"><div><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search student, score or band…"/></div><button onClick={()=>load(selectedDay)}><RefreshCw size={14}/> Refresh</button></section>
   {message&&<p className="la-message">{message}</p>}
