@@ -10,7 +10,7 @@ test('Day32 renders original contiguous notes and summary without affecting othe
  for(let n=27;n<=32;n++)assert.ok(x.includes('gap('+n+')'));
 });
 test('Original day32 Reading input controls are readable',()=>{
- const css=read('app/day/[day]/mock/mock.css');
+ const css=read('app/day/[day]/mock/page.tsx');
  assert.match(css,/mock-r32-blank input/);
  assert.match(css,/mock-r32-original/);
 });
