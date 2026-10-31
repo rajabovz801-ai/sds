@@ -284,7 +284,7 @@ export default function FullMockPage(){
     <button className="cr-submit" disabled={busy} onClick={()=>setConfirmStage("reading")}><Send size={15}/> {busy?"Submitting…":"Submit Reading"}</button>
    </footer>
    {message&&<div className="mock-floating-message">{message}</div>}
-   <style jsx global>{`
+   <style>{`
 
 /* Day 32 original IELTS notes and continuous summary only. */
 .mock-reading-shell .mock-r32-original{
@@ -317,7 +317,7 @@ export default function FullMockPage(){
   .mock-reading-shell .mock-r32-blank input{width:99px;}
 }
 
-::highlight(ark-mock-yellow){background:#ffe58a;color:inherit}`}</style>
+`}</style><style jsx global>{`::highlight(ark-mock-yellow){background:#ffe58a;color:inherit}`}</style>
   </main>
  }
 
