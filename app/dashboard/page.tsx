@@ -199,7 +199,7 @@ export default function Dashboard(){
  const planLive=progressUnlocked(planDayNumber,stats,today,clock);
 
  const chosen=DAYS[selected-1];
- const personalMockEntry=[18,25].includes(chosen.n)&&unlocked(chosen,today)&&clock>=Date.UTC(2026,9,chosen.n,4,0,0);
+ const personalMockEntry=[18,25,32].includes(chosen.n)&&unlocked(chosen,today)&&clock>=Date.UTC(2026,9,chosen.n,4,0,0);
  const live=personalMockEntry||progressUnlocked(chosen.n,stats,today,clock);
  // Days 18 and 25 use student-bound personal codes. Its material rows are intentionally draft,
  // so regular published-module counts must never hide the code-entry navigation.

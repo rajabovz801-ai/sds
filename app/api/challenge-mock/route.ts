@@ -382,7 +382,7 @@ export async function GET(req:NextRequest){
    if(action==="availability")return json({published:preview||opened,open:preview||opened,opens_at:mockOpensAt(day),code_required:!preview});
    if(!viewer)return json({detail:"Please sign in."},401);
    const entry=await mockEntryForStudent(day,viewer);
-   if(entry==="scheduled")return json({detail:`Mock ${day}-oktabr soat 09:00 da ochiladi (Toshkent vaqti).`,scheduled:true,opens_at:mockOpensAt(day)},403);
+   if(entry==="scheduled")return json({detail:`Mock ${new Date(START_UTC+(day-1)*DAY_MS).toLocaleDateString('uz-UZ',{timeZone:'UTC',day:'numeric',month:'long'})} soat 09:00 da ochiladi (Toshkent vaqti).`,scheduled:true,opens_at:mockOpensAt(day)},403);
    if(entry==="code_required")return json({detail:"Shaxsiy kirish kodingizni kiriting.",code_required:true,opens_at:mockOpensAt(day)},403);
    src=await source(day,true);
   }else if(!action.startsWith("admin_"))src=viewer&&isPreview(viewer)?await source(day,true):await source(day);

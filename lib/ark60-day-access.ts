@@ -14,7 +14,7 @@ export function challengeDayUnlocked(day:number,stats:ChallengeProgress|null,tod
  if(!Number.isInteger(day)||day<1||day>60||!stats)return false;
  if(stats.preview)return true;
  // Personal-code mocks must be reachable even without a billing package; their server gate verifies payment codes.
- if(day===18||day===25)return new Date(Date.UTC(2026,9,day)).toISOString().slice(0,10)<=today&&now>=Date.UTC(2026,9,day,4,0,0);
+ if(day===18||day===25||day===32)return new Date(Date.UTC(2026,9,day)).toISOString().slice(0,10)<=today&&now>=Date.UTC(2026,9,day,4,0,0);
  if(stats.membership?.enforced){
    const date=new Date(Date.UTC(2026,9,day)),iso=date.toISOString().slice(0,10),m=stats.membership;
    if(iso>today)return false;
