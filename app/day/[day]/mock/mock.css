@@ -150,35 +150,3 @@
   white-space: normal;
   hyphens: auto;
 }
-
-
-/* Day 32 original IELTS notes and continuous summary only. */
-.mock-reading-shell .mock-r32-original{
-  margin:0 0 20px;padding:18px 20px;border:1px solid #d9e1eb;
-  border-radius:9px;background:#fff;color:#1c3045;
-  font:400 16px/1.75 Arial,Helvetica,sans-serif;
-}
-.mock-reading-shell .mock-r32-original h4{
-  margin:0 0 16px;font:700 17px/1.4 Arial,Helvetica,sans-serif;text-align:center;color:#122d47;
-}
-.mock-reading-shell .mock-r32-original h5{
-  margin:19px 0 8px;font:700 15px/1.4 Arial,Helvetica,sans-serif;color:#263e55;
-}
-.mock-reading-shell .mock-r32-original ul{margin:6px 0 16px;padding-left:23px;list-style:disc;}
-.mock-reading-shell .mock-r32-original li{padding:2px 0 5px;line-height:1.9;}
-.mock-reading-shell .mock-r32-original p{margin:0;line-height:2.1;white-space:normal;}
-.mock-reading-shell .mock-r32-blank{display:inline-flex;align-items:center;gap:5px;margin:1px 3px;vertical-align:middle;white-space:nowrap;}
-.mock-reading-shell .mock-r32-blank strong{
-  display:grid;place-items:center;min-width:24px;height:25px;padding:0 4px;
-  border-radius:4px;background:#eaf0f6;color:#22465f;font:700 12px Arial,Helvetica,sans-serif;
-}
-.mock-reading-shell .mock-r32-blank input{
-  box-sizing:border-box;width:124px;max-width:25vw;height:34px;padding:4px 9px;
-  border:1px solid #b8c9d8;border-radius:5px;background:#fff;
-  font:500 15px Arial,Helvetica,sans-serif;color:#142d45;
-}
-.mock-reading-shell .mock-r32-blank input:focus{outline:2px solid #6b9cc6;outline-offset:1px;}
-@media(max-width:600px){
-  .mock-reading-shell .mock-r32-original{padding:14px 12px;font-size:15px;}
-  .mock-reading-shell .mock-r32-blank input{width:99px;}
-}
