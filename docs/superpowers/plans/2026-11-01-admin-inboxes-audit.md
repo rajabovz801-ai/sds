@@ -12,3 +12,5 @@ User-approved scope: integrate Writing/Speaking into the existing sidebar and fi
 Review focus: reviewed links with pending filter; rapid student/day switching; grading while refreshing; band zero; browser back/refresh; mobile overflow/audio unmount.
 
 Verification: 313/313 Node tests pass; production build (including TypeScript) passes. Reviewed notification tests execute actual inbox load functions with fixture fetch responses. Editable-field tests reproduced the save/edit race before inputs were locked. Independent review found that race; it is fixed and covered. No backend, SQL, payment/access policy or student content changed. Live authenticated browser interaction remains unavailable due to prior browser tool timeouts.
+
+Embedded report layout uses a named width container so tablet panes collapse based on remaining space beside the sidebar; embedded headers use flex so refresh stays aligned right.

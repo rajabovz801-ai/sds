@@ -105,10 +105,10 @@ html body .ark-admin-scope .student-admin-row .student-status{display:inline-fle
 
 /* Reuse result screens inside the existing sidebar without duplicate navigation. */
 html body .ark-admin-scope .admin-report-heading{display:none}
-html body .ark-admin-scope .admin-embedded-report{min-width:0}
+html body .ark-admin-scope .admin-embedded-report{min-width:0;container-type:inline-size;container-name:admin-report}
 html body .ark-admin-scope .admin-embedded-report .admin-report-nav{display:none}
 html body .ark-admin-scope .admin-embedded-report :is(.cr-admin,.la-shell,.ma-shell,.wa-shell,.sa-shell){min-height:0;background:transparent}
-html body .ark-admin-scope .admin-embedded-report :is(.cr-admin-top,.la-top,.ma-top,.wa-top,.sa-top){position:static;background:transparent;border:0;padding:0 0 12px;height:auto;min-height:40px;justify-content:flex-end}
+html body .ark-admin-scope .admin-embedded-report :is(.cr-admin-top,.la-top,.ma-top,.wa-top,.sa-top){display:flex;position:static;background:transparent;border:0;padding:0 0 12px;height:auto;min-height:40px;justify-content:flex-end}
 html body .ark-admin-scope .admin-embedded-report :is(.cr-admin-top,.la-top,.ma-top,.wa-top,.sa-top)>:not(button:last-child){display:none}
 html body .ark-admin-scope .admin-embedded-report .cr-a-content{padding:0;max-width:none;margin:0}
 html body .ark-admin-scope .bill-filter-select{display:flex;align-items:center;gap:10px;color:#64748b;font-size:13px}
@@ -132,3 +132,12 @@ html body .ark-admin-scope .bill-pagination button:disabled{opacity:.45;cursor:d
 @media(max-width:710px){html body .ark-admin-scope .bill-request-details{padding:12px}.ark-admin-scope .bill-admin-filters{flex-wrap:wrap}.ark-admin-scope .bill-filter-select{width:100%}}
 
 html body .ark-admin-scope button.admin-inline-link{background:none;border:0;padding:0;font:inherit;cursor:pointer;text-decoration:underline}
+
+/* Report panes respond to the space beside the sidebar, including tablet widths. */
+@container admin-report (max-width:850px){
+ html body .ark-admin-scope .admin-embedded-report :is(.la-layout,.wa-layout,.sa-layout){grid-template-columns:minmax(0,1fr)}
+ html body .ark-admin-scope .admin-embedded-report :is(.wa-hero,.sa-hero){flex-wrap:wrap}
+ html body .ark-admin-scope .admin-embedded-report :is(.wa-toolbar,.sa-toolbar){flex-wrap:wrap}
+ html body .ark-admin-scope .admin-embedded-report :is(.wa-search,.sa-search){min-width:0;flex:1 1 240px}
+ html body .ark-admin-scope .admin-embedded-report :is(.wa-list,.sa-list,.la-list){max-height:340px;overflow:auto}
+}
