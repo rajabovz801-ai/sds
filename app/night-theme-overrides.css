@@ -35,3 +35,7 @@ html[data-ark-theme="dark"] .cr-shell .cr-options input:checked+.cr-radio:after{
 html[data-ark-theme="dark"] .ark-back-icon svg path{fill:#EAF0F7}
 html[data-ark-theme="dark"] .learning-shell.theme-dark .reward-modal{background:#152131;border-color:#29384A;color:#EAF0F7;box-shadow:0 24px 70px #00000055}
 html[data-ark-theme="dark"] .learning-shell.theme-dark .reward-modal>p{color:#A7B6C8}
+
+/* Membership duration is a meter, so its fill must contrast with its track. */
+html[data-ark-theme="dark"] body .ark-admin-scope .bill-expiry [role=progressbar]>span {background:#83D6AE}
+html[data-ark-theme="dark"] body .ark-admin-scope .bill-expiry.ending [role=progressbar]>span {background:#E8C56A}

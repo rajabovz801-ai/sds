@@ -32,7 +32,8 @@ test("cash column collisions are removed and admin displays issued access",()=>{
  const cash=file("app/components/admin-billing-panel.tsx");
  assert.match(cash,/\[filter,setFilter\]=useState\('all'\)/);
  assert.match(cash,/Berilgan obunalar/);
- assert.match(cash,/visibleGrants\.map/);
+ assert.match(cash,/pagedGrants\.map/);
+ assert.match(cash,/filteredGrants\.slice/);
 });
 test("day 1 and day 2 trial remains but mock stays separate",()=>{
  const access=file("lib/billing/access-policy.ts");

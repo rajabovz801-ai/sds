@@ -471,7 +471,7 @@ test("Listening admin results expose all answers with official correct answers",
   const admin=read("app/admin/listening/page.tsx");
   const root=read("app/admin/page.tsx");
   assert.match(root,/Listening results/);
-  assert.match(root,/\/admin\/listening/);
+  assert.match(root,/<ListeningAdmin\/>/);
   assert.match(admin,/selected\.review\.map/);
   assert.match(admin,/Your answer:/);
   assert.match(admin,/Correct:/);

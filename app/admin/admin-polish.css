@@ -102,3 +102,31 @@ html body .ark-admin-scope .sa-player small{letter-spacing:normal;text-transform
 /* Account status and target remain visible on small screens. */
 html body .ark-admin-scope .student-admin-meta{display:block}
 html body .ark-admin-scope .student-admin-row .student-status{display:inline-flex}
+
+/* Reuse result screens inside the existing sidebar without duplicate navigation. */
+html body .ark-admin-scope .admin-report-heading{display:none}
+html body .ark-admin-scope .admin-embedded-report{min-width:0}
+html body .ark-admin-scope .admin-embedded-report .admin-report-nav{display:none}
+html body .ark-admin-scope .admin-embedded-report :is(.cr-admin,.la-shell,.ma-shell){min-height:0;background:transparent}
+html body .ark-admin-scope .admin-embedded-report :is(.cr-admin-top,.la-top,.ma-top){position:static;background:transparent;border:0;padding:0 0 12px;height:auto;min-height:40px;justify-content:flex-end}
+html body .ark-admin-scope .admin-embedded-report :is(.cr-admin-top,.la-top,.ma-top)>:not(button:last-child){display:none}
+html body .ark-admin-scope .admin-embedded-report .cr-a-content{padding:0;max-width:none;margin:0}
+html body .ark-admin-scope .bill-filter-select{display:flex;align-items:center;gap:10px;color:#64748b;font-size:13px}
+html body .ark-admin-scope .bill-filter-select select{min-height:42px;padding:8px 32px 8px 12px;border:1px solid #dbe4ef;border-radius:10px;background:var(--panel,#fff);color:inherit;font:inherit;max-width:100%}
+html body .ark-admin-scope .bill-request-details{border:1px solid #dbe4ef;border-radius:16px;padding:16px 20px;margin:20px 0;scroll-margin-top:85px}
+html body .ark-admin-scope .bill-request-details>summary{cursor:pointer;font-weight:700;font-size:16px;color:#17375e;padding:4px 0}
+html body .ark-admin-scope .bill-request-details>summary span{display:inline-block;font-size:12px;font-weight:500;background:#eef3ff;border-radius:20px;padding:5px 10px;margin-left:10px}
+html body .ark-admin-scope .bill-order-actions>summary{cursor:pointer;white-space:nowrap;border:1px solid #dbe4ef;border-radius:8px;padding:8px 12px;display:inline-block;color:#2455a0}
+html body .ark-admin-scope .bill-order-actions[open]>summary{margin-bottom:12px}
+html body .ark-admin-scope .bill-grant-dates :is(span,strong){display:block;font-size:12px;white-space:nowrap;line-height:1.9}
+html body .ark-admin-scope .bill-grant-dates strong{font-weight:600}
+html body .ark-admin-scope .bill-expiry{min-width:145px;margin-top:8px}
+html body .ark-admin-scope .bill-expiry [role=progressbar]{height:8px;background:#e8edf4;border-radius:8px;overflow:hidden}
+html body .ark-admin-scope .bill-expiry [role=progressbar]>span{display:block;height:100%;background:#2c9b65;border-radius:8px;transition:width .3s}
+html body .ark-admin-scope .bill-expiry.ending [role=progressbar]>span{background:#d69a23}
+html body .ark-admin-scope .bill-expiry.scheduled [role=progressbar]>span{background:#4e7bd4}
+html body .ark-admin-scope .bill-expiry small{display:block;margin-top:5px;font-size:12px;color:#64748b}
+html body .ark-admin-scope .bill-pagination{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:12px 0;flex-wrap:wrap}
+html body .ark-admin-scope .bill-pagination>span{margin-right:auto;font-size:13px;color:#64748b}
+html body .ark-admin-scope .bill-pagination button:disabled{opacity:.45;cursor:default}
+@media(max-width:710px){html body .ark-admin-scope .bill-request-details{padding:12px}.ark-admin-scope .bill-admin-filters{flex-wrap:wrap}.ark-admin-scope .bill-filter-select{width:100%}}

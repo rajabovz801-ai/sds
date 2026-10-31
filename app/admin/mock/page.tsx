@@ -1,8 +1,9 @@
 "use client";
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useMemo,useRef,useState} from "react";
 import {BookOpen,CheckCircle2,Clock3,FileText,Headphones,PenLine,RefreshCcw,Search,UserRound,X} from "lucide-react";
 import AnimatedBackButton from "../admin-back";
 import ReportNav from "../report-nav";
+import {ADMIN_MOCK_DAYS,defaultMockDay,beginAdminRequest} from "@/lib/admin-display";
 import "./mock-admin.css";
 import MockCodePanel from "./mock-code-panel";
 import MockLiveView from "./mock-live-view";
@@ -18,7 +19,7 @@ type Attempt={
 const when=(v:string|null)=>v?new Date(v).toLocaleString("en-GB",{timeZone:"Asia/Tashkent",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"—";
 const band=(v:number|null)=>v===null||v===undefined?"—":Number(v).toFixed(1);
 const overall=(r:Attempt)=>r.listening_band!=null&&r.reading_band!=null&&r.writing_band!=null?Math.round(((Number(r.listening_band)+Number(r.reading_band)+Number(r.writing_band))/3)*2)/2:null;
-const MOCK_DAYS=Array.from({length:60},(_,i)=>i+1).filter(day=>new Date(Date.UTC(2026,9,day)).getUTCDay()===0);
+const MOCK_DAYS=ADMIN_MOCK_DAYS;
 const mockDate=(day:number,short=false)=>new Date(Date.UTC(2026,9,day)).toLocaleDateString("en-GB",{timeZone:"UTC",day:"numeric",month:short?"short":"long"});
 const status=(r:Attempt)=>{
  if(r.stage==="completed")return {label:"Completed",tone:"done"};
@@ -29,22 +30,26 @@ const status=(r:Attempt)=>{
 };
 
 export default function AdminFullMock(){
- const [day,setDay]=useState(18),[teacherPreview,setTeacherPreview]=useState<(Student&{id:string})|null>(null);
+ const [day,setDay]=useState(()=>defaultMockDay()),[teacherPreview,setTeacherPreview]=useState<(Student&{id:string})|null>(null);
  const [rows,setRows]=useState<Attempt[]>([]),[loading,setLoading]=useState(true),[message,setMessage]=useState(""),[query,setQuery]=useState(""),[selected,setSelected]=useState<Attempt|null>(null),[lastUpdated,setLastUpdated]=useState("");
+ const requestRef=useRef<AbortController|null>(null);
+ useEffect(()=>{const requested=new URLSearchParams(window.location.search).get("day");if(requested)setDay(defaultMockDay(new Date(),requested));return()=>requestRef.current?.abort()},[]);
  async function load(silent=false){
+  const controller=beginAdminRequest(requestRef.current,silent);if(!controller)return;requestRef.current=controller;
   if(!silent)setLoading(true);setMessage("");
   try{
-   const res=await fetch("/api/challenge-mock?action=admin_list&day="+day,{credentials:"same-origin",cache:"no-store"});
+   const res=await fetch("/api/challenge-mock?action=admin_list&day="+day,{credentials:"same-origin",cache:"no-store",signal:controller.signal});
    const obj=await res.json();
+   if(controller.signal.aborted)return;
    if(res.status===401){window.location.assign("/admin");return}
    if(!res.ok)throw new Error(obj.detail||"Could not load Full Mock results.");
    setRows(obj.attempts||[]);setTeacherPreview(obj.teacher_preview||null);
    setLastUpdated(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Tashkent",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date()));
    setSelected(previous=>previous?((obj.attempts||[]).find((x:Attempt)=>x.id===previous.id)||previous):null);
-  }catch(e){setMessage(e instanceof Error?e.message:"Could not contact the server.")}
-  finally{if(!silent)setLoading(false)}
+  }catch(e){if(controller.signal.aborted)return;setMessage(e instanceof Error?e.message:"Could not contact the server.")}
+  finally{if(requestRef.current===controller)requestRef.current=null;if(!controller.signal.aborted)setLoading(false)}
  }
- useEffect(()=>{setRows([]);setSelected(null);void load();const id=window.setInterval(()=>{if(document.visibilityState==="visible")void load(true)},5000);const focus=()=>void load(true);window.addEventListener("focus",focus);return()=>{window.clearInterval(id);window.removeEventListener("focus",focus)}},[day]);
+ useEffect(()=>{setRows([]);setSelected(null);void load();const id=window.setInterval(()=>{if(document.visibilityState==="visible")void load(true)},5000);const focus=()=>void load(true);window.addEventListener("focus",focus);return()=>{requestRef.current?.abort();window.clearInterval(id);window.removeEventListener("focus",focus)}},[day]);
  const visible=useMemo(()=>{const q=query.trim().toLowerCase();return rows.filter(r=>!q||((r.student?.first_name||"")+" "+(r.student?.last_name||"")+" "+(r.student?.username||"")).toLowerCase().includes(q))},[rows,query]);
  const completed=rows.filter(r=>r.stage==="completed").length;
  const readingDone=rows.filter(r=>r.reading_score!=null).length;
