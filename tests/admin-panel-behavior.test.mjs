@@ -33,9 +33,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),ts=require('typescript'),React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
-function component(file,states=[]){
+function component(file,states=[],effects=[]){
  let stateIndex=0;
- const fakeReact={...React,useState:initial=>[stateIndex<states.length?states[stateIndex++]:typeof initial==='function'?initial():initial,()=>{}],useEffect:()=>{},useMemo:fn=>fn(),useRef:value=>({current:value})};
+ const fakeReact={...React,useState:initial=>{const index=stateIndex++;if(!(index in states))states[index]=typeof initial==='function'?initial():initial;return [states[index],value=>{states[index]=typeof value==='function'?value(states[index]):value}]},useEffect:fn=>effects.push(fn),useMemo:fn=>fn(),useRef:value=>({current:value})};
  function load(filename){
   const source=fs.readFileSync(filename,'utf8').replace(/<style jsx global>/g,'<style>'),module={exports:{}};
   const code=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText;
@@ -44,7 +44,7 @@ function component(file,states=[]){
    if(name==='next/link')return ({children,...props})=>React.createElement('a',props,children);
    if(name==='next/navigation')return {usePathname:()=>'/admin/reading'};
    if(name.endsWith('.css'))return {};
-   if(name.startsWith('.')){const base=path.resolve(path.dirname(filename),name);for(const ext of ['','.tsx','.ts'])if(fs.existsSync(base+ext))return load(base+ext);}
+   if(name.startsWith('.')||name.startsWith('@/')){const base=name.startsWith('@/')?path.resolve(name.slice(2)):path.resolve(path.dirname(filename),name);for(const ext of ['','.tsx','.ts'])if(fs.existsSync(base+ext))return load(base+ext);}
    return require(name);
   };
   new Function('require','module','exports',code)(localRequire,module,module.exports);return module.exports;
@@ -75,4 +75,40 @@ test('Writing empty filters cannot expose an unrelated submission for approval',
  const html=renderToStaticMarkup(React.createElement(Page));
  assert.match(html,/Select a Writing submission/);
  assert.doesNotMatch(html,/Approve &amp; publish/);
+});
+
+test('Writing notification opens a reviewed submission despite the initial pending filter',async()=>{
+ const states=[],effects=[],originalFetch=globalThis.fetch,originalWindow=globalThis.window;
+ const rows=[{id:'reviewed',day_number:3,band:7,review_status:'reviewed',review_feedback:'Saved feedback'},{id:'pending',day_number:4,band:null,review_status:'pending'}];
+ globalThis.window={location:{search:'?section=writing&id=reviewed'}};
+ globalThis.fetch=async()=>({ok:true,json:async()=>({submissions:rows})});
+ try{
+  const Page=component('app/admin/writing/page.tsx',states,effects);Page();effects[0]();
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(states[4],'all');assert.equal(states[5],0);assert.equal(states[6],'reviewed');
+  assert.equal(states[7].reviewed,'7');assert.equal(states[8].reviewed,'Saved feedback');
+ }finally{globalThis.fetch=originalFetch;globalThis.window=originalWindow}
+});
+test('Speaking notification opens reviewed audio instead of silently reverting to pending',async()=>{
+ const states=[],effects=[],originalFetch=globalThis.fetch,originalWindow=globalThis.window;
+ const row={id:'reviewed',day_number:3,band:7,review_status:'reviewed',feedback:'Saved',answers:[],expires_at:null};
+ globalThis.window={location:{search:'?section=speaking&id=reviewed'}};
+ globalThis.fetch=async url=>({ok:true,json:async()=>String(url).includes('admin_detail')?{submission:row}:{submissions:[row]}});
+ try{
+  const Page=component('app/admin/speaking/page.tsx',states,effects);Page();effects[1]();
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(states[4],'all');assert.equal(states[5],0);assert.equal(states[6].id,'reviewed');assert.equal(states[1],false);
+ }finally{globalThis.fetch=originalFetch;globalThis.window=originalWindow}
+});
+test('Writing grading locks editable fields until the saved payload is refreshed',()=>{
+ const row={id:'w',day_number:1,review_status:'pending',payload:{word_count:100},submitted_at:'2026-10-27T06:00:00Z'};
+ const Page=component('app/admin/writing/page.tsx',[[row],false,'','', 'pending',0,'w',{w:'6'},{w:'draft'},'w',false]);
+ const html=renderToStaticMarkup(React.createElement(Page));
+ assert.match(html,/<select[^>]*disabled/);assert.match(html,/<textarea[^>]*disabled/);
+});
+test('Speaking grading locks editable fields until the saved payload is refreshed',()=>{
+ const row={id:'sp',day_number:1,review_status:'pending',answers:[],content:{payload:{}},student:null,submitted_at:'2026-10-27T06:00:00Z',expires_at:null,audio_expired:false};
+ const Page=component('app/admin/speaking/page.tsx',[[row],false,'','', 'pending',0,row,false,{sp:'6'},{sp:'draft'},'sp',false]);
+ const html=renderToStaticMarkup(React.createElement(Page));
+ assert.match(html,/<select[^>]*disabled/);assert.match(html,/<textarea[^>]*disabled/);
 });

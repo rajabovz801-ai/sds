@@ -1,8 +1,10 @@
 "use client";
 import {writingStage} from "../admin-utils";
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useMemo,useRef,useState} from "react";
 import AnimatedBackButton from "../admin-back";
 import ReportNav from "../report-nav";
+import {beginAdminRequest} from "@/lib/admin-display";
+import {parseReviewBand,mergeReviewDrafts} from "@/lib/admin-inbox";
 import AdminDayPicker from "../day-picker";
 import {CheckCircle2,Clock3,FileText,RefreshCcw,Search,Send,UserRound,Sparkles} from "lucide-react";
 import "./writing-admin.css";
@@ -22,20 +24,25 @@ export default function AdminWriting(){
  const [query,setQuery]=useState(""),[filter,setFilter]=useState<"pending"|"checked"|"all">("pending"),[day,setDay]=useState<number|0>(0);
  const [selectedId,setSelectedId]=useState(""),[bands,setBands]=useState<Record<string,string>>({}),[feedback,setFeedback]=useState<Record<string,string>>({}),[busy,setBusy]=useState(""),[aiBusy,setAiBusy]=useState(false);
 
+ const listRequest=useRef<AbortController|null>(null),requestedHandled=useRef(false);
+ const dirtyBands=useRef(new Set<string>()),dirtyFeedback=useRef(new Set<string>());
+
  async function load(){
+  const controller=beginAdminRequest(listRequest.current,false)!;listRequest.current=controller;
   setLoading(true);setMessage("");
   try{
-   const res=await fetch("/api/challenge-writing?action=admin_list",{credentials:"same-origin",cache:"no-store"});
-   const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not load Writing submissions.");
+   const res=await fetch("/api/challenge-writing?action=admin_list",{credentials:"same-origin",cache:"no-store",signal:controller.signal});
+   const obj=await res.json();if(controller.signal.aborted)return;if(!res.ok)throw new Error(obj.detail||"Could not load Writing submissions.");
    const next:Row[]=obj.submissions||[];setRows(next);
    const b:Record<string,string>={},f:Record<string,string>={};
-   next.forEach(r=>{if(r.band!==null)b[r.id]=String(r.band);if(r.review_feedback)f[r.id]=r.review_feedback||""});
-   setBands(b);setFeedback(f);
-   const requested=new URLSearchParams(window.location.search).get("id");
+   next.forEach(r=>{b[r.id]=r.band!=null?String(r.band):"";f[r.id]=r.review_feedback||""});
+   setBands(current=>mergeReviewDrafts(b,current,dirtyBands.current));setFeedback(current=>mergeReviewDrafts(f,current,dirtyFeedback.current));
+   const requested=requestedHandled.current?null:new URLSearchParams(window.location.search).get("id");
+   if(requested&&next.some(r=>r.id===requested)){requestedHandled.current=true;setFilter("all");setDay(0);setQuery("")}
    setSelectedId(current=>requested&&next.some(r=>r.id===requested)?requested:current&&next.some(r=>r.id===current)?current:(next[0]?.id||""));
-  }catch(e){setMessage(e instanceof Error?e.message:"Could not contact the server.")}finally{setLoading(false)}
+  }catch(e){if(!controller.signal.aborted)setMessage(e instanceof Error?e.message:"Could not contact the server.")}finally{if(listRequest.current===controller)listRequest.current=null;if(!controller.signal.aborted)setLoading(false)}
  }
- useEffect(()=>{void load()},[]);
+ useEffect(()=>{void load();return()=>{listRequest.current?.abort();}},[]);
 
  const days=useMemo(()=>[...new Set(rows.map(r=>r.day_number))].sort((a,b)=>a-b),[rows]);
  const visible=useMemo(()=>rows.filter(r=>filter==="all"||r.review_status===(filter==="checked"?"reviewed":filter)).filter(r=>!day||r.day_number===day).filter(r=>{
@@ -52,11 +59,12 @@ export default function AdminWriting(){
  const recentPending=rows.filter(r=>r.review_status==="pending"&&Date.parse(r.submitted_at)>=Date.now()-72*3600000).length;
 
  async function grade(row:Row){
-  const band=Number(bands[row.id]);if(!Number.isFinite(band)){setMessage("Select a band score first.");return}
+  const band=parseReviewBand(bands[row.id]);if(band===null){setMessage("Select a band score first.");return}
   setBusy(row.id);setMessage("");
   try{
    const res=await fetch("/api/challenge-writing",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"grade",id:row.id,band,feedback:feedback[row.id]||""})});
    const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not save score.");
+   dirtyBands.current.delete(row.id);dirtyFeedback.current.delete(row.id);
    await load();
   }catch(e){setMessage(e instanceof Error?e.message:"Could not contact the server.")}finally{setBusy("")}
  }
@@ -80,14 +88,14 @@ export default function AdminWriting(){
     total+=Number(obj.graded||0);
     if(Number(obj.processed||0)===0)break;
    }
-   setMessage(total?("AI checked "+total+" pending Writing submissions. Review and approve the suggested scores."):"No unchecked Writing submissions were found.");
    await load();
+   setMessage(total?("AI checked "+total+" pending Writing submissions. Review and approve the suggested scores."):"No unchecked Writing submissions were found.");
   }catch(e){setMessage(e instanceof Error?e.message:"Could not contact the server.")}finally{setAiBusy(false)}
  }
 
  return <main className="wa-shell">
-  <header className="wa-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>WRITING INBOX</span></div><button onClick={load}><RefreshCcw size={15}/> Refresh</button></header><ReportNav/>
-  <section className="wa-hero"><div><small>TEACHER REVIEW INBOX</small><h1>Writing submissions</h1><p>Every new essay is AI-assessed first. The suggested band, criteria and corrections stay pending until a teacher reviews and approves them.</p><button className="wa-ai-all" disabled={aiBusy||aiPending===0} onClick={aiGradePending}><Sparkles size={14}/>{aiBusy?"Checking pending Writing…":"AI check pending ("+aiPending+")"}</button></div><div className="wa-kpis"><span><b>{pending}</b> Pending</span><span><b>{rows.length-pending}</b> Checked</span><span><b>{rows.length}</b> In inbox</span></div></section>
+  <header className="wa-top"><AnimatedBackButton href="/admin" ariaLabel="Back to admin"/><div><b>ARK EDUCATION</b><span>WRITING INBOX</span></div><button onClick={load} disabled={loading||!!busy||aiBusy}><RefreshCcw size={15}/> Refresh</button></header><ReportNav/>
+  <section className="wa-hero"><div><small>TEACHER REVIEW INBOX</small><h1>Writing submissions</h1><p>Every new essay is AI-assessed first. The suggested band, criteria and corrections stay pending until a teacher reviews and approves them.</p><button className="wa-ai-all" disabled={aiBusy||!!busy||aiPending===0} onClick={aiGradePending}><Sparkles size={14}/>{aiBusy?"Checking pending Writing…":"AI check pending ("+aiPending+")"}</button></div><div className="wa-kpis"><span><b>{pending}</b> Pending</span><span><b>{rows.length-pending}</b> Checked</span><span><b>{rows.length}</b> In inbox</span></div></section>
 
   <AdminDayPicker days={days.map(d=>({day:d,label:`Day ${d} · ${dayDate(d)}`}))} value={day} onChange={setDay} all/><details className="admin-day-history"><summary>Show day overview</summary><section className="wa-days"><button className={day===0?"active":""} onClick={()=>setDay(0)}><span>ALL</span><b>{rows.length}</b><small>current inbox</small></button>{days.map(d=><button key={d} className={day===d?"active":""} onClick={()=>setDay(d)}><span>DAY {String(d).padStart(2,"0")}</span><b>{dayDate(d)}</b><small>{rows.filter(r=>r.day_number===d).length} submissions</small></button>)}</section></details>
 
@@ -119,9 +127,9 @@ export default function AdminWriting(){
        </div>
       </>}
     </section>
-    <div className="wa-actions"><a href={"/api/challenge-writing?action=pdf&id="+selected.id} target="_blank" rel="noreferrer"><FileText size={15}/> Open assessment PDF</a>{!selected.payload?.ai_assessment&&<button disabled={busy==="ai-"+selected.id} onClick={()=>aiGrade(selected)}><Sparkles size={15}/>{busy==="ai-"+selected.id?"Checking…":"Run AI check"}</button>}</div>
+    <div className="wa-actions"><a href={"/api/challenge-writing?action=pdf&id="+selected.id} target="_blank" rel="noreferrer"><FileText size={15}/> Open assessment PDF</a>{!selected.payload?.ai_assessment&&<button disabled={!!busy||aiBusy} onClick={()=>aiGrade(selected)}><Sparkles size={15}/>{busy==="ai-"+selected.id?"Checking…":"Run AI check"}</button>}</div>
     {selected.payload?.ai_assessment&&<div className="wa-ai-card"><div className="wa-ai-head"><span><Sparkles size={15}/> AI SUGGESTION</span><b>Band {Number(selected.payload.ai_assessment.band??selected.band??0).toFixed(1)}</b><em>{selected.review_status==="reviewed"?"Teacher approved":"Teacher approval required"}</em></div><div className="wa-ai-scores"><span><small>{selected.payload?.task_type==="task1"?"TASK ACHIEVEMENT":"TASK RESPONSE"}</small><b>{Number(selected.payload.ai_assessment.task_criterion??0).toFixed(1)}</b></span><span><small>COHERENCE</small><b>{Number(selected.payload.ai_assessment.coherence_cohesion??0).toFixed(1)}</b></span><span><small>LEXICAL</small><b>{Number(selected.payload.ai_assessment.lexical_resource??0).toFixed(1)}</b></span><span><small>GRAMMAR</small><b>{Number(selected.payload.ai_assessment.grammar??0).toFixed(1)}</b></span></div><p>{selected.payload.ai_assessment.summary}</p>{Array.isArray(selected.payload.ai_assessment.errors)&&selected.payload.ai_assessment.errors.length>0&&<div className="wa-errors"><b>Key corrections</b>{selected.payload.ai_assessment.errors.map((e:any,i:number)=><article key={i}><strong>{i+1}. {e.category||"Correction"}</strong><span><i>Original</i>{e.original}</span><span><i>Better</i>{e.correction}</span>{e.explanation&&<small>{e.explanation}</small>}</article>)}</div>}</div>}
-    <div className="wa-review"><label><span>Teacher final band</span><select value={bands[selected.id]||""} onChange={e=>setBands(v=>({...v,[selected.id]:e.target.value}))}><option value="">Select</option>{Array.from({length:19},(_,i)=>i/2).map(v=><option key={v} value={v}>{v.toFixed(1)}</option>)}</select></label><label className="feedback"><span>Teacher feedback <i>editable before publishing</i></span><textarea value={feedback[selected.id]||""} onChange={e=>setFeedback(v=>({...v,[selected.id]:e.target.value}))} placeholder="Review the AI feedback, edit it if needed, then approve…"/></label><button disabled={busy===selected.id||!bands[selected.id]} onClick={()=>grade(selected)}>{busy===selected.id?"Saving…":selected.review_status==="reviewed"?"Update published result":"Approve & publish"}<Send size={15}/></button></div>
+    <div className="wa-review"><label><span>Teacher final band</span><select disabled={!!busy||aiBusy} value={bands[selected.id]||""} onChange={e=>{dirtyBands.current.add(selected.id);setBands(v=>({...v,[selected.id]:e.target.value}))}}><option value="">Select</option>{Array.from({length:19},(_,i)=>i/2).map(v=><option key={v} value={v}>{v.toFixed(1)}</option>)}</select></label><label className="feedback"><span>Teacher feedback <i>editable before publishing</i></span><textarea disabled={!!busy||aiBusy} value={feedback[selected.id]||""} onChange={e=>{dirtyFeedback.current.add(selected.id);setFeedback(v=>({...v,[selected.id]:e.target.value}))}} placeholder="Review the AI feedback, edit it if needed, then approve…"/></label><button disabled={!!busy||aiBusy||parseReviewBand(bands[selected.id])===null} onClick={()=>grade(selected)}>{busy===selected.id?"Saving…":selected.review_status==="reviewed"?"Update published result":"Approve & publish"}<Send size={15}/></button></div>
    </>}</div>
   </section>
  </main>;

@@ -107,9 +107,9 @@ html body .ark-admin-scope .student-admin-row .student-status{display:inline-fle
 html body .ark-admin-scope .admin-report-heading{display:none}
 html body .ark-admin-scope .admin-embedded-report{min-width:0}
 html body .ark-admin-scope .admin-embedded-report .admin-report-nav{display:none}
-html body .ark-admin-scope .admin-embedded-report :is(.cr-admin,.la-shell,.ma-shell){min-height:0;background:transparent}
-html body .ark-admin-scope .admin-embedded-report :is(.cr-admin-top,.la-top,.ma-top){position:static;background:transparent;border:0;padding:0 0 12px;height:auto;min-height:40px;justify-content:flex-end}
-html body .ark-admin-scope .admin-embedded-report :is(.cr-admin-top,.la-top,.ma-top)>:not(button:last-child){display:none}
+html body .ark-admin-scope .admin-embedded-report :is(.cr-admin,.la-shell,.ma-shell,.wa-shell,.sa-shell){min-height:0;background:transparent}
+html body .ark-admin-scope .admin-embedded-report :is(.cr-admin-top,.la-top,.ma-top,.wa-top,.sa-top){position:static;background:transparent;border:0;padding:0 0 12px;height:auto;min-height:40px;justify-content:flex-end}
+html body .ark-admin-scope .admin-embedded-report :is(.cr-admin-top,.la-top,.ma-top,.wa-top,.sa-top)>:not(button:last-child){display:none}
 html body .ark-admin-scope .admin-embedded-report .cr-a-content{padding:0;max-width:none;margin:0}
 html body .ark-admin-scope .bill-filter-select{display:flex;align-items:center;gap:10px;color:#64748b;font-size:13px}
 html body .ark-admin-scope .bill-filter-select select{min-height:42px;padding:8px 32px 8px 12px;border:1px solid #dbe4ef;border-radius:10px;background:var(--panel,#fff);color:inherit;font:inherit;max-width:100%}
@@ -130,3 +130,5 @@ html body .ark-admin-scope .bill-pagination{display:flex;align-items:center;just
 html body .ark-admin-scope .bill-pagination>span{margin-right:auto;font-size:13px;color:#64748b}
 html body .ark-admin-scope .bill-pagination button:disabled{opacity:.45;cursor:default}
 @media(max-width:710px){html body .ark-admin-scope .bill-request-details{padding:12px}.ark-admin-scope .bill-admin-filters{flex-wrap:wrap}.ark-admin-scope .bill-filter-select{width:100%}}
+
+html body .ark-admin-scope button.admin-inline-link{background:none;border:0;padding:0;font:inherit;cursor:pointer;text-decoration:underline}

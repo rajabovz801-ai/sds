@@ -3,8 +3,9 @@ import Link from "next/link";
 import {groupReading} from "../admin-utils";
 import AnimatedBackButton from "../admin-back";
 import ReportNav from "../report-nav";
+import {beginAdminRequest} from "@/lib/admin-display";
 import AdminDayPicker from "../day-picker";
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useMemo,useRef,useState} from "react";
 import {BookOpen,Clock3,Download,RefreshCw,Users,X,ClipboardList} from "lucide-react";
 type Entry={student_id:string,passage_id:string,day_number:number,ordinal:number,score:number,total:number,elapsed_seconds:number,submitted_at:string,student:{first_name:string,last_name:string,username:string}|null,review?:{items:{number:number,submitted:string,correct:string[],status:"correct"|"wrong"|"empty"}[]}|null};
 type P={id:string,day_number:number,ordinal:number,title:string,status:string};
@@ -13,8 +14,9 @@ function dayDate(day:number){return new Date(Date.UTC(2026,9,day)).toLocaleDateS
 function mins(s:number){const n=Math.max(0,Math.floor(s||0));return (n>=3600?Math.floor(n/3600)+"h ":"")+Math.floor(n%3600/60)+"m "+String(n%60).padStart(2,"0")+"s"}
 export default function ReadingAdmin(){
  const [day,setDay]=useState(1),[availableDays,setAvailableDays]=useState<DayMeta[]>([]),[rows,setRows]=useState<Entry[]>([]),[passages,setPassages]=useState<P[]>([]),[error,setError]=useState(""),[loading,setLoading]=useState(true),[unauthorized,setUnauthorized]=useState(false),[selected,setSelected]=useState<Entry|null>(null);
- async function load(){setLoading(true);setError("");try{const r=await fetch("/api/challenge-reading?action=admin&day="+day,{credentials:"same-origin",cache:"no-store"});const v=await r.json();if(!r.ok){setUnauthorized(r.status===401);throw Error(v.error||"Cannot load results")}const nextDays:DayMeta[]=v.available_days||[];setAvailableDays(nextDays);if(nextDays.length&&!nextDays.some(x=>x.day_number===day)){setDay(nextDays[0].day_number);return}setRows(v.attempts||[]);setPassages(v.passages||[]);setSelected(null)}catch(e){setError(String(e))}finally{setLoading(false)}}
- useEffect(()=>{load()},[day]);
+ const listRequest=useRef<AbortController|null>(null);
+ async function load(){const controller=beginAdminRequest(listRequest.current,false)!;listRequest.current=controller;setLoading(true);setError("");try{const r=await fetch("/api/challenge-reading?action=admin&day="+day,{credentials:"same-origin",cache:"no-store",signal:controller.signal});const v=await r.json();if(controller.signal.aborted)return;if(!r.ok){setUnauthorized(r.status===401);throw Error(v.error||"Cannot load results")}const nextDays:DayMeta[]=v.available_days||[];setAvailableDays(nextDays);if(nextDays.length&&!nextDays.some(x=>x.day_number===day)){setDay(nextDays[0].day_number);return}setRows(v.attempts||[]);setPassages(v.passages||[]);setSelected(null)}catch(e){if(!controller.signal.aborted)setError(String(e))}finally{if(listRequest.current===controller)listRequest.current=null;if(!controller.signal.aborted)setLoading(false)}}
+ useEffect(()=>{setRows([]);setSelected(null);void load();return()=>listRequest.current?.abort()},[day]);
  const groups=useMemo(()=>groupReading(rows),[rows]);
  const ordinals=useMemo(()=>[...new Set([...passages.map(p=>p.ordinal),...rows.map(r=>r.ordinal)])].sort((a,b)=>a-b),[passages,rows]);
  const totalSeconds=rows.reduce((n,r)=>n+r.elapsed_seconds,0);

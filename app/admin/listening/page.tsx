@@ -1,7 +1,8 @@
 "use client";
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useMemo,useRef,useState} from "react";
 import AnimatedBackButton from "../admin-back";
 import ReportNav from "../report-nav";
+import {beginAdminRequest} from "@/lib/admin-display";
 import AdminDayPicker from "../day-picker";
 import {CheckCircle2,Clock3,Headphones,RefreshCw,Search,UserRound,XCircle} from "lucide-react";
 import "./listening-admin.css";
@@ -34,33 +35,37 @@ export default function AdminListening(){
  const [loading,setLoading]=useState(true),[message,setMessage]=useState(""),[query,setQuery]=useState("");
  const [selected,setSelected]=useState<Detail|null>(null),[detailBusy,setDetailBusy]=useState(false);
 
+ const listRequest=useRef<AbortController|null>(null),detailRequest=useRef<AbortController|null>(null);
  async function load(day=selectedDay){
+  const controller=beginAdminRequest(listRequest.current,false)!;listRequest.current=controller;detailRequest.current?.abort();setSelected(null);setDetailBusy(false);
   setLoading(true);setMessage("");
   try{
-   const res=await fetch("/api/challenge-listening?action=admin_list&day="+day,{credentials:"same-origin",cache:"no-store"});
-   const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not load Listening results.");
+   const res=await fetch("/api/challenge-listening?action=admin_list&day="+day,{credentials:"same-origin",cache:"no-store",signal:controller.signal});
+   const obj=await res.json();if(controller.signal.aborted)return;if(!res.ok)throw new Error(obj.detail||"Could not load Listening results.");
    const available:DayMeta[]=obj.available_days||[];
    setDays(available);
    if(available.length&&!available.some(d=>d.day_number===day)){setSelectedDay(available[0].day_number);return}
    setRows(obj.submissions||[]);
    setSelected(null);
-  }catch(e){setMessage(e instanceof Error?e.message:"Could not load Listening results.")}finally{setLoading(false)}
+  }catch(e){if(!controller.signal.aborted)setMessage(e instanceof Error?e.message:"Could not load Listening results.")}finally{if(listRequest.current===controller)listRequest.current=null;if(!controller.signal.aborted)setLoading(false)}
  }
- useEffect(()=>{void load(selectedDay)},[selectedDay]);
+ useEffect(()=>{setRows([]);void load(selectedDay);return()=>{listRequest.current?.abort();detailRequest.current?.abort()}},[selectedDay]);
 
  async function open(row:Row){
+  const controller=beginAdminRequest(detailRequest.current,false)!;detailRequest.current=controller;setSelected(null);
   setDetailBusy(true);setMessage("");
   try{
-   const res=await fetch("/api/challenge-listening?action=admin_detail&id="+encodeURIComponent(row.id),{credentials:"same-origin",cache:"no-store"});
-   const obj=await res.json();if(!res.ok)throw new Error(obj.detail||"Could not open result.");
+   const res=await fetch("/api/challenge-listening?action=admin_detail&id="+encodeURIComponent(row.id),{credentials:"same-origin",cache:"no-store",signal:controller.signal});
+   const obj=await res.json();if(controller.signal.aborted)return;if(!res.ok)throw new Error(obj.detail||"Could not open result.");
    setSelected({...obj.submission,student:obj.submission.student});
-  }catch(e){setMessage(e instanceof Error?e.message:"Could not open result.")}finally{setDetailBusy(false)}
+  }catch(e){if(!controller.signal.aborted)setMessage(e instanceof Error?e.message:"Could not open result.")}finally{if(detailRequest.current===controller)detailRequest.current=null;if(!controller.signal.aborted)setDetailBusy(false)}
  }
 
  const visible=useMemo(()=>rows.filter(r=>{
   const text=(r.student?(r.student.first_name+" "+r.student.last_name+" "+r.student.username):"")+" "+r.score+" "+r.band;
   return text.toLowerCase().includes(query.trim().toLowerCase());
  }),[rows,query]);
+ useEffect(()=>{if(selected&&!visible.some(r=>r.id===selected.id)){detailRequest.current?.abort();setSelected(null);setDetailBusy(false)}},[visible,selected]);
  const selectedMeta=days.find(d=>d.day_number===selectedDay);
  const prompts=selected?promptMap(selected.content?.payload):new Map<number,string>();
  const avgScore=rows.length?Math.round(rows.reduce((a,r)=>a+Number(r.score||0),0)/rows.length):0;

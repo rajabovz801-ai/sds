@@ -23,7 +23,7 @@ test("admin Full Mock page refreshes live without exposing scores to student UI"
 test("admin navigation links to Full Mock results",()=>{
  assert.ok(admin.includes('name:"Full Mock results"'));
  assert.ok(admin.includes('<AdminFullMock/>'));
- assert.ok(admin.includes('setView(name)'));
+ assert.ok(admin.includes('navigateView(name)'));
 });
 
 test("Writing detail exposes Task 1, Task 2 and AI criteria to admin",()=>{
