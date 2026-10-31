@@ -16,7 +16,7 @@ export async function GET(req:NextRequest){
   const db=getServiceSupabase();
   const [people,codes]=await Promise.all([
    db.from('ark60_students').select('id,first_name,last_name,username',{count:'exact'}).eq('status','active').order('first_name').limit(2000),
-   db.from('ark60_mock_entry_codes').select('id,student_id,day_number,code_hint,paid_confirmed_at,issued_at,redeemed_at,revoked_at',{count:'exact'}).eq('day_number',day).order('issued_at',{ascending:false}).limit(2000)
+   db.from('ark60_mock_entry_codes').select('id,student_id,day_number,code_hint,paid_confirmed_at,grant_basis,issued_at,redeemed_at,revoked_at',{count:'exact'}).eq('day_number',day).order('issued_at',{ascending:false}).limit(2000)
   ]);
   if(people.error||codes.error)throw Error('Mock access list unavailable');
   return send({students:people.data,codes:codes.data,opens_at:personalMockOpensAt(day),limited:(people.count||0)>2000||(codes.count||0)>2000});
@@ -32,7 +32,8 @@ export async function POST(req:NextRequest){
    const admin=await getAdmin(req);
    if(!admin||admin.role!=='super_admin')return send({detail:'Super admin access required.'},403);
    if(input.action==='issue'){
-    if(!isUuid(String(input.student_id||''))||input.payment_confirmed!==true)return send({detail:'Select a student and confirm their payment first.'},400);
+    const authorized=input.day===32?input.authorization_confirmed===true:input.payment_confirmed===true;
+    if(!isUuid(String(input.student_id||''))||!authorized)return send({detail:input.day===32?'Select a student and approve mock entry.':'Select a student and confirm their payment first.'},400);
     const raw=randomBytes(6).toString('hex').toUpperCase();
     const {data,error}=await db.rpc('ark60_mock_code_issue',{p_admin:admin.id,p_student:input.student_id,p_day:input.day,p_hash:hash(raw),p_hint:raw.slice(-4)});
     if(error)return send({detail:'Could not issue code. Check that the student is active.'},409);
