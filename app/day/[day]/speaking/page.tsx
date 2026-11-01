@@ -225,15 +225,19 @@ export default function SpeakingPage(){
   const ok=micReady||await checkMic();if(!ok)return;
   try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.().catch(()=>{})}catch{}
   if(data?.preview){setAttemptId("preview-speaking-"+day);setStage("part1");return}
+  try{
   const res=await fetch("/api/challenge-speaking",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});
   const obj=await res.json();if(!res.ok){setMessage(obj.detail||"Could not start Speaking.");return}
   setAttemptId(obj.attempt.id);setData(prev=>prev?{...prev,attempt:obj.attempt}:prev);setStage(obj.already_submitted?"complete":"part1");
+  }catch{setMessage("Could not start Speaking. Check your connection and try again.")}
  }
  async function startPreparation(){
   setMessage("");
+  try{
   const res=await fetch("/api/challenge-speaking",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start_preparation",day,attempt_id:attemptId})});
   const obj=await res.json();if(!res.ok){setMessage(obj.detail||"Could not start preparation.");return}
   setData(prev=>prev?{...prev,attempt:{...(prev.attempt||{id:attemptId,day_number:day,status:"in_progress"}),part2_preparation_started_at:obj.started_at,part2_preparation_expires_at:obj.expires_at}}:prev);
+  }catch{setMessage("Could not start preparation. Check your connection and try again.")}
  }
  async function submit(){
   if(!p1Done||!p2Done||!p3Done)return;
@@ -258,7 +262,7 @@ export default function SpeakingPage(){
  const submitted=data.attempt?.status==="submitted"||stage==="complete";
 
  return <main className={"sp-shell "+(stage==="intro"?"sp-shell--intro":"")}>
-  <StudyTimeHeartbeat day={day} module="speaking"/>
+  <StudyTimeHeartbeat day={day} module="speaking" enabled={stage!=="intro"&&!submitted}/>
   <header className="sp-topbar"><AnimatedBackButton className="sp-back" onClick={goBack} ariaLabel="Back to study day"/><div className="sp-top-title"><span>{stage==="intro"?"":"Speaking"}</span></div><button className="sp-full" onClick={toggleFullscreen} aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} title={fullScreen?"Exit fullscreen":"Fullscreen"}>{fullScreen?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></header>
 
   {stage!=="intro"&&<div className="sp-progress"><span className={stage==="part1"?"active":p1Done?"done":""}><b>Part 1</b></span><i/><span className={stage==="part2"?"active":p2Done?"done":""}><b>Part 2</b></span><i/><span className={stage==="part3"?"active":p3Done?"done":""}><b>Part 3</b></span><i/><span className={stage==="review"||stage==="complete"?"active":""}><b>Review</b></span></div>}
@@ -308,3 +312,4 @@ export default function SpeakingPage(){
   </section>
  </main>;
 }
+

@@ -84,7 +84,7 @@ export default function VocabularyPage(){
   return out;
  },[units]);
  if(panel!=="overview"&&currentUnit){
-  return <main className="vv-shell"><StudyTimeHeartbeat day={day} module="vocabulary"/>
+  return <main className="vv-shell"><StudyTimeHeartbeat day={day} module="vocabulary" enabled={panel==="study"||(panel==="quiz"&&attempt?.status==="in_progress")}/>
    <header className="vv-top"><AnimatedBackButton onClick={back}/><div className="vv-brand">Vocabulary</div><span className="vv-top-tag">DAY {String(day).padStart(2,"0")}</span></header>
    {panel==="study"&&<div className="vv-inner vv-study">
     <div className="vv-eyebrow">STUDY YOUR WORDS</div><h1>{currentUnit.source_title} <span>Unit {currentUnit.unit_number}</span></h1>

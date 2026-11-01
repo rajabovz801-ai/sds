@@ -137,7 +137,7 @@ export default function WritingPage(){
  if(data.submission)return <main className="writing-finish"><section><small>DAY {String(day).padStart(2,"0")} · {taskLabel.toUpperCase()}</small><h1>Writing submitted</h1><WritingResult submission={data.submission} onRetry={retryAssessment} retrying={sending}/>{message&&<p role="status">{message}</p>}<AnimatedBackButton href={`/day/${day}`} ariaLabel="Back to study day"/></section></main>;
 
  const p=data.content.payload;
- return <main className="writing-shell"><StudyTimeHeartbeat day={day} module="writing"/>
+ return <main className="writing-shell"><StudyTimeHeartbeat day={day} module="writing" enabled={started&&!paused&&remaining>0}/>
   <header className="writing-topbar"><div className="writing-back-slot"><AnimatedBackButton onClick={goBack} ariaLabel="Back to study day"/></div><div className="writing-top-center"><span>DAY {String(day).padStart(2,"0")}</span><b>{taskLabel}</b></div><div className="writing-top-meta"><strong className={remaining<=300&&started&&remaining>0?"urgent":""}><Clock3 size={16}/>{formatTime(remaining)}</strong><button className="writing-fullscreen" type="button" aria-label={fullScreen?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFullscreen}>{fullScreen?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
   <section className="writing-toolbar"><div><span className="writing-rule">{p.min_words}+ words · {Math.round(p.duration_seconds/60)} minutes</span></div><div className="writing-controls">{!started?<button className="primary" onClick={begin} disabled={remaining<=0}><Play size={16}/> Start timer</button>:<button onClick={togglePause} disabled={remaining<=0}>{remaining<=0?<><Clock3 size={16}/> Time up</>:paused?<><Play size={16}/> Resume timer</>:<><Pause size={16}/> Pause timer</>}</button>}<button className="submit" onClick={()=>submit(false)} disabled={sending||!answer.trim()}><Send size={16}/>{sending?"Saving response…":"Submit"}</button>{!answer.trim()&&<small className="writing-submit-hint">Write an answer to submit</small>}</div></section>
   <div ref={splitRef} className="writing-stage" style={{"--writing-split":split+"%"} as CSSProperties}>
@@ -147,3 +147,4 @@ export default function WritingPage(){
   </div>
  </main>
 }
+

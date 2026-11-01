@@ -825,15 +825,10 @@ async def actions(request:Request,response:Response):
         else:
             content=db("GET","ark60_content",{"select":"id","day_number":"eq."+str(day),"module":"eq."+module,"status":"eq.published","limit":1})
         if not content:raise HTTPException(status_code=403,detail="This module is not yet available")
-        # A heartbeat can add at most 20 seconds every 18 seconds per module.
-        rows=db("GET","ark60_study_sessions",{"select":"id,last_active_at,active_seconds","student_id":"eq."+user["id"],"study_date":"eq."+str(today_d),"day_number":"eq."+str(day),"module":"eq."+module,"order":"last_active_at.desc","limit":1})
-        if rows:
-            last=datetime.fromisoformat(rows[0]["last_active_at"].replace("Z","+00:00"))
-            elapsed=(now()-last).total_seconds()
-            if elapsed<18: return {"ok":True,"added_seconds":0}
-            added=min(20,int(elapsed))
-            db("PATCH","ark60_study_sessions",params={"id":"eq."+rows[0]["id"],"last_active_at":"eq."+rows[0]["last_active_at"]},payload={"active_seconds":int(rows[0]["active_seconds"])+added,"last_active_at":now().isoformat()},prefer="return=minimal")
-            return {"ok":True,"added_seconds":added}
-        db("POST","ark60_study_sessions",payload={"student_id":user["id"],"study_date":str(today_d),"day_number":day,"module":module,"active_seconds":0},prefer="return=minimal")
-        return {"ok":True,"added_seconds":0}
+        # Postgres serializes all tabs for this student and never backfills gaps.
+        result=db("POST","rpc/ark60_record_study_heartbeat",payload={
+            "p_student":user["id"],"p_day":day,"p_module":module,"p_reset":data.get("reset") is True
+        })
+        return {"ok":True,"added_seconds":int(result or 0)}
     raise HTTPException(status_code=404,detail="Unknown action")
+

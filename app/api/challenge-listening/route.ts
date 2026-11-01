@@ -1,3 +1,4 @@
+import {withTransientRetry} from "@/lib/transient-write";
 import {hasCompletedResult} from "@/lib/billing/server";
 import {NextRequest,NextResponse} from "next/server";
 import {getAdmin,getStudent,isDayUnlocked,isOwnOrigin,isPreview} from "@/lib/ark60-content-auth";
@@ -110,10 +111,12 @@ async function getCurrentAttempt(studentId:string,day=DAY){
 async function ensureSubmission(attempt:AnyObj,content:AnyObj){
  const db=getServiceSupabase();
  const payload={attempt_id:attempt.id,answers:attempt.answers||{},part_scores:attempt.part_scores||[],score:attempt.score,band:attempt.band,elapsed_seconds:attempt.elapsed_seconds,source:String(content?.payload?.version||content?.payload?.test_code||"listening")};
+ await withTransientRetry(async()=>{
  const {error}=await db.from("ark60_submissions").upsert({
   student_id:attempt.student_id,day_number:attempt.day_number,module:MODULE,payload,score:attempt.score,band:attempt.band,review_status:"reviewed"
  },{onConflict:"student_id,day_number,module",ignoreDuplicates:true});
  if(error)throw error;
+ });
 }
 function attemptForClient(content:AnyObj,attempt:AnyObj|null){
  if(!attempt)return null;
@@ -313,3 +316,4 @@ export async function POST(req:NextRequest){
   return json({detail:"Unknown action."},400);
  }catch(e){console.error("Listening POST",e);return json({detail:"Could not save Listening right now."},500)}
 }
+

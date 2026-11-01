@@ -344,13 +344,13 @@ export default function ListeningPage(){
  if(!data||!payload)return <main className="ls-shell ls-center"><Headphones size={30}/><h1>Listening unavailable</h1><p>{message}</p><AnimatedBackButton href={"/day/"+day}/></main>;
 
  if(result&&!reviewMode)return <main className="ls-shell ls-result-shell">
-  <StudyTimeHeartbeat day={day} module="listening"/>
+  <StudyTimeHeartbeat day={day} module="listening" enabled={started&&!result}/>
   <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">Listening</div><button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></header>
   <section className="ls-result-card"><span className="ls-result-icon"><CheckCircle2 size={30}/></span><small>DAY {String(day).padStart(2,"0")} · LISTENING COMPLETE · ATTEMPT {result.attempt_number||attemptNumber}</small><h1>{result.score} <i>/ 40</i></h1><div className="ls-band">IELTS Band <b>{Number(result.band).toFixed(1)}</b></div><div className="ls-section-scores">{result.part_scores.map((s,i)=><div key={i}><span>Section {i+1}</span><b>{s}/10</b></div>)}</div><p>{data.preview?"Preview result only. Nothing was saved to the real student record or admin results.":"This attempt is saved. You can review it or start a fresh attempt without deleting this result."}</p><div className="ls-result-actions"><button onClick={()=>{setReviewMode(true);setSection(1);setCurrentQuestion(1)}}>Review answers <ChevronRight size={15}/></button><button className="ghost" disabled={submitting} onClick={retryTest}>{submitting?"Starting…":"Try again"} <RefreshCcw size={15}/></button><AnimatedBackButton onClick={goBack} ariaLabel="Back to study day"/></div></section>
  </main>;
 
  return <main className={"ls-shell "+(reviewMode?"reviewing":!started?"ls-shell--intro":"")}>
-  <StudyTimeHeartbeat day={day} module="listening"/>
+  <StudyTimeHeartbeat day={day} module="listening" enabled={started&&!result}/>
   <audio ref={audioRef} preload="auto" src={audioSrc} onPlay={()=>setAudioStatus("playing")} onEnded={()=>{if(audioPart+1<audioTracks.length){setAudioPart(audioPart+1);setAudioStatus("loading");setMessage("")}else setAudioStatus("ended")}} onError={()=>{if(startedRef.current){setAudioStatus("error");setMessage("Audio could not load. Check your internet connection, then reopen this Listening task.")}}} onPause={()=>{if(startedRef.current&&audioStatus==="playing"&&!audioRef.current?.ended){setAudioStatus("resume");void audioRef.current?.play().catch(()=>{setAudioStatus("error");setMessage("Audio was interrupted. Please reopen Listening.");})}}}/>
   <header className="ls-topbar"><AnimatedBackButton className="ls-back" onClick={goBack}/><div className="ls-top-title">{started||reviewMode?"Listening":""}</div><div className="ls-top-actions">{started&&!reviewMode&&<span className={"ls-audio-state "+audioStatus}><Volume2 size={14}/>{audioStatus==="ended"?"Audio finished":audioStatus==="error"?"Audio unavailable":audioStatus==="resume"?"Audio interrupted":audioStatus==="loading"?"Loading audio":"Playing"} {started&&<i>{secLabel(elapsed)}</i>}</span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
 
@@ -387,3 +387,4 @@ export default function ListeningPage(){
   <style jsx global>{`::highlight(ark-listening-yellow){background:#ffe58a;color:inherit}`}</style>
  </main>;
 }
+

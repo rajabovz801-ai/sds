@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
           input.confirmed!==true||typeof input.note!=="string"||
           input.note.trim().length<3||input.note.length>500||
           (input.plan==="challenge"&&input.mock_on!=null)||
-          (input.plan==="mock"&&(typeof input.mock_on!=="string"||!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.mock_on)))) {
+          (input.plan==="mock"&&(typeof input.mock_on!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(input.mock_on)))) {
         return send({error:"O‘quvchi, naqd pul tasdig‘i, paket yoki ma’lumotlar noto‘g‘ri."},400);
       }
       const {data,error}=await db.rpc("ark60_billing_record_cash",{
@@ -136,3 +136,4 @@ export async function POST(request: NextRequest) {
     return send({ error: "Amal bajarilmadi. Keyinroq qayta urinib ko‘ring." }, 503);
   }
 }
+
