@@ -182,10 +182,15 @@ test("student API provides reward center leaderboard and editable profile action
 });
 
 
-test("study-time heartbeat ignores hidden and idle tabs",()=>{
+test("study-time heartbeat ignores hidden and idle tabs but counts reading and playing audio",async()=>{
+  const {shouldCountStudy}=await import("../lib/study-activity.ts");
+  const state={visible:true,focused:true,lastActivity:0,now:120000,mediaPlaying:false};
+  assert.equal(shouldCountStudy(state),true);
+  assert.equal(shouldCountStudy({...state,visible:false}),false);
+  assert.equal(shouldCountStudy({...state,focused:false}),false);
+  assert.equal(shouldCountStudy({...state,now:300001}),false);
+  assert.equal(shouldCountStudy({...state,now:600000,mediaPlaying:true}),true);
   const heartbeat=read("app/components/study-time-heartbeat.tsx");
-  assert.match(heartbeat,/document\.visibilityState!==\"visible\"/);
-  assert.match(heartbeat,/Date\.now\(\)-lastActivity>45000/);
   assert.match(heartbeat,/pointerdown/);
   assert.match(heartbeat,/keydown/);
 });
