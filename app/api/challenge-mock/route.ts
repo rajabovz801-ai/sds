@@ -466,6 +466,8 @@ export async function POST(req:NextRequest){
    const row=await attempt(student.id,day);
    if(!row||!["listening","reading","writing"].includes(row.stage)||
       (row.stage==="listening"&&!row.listening_started_at))return json({ok:true,added_seconds:0});
+   if((row.stage==="reading"&&(!row.reading_started_at||remaining(row.reading_started_at,3600)<=0))||
+      (row.stage==="writing"&&(!row.writing_started_at||remaining(row.writing_started_at,3600)<=0)))return json({ok:true,added_seconds:0});
    const {data:live,error:liveError}=await db.from("ark60_mock_live").select("allowed,heartbeat_at").eq("student_id",student.id).eq("day_number",day).maybeSingle();
    if(liveError)throw liveError;
    if(!live?.allowed||!liveLeaseActive(live.heartbeat_at))return json({ok:true,added_seconds:0});

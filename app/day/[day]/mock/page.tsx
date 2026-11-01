@@ -239,7 +239,7 @@ export default function FullMockPage(){
  }
 
 
- const studyTracking=mockActive&&sharing?<StudyTimeHeartbeat day={day} module={stage as "listening"|"reading"|"writing"} mock enabled={stage!=="listening"||listeningStarted}/>:null;
+ const studyTracking=mockActive&&sharing?<StudyTimeHeartbeat day={day} module={stage as "listening"|"reading"|"writing"} mock enabled={stage==="listening"?listeningStarted:stage==="reading"?rRemaining>0:wRemaining>0}/>:null;
  const confirmation=confirmStage&&<div className="mock-confirm-backdrop" role="presentation"><section className="mock-confirm" role="dialog" aria-modal="true" aria-labelledby="mock-confirm-title"><h2 id="mock-confirm-title">Submit {confirmStage==="listening"?"Listening":confirmStage==="reading"?"Reading":"Writing"}?</h2><p>{confirmStage==="writing"?"Finish the Full Mock? Your results will appear after the Writing assessment is complete.":<>You will continue to {confirmStage==="listening"?"Reading":"Writing"}. You cannot return to this section.</>}</p><div><button autoFocus onClick={()=>setConfirmStage(null)}>Cancel</button><button onClick={()=>{if(confirmStage==="listening")void submitListening(true);else if(confirmStage==="writing")void submitWriting(false,true);else{setConfirmStage(null);void submitReading(false)}}}>{confirmStage==="writing"?"Submit and finish":"Submit and continue"}</button></div></section></div>;
  if(loading)return <LoadingIndicator/>;
  if(accessGate)return <MockAccessGate day={day} scheduled={accessGate.scheduled} opensAt={accessGate.opensAt} onRedeemed={()=>{setLoading(true);setAccessGate(null);setLoadVersion(v=>v+1)}}/>;

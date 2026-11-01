@@ -80,3 +80,9 @@ test('Full Mock tracks active study using the same server clock behind its exist
  assert.match(page,/const studyTracking=mockActive&&sharing/);
  assert.match(read('app/components/study-time-heartbeat.tsx'),/mock\?"study_heartbeat":"heartbeat"/);
 });
+test('expired Full Mock timed sections stop study time even when submission is delayed',()=>{
+ const page=read('app/day/[day]/mock/page.tsx'),api=read('app/api/challenge-mock/route.ts');
+ assert.match(page,/stage==="reading"\?rRemaining>0:wRemaining>0/);
+ assert.match(api,/remaining\(row.reading_started_at,3600\)<=0/);
+ assert.match(api,/remaining\(row.writing_started_at,3600\)<=0/);
+});
