@@ -4,7 +4,7 @@ import StudentPresence from "./student-presence";
 import {shouldCountStudy,STUDY_IDLE_MS} from "../../lib/study-activity";
 
 type ModuleName="reading"|"article"|"vocabulary"|"writing"|"listening"|"speaking";
-export default function StudyTimeHeartbeat({day,module,enabled=true}:{day:number;module:ModuleName;enabled?:boolean}){
+export default function StudyTimeHeartbeat({day,module,enabled=true,mock=false}:{day:number;module:ModuleName;enabled?:boolean;mock?:boolean}){
  useEffect(()=>{
   let stopped=false,inFlight=false,lastActivity=Date.now(),needsReset=true,activityEpoch=0;
   const markActive=()=>{const stamp=Date.now();if(stamp-lastActivity>STUDY_IDLE_MS){activityEpoch++;needsReset=true}lastActivity=stamp};
@@ -18,8 +18,8 @@ export default function StudyTimeHeartbeat({day,module,enabled=true}:{day:number
    inFlight=true;
    const reset=needsReset,epoch=activityEpoch;
    try{
-    const response=await fetch("/api/ark60",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},
-     body:JSON.stringify({action:"heartbeat",day,module,reset}),keepalive:true});
+    const response=await fetch(mock?"/api/challenge-mock":"/api/ark60",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({action:mock?"study_heartbeat":"heartbeat",day,module,reset}),keepalive:true});
     if(response.ok&&!stopped&&epoch===activityEpoch)needsReset=false;
    }catch{needsReset=true}finally{inFlight=false}
   }
@@ -38,6 +38,6 @@ export default function StudyTimeHeartbeat({day,module,enabled=true}:{day:number
    window.removeEventListener("focus",resume);window.removeEventListener("blur",suspend);
    document.removeEventListener("visibilitychange",onVisible);
   };
- },[day,module,enabled]);
+ },[day,module,enabled,mock]);
  return <StudentPresence area={(module[0].toUpperCase()+module.slice(1)) as "Reading"|"Listening"|"Article"|"Vocabulary"|"Writing"|"Speaking"} day={day}/>;
 }

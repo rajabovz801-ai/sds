@@ -461,6 +461,18 @@ export async function POST(req:NextRequest){
    return json({ok:true,watching});
   }
   const src=requiresPersonalMockCode(day)?await source(day,true):await source(day,isPreview(student));if(!src)return json({detail:"Full Mock materials are not published yet."},404);
+  if(action==="study_heartbeat"){
+   if(preview)return json({ok:true,preview:true,added_seconds:0});
+   const row=await attempt(student.id,day);
+   if(!row||!["listening","reading","writing"].includes(row.stage)||
+      (row.stage==="listening"&&!row.listening_started_at))return json({ok:true,added_seconds:0});
+   const {data:live,error:liveError}=await db.from("ark60_mock_live").select("allowed,heartbeat_at").eq("student_id",student.id).eq("day_number",day).maybeSingle();
+   if(liveError)throw liveError;
+   if(!live?.allowed||!liveLeaseActive(live.heartbeat_at))return json({ok:true,added_seconds:0});
+   const {data:added,error}=await db.rpc("ark60_record_study_heartbeat",{p_student:student.id,p_day:day,p_module:row.stage,p_reset:body.reset===true});
+   if(error)throw error;
+   return json({ok:true,added_seconds:Number(added)||0});
+  }
   if(["start","start_listening","live_resume"].includes(action)){
    const {data:consent,error}=await db.from("ark60_mock_live").select("allowed").eq("student_id",student.id).eq("day_number",day).maybeSingle();if(error)throw error;
    if(!consent?.allowed)return json({detail:"Allow mock view before starting this Full Mock."},403);
@@ -596,3 +608,4 @@ export async function POST(req:NextRequest){
   return json({detail:"Unknown Full Mock action."},400);
  }catch(e){console.error("mock POST",e);return json({detail:"Could not update Full Mock."},500)}
 }
+

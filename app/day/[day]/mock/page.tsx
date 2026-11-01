@@ -1,4 +1,5 @@
 "use client";
+import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
 import {fetchMockWithAccess,restoreMockDraft,mockRuntimeActive} from "../../../../lib/mock-client-access";
 import MockAccessGate from "../../../components/mock-access-gate";
 import {ensureExamFullscreen} from "../../../../lib/exam-fullscreen";
@@ -238,6 +239,7 @@ export default function FullMockPage(){
  }
 
 
+ const studyTracking=mockActive&&sharing?<StudyTimeHeartbeat day={day} module={stage as "listening"|"reading"|"writing"} mock enabled={stage!=="listening"||listeningStarted}/>:null;
  const confirmation=confirmStage&&<div className="mock-confirm-backdrop" role="presentation"><section className="mock-confirm" role="dialog" aria-modal="true" aria-labelledby="mock-confirm-title"><h2 id="mock-confirm-title">Submit {confirmStage==="listening"?"Listening":confirmStage==="reading"?"Reading":"Writing"}?</h2><p>{confirmStage==="writing"?"Finish the Full Mock? Your results will appear after the Writing assessment is complete.":<>You will continue to {confirmStage==="listening"?"Reading":"Writing"}. You cannot return to this section.</>}</p><div><button autoFocus onClick={()=>setConfirmStage(null)}>Cancel</button><button onClick={()=>{if(confirmStage==="listening")void submitListening(true);else if(confirmStage==="writing")void submitWriting(false,true);else{setConfirmStage(null);void submitReading(false)}}}>{confirmStage==="writing"?"Submit and finish":"Submit and continue"}</button></div></section></div>;
  if(loading)return <LoadingIndicator/>;
  if(accessGate)return <MockAccessGate day={day} scheduled={accessGate.scheduled} opensAt={accessGate.opensAt} onRedeemed={()=>{setLoading(true);setAccessGate(null);setLoadVersion(v=>v+1)}}/>;
@@ -245,7 +247,7 @@ export default function FullMockPage(){
 
  if(stage==="not_started")return <main className="mock-entry"><header className="mock-entry-top"><AnimatedBackButton href="/dashboard"/><b>ARK EDUCATION · FULL MOCK</b><span>{data.preview?"PREVIEW MODE":mockDateText}</span></header><section className="mock-entry-card"><small>DAY {String(day).padStart(2,"0")} · IELTS FULL MOCK</small><h1>Listening → Reading → Writing</h1><p>Complete all three sections in order. Section scores stay hidden until the Writing assessment is finished.</p>{shareControl}<div className="mock-entry-steps"><div><Headphones/><b>Listening</b><span>40 questions · audio once</span></div><div><BookOpen/><b>Reading</b><span>40 questions · 60 minutes</span></div><div><PenLine/><b>Writing</b><span>Task 1 + Task 2 · 60 minutes</span></div></div>{data.preview&&<div className="mock-preview-note"><ShieldCheck size={16}/> Teacher preview · nothing is saved to real student results.</div>}<button disabled={busy||!sharing||consentBusy} onClick={startMock}>{busy?"Opening…":"Start Full Mock"} <ChevronRight size={17}/></button>{message&&<p className="mock-error">{message}</p>}</section></main>;
 
- if(stage==="listening")return <main className={"ls-shell mock-section-shell "+(!listeningStarted?"ls-shell--intro":"")}>{confirmation}
+ if(stage==="listening")return <main className={"ls-shell mock-section-shell "+(!listeningStarted?"ls-shell--intro":"")}>{confirmation}{studyTracking}
   <audio ref={audioRef} preload="auto" src={lp.audio_url} onPlay={()=>setAudioState("playing")} onEnded={()=>setAudioState("ended")} onPause={()=>{if(listeningStarted&&audioState==="playing"){audioRef.current?.play().catch(()=>setAudioState("resume"))}}}/>
   <header className="ls-topbar"><div className="mock-section-lock" aria-label="Section locked until submission"><LockKeyhole size={17}/></div><div className="ls-top-title">FULL MOCK · LISTENING</div><div className="ls-top-actions">{listeningStarted&&<span className={"ls-audio-state "+audioState}><Volume2 size={14}/>{audioState==="ended"?"Audio finished":audioState==="resume"?"Audio needs permission":"Playing"} <i>{fmt(lElapsed)}</i></span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
   {!listeningStarted?<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>FULL MOCK · SECTION 1 OF 3</small><h1>Listening</h1><p>40 questions · 4 sections. If you leave before submitting, your unfinished Listening will restart from the beginning.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Playback</span></div></div>{!sharing&&shareControl}<button disabled={busy||!sharing||consentBusy} onClick={startListening}><Headphones size={17}/> {busy?"Starting…":"Start Listening"}</button></section>:<>
@@ -267,7 +269,7 @@ export default function FullMockPage(){
   for(const q of passage?.questions||[]){const last=groups[groups.length-1];if(!last||last[0]?.instruction!==q.instruction)groups.push([q]);else last.push(q)}
   const partAnswered=(passage?.questions||[]).filter(q=>rAnswers[String(q.number)]).length;
   const totalAnswered=Object.values(rAnswers).filter(Boolean).length;
-  return <main className={"cr-shell mock-reading-shell"+(day===25?" mock-reading-day25":"")}>{confirmation}
+  return <main className={"cr-shell mock-reading-shell"+(day===25?" mock-reading-day25":"")}>{confirmation}{studyTracking}
    <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div></div><div className="cr-head-end"><span className="cr-head-practice">FULL MOCK · PART {String(rPassage).padStart(2,"0")}</span><button className="cr-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
    <div className="cr-instructions"><div><small>FULL MOCK · IELTS READING</small><p>3 passages <span>·</span> 40 questions <span>·</span> 60-minute countdown</p></div><div className="cr-tools"></div></div>
    <div className="cr-mobile-tabs"><button className={rTab==="passage"?"active":""} onClick={()=>setRTab("passage")}>Passage</button><button className={rTab==="questions"?"active":""} onClick={()=>setRTab("questions")}>Questions</button></div>
@@ -321,7 +323,7 @@ export default function FullMockPage(){
   </main>
  }
 
- if(stage==="writing")return <main className="writing-shell mock-writing-shell">{confirmation}
+ if(stage==="writing")return <main className="writing-shell mock-writing-shell">{confirmation}{studyTracking}
   <header className="writing-topbar"><div className="writing-back-slot"><LockKeyhole size={17}/></div><div className="writing-top-center"><b>FULL MOCK · WRITING</b></div><div className="writing-top-meta"><strong className={wRemaining<=300?"urgent":""}><Clock3 size={16}/>{fmt(wRemaining)}</strong><button className="writing-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
   <section className="writing-toolbar"><div className="mock-writing-tabs"><button className={"writing-task-chip "+(wTask===1?"active":"")} onClick={()=>setWTask(1)}>Writing Task 1</button><button className={"writing-task-chip "+(wTask===2?"active":"")} onClick={()=>setWTask(2)}>Writing Task 2</button><span className="writing-rule">Task 1 + Task 2 · 60 minutes total</span></div><div className="writing-controls"><button className="submit" disabled={busy||!w1.trim()||!w2.trim()} onClick={()=>submitWriting(false)}><Send size={16}/>{busy?"Submitting…":"Submit Writing"}</button></div></section>
   <div className="writing-stage">

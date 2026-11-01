@@ -72,3 +72,11 @@ test('day progress uses published requirements rather than all scheduled cards',
  assert.match(source,/dayRequired=progress\?\.required_by_day\?\.\[String\(day\)\]\|\|\[\]/);
  assert.match(source,/\{dayDone\}\/\{dayRequired.length\} modules completed/);
 });
+test('Full Mock tracks active study using the same server clock behind its existing access gate',()=>{
+ const api=read('app/api/challenge-mock/route.ts'),page=read('app/day/[day]/mock/page.tsx');
+ assert.match(api,/action==="study_heartbeat"/);
+ assert.ok(api.indexOf('if(requiresPersonalMockCode(day))')<api.indexOf('if(action==="study_heartbeat")'));
+ assert.match(api,/p_module:row.stage/);
+ assert.match(page,/const studyTracking=mockActive&&sharing/);
+ assert.match(read('app/components/study-time-heartbeat.tsx'),/mock\?"study_heartbeat":"heartbeat"/);
+});
