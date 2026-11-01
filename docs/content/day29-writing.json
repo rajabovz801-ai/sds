@@ -1,0 +1,13 @@
+{
+  "task_type": "task1",
+  "duration_seconds": 1200,
+  "min_words": 150,
+  "prompt": "The chart below shows the expenditure of two countries on consumer goods in 2010.",
+  "instructions": [
+    "Summarise the information by selecting and reporting the main features, and make comparisons where relevant."
+  ],
+  "visual_kind": "/writing/day29-consumer-goods-2010.png",
+  "image_url": "/writing/day29-consumer-goods-2010.png",
+  "revision": "day29-consumer-goods-2010-v1",
+  "source_file": "Teacher-provided consumer goods expenditure chart (France and UK, 2010)"
+}

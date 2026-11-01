@@ -1,0 +1,602 @@
+{
+  "version": "listening-test-182-day29-v1",
+  "test_code": "TEST-182",
+  "audio_url": "https://ia600407.us.archive.org/5/items/test-182-converted/TEST_182_Converted.mp3",
+  "audio_once": true,
+  "total_questions": 40,
+  "source_file": "TEST 182.pdf",
+  "sections": [
+    {
+      "number": 1,
+      "label": "SECTION 1",
+      "range": "Questions 1–10",
+      "blocks": [
+        {
+          "kind": "notes_groups",
+          "range": "Questions 1–10",
+          "instruction": "Complete the notes below.",
+          "word_limit": "Write ONE WORD AND/OR A NUMBER for each answer.",
+          "title": "Holiday Job",
+          "groups": [
+            {
+              "heading": "Job details",
+              "items": [
+                [
+                  "Location ",
+                  {
+                    "q": 1
+                  },
+                  " Island"
+                ],
+                [
+                  "Start date ",
+                  {
+                    "q": 2
+                  }
+                ]
+              ]
+            },
+            {
+              "heading": "Available jobs",
+              "items": [
+                [
+                  "Vacancy 1: Calypso Bistro"
+                ],
+                [
+                  "working as a ",
+                  {
+                    "q": 3
+                  }
+                ],
+                [
+                  "no experience needed"
+                ],
+                [
+                  "Vacancy 2: Guest Liaison"
+                ],
+                [
+                  "must be able to ",
+                  {
+                    "q": 4
+                  }
+                ],
+                [
+                  "Vacancy 3: Activities staff"
+                ],
+                [
+                  "help with games and water sports"
+                ],
+                [
+                  "need experience with ",
+                  {
+                    "q": 5
+                  }
+                ],
+                [
+                  "Vacancy 4: In reception"
+                ],
+                [
+                  "as a porter"
+                ],
+                [
+                  "must be able to ",
+                  {
+                    "q": 6
+                  }
+                ]
+              ]
+            },
+            {
+              "heading": "Benefits — For all jobs",
+              "items": [
+                [
+                  "there is free ",
+                  {
+                    "q": 7
+                  }
+                ],
+                [
+                  {
+                    "q": 8
+                  },
+                  " are provided"
+                ]
+              ]
+            },
+            {
+              "heading": "Interview",
+              "items": [
+                [
+                  "to be held on ",
+                  {
+                    "q": 9
+                  },
+                  " at 2pm"
+                ],
+                [
+                  "bring a CV and a ",
+                  {
+                    "q": 10
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "label": "SECTION 2",
+      "range": "Questions 11–20",
+      "blocks": [
+        {
+          "kind": "mcq",
+          "range": "Questions 11–15",
+          "instruction": "Choose the correct letter, A, B or C.",
+          "questions": [
+            {
+              "q": 11,
+              "text": "The walk is organised specifically for",
+              "options": {
+                "A": "extremely fit people.",
+                "B": "parents with their children.",
+                "C": "tourists unfamiliar with the local area."
+              }
+            },
+            {
+              "q": 12,
+              "text": "The maximum number of people on the walk will be",
+              "options": {
+                "A": "220.",
+                "B": "250.",
+                "C": "280."
+              }
+            },
+            {
+              "q": 13,
+              "text": "The organisers will stop walkers taking part if they",
+              "options": {
+                "A": "arrive without a waterproof coat.",
+                "B": "are causing a lot of trouble.",
+                "C": "are unable to answer basic safety questions."
+              }
+            },
+            {
+              "q": 14,
+              "text": "The walk was cancelled two years previously because of",
+              "options": {
+                "A": "illness in the organising team.",
+                "B": "very stormy weather.",
+                "C": "problems getting people to help."
+              }
+            },
+            {
+              "q": 15,
+              "text": "Badges can be obtained",
+              "options": {
+                "A": "only when they have been ordered before the walk.",
+                "B": "immediately people have completed the whole walk.",
+                "C": "one week after the walk has finished."
+              }
+            }
+          ]
+        },
+        {
+          "kind": "matching",
+          "range": "Questions 16–20",
+          "title": "Objects",
+          "instruction": "What advice does Peter give about the following objects? Choose the correct letter, A, B or C next to questions 16–20.",
+          "choices": {
+            "A": "Walkers are advised to have this",
+            "B": "Walkers can have this, if they wish",
+            "C": "Walkers are advised NOT to have this"
+          },
+          "items": [
+            {
+              "q": 16,
+              "text": "a pair of thick trousers"
+            },
+            {
+              "q": 17,
+              "text": "a mobile phone"
+            },
+            {
+              "q": 18,
+              "text": "a torch"
+            },
+            {
+              "q": 19,
+              "text": "something to drink"
+            },
+            {
+              "q": 20,
+              "text": "a rucksack"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "label": "SECTION 3",
+      "range": "Questions 21–30",
+      "blocks": [
+        {
+          "kind": "matching",
+          "range": "Questions 21–26",
+          "title": "Comments — Websites",
+          "instruction": "What do the students say about each of the following websites? Choose SIX answers from the box and write the correct letter, A–H, next to questions 21–26.",
+          "choices": {
+            "A": "Information is not freely accessible",
+            "B": "Too detailed for their purposes",
+            "C": "Contains a useful tool for users",
+            "D": "Convenient format",
+            "E": "Up-to-date information",
+            "F": "Difficult to navigate",
+            "G": "Some information is missing",
+            "H": "Useful historical information"
+          },
+          "items": [
+            {
+              "q": 21,
+              "text": "National Geographic"
+            },
+            {
+              "q": 22,
+              "text": "United Nations"
+            },
+            {
+              "q": 23,
+              "text": "Energy Information Administration"
+            },
+            {
+              "q": 24,
+              "text": "British Petroleum"
+            },
+            {
+              "q": 25,
+              "text": "Central Intelligence Agency"
+            },
+            {
+              "q": 26,
+              "text": "World Bank"
+            }
+          ]
+        },
+        {
+          "kind": "choose_two",
+          "range": "Questions 27–28",
+          "instruction": "Choose TWO letters, A–E.",
+          "question": "Which TWO decisions do the students reach about the subject matter of their assignment?",
+          "questions": [
+            27,
+            28
+          ],
+          "max_selections": 2,
+          "options": {
+            "A": "They will keep the assessment criteria in mind.",
+            "B": "They will limit the scale of their investigation.",
+            "C": "They will select countries from all over the world.",
+            "D": "They will collect data about two groups of countries.",
+            "E": "They will find figures for wind and nuclear power."
+          }
+        },
+        {
+          "kind": "choose_two",
+          "range": "Questions 29–30",
+          "instruction": "Choose TWO letters, A–E.",
+          "question": "Which TWO tasks will Charley be responsible for?",
+          "questions": [
+            29,
+            30
+          ],
+          "max_selections": 2,
+          "options": {
+            "A": "reviewing the final draft",
+            "B": "collecting basic figures",
+            "C": "producing the graphics",
+            "D": "processing the raw data",
+            "E": "drafting the written sections"
+          }
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "label": "SECTION 4",
+      "range": "Questions 31–40",
+      "blocks": [
+        {
+          "kind": "notes_groups",
+          "range": "Questions 31–40",
+          "instruction": "Complete the notes below.",
+          "word_limit": "Write ONE WORD ONLY for each answer.",
+          "title": "Public Monument Assignment",
+          "groups": [
+            {
+              "heading": "Section one",
+              "items": [
+                [
+                  "First, identify the monument and justify your choice"
+                ],
+                [
+                  "Comment on the ",
+                  {
+                    "q": 31
+                  },
+                  " of the monument"
+                ],
+                [
+                  "Add information about its:"
+                ],
+                [
+                  "geographical location"
+                ],
+                [
+                  {
+                    "q": 32
+                  },
+                  " significance"
+                ],
+                [
+                  "historical context"
+                ],
+                [
+                  "Illustrate assignment with:"
+                ],
+                [
+                  {
+                    "q": 33
+                  }
+                ],
+                [
+                  "photos (with captions)"
+                ],
+                [
+                  "End with: record of architect’s achievements"
+                ]
+              ]
+            },
+            {
+              "heading": "Section two: Design and construction",
+              "items": [
+                [
+                  "Include information about:"
+                ],
+                [
+                  "The ",
+                  {
+                    "q": 34
+                  },
+                  " of any particular style on the design"
+                ],
+                [
+                  "The ",
+                  {
+                    "q": 35
+                  },
+                  " used in construction"
+                ],
+                [
+                  "Specialist ",
+                  {
+                    "q": 36
+                  },
+                  " required"
+                ]
+              ]
+            },
+            {
+              "heading": "Section three: Assessment of design",
+              "items": [
+                [
+                  "Content should include:"
+                ],
+                [
+                  "personal assessment"
+                ],
+                [
+                  "results of your survey"
+                ],
+                [
+                  "Use personal assessment and survey to consider:"
+                ],
+                [
+                  "the ",
+                  {
+                    "q": 37
+                  },
+                  " for building the monument"
+                ],
+                [
+                  "the monument’s ",
+                  {
+                    "q": 38
+                  },
+                  " effect on members of the public"
+                ],
+                [
+                  "how well the monument suits its ",
+                  {
+                    "q": 39
+                  }
+                ]
+              ]
+            },
+            {
+              "heading": "Remember!",
+              "items": [
+                [
+                  "Credit given for good ",
+                  {
+                    "q": 40
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "answer_key": {
+    "1": [
+      "Jamieson"
+    ],
+    "2": [
+      "11 July",
+      "11th July",
+      "July 11",
+      "July 11th"
+    ],
+    "3": [
+      "waiter"
+    ],
+    "4": [
+      "sing"
+    ],
+    "5": [
+      "children"
+    ],
+    "6": [
+      "drive"
+    ],
+    "7": [
+      "transport"
+    ],
+    "8": [
+      "meals"
+    ],
+    "9": [
+      "Thursday"
+    ],
+    "10": [
+      "photo"
+    ],
+    "11": [
+      "B"
+    ],
+    "12": [
+      "C"
+    ],
+    "13": [
+      "B"
+    ],
+    "14": [
+      "C"
+    ],
+    "15": [
+      "A"
+    ],
+    "16": [
+      "C"
+    ],
+    "17": [
+      "B"
+    ],
+    "18": [
+      "C"
+    ],
+    "19": [
+      "B"
+    ],
+    "20": [
+      "A"
+    ],
+    "21": [
+      "C"
+    ],
+    "22": [
+      "A"
+    ],
+    "23": [
+      "G"
+    ],
+    "24": [
+      "B"
+    ],
+    "25": [
+      "E"
+    ],
+    "26": [
+      "H"
+    ],
+    "31": [
+      "success"
+    ],
+    "32": [
+      "social"
+    ],
+    "33": [
+      "plans"
+    ],
+    "34": [
+      "influence"
+    ],
+    "35": [
+      "materials"
+    ],
+    "36": [
+      "skills"
+    ],
+    "37": [
+      "reason"
+    ],
+    "38": [
+      "emotional"
+    ],
+    "39": [
+      "environment"
+    ],
+    "40": [
+      "analysis"
+    ],
+    "27": [
+      "B",
+      "D"
+    ],
+    "28": [
+      "B",
+      "D"
+    ],
+    "29": [
+      "B",
+      "E"
+    ],
+    "30": [
+      "B",
+      "E"
+    ]
+  },
+  "pair_groups": {
+    "pair_27_28": {
+      "questions": [
+        27,
+        28
+      ],
+      "correct": [
+        "B",
+        "D"
+      ]
+    },
+    "pair_29_30": {
+      "questions": [
+        29,
+        30
+      ],
+      "correct": [
+        "B",
+        "E"
+      ]
+    }
+  },
+  "source_correction": {
+    "questions": "21–26",
+    "detail": "Teacher PDF omits choices F–H. Restored the complete A–H option set from matching versions of the same test.",
+    "references": [
+      "https://www.scribd.com/document/1010818855/Listening-Test-2-Fixed-docx",
+      "https://www.scribd.com/document/960809878/Test-2"
+    ]
+  }
+}
