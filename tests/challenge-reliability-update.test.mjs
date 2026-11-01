@@ -67,3 +67,8 @@ test('separate SQL function definitions are terminated',()=>{
 test('an interaction after idle expiry resets the baseline before counting resumes',()=>{
  assert.match(read('app/components/study-time-heartbeat.tsx'),/if\(stamp-lastActivity>STUDY_IDLE_MS\)\{activityEpoch\+\+;needsReset=true\}/);
 });
+test('day progress uses published requirements rather than all scheduled cards',()=>{
+ const source=read('app/day/[day]/page.tsx');
+ assert.match(source,/dayRequired=progress\?\.required_by_day\?\.\[String\(day\)\]\|\|\[\]/);
+ assert.match(source,/\{dayDone\}\/\{dayRequired.length\} modules completed/);
+});
