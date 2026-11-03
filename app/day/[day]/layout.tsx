@@ -1,3 +1,4 @@
 import type {ReactNode} from 'react';
 import StudyAccessGate from '@/app/components/study-access-gate';
-export default function StudyLayout({children}:{children:ReactNode}){return <StudyAccessGate>{children}</StudyAccessGate>}
+import LessonResumeTracker from '@/app/components/lesson-resume-tracker';
+export default function StudyLayout({children}:{children:ReactNode}){return <StudyAccessGate><LessonResumeTracker/>{children}</StudyAccessGate>}
