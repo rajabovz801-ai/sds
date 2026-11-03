@@ -12,7 +12,7 @@ import {WorkspaceArt} from "../components/workspace-art";
 import StudentPresence from "../components/student-presence";
 import {LeaderboardPanel,ProfilePanel,ProgressPanel,RewardModal,type HubStats} from "../components/challenge-hub-panels";
 import {useEffect,useMemo,useState} from "react";
-import {CHALLENGE_RESUME_STORAGE_KEY,parseChallengeResume,type ChallengeResume} from "../../lib/ark60-resume";
+import {CHALLENGE_RESUME_STORAGE_KEY,parseChallengeResume,suggestChallengeResume,type ChallengeResume} from "../../lib/ark60-resume";
 import {
  LayoutDashboard,CalendarDays,ChartNoAxesCombined,Trophy,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Mic,
  LockKeyhole,Clock3,ChevronRight,Menu,X,Bell,CircleHelp,CheckCircle2,Sun,Moon,Coins,ShieldCheck,CreditCard
@@ -112,7 +112,17 @@ export default function Dashboard(){
     if(!res.ok)throw new Error("Could not load your challenge data.");
     const obj=await res.json();
     if(mounted){
-     try{const owner=localStorage.getItem("ark60-resume-owner");if(owner!==obj.student.id){localStorage.removeItem(CHALLENGE_RESUME_STORAGE_KEY);setResumeLocation(null)}localStorage.setItem("ark60-resume-owner",obj.student.id)}catch{}
+     try{
+      const owner=localStorage.getItem("ark60-resume-owner");
+      if(owner!==obj.student.id)localStorage.removeItem(CHALLENGE_RESUME_STORAGE_KEY);
+      const device=owner===obj.student.id?parseChallengeResume(localStorage.getItem(CHALLENGE_RESUME_STORAGE_KEY)):null;
+      const server=obj.resume_location?parseChallengeResume(JSON.stringify(obj.resume_location)):null;
+      const available=Math.max(1,Math.min(60,Math.round((Date.parse(tashkentDate()+"T00:00:00Z")-Date.UTC(2026,9,1))/86400000)+1));
+      const choices=[device,server].filter((item):item is ChallengeResume=>!!item&&canResume(item,obj.required_by_day||{},obj.completed||[]));
+      const last=choices.sort((a,b)=>b.savedAt-a.savedAt)[0]||suggestChallengeResume(obj.required_by_day||{},obj.completed||[],available);
+      setResumeLocation(last||null);
+      localStorage.setItem("ark60-resume-owner",obj.student.id);
+     }catch{setResumeLocation(obj.resume_location?parseChallengeResume(JSON.stringify(obj.resume_location)):null)}
      setStats(obj);setLoadError("")
     }
    }catch(e){

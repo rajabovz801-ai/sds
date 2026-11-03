@@ -141,3 +141,33 @@ html body .ark-admin-scope button.admin-inline-link{background:none;border:0;pad
  html body .ark-admin-scope .admin-embedded-report :is(.wa-search,.sa-search){min-width:0;flex:1 1 240px}
  html body .ark-admin-scope .admin-embedded-report :is(.wa-list,.sa-list,.la-list){max-height:340px;overflow:auto}
 }
+
+/* Student account recovery: scoped to admin only; never changes student styling. */
+.ark-admin-scope .student-admin-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:7px}
+.ark-admin-scope .student-reset-btn{min-height:34px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;border:1px solid #c4d5eb;background:#eef5ff;color:#22548c;padding:7px 11px;font:600 12px/1.2 var(--admin-font);cursor:pointer;white-space:nowrap}
+.ark-admin-scope .student-reset-btn:hover:not(:disabled){background:#e1edff;border-color:#7ba6df}
+.ark-admin-scope .student-reset-btn:disabled{opacity:.55;cursor:not-allowed}
+.ark-admin-scope .student-reset-backdrop{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:20px;background:rgba(13,31,57,.56);backdrop-filter:blur(4px)}
+.ark-admin-scope .student-reset-modal{width:min(100%,480px);max-height:calc(100dvh - 40px);overflow-y:auto;border-radius:18px;background:#fff;border:1px solid #d6e3f1;box-shadow:0 24px 80px rgba(0,24,56,.3);padding:25px;color:#1e3554}
+.ark-admin-scope .student-reset-modal header{display:flex;align-items:start;gap:12px;margin:0 0 19px}
+.ark-admin-scope .student-reset-icon{display:grid;place-items:center;min-width:42px;height:42px;border-radius:12px;background:#eaf2ff;color:#2563ad}
+.ark-admin-scope .student-reset-modal header>div{flex:1}
+.ark-admin-scope .student-reset-modal h2{margin:0;font:700 20px/1.2 var(--admin-font);letter-spacing:-.025em}
+.ark-admin-scope .student-reset-modal header p{margin:5px 0 0;font:400 13px/1.45 var(--admin-font);color:#64748b}
+.ark-admin-scope .student-reset-close{border:none;background:transparent;color:#64748b;cursor:pointer;padding:5px}
+.ark-admin-scope .student-reset-identity{border:1px solid #e1e8f3;border-radius:10px;background:#f8fbff;padding:12px 14px;margin-bottom:20px;display:grid;gap:3px}
+.ark-admin-scope .student-reset-identity b{font-size:15px}.ark-admin-scope .student-reset-identity small{font-size:12px;color:#65778d}
+.ark-admin-scope .student-reset-modal form>label{display:grid;gap:8px;font-size:13px;font-weight:650}
+.ark-admin-scope .student-reset-input{display:flex;align-items:center;border:1px solid #cbd7e6;border-radius:10px;overflow:hidden}
+.ark-admin-scope .student-reset-input:focus-within{border-color:#467bd0;box-shadow:0 0 0 3px #dce9ff}
+.ark-admin-scope .student-reset-input input{flex:1;min-width:0;border:0;outline:0;padding:13px 12px;font:500 14px var(--admin-font);color:#1e3554}
+.ark-admin-scope .student-reset-input button{border:none;background:none;cursor:pointer;color:#577087;padding:12px}
+.ark-admin-scope .student-reset-note{display:flex;gap:8px;align-items:flex-start;margin:16px 0 0;color:#586e86;font-size:12px;line-height:1.6}
+.ark-admin-scope .student-reset-note svg{flex:none;color:#1d6ca8;margin-top:1px}
+.ark-admin-scope .student-reset-error{border:1px solid #f2b9b9;background:#fff1f1;color:#b52a31;padding:9px 11px;border-radius:8px;font-size:12px;margin-top:12px}
+.ark-admin-scope .student-reset-modal footer{display:flex;justify-content:flex-end;gap:9px;margin-top:23px;flex-wrap:wrap}
+.ark-admin-scope .student-reset-modal footer button{min-height:40px;border-radius:9px;font:650 13px var(--admin-font);padding:10px 16px;cursor:pointer}
+.ark-admin-scope .student-reset-cancel{border:1px solid #d4deea;background:#fff;color:#52657a}
+.ark-admin-scope .student-reset-confirm{border:1px solid #1c5cad;background:#235fb4;color:#fff;display:flex;align-items:center;gap:8px}
+.ark-admin-scope .student-reset-modal footer button:disabled{opacity:.55;cursor:wait}
+@media(max-width:700px){.ark-admin-scope .student-admin-actions{grid-column:1/-1;justify-content:flex-start}.ark-admin-scope .student-reset-modal{padding:20px}}
