@@ -12,7 +12,7 @@ import AdminBillingPanel from "../components/admin-billing-panel";
 import "./mock/mock-admin.css";
 import AnimatedBackButton from "../components/animated-back-button";
 import {useEffect,useMemo,useState} from "react";
-import {LayoutDashboard,Users,CalendarDays,FileText,Mic,ChartNoAxesCombined,Trophy,Clock3,Settings,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Bell,Menu,X,ShieldCheck,ChevronRight,CheckCircle2,LockKeyhole,LogOut,UserPlus,UserCog,Eye,EyeOff,Trash2,CreditCard} from "lucide-react";
+import {LayoutDashboard,Users,CalendarDays,FileText,Mic,ChartNoAxesCombined,Trophy,Clock3,Settings,BookOpen,Headphones,Newspaper,NotebookPen,PenLine,Bell,Menu,X,ShieldCheck,ChevronRight,CheckCircle2,LockKeyhole,LogOut,UserPlus,UserCog,Eye,EyeOff,Trash2,CreditCard,KeyRound} from "lucide-react";
 
 type Admin={id:string;display_name:string;username:string;role:"super_admin"|"admin";status?:string;created_at?:string};
 type DashboardData={admin:Admin;students:any[];total_students:number;active_today:number;today_seconds:number;pending_writing:number;pending_speaking:number;pending_requests:number;online_now?:number;idle_now?:number};
@@ -55,6 +55,11 @@ export default function AdminPage(){
  const [studentSearch,setStudentSearch]=useState("");
  const [studentBusy,setStudentBusy]=useState("");
  const [studentMessage,setStudentMessage]=useState("");
+ const [resetTarget,setResetTarget]=useState<{id:string;first_name:string;last_name:string;username:string}|null>(null);
+ const [resetPassword,setResetPassword]=useState("");
+ const [resetVisible,setResetVisible]=useState(false);
+ const [resetBusy,setResetBusy]=useState(false);
+ const [resetError,setResetError]=useState("");
  const [leaderRows,setLeaderRows]=useState<LeaderRow[]>([]);
  const [leaderLoading,setLeaderLoading]=useState(false);
  const [leaderMessage,setLeaderMessage]=useState("");
@@ -153,6 +158,26 @@ export default function AdminPage(){
    const obj=await res.json();if(!res.ok){setAdminMessage(obj.detail||"Unable to update admin.");return}await loadAdmins();
   }catch{setAdminMessage("Unable to contact the server.")}
  }
+ function openResetStudent(item:any){
+  setResetTarget({id:item.id,first_name:item.first_name,last_name:item.last_name,username:item.username});
+  setResetPassword("");setResetVisible(false);setResetError("");setStudentMessage("");
+ }
+ async function submitReset(e:React.FormEvent){
+  e.preventDefault();
+  if(!resetTarget||resetBusy)return;
+  if(resetPassword.length<8||resetPassword.length>128||!/[A-Za-z]/.test(resetPassword)||!/[0-9]/.test(resetPassword)){
+   setResetError("Use at least 8 characters, with letters and numbers.");return;
+  }
+  setResetBusy(true);setResetError("");
+  try{
+   const res=await fetch("/api/ark60",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({action:"reset_student_password",student_id:resetTarget.id,new_password:resetPassword})});
+   const obj=await res.json();
+   if(!res.ok){setResetError(obj.detail||"Password could not be changed.");return}
+   setStudentMessage("@"+obj.username+" password updated. Previous sessions were signed out; existing progress remains.");
+   setResetTarget(null);setResetPassword("");await loadDashboard();
+  }catch{setResetError("Unable to contact the server.")}
+  finally{setResetBusy(false)}
+ }
  async function deleteStudent(item:any){
   if(!window.confirm("Delete "+item.first_name+" "+item.last_name+"? Their access will be revoked immediately."))return;
   setStudentBusy(item.id);setStudentMessage("");
@@ -200,6 +225,16 @@ export default function AdminPage(){
   </aside>
   {mobile&&<button className="sidebar-overlay" onClick={()=>setMobile(false)} aria-label="Close navigation"/>}
   <div className="learning-main"><header className="learning-topbar"><div className="topbar-left"><button className="menu-toggle" aria-label="Open navigation" onClick={()=>setMobile(true)}><Menu size={20}/></button><b className="topbar-section">{view}</b><div className="topbar-line"/><span className="topbar-status"><span className="status-pulse"/> {courseStatus()}</span></div><div className="topbar-right"><span className="time-chip"><Clock3 size={15}/>{clock||"--:--:--"} <small>UZT</small></span><button className="top-icon admin-bell" onClick={()=>navigateView("Notifications")} aria-label="Notifications"><Bell size={18}/>{((dashboard?.pending_writing||0)+(dashboard?.pending_speaking||0))>0&&<span>{(dashboard?.pending_writing||0)+(dashboard?.pending_speaking||0)}</span>}</button><span className="profile-chip"><span>{admin.display_name.slice(0,2).toUpperCase()}</span> {admin.display_name} · {admin.role==="super_admin"?"Super Admin":"Admin"}</span></div></header>
+   {resetTarget&&<div className="student-reset-backdrop"><section className="student-reset-modal" role="dialog" aria-modal="true" aria-labelledby="student-reset-title">
+    <header><span className="student-reset-icon"><KeyRound size={20}/></span><div><h2 id="student-reset-title">Reset student password</h2><p>Restore access to the existing student account.</p></div><button type="button" className="student-reset-close" aria-label="Close password reset" disabled={resetBusy} onClick={()=>setResetTarget(null)}><X size={19}/></button></header>
+    <div className="student-reset-identity"><b>{resetTarget.first_name} {resetTarget.last_name}</b><small>@{resetTarget.username}</small></div>
+    <form onSubmit={submitReset} autoComplete="off">
+     <label>New temporary password <span className="student-reset-input"><input autoFocus required minLength={8} maxLength={128} type={resetVisible?"text":"password"} autoComplete="new-password" value={resetPassword} onChange={e=>setResetPassword(e.target.value)} placeholder="At least 8 letters and numbers"/><button type="button" aria-label={resetVisible?"Hide password":"Show password"} onClick={()=>setResetVisible(v=>!v)}>{resetVisible?<EyeOff size={17}/>:<Eye size={17}/>}</button></span></label>
+     <p className="student-reset-note"><ShieldCheck size={16}/> Mock results, coins, submissions and study time will remain linked to the same account. Previous login sessions will be revoked.</p>
+     {resetError&&<p className="student-reset-error" role="alert">{resetError}</p>}
+     <footer><button type="button" className="student-reset-cancel" disabled={resetBusy} onClick={()=>setResetTarget(null)}>Cancel</button><button type="submit" className="student-reset-confirm" disabled={resetBusy||resetPassword.length<8}>{resetBusy?"Updating…":"Confirm reset"}<KeyRound size={15}/></button></footer>
+    </form>
+   </section></div>}
    {liveStudent&&<aside className="admin-live-drawer" role="dialog" aria-modal="true" aria-label="Student live mock"><header><div><b>{liveStudent.full_name}</b><small>@{liveStudent.username}</small></div><button onClick={()=>setLiveStudent(null)} aria-label="Close live mock"><X size={20}/></button></header>{courseDays.find(d=>d.n===liveStudent.day_number)?.mock?<MockLiveView day={liveStudent.day_number!} studentId={liveStudent.student_id}/>:<p>This student is not currently on a Full Mock day.</p>}</aside>}
    <div className="learning-content" role={ADMIN_REPORT_VIEWS.includes(view)?undefined:"main"}><div className={"page-heading admin-page-heading"+(ADMIN_REPORT_VIEWS.includes(view)?" admin-report-heading":"")}><div className="hero-copy"><div className="section-eyebrow"><ShieldCheck size={16}/> ADMINISTRATION <span className="eyebrow-line"/></div><h1>{view==="Overview"?"Course control centre":view}</h1><p>ARK IELTS · 60-day challenge · 1 October – 29 November 2026</p></div></div>
    {ADMIN_REPORT_VIEWS.includes(view)?<div className="admin-embedded-report" key={view+":"+inboxRequest}>{view==="Reading results"?<ReadingAdmin/>:view==="Listening results"?<ListeningAdmin/>:view==="Full Mock results"?<AdminFullMock/>:view==="Writing inbox"?<AdminWriting/>:<AdminSpeaking/>}</div>:view==="To‘lovlar"&&admin.role==="super_admin"?<AdminBillingPanel/>:view==="Overview"?<>
@@ -228,7 +263,7 @@ export default function AdminPage(){
       <div className="student-admin-name"><b>{item.first_name} {item.last_name}</b><small>@{item.username}</small><small className="bill-note">Subscription: {item.membership_label||"Free"}</small>{liveById.get(item.id)&&<small className="student-live-line"><i className={liveById.get(item.id)?.status}/>{liveById.get(item.id)?.status} · {liveById.get(item.id)?.current_area}{liveById.get(item.id)?.day_number?" · Day "+String(liveById.get(item.id)?.day_number).padStart(2,"0"):""} · Today {duration(liveById.get(item.id)?.today_seconds||0)}</small>}</div>
       <div className="student-admin-meta"><span>Target</span><b>{Number(item.target_band).toFixed(1)}</b></div>
       <em className={"student-status "+item.status} title="Account status; subscription is shown separately">Account: {item.status}</em>
-      <button type="button" className="student-delete-btn" title="Delete student account" disabled={studentBusy===item.id} onClick={()=>deleteStudent(item)}><Trash2 size={14}/>{studentBusy===item.id?"Deleting…":"Delete"}</button>
+      <div className="student-admin-actions"><button type="button" className="student-reset-btn" title="Reset password without deleting learning progress" disabled={!!studentBusy||item.status!=="active"} onClick={()=>openResetStudent(item)}><KeyRound size={14}/>Reset password</button><button type="button" className="student-delete-btn" title="Delete student account" disabled={!!studentBusy} onClick={()=>deleteStudent(item)}><Trash2 size={14}/>{studentBusy===item.id?"Deleting…":"Delete"}</button></div>
      </div>)}</div>
      {(dashboard?.students||[]).length===0&&<div className="student-admin-empty"><Users size={24}/><h3>No students yet</h3><p>Approved students will appear here.</p></div>}
    </section>:view==="Admins"&&admin.role==="super_admin"?<section className="admin-role-layout">

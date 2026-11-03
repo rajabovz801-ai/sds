@@ -29,3 +29,26 @@ export function parseChallengeResume(value:string|null):ChallengeResume|null{
   return createChallengeResume(parsed.href,parsed.area,Number(parsed.savedAt));
  }catch{return null}
 }
+
+/** Last completed activity is a safe starting point when migrating from device-only resume. */
+export function suggestChallengeResume(
+ required:Record<string,string[]>,
+ completed:Array<{day_number:number;module:string}>,
+ latestDay:number
+):ChallengeResume|null{
+ const cap=Math.max(1,Math.min(60,Math.floor(latestDay)));
+ const last=Math.max(1,...completed.map(item=>Number(item.day_number)||0).filter(day=>day>=1&&day<=cap));
+ const days=[...Array.from({length:cap-last+1},(_,i)=>i+last),...Array.from({length:last-1},(_,i)=>i+1)];
+ for(const day of days){
+  const needed=required[String(day)]||[];
+  if(!needed.length)continue;
+  const pending=needed.find(module=>!completed.some(x=>x.day_number===day&&x.module===module));
+  if(!pending)continue;
+  const sunday=new Date(Date.UTC(2026,9,day)).getUTCDay()===0;
+  const area=sunday?"Mock":(pending[0].toUpperCase()+pending.slice(1).toLowerCase()) as ChallengeArea;
+  const path="/day/"+day+(sunday?"/mock":"/"+pending.toLowerCase());
+  const found=createChallengeResume(path,area,0);
+  if(found)return found;
+ }
+ return null;
+}

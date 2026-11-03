@@ -284,7 +284,27 @@ def get_data(request:Request,response:Response, action:str="health", day:int=1):
         summary=rows[0] if isinstance(rows,list) and rows else (rows if isinstance(rows,dict) else {})
         preview=user.get("username")=="rustam7"
         mock_days=[] if preview else completed_mock_days(user)
+        resume_location=None
+        if not preview:
+            resume_rows=db("GET","ark60_presence",{
+                "select":"resume_area,resume_day,resume_at",
+                "student_id":"eq."+user["id"],"limit":1
+            })
+            if resume_rows:
+                last=resume_rows[0]
+                area=str(last.get("resume_area") or "")
+                day_num=int(last.get("resume_day") or 0)
+                segment={"Day":"","Reading":"reading","Listening":"listening","Article":"article",
+                         "Vocabulary":"vocabulary","Writing":"writing","Speaking":"speaking","Mock":"mock"}.get(area)
+                if segment is not None and 1<=day_num<=60 and last.get("resume_at"):
+                    try:
+                        stamp=int(datetime.fromisoformat(last["resume_at"].replace("Z","+00:00")).timestamp()*1000)
+                        resume_location={"href":f"/day/{day_num}"+(f"/{segment}" if segment else ""),
+                                         "area":area,"day":day_num,"savedAt":stamp}
+                    except (ValueError,TypeError,OverflowError):
+                        pass
         return {
+            "resume_location":resume_location,
             "student":{**user,"cosmetics":cosmetic_state(user)},
             "active_seconds":0 if preview else int(summary.get("active_seconds") or 0),
             "today_seconds":0 if preview else int(summary.get("today_seconds") or 0),
@@ -740,6 +760,37 @@ async def actions(request:Request,response:Response):
         if not updated:
             raise HTTPException(status_code=409,detail="This request was already reviewed")
         return {"ok":True,"student_id":student_id,"status":final_status}
+    if action=="reset_student_password":
+        actor=require_admin(request)
+        student_id=str(data.get("student_id") or "").strip()
+        temporary=data.get("new_password")
+        if not re.fullmatch(r"[0-9a-fA-F-]{36}",student_id):
+            raise HTTPException(status_code=400,detail="Invalid student.")
+        if not isinstance(temporary,str) or not (8<=len(temporary)<=128) or not re.search(r"[A-Za-z]",temporary) or not re.search(r"[0-9]",temporary) or any(ord(ch)<32 or ord(ch)==127 for ch in temporary):
+            raise HTTPException(status_code=400,detail="Password must contain 8–128 characters, including a letter and a number.")
+        target=db("GET","ark60_students",{
+            "select":"id,first_name,last_name,username,status",
+            "id":"eq."+student_id,"limit":1
+        })
+        if not target or target[0]["status"]!="active":
+            raise HTTPException(status_code=404,detail="Active student account not found.")
+        changed=db("PATCH","ark60_students",{
+            "id":"eq."+student_id,"status":"eq.active"
+        },payload={"password_hash":hash_password(temporary)},prefer="return=representation")
+        if not changed:
+            raise HTTPException(status_code=409,detail="Student account status changed. Refresh and try again.")
+        # A password reset changes credentials only, never student ID or learning history.
+        db("PATCH","ark60_sessions",{
+            "student_id":"eq."+student_id,"revoked_at":"is.null"
+        },payload={"revoked_at":now().isoformat()},prefer="return=minimal")
+        try:
+            db("POST","ark60_password_reset_events",payload={
+                "student_id":student_id,"admin_id":actor["id"]
+            },prefer="return=minimal")
+        except HTTPException:
+            # Audit storage failure must not hide a successful credential change.
+            pass
+        return {"ok":True,"student_id":student_id,"username":target[0]["username"],"sessions_revoked":True}
     if action=="delete_student":
         actor=require_admin(request)
         student_id=str(data.get("student_id","")).strip()
@@ -801,6 +852,9 @@ async def actions(request:Request,response:Response):
         except (ValueError,TypeError):
             pass
         payload={"student_id":user["id"],"last_seen_at":stamp.isoformat(),"last_interaction_at":interaction.isoformat(),"current_area":area,"day_number":day,"updated_at":stamp.isoformat()}
+        # Dashboard/notification visits do not erase the student's last lesson.
+        if day is not None and area in {"Day","Reading","Listening","Article","Vocabulary","Writing","Speaking","Mock"}:
+            payload.update({"resume_area":area,"resume_day":day,"resume_at":stamp.isoformat()})
         db("POST","ark60_presence",params={"on_conflict":"student_id"},payload=payload,prefer="resolution=merge-duplicates,return=minimal")
         return {"ok":True}
     if action=="heartbeat":
