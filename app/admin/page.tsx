@@ -200,8 +200,6 @@ export default function AdminPage(){
  const chosen=courseDays[selected-1];
  const items=chosen.mock?[contentModules[1],contentModules[0],contentModules[4]]:contentModules;
  const moduleState=contentState?.day===selected?contentState.modules:{};
- const selectedStates=items.map(item=>moduleState[item.name]?.status||"Missing");
- const overallContentStatus=selectedStates.length&&selectedStates.every(x=>x==="Published")?"Published":selectedStates.some(x=>x!=="Missing")?"In progress":"Missing";
 
  if(!checked)return <main className="admin-auth-shell"><div className="admin-auth-loading">ARK IELTS</div></main>;
  if(!admin)return <main className="admin-auth-shell">
