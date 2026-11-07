@@ -2,7 +2,7 @@ import {createHash,randomBytes} from 'node:crypto';
 import {NextRequest,NextResponse} from 'next/server';
 import {getAdmin,getStudent,isOwnOrigin,isUuid} from '@/lib/ark60-content-auth';
 import {getServiceSupabase} from '@/lib/supabase/server';
-import {requiresPersonalMockCode,personalMockOpensAt} from '@/lib/mock-access-policy';
+import {requiresPersonalMockCode,personalMockOpensAt,isAdminGrantedMock} from '@/lib/mock-access-policy';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 const send=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:{'Cache-Control':'private, no-store'}});
@@ -32,8 +32,8 @@ export async function POST(req:NextRequest){
    const admin=await getAdmin(req);
    if(!admin||admin.role!=='super_admin')return send({detail:'Super admin access required.'},403);
    if(input.action==='issue'){
-    const authorized=input.day===32?input.authorization_confirmed===true:input.payment_confirmed===true;
-    if(!isUuid(String(input.student_id||''))||!authorized)return send({detail:input.day===32?'Select a student and approve mock entry.':'Select a student and confirm their payment first.'},400);
+    const authorized=isAdminGrantedMock(input.day)?input.authorization_confirmed===true:input.payment_confirmed===true;
+    if(!isUuid(String(input.student_id||''))||!authorized)return send({detail:isAdminGrantedMock(input.day)?'Select a student and approve mock entry.':'Select a student and confirm their payment first.'},400);
     const raw=randomBytes(6).toString('hex').toUpperCase();
     const {data,error}=await db.rpc('ark60_mock_code_issue',{p_admin:admin.id,p_student:input.student_id,p_day:input.day,p_hash:hash(raw),p_hint:raw.slice(-4)});
     if(error)return send({detail:'Could not issue code. Check that the student is active.'},409);
