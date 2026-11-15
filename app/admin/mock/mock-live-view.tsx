@@ -1,6 +1,5 @@
 "use client";
 import {useEffect,useState} from "react";
-import {createPortal} from "react-dom";
 import MockScreen from "../../day/[day]/mock/mock-screen";
 
 type Props={day:number;studentId:string};
@@ -12,27 +11,11 @@ export default function MockLiveView({day,studentId}:Props){
  return data.snapshot?.view&&data.content?<StudentMockScreen day={day} data={data}/>:<MockLiveContent data={data}/>;
 }
 function StudentMockScreen({day,data}:{day:number;data:any}){
- const [frameDocument,setFrameDocument]=useState<Document|null>(null);
+ const [root,setRoot]=useState<HTMLDivElement|null>(null);
  const {view}=data.snapshot;
- function prepare(frame:HTMLIFrameElement){
-  const doc=frame.contentDocument;
-  if(!doc)return;
-  for(const style of document.querySelectorAll('link[rel="stylesheet"],style')){
-   const clone=style.cloneNode(true) as HTMLElement;
-   if(style instanceof HTMLLinkElement)clone.setAttribute("href",style.href);
-   doc.head.appendChild(clone);
-  }
-  doc.documentElement.lang="en";
-  doc.body.style.margin="0";
-  doc.body.inert=true;
-  setFrameDocument(doc);
- }
  return <section className="ma-live-screen"><header><b>LIVE MOCK · {data.snapshot.stage.toUpperCase()}</b><span>Kuzatuv rejimi</span></header>
-  <div style={{overflow:"auto",maxHeight:"75vh",background:"#e7edf4"}}>
-   <div inert style={{width:view.width,height:view.height,marginInline:"auto"}}>
-    <iframe title="O‘quvchining mock ekrani" src="about:blank" onLoad={event=>prepare(event.currentTarget)} tabIndex={-1} style={{display:"block",width:"100%",height:"100%",border:0,pointerEvents:"none"}}/>
-    {frameDocument&&createPortal(<MockScreen liveDay={day} liveView={data} liveDocument={frameDocument}/>,frameDocument.body)}
-   </div>
+  <div ref={setRoot} inert data-ark-theme={view.dark?"dark":"light"} style={{position:"relative",contain:"layout paint",height:Math.min(view.height,760),overflow:"auto",background:"#fff"}}>
+   {root?<MockScreen liveDay={day} liveView={data} liveRoot={root}/>:<MockLiveContent data={data}/>}
   </div>
  </section>;
 }

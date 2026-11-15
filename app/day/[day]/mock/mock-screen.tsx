@@ -47,24 +47,24 @@ function readMockHighlights(){
   return start&&end?[{start,end}]:[];
  });
 }
-function restoreMockHighlights(items:any[],target:Document){
+function restoreMockHighlights(items:any[],target:HTMLElement){
  const root=target.querySelector("main");
- const frame=target.defaultView as (Window & typeof globalThis)|null;
+ const frame=target.ownerDocument.defaultView as (Window & typeof globalThis)|null;
  if(!root||!frame?.Highlight||!frame.CSS.highlights)return;
  const find=(path:number[])=>path.reduce<Node|undefined>((node,index)=>node?.childNodes[index],root);
  const ranges:Range[]=[];
  for(const item of items||[]){
   const start=find(item.start.path),end=find(item.end.path);
   if(!start||!end)continue;
-  try{const range=target.createRange();range.setStart(start,item.start.offset);range.setEnd(end,item.end.offset);ranges.push(range)}catch{}
+  try{const range=target.ownerDocument.createRange();range.setStart(start,item.start.offset);range.setEnd(end,item.end.offset);ranges.push(range)}catch{}
  }
  frame.CSS.highlights.set("ark-mock-yellow",new frame.Highlight(...ranges));
 }
 const words=(s:string)=>s.trim()?s.trim().split(/\s+/).length:0;
 
-export default function FullMockPage({liveView,liveDay,liveDocument}:{liveView?:any;liveDay?:number;liveDocument?:Document}={}){
+export default function FullMockPage({liveView,liveDay,liveRoot}:{liveView?:any;liveDay?:number;liveRoot?:HTMLElement}={}){
  const {day:slug}=useParams<{day:string}>();const day=liveDay||(Number(slug)||4);const router=useRouter();
- const mirror=Boolean(liveDocument);
+ const mirror=Boolean(liveRoot);
  const mirrorView=useRef<any>(null);
  const [mirrorTick,setMirrorTick]=useState(0);
  const mockDate=new Date(Date.UTC(2026,9,day));
@@ -117,31 +117,30 @@ export default function FullMockPage({liveView,liveDay,liveDocument}:{liveView?:
  const shareControl=<aside className="mock-consent"><p>Your admin may view this mock, your current section and typed answers during the exam. Only this mock is shared. Viewing ends when you finish or leave.</p>{sharing?<span className="mock-consent-accepted"><CheckCircle2 size={16}/> Mock view allowed</span>:<button disabled={consentBusy} onClick={allowMockView}>{consentBusy?"Allowing…":"Allow mock view"}</button>}{shareMessage&&<small role="alert">{shareMessage}</small>}</aside>;
  useEffect(()=>{const f=()=>setFull(!!document.fullscreenElement);f();document.addEventListener("fullscreenchange",f);return()=>document.removeEventListener("fullscreenchange",f)},[]);
  useEffect(()=>{
-  if(!liveDocument||!liveView)return;
+  if(!liveRoot||!liveView)return;
   const {snapshot:s,content:c}=liveView;
   if(!s?.view||!c?.listening||!Array.isArray(c?.reading)||!c?.writing||!["listening","reading","writing"].includes(s.stage))return;
    mirrorView.current=s.view;
-   liveDocument.documentElement.dataset.arkTheme=s.view.dark?"dark":"light";
    setData({preview:false,day,content:{listening:{title:"",payload:c.listening},reading:c.reading,writing:{title:"",payload:c.writing}},mock:{stage:s.stage,status:"",reading_remaining:s.rRemaining,writing_remaining:s.wRemaining}});
    setSharing(true);setStage(s.stage);setFull(s.view.full);setListeningStarted(s.view.listeningStarted);
    setAudioState(s.audioState);setLSection(s.lSection);setLCurrentQuestion(s.lCurrentQuestion);setLAnswers(s.lAnswers);setLElapsed(s.lElapsed);
    setRPassage(s.rPassage);setRTab(s.rTab);setRAnswers(s.rAnswers);setRRemaining(s.rRemaining);
    setWTask(s.wTask);setW1(s.w1);setW2(s.w2);setWRemaining(s.wRemaining);setConfirmStage(s.view.confirm);
    setLoading(false);setMirrorTick(tick=>tick+1);
- },[day,liveView,liveDocument]);
+ },[day,liveView,liveRoot]);
  useEffect(()=>{
   const scroll=mirrorView.current?.scroll;
   if(!mirror||!scroll)return;
   const frame=requestAnimationFrame(()=>{
-   liveDocument?.defaultView?.scrollTo({left:scroll[0],top:scroll[1],behavior:"instant"});
-   if(liveDocument)restoreMockHighlights(mirrorView.current.highlights,liveDocument);
+   liveRoot?.scrollTo({left:scroll[0],top:scroll[1],behavior:"instant"});
+   if(liveRoot)restoreMockHighlights(mirrorView.current.highlights,liveRoot);
    mockScrollTargets.forEach((selector,index)=>{
-    const el=liveDocument?.querySelector(selector);
+    const el=liveRoot?.querySelector(selector);
     if(el){el.scrollLeft=scroll[2+index*2];el.scrollTop=scroll[3+index*2]}
    });
   });
   return()=>cancelAnimationFrame(frame);
- },[mirror,mirrorTick,liveDocument]);
+ },[mirror,mirrorTick,liveRoot]);
  useEffect(()=>{if(mirror)return;let live=true;(async()=>{setLoading(true);try{const r=await mockFetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!r.ok&&(obj.code_required||obj.scheduled)){if(live)setAccessGate({scheduled:obj.scheduled===true,opensAt:obj.opens_at||null});return}if(!r.ok)throw new Error(obj.detail||"Full Mock could not be loaded.");if(!live)return;obj.mock=restoreMockDraft(obj.mock,heldDraft.current);const restored=!!heldDraft.current;heldDraft.current=null;setData(obj);setSharing(obj.live_consent===true);setStage(obj.mock.stage);setLAnswers(obj.mock.stage==="listening"?{}:obj.mock.listening_answers||{});setLStartedAt(obj.mock.stage==="listening"?"":obj.mock.listening_started_at||"");setListeningStarted(false);setLElapsed(obj.mock.stage==="listening"?0:Number(obj.mock.listening_elapsed_seconds||0));setRAnswers(obj.mock.reading_answers||{});setW1(obj.mock.writing_task1||"");setW2(obj.mock.writing_task2||"");setRRemaining(Number(obj.mock.reading_remaining??3600));setWRemaining(Number(obj.mock.writing_remaining??3600));setResult(obj.mock.result||null);if(restored&&obj.mock.stage==="reading")queueSave("reading",{answers:obj.mock.reading_answers});if(restored&&obj.mock.stage==="writing")queueSave("writing",{task1:obj.mock.writing_task1,task2:obj.mock.writing_task2})}catch(e){if(live)setMessage(e instanceof Error?e.message:"Full Mock could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day,loadVersion]);
 
  useEffect(()=>{if(mirror||!mockRuntimeActive(stage,accessGate)||stage!=="listening"||!listeningStarted||!lStartedAt)return;const tick=()=>setLElapsed(Math.max(0,Math.floor((Date.now()-Date.parse(lStartedAt))/1000)));tick();const id=window.setInterval(tick,1000);return()=>window.clearInterval(id)},[stage,listeningStarted,lStartedAt,accessGate]);
