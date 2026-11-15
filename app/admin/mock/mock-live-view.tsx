@@ -1,5 +1,7 @@
 "use client";
-import {useEffect,useRef,useState} from "react";
+import {useEffect,useState} from "react";
+import {createPortal} from "react-dom";
+import MockScreen from "../../day/[day]/mock/mock-screen";
 
 type Props={day:number;studentId:string};
 export default function MockLiveView({day,studentId}:Props){
@@ -10,14 +12,26 @@ export default function MockLiveView({day,studentId}:Props){
  return data.snapshot?.view&&data.content?<StudentMockScreen day={day} data={data}/>:<MockLiveContent data={data}/>;
 }
 function StudentMockScreen({day,data}:{day:number;data:any}){
- const frame=useRef<HTMLIFrameElement>(null);
+ const [frameDocument,setFrameDocument]=useState<Document|null>(null);
  const {view}=data.snapshot;
- const sync=()=>frame.current?.contentWindow?.postMessage({type:"ark-mock-live-view",snapshot:data.snapshot,content:data.content},window.location.origin);
- useEffect(sync,[data]);
+ function prepare(frame:HTMLIFrameElement){
+  const doc=frame.contentDocument;
+  if(!doc)return;
+  for(const style of document.querySelectorAll('link[rel="stylesheet"],style')){
+   const clone=style.cloneNode(true) as HTMLElement;
+   if(style instanceof HTMLLinkElement)clone.setAttribute("href",style.href);
+   doc.head.appendChild(clone);
+  }
+  doc.documentElement.lang="en";
+  doc.body.style.margin="0";
+  doc.body.inert=true;
+  setFrameDocument(doc);
+ }
  return <section className="ma-live-screen"><header><b>LIVE MOCK · {data.snapshot.stage.toUpperCase()}</b><span>Kuzatuv rejimi</span></header>
   <div style={{overflow:"auto",maxHeight:"75vh",background:"#e7edf4"}}>
    <div inert style={{width:view.width,height:view.height,marginInline:"auto"}}>
-    <iframe ref={frame} title="O‘quvchining mock ekrani" src={`/day/${day}/mock/live-view`} onLoad={sync} tabIndex={-1} style={{display:"block",width:"100%",height:"100%",border:0,pointerEvents:"none"}}/>
+    <iframe title="O‘quvchining mock ekrani" src="about:blank" onLoad={event=>prepare(event.currentTarget)} tabIndex={-1} style={{display:"block",width:"100%",height:"100%",border:0,pointerEvents:"none"}}/>
+    {frameDocument&&createPortal(<MockScreen liveDay={day} liveView={data} liveDocument={frameDocument}/>,frameDocument.body)}
    </div>
   </div>
  </section>;

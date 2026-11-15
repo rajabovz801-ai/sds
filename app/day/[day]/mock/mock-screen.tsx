@@ -1,0 +1,478 @@
+"use client";
+import StudyTimeHeartbeat from "../../../components/study-time-heartbeat";
+import {fetchMockWithAccess,restoreMockDraft,mockRuntimeActive} from "../../../../lib/mock-client-access";
+import MockAccessGate from "../../../components/mock-access-gate";
+import {ensureExamFullscreen} from "../../../../lib/exam-fullscreen";
+import ListeningPartNavigation from "../../../components/listening-part-navigation";
+import LoadingIndicator from "../../../components/loading-indicator";
+import {useParams,useRouter} from "next/navigation";
+import {useEffect,useMemo,useRef,useState} from "react";
+import {BookOpen,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Headphones,Eraser,Highlighter,LockKeyhole,Maximize2,Minimize2,PenLine,Send,ShieldCheck,Volume2} from "lucide-react";
+import AnimatedBackButton from "../../../components/animated-back-button";
+import "../listening/listening.css";
+import "../writing/writing.css";
+import "./mock.css";
+import "../reading/worksheet.css";
+import {ReadingGapSentence,compactReadingInstruction} from "../../../components/reading-question-ui";
+
+type Stage="not_started"|"listening"|"reading"|"writing"|"assessing"|"completed";
+type Q={number:number;type:"tfng"|"gap"|"mcq"|"select";text:string;options?:string[];instruction?:string;answer_group?:string};
+type Passage={id:string;ordinal:number;title:string;text:string;questions:Q[];question_source:string};
+type MockData={
+ preview:boolean;day:number;live_consent?:boolean;
+ content:{listening:{title:string;payload:any};reading:Passage[];writing:{title:string;payload:any}};
+ mock:{stage:Stage;status:string;listening_started_at?:string|null;listening_elapsed_seconds?:number;reading_remaining:number;writing_remaining:number;listening_answers?:Record<string,string>;reading_answers?:Record<string,string>;writing_task1?:string;writing_task2?:string;result?:any}
+};
+type Token=string|{q:number};
+
+const optionValue=(value:string)=>value.trim().match(/^([ivx]+|[A-Z])(?:[.): ]|$)/i)?.[1]||value.trim();
+const fmt=(total:number)=>{const s=Math.max(0,Math.floor(total));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+const mockScrollTargets=[".ls-workspace",".ls-question-paper",".ls-table-scroll",".cr-passage",".cr-questions",".writing-task-pane",".writing-paper",".writing-answer-pane",".writing-editor-wrap textarea",".ls-bottom-nav",".cr-footer"] as const;
+function readMockHighlights(){
+ const root=document.querySelector("main");
+ const highlights=CSS.highlights?.get("ark-mock-yellow");
+ if(!root||!highlights)return [];
+ function location(node:Node,offset:number){
+  const path:number[]=[];
+  while(node!==root){
+   const parent=node.parentNode;
+   if(!parent)return null;
+   path.unshift(Array.from(parent.childNodes).indexOf(node as ChildNode));
+   node=parent;
+  }
+  return {path,offset};
+ }
+ return Array.from(highlights).slice(0,64).flatMap(range=>{
+  const start=location(range.startContainer,range.startOffset),end=location(range.endContainer,range.endOffset);
+  return start&&end?[{start,end}]:[];
+ });
+}
+function restoreMockHighlights(items:any[],target:Document){
+ const root=target.querySelector("main");
+ const frame=target.defaultView as (Window & typeof globalThis)|null;
+ if(!root||!frame?.Highlight||!frame.CSS.highlights)return;
+ const find=(path:number[])=>path.reduce<Node|undefined>((node,index)=>node?.childNodes[index],root);
+ const ranges:Range[]=[];
+ for(const item of items||[]){
+  const start=find(item.start.path),end=find(item.end.path);
+  if(!start||!end)continue;
+  try{const range=target.createRange();range.setStart(start,item.start.offset);range.setEnd(end,item.end.offset);ranges.push(range)}catch{}
+ }
+ frame.CSS.highlights.set("ark-mock-yellow",new frame.Highlight(...ranges));
+}
+const words=(s:string)=>s.trim()?s.trim().split(/\s+/).length:0;
+
+export default function FullMockPage({liveView,liveDay,liveDocument}:{liveView?:any;liveDay?:number;liveDocument?:Document}={}){
+ const {day:slug}=useParams<{day:string}>();const day=liveDay||(Number(slug)||4);const router=useRouter();
+ const mirror=Boolean(liveDocument);
+ const mirrorView=useRef<any>(null);
+ const [mirrorTick,setMirrorTick]=useState(0);
+ const mockDate=new Date(Date.UTC(2026,9,day));
+ const mockDateText=mockDate.toLocaleDateString("en-GB",{day:"numeric",month:"long",timeZone:"UTC"}).toUpperCase();
+ const [data,setData]=useState<MockData|null>(null),[stage,setStage]=useState<Stage>("not_started"),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
+ const [sharing,setSharing]=useState(false),[watching,setWatching]=useState(false),[shareMessage,setShareMessage]=useState("");
+ const [consentBusy,setConsentBusy]=useState(false);
+ const liveState=useRef<any>(null);
+ const [full,setFull]=useState(false),[confirmStage,setConfirmStage]=useState<"listening"|"reading"|"writing"|null>(null);
+ const [listeningStarted,setListeningStarted]=useState(false),[lStartedAt,setLStartedAt]=useState(""),[audioState,setAudioState]=useState<"idle"|"playing"|"ended"|"resume">("idle"),[lSection,setLSection]=useState(1),[lCurrentQuestion,setLCurrentQuestion]=useState(1),[lAnswers,setLAnswers]=useState<Record<string,string>>({}),[lElapsed,setLElapsed]=useState(0);
+ const [rPassage,setRPassage]=useState(1),[rTab,setRTab]=useState<"passage"|"questions">("passage"),[rAnswers,setRAnswers]=useState<Record<string,string>>({}),[rRemaining,setRRemaining]=useState(3600);
+ const [wTask,setWTask]=useState<1|2>(1),[w1,setW1]=useState(""),[w2,setW2]=useState(""),[wRemaining,setWRemaining]=useState(3600);
+ const [result,setResult]=useState<any>(null),[previewListening,setPreviewListening]=useState<any>(null),[previewReading,setPreviewReading]=useState<any>(null);
+ const audioRef=useRef<HTMLAudioElement>(null),saveRef=useRef<number|null>(null),selectionRef=useRef<Range|null>(null),questionsRef=useRef<HTMLDivElement>(null);
+ const [highlightPopup,setHighlightPopup]=useState<{x:number;y:number}|null>(null);
+ const paperRef=useRef<HTMLDivElement>(null);
+ const [accessGate,setAccessGate]=useState<{scheduled:boolean;opensAt:string|null}|null>(null);
+ const [loadVersion,setLoadVersion]=useState(0);
+ const heldDraft=useRef<any>(null);
+ async function mockFetch(url:string,options?:RequestInit){return fetchMockWithAccess(fetch,url,options,gate=>{if(!heldDraft.current)heldDraft.current=liveState.current;audioRef.current?.pause();if(saveRef.current)window.clearTimeout(saveRef.current);setAccessGate(gate)})}
+
+
+ liveState.current={watching,stage,listeningStarted,confirmStage,lSection,lCurrentQuestion,lAnswers,lElapsed,audioState,rPassage,rTab,rAnswers,rRemaining,wTask,w1,w2,wRemaining};
+ const mockActive=!mirror&&!loading&&!accessGate&&["listening","reading","writing"].includes(stage);
+ useEffect(()=>{
+  if(!sharing||!mockActive)return;
+  let active=true,inflight=false,timer:number|undefined;const controller=new AbortController();
+  const stop=()=>{
+   active=false;controller.abort();if(timer)window.clearTimeout(timer);
+   const body=JSON.stringify({action:"live_stop",day});
+   try{if(navigator.sendBeacon?.("/api/challenge-mock",new Blob([body],{type:"application/json"})))return}catch{}
+   void mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body,keepalive:true}).catch(()=>{});
+  };
+  const tick=async()=>{if(!active||inflight)return;inflight=true;try{const res=await mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",signal:controller.signal,headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_heartbeat",day,snapshot:liveState.current?.watching?{...liveState.current,view:{
+     width:window.innerWidth,height:window.innerHeight,highlights:readMockHighlights(),full:!!document.fullscreenElement,
+     dark:document.documentElement.dataset.arkTheme==="dark",listeningStarted:!!liveState.current.listeningStarted,
+     confirm:liveState.current.confirmStage,scroll:[window.scrollX,window.scrollY,...mockScrollTargets.flatMap(selector=>{
+      const el=document.querySelector(selector);return [el?.scrollLeft||0,el?.scrollTop||0];
+     })]
+    }}:null})});const obj=await res.json();if(active&&res.ok)setWatching(obj.watching===true)}catch{}finally{inflight=false;if(active)timer=window.setTimeout(tick,liveState.current?.watching?3000:10000)}};
+  const resume=async()=>{try{const res=await mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",signal:controller.signal,headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_resume",day})});if(active&&res.ok)void tick()}catch{}};
+  void resume();window.addEventListener("pagehide",stop);
+  const restore=()=>{if(controller.signal.aborted)location.reload()};window.addEventListener("pageshow",restore);
+  return()=>{window.removeEventListener("pagehide",stop);window.removeEventListener("pageshow",restore);stop()};
+ },[sharing,mockActive,day]);
+ async function allowMockView(){
+  if(consentBusy||sharing)return;
+  setConsentBusy(true);setShareMessage("");try{const res=await mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"live_consent",day,allowed:true})});const obj=await res.json();if(!res.ok||obj.allowed!==true)throw new Error();setSharing(true);setWatching(false)}catch{setShareMessage("Could not allow mock view. Please try again.")}finally{setConsentBusy(false)}
+ }
+ const shareControl=<aside className="mock-consent"><p>Your admin may view this mock, your current section and typed answers during the exam. Only this mock is shared. Viewing ends when you finish or leave.</p>{sharing?<span className="mock-consent-accepted"><CheckCircle2 size={16}/> Mock view allowed</span>:<button disabled={consentBusy} onClick={allowMockView}>{consentBusy?"Allowing…":"Allow mock view"}</button>}{shareMessage&&<small role="alert">{shareMessage}</small>}</aside>;
+ useEffect(()=>{const f=()=>setFull(!!document.fullscreenElement);f();document.addEventListener("fullscreenchange",f);return()=>document.removeEventListener("fullscreenchange",f)},[]);
+ useEffect(()=>{
+  if(!liveDocument||!liveView)return;
+  const {snapshot:s,content:c}=liveView;
+  if(!s?.view||!c?.listening||!Array.isArray(c?.reading)||!c?.writing||!["listening","reading","writing"].includes(s.stage))return;
+   mirrorView.current=s.view;
+   liveDocument.documentElement.dataset.arkTheme=s.view.dark?"dark":"light";
+   setData({preview:false,day,content:{listening:{title:"",payload:c.listening},reading:c.reading,writing:{title:"",payload:c.writing}},mock:{stage:s.stage,status:"",reading_remaining:s.rRemaining,writing_remaining:s.wRemaining}});
+   setSharing(true);setStage(s.stage);setFull(s.view.full);setListeningStarted(s.view.listeningStarted);
+   setAudioState(s.audioState);setLSection(s.lSection);setLCurrentQuestion(s.lCurrentQuestion);setLAnswers(s.lAnswers);setLElapsed(s.lElapsed);
+   setRPassage(s.rPassage);setRTab(s.rTab);setRAnswers(s.rAnswers);setRRemaining(s.rRemaining);
+   setWTask(s.wTask);setW1(s.w1);setW2(s.w2);setWRemaining(s.wRemaining);setConfirmStage(s.view.confirm);
+   setLoading(false);setMirrorTick(tick=>tick+1);
+ },[day,liveView,liveDocument]);
+ useEffect(()=>{
+  const scroll=mirrorView.current?.scroll;
+  if(!mirror||!scroll)return;
+  const frame=requestAnimationFrame(()=>{
+   liveDocument?.defaultView?.scrollTo({left:scroll[0],top:scroll[1],behavior:"instant"});
+   if(liveDocument)restoreMockHighlights(mirrorView.current.highlights,liveDocument);
+   mockScrollTargets.forEach((selector,index)=>{
+    const el=liveDocument?.querySelector(selector);
+    if(el){el.scrollLeft=scroll[2+index*2];el.scrollTop=scroll[3+index*2]}
+   });
+  });
+  return()=>cancelAnimationFrame(frame);
+ },[mirror,mirrorTick,liveDocument]);
+ useEffect(()=>{if(mirror)return;let live=true;(async()=>{setLoading(true);try{const r=await mockFetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store"});const obj=await r.json();if(!r.ok&&(obj.code_required||obj.scheduled)){if(live)setAccessGate({scheduled:obj.scheduled===true,opensAt:obj.opens_at||null});return}if(!r.ok)throw new Error(obj.detail||"Full Mock could not be loaded.");if(!live)return;obj.mock=restoreMockDraft(obj.mock,heldDraft.current);const restored=!!heldDraft.current;heldDraft.current=null;setData(obj);setSharing(obj.live_consent===true);setStage(obj.mock.stage);setLAnswers(obj.mock.stage==="listening"?{}:obj.mock.listening_answers||{});setLStartedAt(obj.mock.stage==="listening"?"":obj.mock.listening_started_at||"");setListeningStarted(false);setLElapsed(obj.mock.stage==="listening"?0:Number(obj.mock.listening_elapsed_seconds||0));setRAnswers(obj.mock.reading_answers||{});setW1(obj.mock.writing_task1||"");setW2(obj.mock.writing_task2||"");setRRemaining(Number(obj.mock.reading_remaining??3600));setWRemaining(Number(obj.mock.writing_remaining??3600));setResult(obj.mock.result||null);if(restored&&obj.mock.stage==="reading")queueSave("reading",{answers:obj.mock.reading_answers});if(restored&&obj.mock.stage==="writing")queueSave("writing",{task1:obj.mock.writing_task1,task2:obj.mock.writing_task2})}catch(e){if(live)setMessage(e instanceof Error?e.message:"Full Mock could not be loaded.")}finally{if(live)setLoading(false)}})();return()=>{live=false}},[day,loadVersion]);
+
+ useEffect(()=>{if(mirror||!mockRuntimeActive(stage,accessGate)||stage!=="listening"||!listeningStarted||!lStartedAt)return;const tick=()=>setLElapsed(Math.max(0,Math.floor((Date.now()-Date.parse(lStartedAt))/1000)));tick();const id=window.setInterval(tick,1000);return()=>window.clearInterval(id)},[stage,listeningStarted,lStartedAt,accessGate]);
+ useEffect(()=>{
+  if(mirror||!mockRuntimeActive(stage,accessGate)||stage!=="listening"||!listeningStarted||!lStartedAt||!audioRef.current)return;
+  const audio=audioRef.current;
+  const resume=async()=>{
+   try{
+    // Abandoned Full Mock Listening runs restart their audio at 0:00.
+    audio.currentTime=0;
+    await audio.play();setAudioState("playing");
+   }catch{setAudioState("resume")}
+  };
+  if(audio.readyState>=1)void resume();else audio.addEventListener("loadedmetadata",resume,{once:true});
+  return()=>audio.removeEventListener("loadedmetadata",resume);
+ },[stage,listeningStarted,lStartedAt,accessGate]);
+ // Only an unfinished Full Mock Listening stage gets reset on exit.
+ useEffect(()=>{
+  if(mirror||!mockRuntimeActive(stage,accessGate)||stage!=="listening"||!listeningStarted||!lStartedAt)return;
+  const body=JSON.stringify({action:"abandon_listening",day,started_at:lStartedAt});
+  const send=()=>{
+   try{
+    if(navigator.sendBeacon?.("/api/challenge-mock",new Blob([body],{type:"application/json"})))return;
+   }catch{}
+   void mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body,keepalive:true}).catch(()=>{});
+  };
+  window.addEventListener("pagehide",send);
+  return()=>{window.removeEventListener("pagehide",send);send()};
+ },[day,stage,listeningStarted,lStartedAt,accessGate]);
+ useEffect(()=>{if(mirror||!mockRuntimeActive(stage,accessGate)||stage!=="reading")return;const id=window.setInterval(()=>setRRemaining(v=>Math.max(0,v-1)),1000);return()=>window.clearInterval(id)},[stage,accessGate]);
+ useEffect(()=>{if(!mirror&&!loading&&!accessGate&&stage==="reading"&&rRemaining===0&&!busy)void submitReading(true)},[stage,rRemaining,busy,accessGate,loading]);
+ useEffect(()=>{if(mirror||!mockRuntimeActive(stage,accessGate)||stage!=="writing")return;const id=window.setInterval(()=>setWRemaining(v=>Math.max(0,v-1)),1000);return()=>window.clearInterval(id)},[stage,accessGate]);
+ useEffect(()=>{if(!mirror&&!loading&&!accessGate&&stage==="writing"&&wRemaining===0&&!busy)void submitWriting(true)},[stage,wRemaining,busy,accessGate,loading]);
+ useEffect(()=>{
+  if(stage!=="assessing")return;
+  if(mirror||!mockRuntimeActive(stage,accessGate))return;
+  let active=true,finished=false,timer:number|undefined;const controller=new AbortController();
+  const check=async()=>{
+   try{const r=await mockFetch("/api/challenge-mock?day="+day,{credentials:"same-origin",cache:"no-store",signal:controller.signal});const obj=await r.json();if(!active||!r.ok)return;if(obj?.mock?.stage==="completed"){finished=true;setResult(obj.mock.result);setStage("completed");setMessage("")}}
+   catch{}finally{if(active&&!finished)timer=window.setTimeout(check,3000)}
+  };
+  void check();return()=>{active=false;controller.abort();if(timer)window.clearTimeout(timer)};
+ },[stage,day,accessGate]);
+
+ function queueSave(kind:"listening"|"reading"|"writing",payload:any){
+  if(accessGate)return;
+  if(saveRef.current)window.clearTimeout(saveRef.current);
+  saveRef.current=window.setTimeout(()=>{void mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save_"+kind,day,...payload})}).catch(()=>{})},500);
+ }
+ function setL(q:number,value:string){setLCurrentQuestion(q);setLSection(Math.ceil(q/10));setLAnswers(prev=>{const next={...prev,[String(q)]:value};queueSave("listening",{answers:next,started_at:lStartedAt,elapsed_seconds:lElapsed});return next})}
+ function toggleMulti(block:any,letter:string){
+  const qs=(block.questions||[]).map(Number),max=Math.max(1,Math.min(qs.length,Number(block.max_selections||2)));
+  const selected=qs.map((q:number)=>lAnswers[String(q)]).filter(Boolean);
+  const next=selected.includes(letter)?selected.filter((x:string)=>x!==letter):selected.length<max?[...selected,letter]:selected;
+  const copy={...lAnswers};qs.forEach((q:number,i:number)=>copy[String(q)]=next[i]||"");setLCurrentQuestion(qs[0]||1);setLSection(Math.ceil((qs[0]||1)/10));setLAnswers(copy);queueSave("listening",{answers:copy,started_at:lStartedAt,elapsed_seconds:lElapsed});
+ }
+ function setR(q:number,value:string){setRAnswers(prev=>{const next={...prev,[String(q)]:value};queueSave("reading",{answers:next});return next})}
+ function setWriting(which:1|2,value:string){if(which===1)setW1(value);else setW2(value);queueSave("writing",{task1:which===1?value:w1,task2:which===2?value:w2})}
+
+ async function startMock(){
+  if(busy||!sharing)return;void ensureExamFullscreen();
+  setBusy(true);setMessage("");try{const r=await mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start",day})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Full Mock.");setStage("listening");setLSection(1);setLCurrentQuestion(1)}catch(e){setMessage(e instanceof Error?e.message:"Could not start Full Mock.")}finally{setBusy(false)}
+ }
+ async function startListening(){
+  if(busy||!sharing)return;void ensureExamFullscreen();setBusy(true);setMessage("");
+  try{
+   const r=await mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start_listening",day})});
+   const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not start Listening.");
+   setLAnswers({});setLSection(1);setLCurrentQuestion(1);setLElapsed(0);setLStartedAt(obj.started_at||new Date().toISOString());setListeningStarted(true);setAudioState("idle");
+  }catch(e){setMessage(e instanceof Error?e.message:"Could not start Listening.")}finally{setBusy(false)}
+ }
+ async function submitListening(confirmed=false){
+  if(busy)return;if(!confirmed){setConfirmStage("listening");return}setConfirmStage(null);
+  void ensureExamFullscreen();
+  setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_listening",day,started_at:lStartedAt,answers:lAnswers,elapsed_seconds:lElapsed})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit Listening.");audioRef.current?.pause();if(obj.hidden_result)setPreviewListening(obj.hidden_result);setRRemaining(Number(obj.reading_remaining??3600));setStage("reading");setRPassage(1);setRTab("passage")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Listening.")}finally{setBusy(false)}
+ }
+ async function submitReading(auto=false){
+  if(busy)return;
+  if(!auto)void ensureExamFullscreen();
+  setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_reading",day,answers:rAnswers})});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Could not submit Reading.");if(obj.hidden_result)setPreviewReading(obj.hidden_result);setWRemaining(Number(obj.writing_remaining??3600));setStage("writing");setWTask(1)}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Reading.")}finally{setBusy(false)}
+ }
+ async function submitWriting(auto=false,confirmed=false){
+  if(busy)return;if(!auto&&(!w1.trim()||!w2.trim())){setMessage("Complete both Writing Task 1 and Task 2 before submitting.");return}
+  if(!auto&&!confirmed){setConfirmStage("writing");return}
+  setConfirmStage(null);
+  setBusy(true);setMessage("");try{if(saveRef.current)window.clearTimeout(saveRef.current);const r=await mockFetch("/api/challenge-mock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"submit_writing",day,task1:w1,task2:w2,auto,preview_listening:previewListening,preview_reading:previewReading})});const obj=await r.json();if(r.status===202){setStage("assessing");setMessage(obj.detail||"Writing is being assessed.");return}if(!r.ok)throw new Error(obj.detail||"Could not submit Writing.");setResult(obj.result);setStage("completed")}catch(e){setMessage(e instanceof Error?e.message:"Could not submit Writing.")}finally{setBusy(false)}
+ }
+ async function toggleFull(){try{if(document.fullscreenElement)await document.exitFullscreen();else await ensureExamFullscreen()}catch{}}
+ function showHighlight(){
+  const sel=window.getSelection();if(!sel||sel.isCollapsed||!sel.rangeCount)return;
+  const r=sel.getRangeAt(0);
+  const insidePaper=paperRef.current?.contains(r.commonAncestorContainer)||questionsRef.current?.contains(r.commonAncestorContainer);
+  if(!insidePaper)return;
+  const nodeEl=(node:Node)=>node instanceof Element?node:node.parentElement;
+  const forbidden="input,textarea,select,button,.ls-qnum,.cr-number,.cr-question-head b,.ls-bottom-nav,.cr-footer";
+  if(nodeEl(r.startContainer)?.closest(forbidden)||nodeEl(r.endContainer)?.closest(forbidden))return;
+  const rect=r.getBoundingClientRect();selectionRef.current=r.cloneRange();
+  setHighlightPopup({x:Math.min(innerWidth-112,Math.max(112,rect.left+rect.width/2)),y:Math.max(66,rect.top-54)});
+ }
+ function applyHighlight(shade:"yellow"|"erase"="yellow"){
+  const range=selectionRef.current,h=window.CSS?.highlights;if(!range||!h)return;
+  const key="ark-mock-yellow";
+  if(shade==="erase"){
+   const old=h.get(key);if(old){const keep=Array.from(old).filter(r=>!(r instanceof Range&&r.compareBoundaryPoints(Range.END_TO_START,range)>0&&r.compareBoundaryPoints(Range.START_TO_END,range)<0));if(keep.length)h.set(key,new Highlight(...keep));else h.delete(key)}
+  }else{
+   const old=h.get(key);h.set(key,old?new Highlight(...Array.from(old),range.cloneRange()):new Highlight(range.cloneRange()));
+  }
+  window.getSelection()?.removeAllRanges();selectionRef.current=null;setHighlightPopup(null);
+ }
+ function goLQuestion(q:number){
+  const next=Math.max(1,Math.min(40,q));setLCurrentQuestion(next);setLSection(Math.ceil(next/10));
+  setTimeout(()=>document.getElementById("listen-q-"+next)?.scrollIntoView({behavior:"smooth",block:"center"}),30);
+ }
+
+ const lp=data?.content.listening.payload,currentSection=lp?.sections?.find((x:any)=>Number(x.number)===lSection);
+ const passage=data?.content.reading.find(p=>p.ordinal===rPassage);
+ const writing=data?.content.writing.payload,tasks=writing?.tasks||[],task=tasks[wTask-1];
+
+ function gap(q:number){return <span className="ls-gap-wrap" id={"listen-q-"+q}><span className="ls-qnum">{q}</span><input value={lAnswers[String(q)]||""} onChange={e=>setL(q,e.target.value)} aria-label={"Question "+q}/></span>}
+ function tokens(items:Token[]){return items.map((x,i)=>typeof x==="string"?<span key={i}>{x}</span>:<span key={i}>{gap(x.q)}</span>)}
+ function renderL(block:any,idx:number){
+  if(block.kind==="table")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em><strong>{block.word_limit}</strong></div><h2 className="ls-source-title">{block.title}</h2><div className="ls-table-scroll"><table className="ls-source-table"><thead><tr>{block.headers.map((h:string)=><th key={h}>{h}</th>)}</tr></thead><tbody>{block.rows.map((row:Token[][],ri:number)=><tr key={ri}>{row.map((cell:Token[],ci:number)=><td key={ci}>{tokens(cell)}</td>)}</tr>)}</tbody></table></div></section>;
+
+  if(block.kind==="notes")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em><strong>{block.word_limit}</strong></div><div className="ls-notes-sheet"><h2>{block.title}</h2><ul>{block.items.map((it:Token[],i:number)=><li key={i}>{tokens(it)}</li>)}</ul></div></section>;
+  if(block.kind==="matching")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em><strong>{block.word_limit}</strong></div>{block.title&&<h2 className="ls-source-title">{block.title}</h2>}{block.image_url&&<div className="ls-map-image-wrap"><img src={block.image_url} alt={block.image_alt||"Listening visual"}/></div>}{!block.hide_choices&&<div className="ls-choice-box">{Object.entries(block.choices||{}).map(([k,v])=><p key={k}><b>{k}</b><span>{String(v)}</span></p>)}</div>}<div className="ls-match-list">{(block.items||[]).map((it:any)=><div className="ls-match" id={"listen-q-"+it.q} key={it.q}><span className="ls-qnum static">{it.q}</span><b>{it.text}</b><select value={lAnswers[String(it.q)]||""} onChange={e=>setL(it.q,e.target.value)}><option value="">Choose</option>{Object.keys(block.choices||{}).map(k=><option key={k}>{k}</option>)}</select></div>)}</div></section>;
+  if(block.kind==="mcq")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em></div>{block.title&&<h2 className="ls-source-title">{block.title}</h2>}<div>{(block.questions||[]).map((q:any)=><article className="ls-mcq" id={"listen-q-"+q.q} key={q.q}><div className="ls-q-title"><span className="ls-qnum static">{q.q}</span><b>{q.text}</b></div><div className="ls-options">{Object.entries(q.options||{}).map(([letter,text])=><label className="ls-option" key={letter}><input type="radio" name={"mq"+q.q} checked={lAnswers[String(q.q)]===letter} onChange={()=>setL(q.q,letter)}/><b>{letter}</b><span>{String(text)}</span></label>)}</div></article>)}</div></section>;
+  if(block.kind==="choose_two"||block.kind==="choose_many"){
+   const qs=(block.questions||[]).map(Number),selected=qs.map((q:number)=>lAnswers[String(q)]).filter(Boolean);
+   return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em></div><div className="ls-two"><h3>{block.question}</h3><div>{Object.entries(block.options||{}).map(([letter,text])=><label className="ls-check" key={letter}><input type="checkbox" checked={selected.includes(letter)} onChange={()=>toggleMulti(block,letter)}/><b>{letter}</b><span>{String(text)}</span></label>)}</div></div></section>
+  }
+  if(block.kind==="notes_groups")return <section className="ls-block" key={idx}><div className="ls-block-head"><b>{block.range}</b><em>{block.instruction}</em><strong>{block.word_limit}</strong></div><div className="ls-notes-sheet"><h2>{block.title}</h2>{(block.groups||[]).map((g:any,gi:number)=><div className="ls-note-group" key={gi}><h3>{g.heading}</h3>{g.intro&&<p>{g.intro}</p>}<ul>{(g.items||[]).map((it:Token[],i:number)=><li key={i}>{tokens(it)}</li>)}</ul></div>)}</div></section>;
+  return null;
+ }
+
+ // Original layout of Day 32 notes and continuous summary only; other days unchanged.
+ function renderDay46Summary(group:Q[]){
+  const first=group[0].number;
+  const sections:Record<number,[string,string][]>={"6":[["h3","February 1861: Storm warning service"],["p","FitzRoy received weather reports produced by ships using reliable [6]."],["p","simultaneous weather reports were taken daily"],["p","storm warnings were telegraphed to [7] along the shore"],["p","signals for ships were displayed using raised [8]."],["p","the storm warning service was the greatest development in sea safety since the [9] was introduced"],["h3","August 1861: Public weather forecasting service"],["p","very popular in The Times newspaper"],["p","frequently used by the English Queen for safe trips to a favourite [10]."],["p","FitzRoy's forecasts were popular with fishermen but not with boat [11]."],["p","in modern times FitzRoy's [12] is used for a marine area"],["p","FitzRoy produced a [13] which was respected by the scientific community"]],"23":[["h4","Animal Research into the Value of Play"],["p","In studies researching links between play and social learning, experiments analysing protein levels in the [23] of rats noted significant differences between rats which had played and those which had not."],["p","In another study, rats made distressed by an object smelling of a [24] experienced a noticeable reduction in their [25] levels after they had been allowed to play."],["p","A further experiment, in which rats had to move a [26] in order to reach a reward, indicated that rats deprived of play were less skilled at dealing with problems."]],"31":[["h4","The fall of the Western Roman Empire"],["p","Barbarians eventually overcame the Romans in the 5th century, after the latter had been under attack for a very long period. The interesting question is why the barbarians experienced [31] on this occasion."],["p","One hypothesis is that they had gained in strength. For example, they may have increased in [32], have built up greater [33] or benefited from a change in climate."],["p","Another hypothesis is that the Romans had developed [34], so they were more vulnerable to attack. This would then be the fundamental [35] of the fall of the Roman Empire."],["p","Whatever the reason, the same question about the fall of the Roman Empire applies to the disappearance of several other historical societies."]]};
+  if(first===6){
+   const notes=sections[first];
+   return <div className="mock-r32-original" style={{display:"grid",gap:20,lineHeight:1.65}}>
+    {[0,6].map((heading,index)=><section key={heading} style={index?{borderTop:"1px solid #dbe5ef",paddingTop:16}:undefined}>
+     <h4 style={{textAlign:"left",margin:"0 0 10px"}}>{notes[heading][1]}</h4>
+     <ul style={{listStyleType:"disc",paddingInlineStart:22,margin:0,display:"grid",gap:7}}>
+      {notes.slice(heading+1,index?notes.length:6).map(([,line])=><li key={line}>
+       {line.split(/(\[\d+\])/).map((part,i)=>{
+        const number=Number(part.match(/^\[(\d+)\]$/)?.[1]);
+        if(!number)return part;
+        return <span className="mock-r32-blank" key={i} style={{display:"inline-flex",alignItems:"center",verticalAlign:"middle",marginInline:3,gap:4}}>
+         <strong>{number}</strong><input id={"question-"+number} aria-label={"Answer to question "+number} value={rAnswers[String(number)]||""} onChange={e=>setR(number,e.target.value)} autoComplete="off" spellCheck={false} style={{width:"7.5em",minWidth:0,height:34}}/>
+        </span>;
+       })}
+      </li>)}
+     </ul>
+    </section>)}
+   </div>;
+  }
+  const options=group[0].options||[];
+  return <div className="mock-r32-original mock-r32-summary">
+   {sections[first].map(([kind,line],index)=>{
+    if(kind!=="p")return <div key={index}><h4>{line}</h4>{index===0&&options.length>0&&<div className="mock-summary-words"><strong>List of Words</strong><ul>{options.map(word=><li key={word}>{word}</li>)}</ul></div>}</div>;
+    return <p key={index}>{line.split(/(\[\d+\])/).map((part,i)=>{
+     const number=Number(part.match(/^\[(\d+)\]$/)?.[1]);
+     if(!group.some(q=>q.number===number))return part;
+     const id="question-"+number,label="Answer to question "+number,value=rAnswers[String(number)]||"";
+     return <span className="mock-r32-blank" key={i}><strong>{number}</strong>{options.length
+      ?<select className="cr-gap cr-select cr-inline-select" id={id} aria-label={label} value={value} onChange={e=>setR(number,e.target.value)}><option value="">Select</option>{options.map(word=><option key={word} value={word}>{word}</option>)}</select>
+      :<input id={id} aria-label={label} value={value} onChange={e=>setR(number,e.target.value)} autoComplete="off" spellCheck={false}/>}</span>;
+    })}</p>;
+   })}
+  </div>;
+ }
+ function renderDay46Researchers(group:Q[]){
+  const researchers=["Anthony Pellegrini","Jaak Panksepp","Stephen Siviy","Marc Bekoff"];
+  return <>
+   <div className="mock-summary-words"><strong>List of Researchers</strong><ul style={{display:"block"}}>{researchers.map((name,index)=><li key={name}><b>{"ABCD"[index]}.</b> {name}</li>)}</ul></div>
+   {group.map(q=><div key={q.number} id={"question-"+q.number} className="cr-question">
+    <div className="cr-question-head" style={{flexWrap:"wrap",alignItems:"center",gap:"12px"}}>
+     <b>{q.number}</b><span style={{flex:"1 1 230px"}}>{q.text}</span>
+     <select className="cr-gap cr-select" aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}>
+      <option value="">Select answer</option>{(q.options||[]).map(letter=><option key={letter} value={letter}>{letter}</option>)}
+     </select>
+    </div>
+   </div>)}
+  </>;
+ }
+ function renderDay39Summary(group:Q[]){
+  const first=group[0].number;
+  const title=first===19?"Construction of Halley VI":"The Discovery of Johnston’s Diaries";
+  const options=group[0].options||[];
+  const text=group[0].text.replace(/^The Discovery of Johnston’s Diaries\.\s*/,"").replace("______","["+first+"]");
+  return <div className="mock-r32-original mock-r32-summary">
+   <h4>{title}</h4>
+   {options.length>0&&<div className="mock-summary-words"><strong>List of Words</strong><ul>{options.map(option=><li key={option}>{option}</li>)}</ul></div>}
+   <p>{text.split(/(\[\d+\])/).map((part,index)=>{
+    const number=Number(part.match(/^\[(\d+)\]$/)?.[1]);
+    if(!group.some(question=>question.number===number))return part;
+    const id="question-"+number, label="Answer to question "+number, value=rAnswers[String(number)]||"";
+    return <span className="mock-r32-blank" key={index}><strong>{number}</strong>{options.length>0
+     ?<select className="cr-gap cr-select cr-inline-select" id={id} aria-label={label} value={value} onChange={event=>setR(number,event.target.value)}><option value="">Select</option>{options.map(option=><option key={option} value={optionValue(option)}>{option}</option>)}</select>
+     :<input id={id} aria-label={label} value={value} onChange={event=>setR(number,event.target.value)} autoComplete="off" spellCheck={false}/>}</span>;
+   })}</p>
+  </div>;
+ }
+ function renderDay32ReadingGroup(first:number){
+  const gap=(n:number)=><span className="mock-r32-blank"><strong>{n}</strong><input type="text" id={"question-"+n} aria-label={"Answer to question "+n} value={rAnswers[String(n)]||""} onChange={e=>setR(n,e.target.value)} autoComplete="off" spellCheck={false}/></span>;
+  if(first===9)return <div className="mock-r32-original"><h4>Marc Brunel’s Tunnel</h4>
+   <h5>Preparing to build the tunnel</h5>
+   <ul><li>Brunel noticed how a kind of {gap(9)} made its tunnels in wood.</li>
+   <li>Brunel created a device called a tunnelling shield, to protect people working under the river.</li>
+   <li>Brunel planned to build a tunnel at a relatively shallow depth, where {gap(10)} was likely to be found.</li></ul>
+   <h5>Problems faced by miners</h5>
+   <ul><li>There were frequent floods caused by mechanical breakdowns.</li>
+   <li>The miners suffered from health problems such as headaches and {gap(11)} because of pollution in the tunnels.</li>
+   <li>Lighting problems led to several {gap(12)}.</li>
+   <li>Some workers quit because of the high temperatures in the tunnel.</li></ul>
+   <h5>After the tunnel was finished</h5>
+   <ul><li>The tunnel was finally completed in 1841.</li>
+   <li>Brunel did not have enough money to repay his debt to the {gap(13)}.</li>
+   <li>The tunnel was abandoned until the 1880s.</li></ul></div>;
+  if(first===27)return <div className="mock-r32-original mock-r32-summary"><h4>The Discovery of the Antikythera Mechanism</h4>
+   <p>The Antikythera mechanism was discovered by a diver who was looking for {gap(27)}. Instead, he found the remains of an ancient ship, from which he took proof to show his fellow divers. Having been commissioned to recover the relics, the same divers spent {gap(28)} retrieving items such as sculptures made of {gap(29)} for the National Museum. Another item they found was a {gap(30)} which contained a piece of metal. This was ignored until over a year later when a renowned archaeologist noticed that the inside was composed of several pieces, one of which had {gap(31)} on it, and others appeared to be apparatus of some sort, leading the investigators to think at first that the artefact might have been a {gap(32)}, although its historical origin suggested this was impossible.</p>
+  </div>;
+  return null;
+ }
+
+ function renderRQ(q:Q){
+  if(q.type==="select")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span><ReadingGapSentence text={q.text} input={<select className="cr-gap cr-select cr-inline-select" aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}><option value="">Select answer</option>{(q.options||[]).map(opt=><option key={opt} value={optionValue(opt)}>{opt}</option>)}</select>}/></span></div></div>;
+  if(q.type==="tfng")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><div className="cr-options">{(q.options?.length?q.options:["TRUE","FALSE","NOT GIVEN"]).map(opt=><label key={opt}><input type="radio" checked={rAnswers[String(q.number)]===opt} onChange={()=>setR(q.number,opt)}/><span className="cr-radio"/>{opt}</label>)}</div></div>;
+  if(q.type==="mcq")return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span>{q.text}</span></div><div className="cr-options">{(q.options||[]).map(opt=>{const v=optionValue(opt);return <label key={opt}><input type="radio" checked={rAnswers[String(q.number)]===v} onChange={()=>setR(q.number,v)}/><span className="cr-radio"/>{opt}</label>})}</div></div>;
+  return <div className="cr-question" key={q.number} id={"question-"+q.number}><div className="cr-question-head"><b>{q.number}</b><span><ReadingGapSentence text={q.text} input={<input className="cr-gap cr-inline-gap" type="text" placeholder="Answer" autoComplete="off" spellCheck={false} aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}/>} /></span></div></div>;
+ }
+
+
+ const studyTracking=mockActive&&sharing?<StudyTimeHeartbeat day={day} module={stage as "listening"|"reading"|"writing"} mock enabled={stage==="listening"?listeningStarted:stage==="reading"?rRemaining>0:wRemaining>0}/>:null;
+ const confirmation=confirmStage&&<div className="mock-confirm-backdrop" role="presentation"><section className="mock-confirm" role="dialog" aria-modal="true" aria-labelledby="mock-confirm-title"><h2 id="mock-confirm-title">Submit {confirmStage==="listening"?"Listening":confirmStage==="reading"?"Reading":"Writing"}?</h2><p>{confirmStage==="writing"?"Finish the Full Mock? Your results will appear after the Writing assessment is complete.":<>You will continue to {confirmStage==="listening"?"Reading":"Writing"}. You cannot return to this section.</>}</p><div><button autoFocus onClick={()=>setConfirmStage(null)}>Cancel</button><button onClick={()=>{if(confirmStage==="listening")void submitListening(true);else if(confirmStage==="writing")void submitWriting(false,true);else{setConfirmStage(null);void submitReading(false)}}}>{confirmStage==="writing"?"Submit and finish":"Submit and continue"}</button></div></section></div>;
+ if(loading)return <LoadingIndicator/>;
+ if(accessGate)return <MockAccessGate day={day} scheduled={accessGate.scheduled} opensAt={accessGate.opensAt} onRedeemed={()=>{setLoading(true);setAccessGate(null);setLoadVersion(v=>v+1)}}/>;
+ if(!data)return <main className="mock-loading"><span>FULL MOCK</span><b>{message||"Mock unavailable."}</b><AnimatedBackButton onClick={()=>router.push("/dashboard")} ariaLabel="Back to dashboard"/></main>;
+
+ if(stage==="not_started")return <main className="mock-entry"><header className="mock-entry-top"><AnimatedBackButton href="/dashboard"/><b>ARK EDUCATION · FULL MOCK</b><span>{data.preview?"PREVIEW MODE":mockDateText}</span></header><section className="mock-entry-card"><small>DAY {String(day).padStart(2,"0")} · IELTS FULL MOCK</small><h1>Listening → Reading → Writing</h1><p>Complete all three sections in order. Section scores stay hidden until the Writing assessment is finished.</p>{shareControl}<div className="mock-entry-steps"><div><Headphones/><b>Listening</b><span>40 questions · audio once</span></div><div><BookOpen/><b>Reading</b><span>40 questions · 60 minutes</span></div><div><PenLine/><b>Writing</b><span>Task 1 + Task 2 · 60 minutes</span></div></div>{data.preview&&<div className="mock-preview-note"><ShieldCheck size={16}/> Teacher preview · nothing is saved to real student results.</div>}<button disabled={busy||!sharing||consentBusy} onClick={startMock}>{busy?"Opening…":"Start Full Mock"} <ChevronRight size={17}/></button>{message&&<p className="mock-error">{message}</p>}</section></main>;
+
+ if(stage==="listening")return <main className={"ls-shell mock-section-shell "+(!listeningStarted?"ls-shell--intro":"")}>{confirmation}{studyTracking}
+  <audio ref={audioRef} preload="auto" src={mirror?undefined:lp.audio_url} onPlay={()=>setAudioState("playing")} onEnded={()=>setAudioState("ended")} onPause={()=>{if(listeningStarted&&audioState==="playing"){audioRef.current?.play().catch(()=>setAudioState("resume"))}}}/>
+  <header className="ls-topbar"><div className="mock-section-lock" aria-label="Section locked until submission"><LockKeyhole size={17}/></div><div className="ls-top-title">FULL MOCK · LISTENING</div><div className="ls-top-actions">{listeningStarted&&<span className={"ls-audio-state "+audioState}><Volume2 size={14}/>{audioState==="ended"?"Audio finished":audioState==="resume"?"Audio needs permission":"Playing"} <i>{fmt(lElapsed)}</i></span>}<button className="ls-full" onClick={toggleFull}>{full?<Minimize2 size={17}/>:<Maximize2 size={17}/>}</button></div></header>
+  {!listeningStarted?<section className="ls-start-card"><span className="ls-start-icon"><Headphones size={27}/></span><small>FULL MOCK · SECTION 1 OF 3</small><h1>Listening</h1><p>40 questions · 4 sections. If you leave before submitting, your unfinished Listening will restart from the beginning.</p><div className="ls-start-meta"><div><b>4</b><span>Sections</span></div><div><b>40</b><span>Questions</span></div><div><b>1×</b><span>Playback</span></div></div>{!sharing&&shareControl}<button disabled={busy||!sharing||consentBusy} onClick={startListening}><Headphones size={17}/> {busy?"Starting…":"Start Listening"}</button></section>:<>
+   {audioState==="resume"&&<div className="ls-resume-banner"><Volume2 size={16}/><div><b>Audio needs permission</b><span>Tap to play the recording.</span></div><button onClick={()=>audioRef.current?.play().then(()=>setAudioState("playing")).catch(()=>{})}>Resume audio</button></div>}
+   <section className="ls-instruction"><div><b>Part {lSection}</b><span>{currentSection?.range}</span></div></section>
+   <div className="ls-workspace"><section className="ls-question-paper" ref={paperRef} onMouseUp={showHighlight}>{currentSection?.blocks?.map((b:any,i:number)=>renderL(b,i))}</section></div>
+   {highlightPopup&&<div className="ls-selection-popup" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()}><button className="yellow" onClick={()=>applyHighlight("yellow")}><span/> Highlight</button><button onClick={()=>applyHighlight("erase")}><Eraser size={15}/> Remove</button></div>}
+   <nav className="ls-bottom-nav ls-part-navigation">
+    <ListeningPartNavigation part={lSection} currentQuestion={lCurrentQuestion} questionClass={q=>lAnswers[String(q)]?"answered":""} onPart={part=>{setLSection(part);setLCurrentQuestion((part-1)*10+1);window.scrollTo({top:0,behavior:"smooth"})}} onQuestion={goLQuestion}/>
+    <button className="ls-submit" disabled={busy} onClick={()=>submitListening()}>{busy?"Submitting…":"Submit Listening"} <Send size={15}/></button>
+   </nav>
+  </>}
+  {message&&<div className="mock-floating-message">{message}</div>}
+  <style jsx global>{`::highlight(ark-mock-yellow){background:#ffe58a;color:inherit}`}</style>
+ </main>;
+
+ if(stage==="reading"){
+  const groups:(Q[])[]=[];
+  for(const q of passage?.questions||[]){const last=groups[groups.length-1];if(!last||last[0]?.instruction!==q.instruction)groups.push([q]);else last.push(q)}
+  const totalAnswered=Object.values(rAnswers).filter(Boolean).length;
+  return <main className={"cr-shell mock-reading-shell"+(day===25?" mock-reading-day25":"")}>{confirmation}{studyTracking}
+   <header className="cr-header"><div className="cr-head-start"><LockKeyhole size={17}/></div><div className="cr-head-center"><div className="cr-timer-controls"><span className="cr-time"><Clock3 size={17}/>{fmt(rRemaining)}</span></div></div><div className="cr-head-end"><span className="cr-head-practice">FULL MOCK · PART {String(rPassage).padStart(2,"0")}</span><button className="cr-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
+   <div className="cr-instructions"><div><small>FULL MOCK · IELTS READING</small><p>3 passages <span>·</span> 40 questions <span>·</span> 60-minute countdown</p></div><div className="cr-tools"></div></div>
+   <div className="cr-mobile-tabs"><button className={rTab==="passage"?"active":""} onClick={()=>setRTab("passage")}>Passage</button><button className={rTab==="questions"?"active":""} onClick={()=>setRTab("questions")}>Questions</button></div>
+   <div className="cr-split">
+    <section style={{display:rTab==="questions"?"var(--cr-hide-passage)":"block"}} className="cr-pane cr-passage" ref={paperRef} onMouseUp={showHighlight} onTouchEnd={()=>setTimeout(showHighlight,100)}><h2>{passage?.title}</h2>{passage?.text.split(/\n\s*\n/).filter(Boolean).map((p,i)=><p key={i}>{p}</p>)}</section>
+    <section style={{display:rTab==="passage"?"var(--cr-hide-questions)":"block"}} className="cr-pane cr-questions" ref={questionsRef} onMouseUp={showHighlight} onTouchEnd={()=>setTimeout(showHighlight,100)}>
+     {groups.map((group,gi)=><section className="cr-qgroup" key={gi}><div className="cr-qgroup-head"><h3>Questions {group[0].number}{group.length>1?"–"+group[group.length-1].number:""}</h3>{group[0].instruction&&<p>{compactReadingInstruction(day===46&&group[0].number===19?group[0].instruction.split(" List of Researchers")[0]:day===46&&group[0].number===31?group[0].instruction.replace("The fall of the Western Roman Empire. ",""):group[0].instruction,group[0].type==="select")}</p>}</div>{day===46&&group[0].number===19?renderDay46Researchers(group):day===46&&[6,23,31].includes(group[0].number)?renderDay46Summary(group):day===39&&((group[0].number===19&&group.length===4)||(group[0].number===32&&group.length===5))?renderDay39Summary(group):day===32&&(group[0].number===9||group[0].number===27)?renderDay32ReadingGroup(group[0].number):group[0].answer_group?<div className="cr-options">{day===32&&group[0].number===21&&<p className="mock-reading-day32-choose-two-stem" style={{fontWeight:650,fontSize:16,lineHeight:1.5,margin:"0 0 10px"}}>{group[0].text}</p>}{(group[0].options||[]).map(opt=>{const value=optionValue(opt);const selected=group.some(q=>rAnswers[String(q.number)]===value);const count=group.filter(q=>!!rAnswers[String(q.number)]).length;return <label key={opt}><input type="checkbox" checked={selected} disabled={!selected&&count>=group.length} onChange={()=>{const values=group.map(q=>rAnswers[String(q.number)]).filter(Boolean).filter(v=>v!==value);if(!selected)values.push(value);setRAnswers(old=>{const next={...old,...Object.fromEntries(group.map((q,i)=>[String(q.number),values[i]||""]))};queueSave("reading",{answers:next});return next});}}/><span>{opt}</span></label>})}<p>{group.filter(q=>!!rAnswers[String(q.number)]).length} of {group.length} selected</p>{group.map(q=><span key={q.number} id={"question-"+q.number}/>)}</div>:group.map(renderRQ)}</section>)}
+    </section>
+   </div>
+   {highlightPopup&&<div className="cr-highlight-menu" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()}><button aria-label="Yellow highlight" onClick={()=>applyHighlight("yellow")}><i className="swatch yellow"/></button><span className="cr-menu-sep"/><button aria-label="Remove highlight" onClick={()=>applyHighlight("erase")}><Eraser size={17}/></button></div>}
+   <footer className="cr-footer mock-reading-footer">
+    <ListeningPartNavigation label="Reading parts" parts={[1,2,3]} part={rPassage} currentQuestion={0} questions={(passage?.questions||[]).map(q=>q.number)} questionClass={q=>rAnswers[String(q)]?"answered":""} onPart={part=>{setRPassage(part);setRTab("passage")}} onQuestion={q=>{setRTab("questions");setTimeout(()=>document.getElementById("question-"+q)?.scrollIntoView({behavior:"smooth",block:"center"}),20)}}/>
+    <span className="cr-answer-count">{totalAnswered+" / 40 answered"}</span>
+    <button className="cr-submit" disabled={busy} onClick={()=>setConfirmStage("reading")}><Send size={15}/> {busy?"Submitting…":"Submit Reading"}</button>
+   </footer>
+   {message&&<div className="mock-floating-message">{message}</div>}
+   <style>{`
+
+/* Day 32 original IELTS notes and continuous summary only. */
+.mock-reading-shell .mock-r32-original{
+  margin:0 0 20px;padding:18px 20px;border:1px solid #d9e1eb;
+  border-radius:9px;background:#fff;color:#1c3045;
+  font:400 16px/1.75 Arial,Helvetica,sans-serif;
+}
+.mock-reading-shell .mock-summary-words{margin:0 0 14px;padding:10px 12px;background:#f6f9fc;border:1px solid #dce6ef;border-radius:8px;}
+.mock-reading-shell .mock-summary-words ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:2px 12px;margin:4px 0 0;padding:0;list-style:none;}
+.mock-reading-shell .mock-summary-words li{padding:0;line-height:1.5;}
+.mock-reading-shell .mock-r32-original h4{
+  margin:0 0 16px;font:700 17px/1.4 Arial,Helvetica,sans-serif;text-align:center;color:#122d47;
+}
+.mock-reading-shell .mock-r32-original h5{
+  margin:19px 0 8px;font:700 15px/1.4 Arial,Helvetica,sans-serif;color:#263e55;
+}
+.mock-reading-shell .mock-r32-original ul{margin:6px 0 16px;padding-left:23px;list-style:disc;}
+.mock-reading-shell .mock-r32-original li{padding:2px 0 5px;line-height:1.9;}
+.mock-reading-shell .mock-r32-original p{margin:0;line-height:2.1;white-space:normal;}
+.mock-reading-shell .mock-r32-blank{display:inline-flex;align-items:center;gap:5px;margin:1px 3px;vertical-align:middle;white-space:nowrap;}
+.mock-reading-shell .mock-r32-blank strong{
+  display:grid;place-items:center;min-width:24px;height:25px;padding:0 4px;
+  border-radius:4px;background:#eaf0f6;color:#22465f;font:700 12px Arial,Helvetica,sans-serif;
+}
+.mock-reading-shell .mock-r32-blank input{
+  box-sizing:border-box;width:124px;max-width:25vw;height:34px;padding:4px 9px;
+  border:1px solid #b8c9d8;border-radius:5px;background:#fff;
+  font:500 15px Arial,Helvetica,sans-serif;color:#142d45;
+}
+.mock-reading-shell .mock-r32-blank input:focus{outline:2px solid #6b9cc6;outline-offset:1px;}
+@media(max-width:600px){
+  .mock-reading-shell .mock-r32-original{padding:14px 12px;font-size:15px;}
+  .mock-reading-shell .mock-r32-blank input{width:99px;}
+}
+
+`}</style><style jsx global>{`::highlight(ark-mock-yellow){background:#ffe58a;color:inherit}`}</style>
+  </main>
+ }
+
+ if(stage==="writing")return <main className="writing-shell mock-writing-shell">{confirmation}{studyTracking}
+  <header className="writing-topbar"><div className="writing-back-slot"><LockKeyhole size={17}/></div><div className="writing-top-center"><b>FULL MOCK · WRITING</b></div><div className="writing-top-meta"><strong className={wRemaining<=300?"urgent":""}><Clock3 size={16}/>{fmt(wRemaining)}</strong><button className="writing-fullscreen" aria-label={full?"Exit fullscreen":"Enter fullscreen"} onClick={toggleFull}>{full?<Minimize2 size={18}/>:<Maximize2 size={18}/>}</button></div></header>
+  <section className="writing-toolbar"><div className="mock-writing-tabs"><button className={"writing-task-chip "+(wTask===1?"active":"")} onClick={()=>setWTask(1)}>Writing Task 1</button><button className={"writing-task-chip "+(wTask===2?"active":"")} onClick={()=>setWTask(2)}>Writing Task 2</button><span className="writing-rule">Task 1 + Task 2 · 60 minutes total</span></div><div className="writing-controls"><button className="submit" disabled={busy||!w1.trim()||!w2.trim()} onClick={()=>submitWriting(false)}><Send size={16}/>{busy?"Submitting…":"Submit Writing"}</button></div></section>
+  <div className="writing-stage">
+   <section className="writing-task-pane"><div className="writing-pane-head"><span>QUESTION</span><b>{task.label}</b></div><div className="writing-paper"><p className="writing-time-note">Recommended: about {Math.round(Number(task.recommended_seconds||0)/60)} minutes.</p>{wTask===2&&<p className="writing-topic-note">Write about the following topic:</p>}<div className="writing-prompt">{task.prompt}</div>{task.visual?.kind==="image"&&<figure style={{margin:"20px 0"}}><img src={task.visual.url} alt={task.visual.alt||"Writing Task 1 chart"} style={{display:"block",width:"100%",height:"auto"}}/></figure>}{task.visual?.kind==="table"&&<div className="mock-writing-table-wrap"><table className="mock-writing-table"><thead><tr>{task.visual.headers.map((h:string)=><th key={h}>{h}</th>)}</tr></thead><tbody>{task.visual.rows.map((row:string[],i:number)=><tr key={i}>{row.map((c,j)=><td key={j}>{c}</td>)}</tr>)}</tbody></table></div>}{(task.instructions||[]).map((x:string,i:number)=><p className="writing-instruction" key={i}>{x}</p>)}<p className="writing-min">Write at least {task.min_words} words.</p></div></section>
+   <section className="writing-answer-pane"><div className="writing-pane-head"><span>YOUR ANSWER</span><div><b>{words(wTask===1?w1:w2)} words</b><i className={words(wTask===1?w1:w2)>=task.min_words?"ok":""}>{words(wTask===1?w1:w2)>=task.min_words?"Minimum reached":"Keep writing"}</i></div></div><div className="writing-editor-wrap"><textarea value={wTask===1?w1:w2} onChange={e=>setWriting(wTask,e.target.value)} spellCheck={false} placeholder={"Type "+task.label+" here…"}/></div><div className="writing-editor-footer"><span><ShieldCheck size={14}/> Draft auto-saved</span><span>{fmt(wRemaining)} remaining</span></div></section>
+  </div>
+  {message&&<div className="mock-floating-message">{message}</div>}
+ </main>;
+
+ if(stage==="assessing")return <main className="mock-assessing"><section><div className="mock-assess-spinner"/><small>FULL MOCK · WRITING</small><h1>Writing is being assessed…</h1><p>{message||"Your Listening and Reading scores remain hidden until the Writing result is ready."}</p><button onClick={()=>location.reload()}>Check status</button></section></main>;
+
+ return <main className="mock-result-page"><header className="mock-entry-top"><AnimatedBackButton href="/dashboard"/><b>ARK EDUCATION · FULL MOCK</b><span>COMPLETED</span></header><section className="mock-result-card"><small>{mockDateText} · FULL MOCK RESULT</small><h1>Mock Overall <b>{Number(result?.overall||0).toFixed(1)}</b></h1><div className="mock-result-grid"><article><Headphones/><span>Listening</span><strong>{result?.listening?.score ?? "—"}<i>/40</i></strong><b>Band {Number(result?.listening?.band||0).toFixed(1)}</b></article><article><BookOpen/><span>Reading</span><strong>{result?.reading?.score ?? "—"}<i>/40</i></strong><b>Band {Number(result?.reading?.band||0).toFixed(1)}</b></article><article><PenLine/><span>Writing</span><strong>{Number(result?.writing?.band||0).toFixed(1)}</strong><b>AI assessed</b></article></div>{result?.writing?.assessment&&<div className="mock-writing-feedback"><h2>Writing assessment</h2><div><span>Task 1 <b>{Number(result.writing.assessment.task1?.band||0).toFixed(1)}</b></span><span>Task 2 <b>{Number(result.writing.assessment.task2?.band||0).toFixed(1)}</b></span></div><p>{result.writing.assessment.summary}</p></div>}{result?.review&&<div className="mock-answer-review"><h2>Answer review</h2>{(["listening","reading"] as const).map(section=><details key={section}><summary>{section==="listening"?"Listening":"Reading"} · 40 answers</summary><div className="mock-review-scroll"><table><thead><tr><th>Question</th><th>Your answer</th><th>Accepted answers</th><th>Result</th></tr></thead><tbody>{result.review[section].map((item:any)=><tr key={item.number}><th>{item.number}{item.question&&<small>{item.question}</small>}</th><td>{item.submitted||"—"}</td><td>{item.correct.join(" / ")}</td><td className={item.status}>{item.status==="correct"?"Correct":item.status==="empty"?"Empty":"Wrong"}</td></tr>)}</tbody></table></div></details>)}</div>}<AnimatedBackButton onClick={()=>router.push("/dashboard")} ariaLabel="Back to dashboard"/></section></main>;
+}
