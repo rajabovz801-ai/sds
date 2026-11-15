@@ -9,3 +9,6 @@ export function decideMockEntry(input:{day:number;studentId:string;preview:boole
  const g=input.grant;
  return g&&g.day_number===input.day&&g.student_id===input.studentId&&g.redeemed_at&&!g.revoked_at?'allowed':'code_required';
 }
+
+export const isOpenAccessMock = (day:number) => day === 46;
+export const openAccessMockOpensAt = (day:number) => isOpenAccessMock(day) ? '2026-11-15T09:00:00+05:00' : null;
