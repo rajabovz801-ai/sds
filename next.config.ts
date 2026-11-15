@@ -10,6 +10,6 @@ const nextConfig:NextConfig={
  poweredByHeader:false,
  serverExternalPackages:["pdfkit"],
  outputFileTracingIncludes:{"/api/challenge-writing":["./public/writing/**/*","./public/images/mock/*writing*"],"/api/telegram":["./node_modules/pdfkit/js/data/*.afm"]},
- async headers(){return [{source:"/:path*",headers:securityHeaders}]}
+ async headers(){return [{source:"/:path*",headers:securityHeaders},{source:"/day/:day/mock/live-view",headers:[{key:"X-Frame-Options",value:"SAMEORIGIN"},{key:"Content-Security-Policy",value:"frame-ancestors 'self'"}]}]}
 };
 export default nextConfig;

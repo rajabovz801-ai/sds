@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useEffect,useRef,useState} from "react";
 
 type Props={day:number;studentId:string};
 export default function MockLiveView({day,studentId}:Props){
@@ -7,7 +7,20 @@ export default function MockLiveView({day,studentId}:Props){
  useEffect(()=>{let active=true,pending=false,materials:any=null;setData(null);setError("");const load=async()=>{if(pending||document.visibilityState!=="visible")return;pending=true;try{const r=await fetch(`/api/challenge-mock?action=admin_live&day=${day}&student_id=${encodeURIComponent(studentId)}${materials?"":"&content=1"}`,{cache:"no-store"});const obj=await r.json();if(!r.ok)throw new Error(obj.detail||"Live view unavailable");if(active){if(obj.content)materials=obj.content;setData({...obj,content:materials});setError("")}}catch(e){if(active)setError(e instanceof Error?e.message:"Connection lost")}finally{pending=false}};void load();const id=window.setInterval(load,3000);return()=>{active=false;window.clearInterval(id)}},[day,studentId]);
  if(error)return <div className="ma-live-paper">{error}</div>;
  if(!data?.available)return <div className="ma-live-paper">{data?.detail||"Connecting to student mock…"}</div>;
- return <MockLiveContent data={data}/>;
+ return data.snapshot?.view&&data.content?<StudentMockScreen day={day} data={data}/>:<MockLiveContent data={data}/>;
+}
+function StudentMockScreen({day,data}:{day:number;data:any}){
+ const frame=useRef<HTMLIFrameElement>(null);
+ const {view}=data.snapshot;
+ const sync=()=>frame.current?.contentWindow?.postMessage({type:"ark-mock-live-view",snapshot:data.snapshot,content:data.content},window.location.origin);
+ useEffect(sync,[data]);
+ return <section className="ma-live-screen"><header><b>LIVE MOCK · {data.snapshot.stage.toUpperCase()}</b><span>Kuzatuv rejimi</span></header>
+  <div style={{overflow:"auto",maxHeight:"75vh",background:"#e7edf4"}}>
+   <div inert style={{width:view.width,height:view.height,marginInline:"auto"}}>
+    <iframe ref={frame} title="O‘quvchining mock ekrani" src={`/day/${day}/mock/live-view`} onLoad={sync} tabIndex={-1} style={{display:"block",width:"100%",height:"100%",border:0,pointerEvents:"none"}}/>
+   </div>
+  </div>
+ </section>;
 }
 export function MockLiveContent({data}:{data:any}){
  const s=data.snapshot,c=data.content;
