@@ -80,21 +80,27 @@ function sanitizeListening(payload:Obj,input:any){
  }
  return out;
 }
+function listeningNormalizer(payload:Obj){
+ return Number(payload.mock_day)===46
+  ? (value:unknown)=>String(value??"").normalize("NFKC").toLowerCase().replace(/[’‘]/g,"'").replace(/[.,\-\/]+/g," ").replace(/\s+/g," ").trim()
+  : norm;
+}
 function gradeListening(payload:Obj,answers:Record<string,string>){
+ const normalize=listeningNormalizer(payload);
  const key=payload.answer_key||{},groups=payload.pair_groups||{};
  const byQ=new Map<number,{id:string;correct:string[]}>();
  for(const [id,g] of Object.entries(groups) as [string,any][]){for(const q of g.questions||[])byQ.set(Number(q),{id,correct:(g.correct||[]).map(String)})}
  const used=new Map<string,Set<string>>();const status:Record<string,boolean>={};let score=0;
  for(let q=1;q<=40;q++){
-  const given=norm(answers[String(q)]);let ok=false;
+  const given=normalize(answers[String(q)]);let ok=false;
   const group=byQ.get(q);
   if(group){
    const set=used.get(group.id)||new Set<string>();
-   ok=!!given&&group.correct.some(v=>norm(v)===given)&&!set.has(given);
+   ok=!!given&&group.correct.some(v=>normalize(v)===given)&&!set.has(given);
    if(ok){set.add(given);used.set(group.id,set)}
   }else{
    const valid=Array.isArray(key[String(q)])?key[String(q)]:[key[String(q)]];
-   ok=!!given&&valid.some((v:any)=>norm(v)===given);
+   ok=!!given&&valid.some((v:any)=>normalize(v)===given);
   }
   status[String(q)]=ok;if(ok)score++;
  }
@@ -129,13 +135,14 @@ function gradeReading(passages:Obj[],answers:Record<string,string>){
 }
 function answerReview(src:Obj,lAnswers:Obj,rAnswers:Obj){
  const payload=src.listening.payload, key=payload.answer_key||{}, groups=payload.pair_groups||{};
+ const normalize=listeningNormalizer(payload);
  const used=new Map<string,Set<string>>();
  const listening=Array.from({length:40},(_,i)=>{
-  const number=i+1,submitted=String(lAnswers[number]||""),given=norm(submitted);
+  const number=i+1,submitted=String(lAnswers[number]||""),given=normalize(submitted);
   const group=Object.entries(groups).find(([,g]:[string,any])=>(g.questions||[]).includes(number)) as [string,any]|undefined;
   const correct=group?group[1].correct:key[number]||[];
   const seen=group?(used.get(group[0])||new Set<string>()):null;
-  const valid=!!given&&correct.some((v:any)=>norm(v)===given)&&(!seen||!seen.has(given));
+  const valid=!!given&&correct.some((v:any)=>normalize(v)===given)&&(!seen||!seen.has(given));
   if(valid&&seen&&group){seen.add(given);used.set(group[0],seen)}
   return {number,submitted,correct,status:!given?"empty":valid?"correct":"wrong"};
  });

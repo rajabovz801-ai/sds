@@ -209,6 +209,38 @@ export default function FullMockPage(){
  }
 
  // Original layout of Day 32 notes and continuous summary only; other days unchanged.
+ function renderDay46Summary(group:Q[]){
+  const first=group[0].number;
+  const sections:Record<number,[string,string][]>={"6":[["h3","February 1861: Storm warning service"],["p","FitzRoy received weather reports produced by ships using reliable [6]."],["p","simultaneous weather reports were taken daily"],["p","storm warnings were telegraphed to [7] along the shore"],["p","signals for ships were displayed using raised [8]."],["p","the storm warning service was the greatest development in sea safety since the [9] was introduced"],["h3","August 1861: Public weather forecasting service"],["p","very popular in The Times newspaper"],["p","frequently used by the English Queen for safe trips to a favourite [10]."],["p","FitzRoy's forecasts were popular with fishermen but not with boat [11]."],["p","in modern times FitzRoy's [12] is used for a marine area"],["p","FitzRoy produced a [13] which was respected by the scientific community"]],"23":[["h4","Animal Research into the Value of Play"],["p","In studies researching links between play and social learning, experiments analysing protein levels in the [23] of rats noted significant differences between rats which had played and those which had not."],["p","In another study, rats made distressed by an object smelling of a [24] experienced a noticeable reduction in their [25] levels after they had been allowed to play."],["p","A further experiment, in which rats had to move a [26] in order to reach a reward, indicated that rats deprived of play were less skilled at dealing with problems."]],"31":[["h4","The fall of the Western Roman Empire"],["p","Barbarians eventually overcame the Romans in the 5th century, after the latter had been under attack for a very long period. The interesting question is why the barbarians experienced [31] on this occasion."],["p","One hypothesis is that they had gained in strength. For example, they may have increased in [32], have built up greater [33] or benefited from a change in climate."],["p","Another hypothesis is that the Romans had developed [34], so they were more vulnerable to attack. This would then be the fundamental [35] of the fall of the Roman Empire."],["p","Whatever the reason, the same question about the fall of the Roman Empire applies to the disappearance of several other historical societies."]]};
+  const options=group[0].options||[];
+  return <div className="mock-r32-original mock-r32-summary">
+   {sections[first].map(([kind,line],index)=>{
+    if(kind!=="p")return <div key={index}><h4>{line}</h4>{index===0&&options.length>0&&<div className="mock-summary-words"><strong>List of Words</strong><ul>{options.map(word=><li key={word}>{word}</li>)}</ul></div>}</div>;
+    return <p key={index}>{line.split(/(\[\d+\])/).map((part,i)=>{
+     const number=Number(part.match(/^\[(\d+)\]$/)?.[1]);
+     if(!group.some(q=>q.number===number))return part;
+     const id="question-"+number,label="Answer to question "+number,value=rAnswers[String(number)]||"";
+     return <span className="mock-r32-blank" key={i}><strong>{number}</strong>{options.length
+      ?<select className="cr-gap cr-select cr-inline-select" id={id} aria-label={label} value={value} onChange={e=>setR(number,e.target.value)}><option value="">Select</option>{options.map(word=><option key={word} value={word}>{word}</option>)}</select>
+      :<input id={id} aria-label={label} value={value} onChange={e=>setR(number,e.target.value)} autoComplete="off" spellCheck={false}/>}</span>;
+    })}</p>;
+   })}
+  </div>;
+ }
+ function renderDay46Researchers(group:Q[]){
+  const researchers=["Anthony Pellegrini","Jaak Panksepp","Stephen Siviy","Marc Bekoff"];
+  return <>
+   <div className="mock-summary-words"><strong>List of Researchers</strong><ul style={{display:"block"}}>{researchers.map((name,index)=><li key={name}><b>{"ABCD"[index]}.</b> {name}</li>)}</ul></div>
+   {group.map(q=><div key={q.number} id={"question-"+q.number} className="cr-question">
+    <div className="cr-question-head" style={{flexWrap:"wrap",alignItems:"center",gap:"12px"}}>
+     <b>{q.number}</b><span style={{flex:"1 1 230px"}}>{q.text}</span>
+     <select className="cr-gap cr-select" aria-label={"Answer to question "+q.number} value={rAnswers[String(q.number)]||""} onChange={e=>setR(q.number,e.target.value)}>
+      <option value="">Select answer</option>{(q.options||[]).map(letter=><option key={letter} value={letter}>{letter}</option>)}
+     </select>
+    </div>
+   </div>)}
+  </>;
+ }
  function renderDay39Summary(group:Q[]){
   const first=group[0].number;
   const title=first===19?"Construction of Halley VI":"The Discovery of Johnston’s Diaries";
@@ -293,7 +325,7 @@ export default function FullMockPage(){
    <div className="cr-split">
     <section style={{display:rTab==="questions"?"var(--cr-hide-passage)":"block"}} className="cr-pane cr-passage" ref={paperRef} onMouseUp={showHighlight} onTouchEnd={()=>setTimeout(showHighlight,100)}><h2>{passage?.title}</h2>{passage?.text.split(/\n\s*\n/).filter(Boolean).map((p,i)=><p key={i}>{p}</p>)}</section>
     <section style={{display:rTab==="passage"?"var(--cr-hide-questions)":"block"}} className="cr-pane cr-questions" ref={questionsRef} onMouseUp={showHighlight} onTouchEnd={()=>setTimeout(showHighlight,100)}>
-     {groups.map((group,gi)=><section className="cr-qgroup" key={gi}><div className="cr-qgroup-head"><h3>Questions {group[0].number}{group.length>1?"–"+group[group.length-1].number:""}</h3>{group[0].instruction&&<p>{compactReadingInstruction(group[0].instruction,group[0].type==="select")}</p>}</div>{day===39&&((group[0].number===19&&group.length===4)||(group[0].number===32&&group.length===5))?renderDay39Summary(group):day===32&&(group[0].number===9||group[0].number===27)?renderDay32ReadingGroup(group[0].number):group[0].answer_group?<div className="cr-options">{day===32&&group[0].number===21&&<p className="mock-reading-day32-choose-two-stem" style={{fontWeight:650,fontSize:16,lineHeight:1.5,margin:"0 0 10px"}}>{group[0].text}</p>}{(group[0].options||[]).map(opt=>{const value=optionValue(opt);const selected=group.some(q=>rAnswers[String(q.number)]===value);const count=group.filter(q=>!!rAnswers[String(q.number)]).length;return <label key={opt}><input type="checkbox" checked={selected} disabled={!selected&&count>=group.length} onChange={()=>{const values=group.map(q=>rAnswers[String(q.number)]).filter(Boolean).filter(v=>v!==value);if(!selected)values.push(value);setRAnswers(old=>{const next={...old,...Object.fromEntries(group.map((q,i)=>[String(q.number),values[i]||""]))};queueSave("reading",{answers:next});return next});}}/><span>{opt}</span></label>})}<p>{group.filter(q=>!!rAnswers[String(q.number)]).length} of {group.length} selected</p>{group.map(q=><span key={q.number} id={"question-"+q.number}/>)}</div>:group.map(renderRQ)}</section>)}
+     {groups.map((group,gi)=><section className="cr-qgroup" key={gi}><div className="cr-qgroup-head"><h3>Questions {group[0].number}{group.length>1?"–"+group[group.length-1].number:""}</h3>{group[0].instruction&&<p>{compactReadingInstruction(day===46&&group[0].number===19?group[0].instruction.split(" List of Researchers")[0]:day===46&&group[0].number===31?group[0].instruction.replace("The fall of the Western Roman Empire. ",""):group[0].instruction,group[0].type==="select")}</p>}</div>{day===46&&group[0].number===19?renderDay46Researchers(group):day===46&&[6,23,31].includes(group[0].number)?renderDay46Summary(group):day===39&&((group[0].number===19&&group.length===4)||(group[0].number===32&&group.length===5))?renderDay39Summary(group):day===32&&(group[0].number===9||group[0].number===27)?renderDay32ReadingGroup(group[0].number):group[0].answer_group?<div className="cr-options">{day===32&&group[0].number===21&&<p className="mock-reading-day32-choose-two-stem" style={{fontWeight:650,fontSize:16,lineHeight:1.5,margin:"0 0 10px"}}>{group[0].text}</p>}{(group[0].options||[]).map(opt=>{const value=optionValue(opt);const selected=group.some(q=>rAnswers[String(q.number)]===value);const count=group.filter(q=>!!rAnswers[String(q.number)]).length;return <label key={opt}><input type="checkbox" checked={selected} disabled={!selected&&count>=group.length} onChange={()=>{const values=group.map(q=>rAnswers[String(q.number)]).filter(Boolean).filter(v=>v!==value);if(!selected)values.push(value);setRAnswers(old=>{const next={...old,...Object.fromEntries(group.map((q,i)=>[String(q.number),values[i]||""]))};queueSave("reading",{answers:next});return next});}}/><span>{opt}</span></label>})}<p>{group.filter(q=>!!rAnswers[String(q.number)]).length} of {group.length} selected</p>{group.map(q=><span key={q.number} id={"question-"+q.number}/>)}</div>:group.map(renderRQ)}</section>)}
     </section>
    </div>
    {highlightPopup&&<div className="cr-highlight-menu" style={{left:highlightPopup.x,top:highlightPopup.y}} onMouseDown={e=>e.preventDefault()}><button aria-label="Yellow highlight" onClick={()=>applyHighlight("yellow")}><i className="swatch yellow"/></button><span className="cr-menu-sep"/><button aria-label="Remove highlight" onClick={()=>applyHighlight("erase")}><Eraser size={17}/></button></div>}
