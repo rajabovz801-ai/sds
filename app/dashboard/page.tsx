@@ -1,5 +1,5 @@
 "use client";
-import {isOpenAccessMock,openAccessMockOpensAt} from "../../lib/mock-access-policy";
+import {requiresPersonalMockCode,personalMockOpensAt} from "../../lib/mock-access-policy";
 import {canResume} from "../../lib/challenge-workspace";
 import "./workspace-compact.css";
 import {challengeDayUnlocked} from "../../lib/ark60-day-access";
@@ -56,7 +56,6 @@ function tashkentDate(){
 }
 function unlocked(d:Day,today:string){return d.date.toISOString().slice(0,10)<=today}
 function progressUnlocked(day:number,stats:StudentStats|null,today:string,now=Date.now()){
- if(isOpenAccessMock(day))return !!stats&&(!!stats.preview||now>=Date.parse(openAccessMockOpensAt(day)!));
  return challengeDayUnlocked(day,stats,today,now);
 }
 function modulesFor(day:Day){
@@ -183,7 +182,7 @@ export default function Dashboard(){
 
  useEffect(()=>{
   let active=true;setPreviewMockDay(null);
-  if(!stats||(!stats.preview&&!isOpenAccessMock(selected))||!DAYS[selected-1]?.mock)return;
+  if(!stats||!stats.preview||!DAYS[selected-1]?.mock)return;
   fetch("/api/challenge-mock?action=availability&day="+selected,{credentials:"same-origin",cache:"no-store"})
    .then(async r=>r.ok?await r.json():null).then(value=>{if(active&&value?.published&&value.open)setPreviewMockDay(selected)}).catch(()=>{});
   return()=>{active=false};
@@ -211,12 +210,12 @@ export default function Dashboard(){
  const planLive=progressUnlocked(planDayNumber,stats,today,clock);
 
  const chosen=DAYS[selected-1];
- const personalMockEntry=[18,25,32,39].includes(chosen.n)&&unlocked(chosen,today)&&clock>=Date.UTC(2026,9,chosen.n,4,0,0);
+ const personalMockEntry=requiresPersonalMockCode(chosen.n)&&unlocked(chosen,today)&&clock>=Date.parse(personalMockOpensAt(chosen.n)!);
  const live=personalMockEntry||progressUnlocked(chosen.n,stats,today,clock);
  // Days 18 and 25 use student-bound personal codes. Its material rows are intentionally draft,
  // so regular published-module counts must never hide the code-entry navigation.
  // The /api/challenge-mock gate independently checks the redeemed code on every request.
- const chosenRequired=personalMockEntry||(isOpenAccessMock(chosen.n)&&live&&previewMockDay===chosen.n)
+ const chosenRequired=personalMockEntry
    ?["listening","reading","writing"]
    :preview&&previewMockDay===chosen.n?["listening","reading","writing"]:stats?.required_by_day?.[String(chosen.n)]||[];
  const display=useMemo(()=>modulesFor(chosen),[chosen]);

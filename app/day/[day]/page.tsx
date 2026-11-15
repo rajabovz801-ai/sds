@@ -1,6 +1,6 @@
 "use client";
 import {vocabularyUnitsReady} from "../../../lib/ark60-reading-plan";
-import {isOpenAccessMock,openAccessMockOpensAt} from "@/lib/mock-access-policy";
+import {personalMockOpensAt} from "@/lib/mock-access-policy";
 import {challengeDayUnlocked} from "../../../lib/ark60-day-access";
 import {WorkspaceArt} from "../../components/workspace-art";
 import AnimatedBackButton from "../../components/animated-back-button";
@@ -28,7 +28,7 @@ type ModuleAvailabilityKey=Exclude<AvailabilityKey,"progress">;
 type AvailabilityState=Record<AvailabilityKey,"checking"|"ready"|"error">;
 const EMPTY_AVAILABILITY:AvailabilityState={progress:"checking",reading:"checking",article:"checking",vocabulary:"checking",speaking:"checking",listening:"checking",writing:"checking",mock:"checking"};
 function progressUnlocked(day:number,stats:ProgressState|null,today:string,now=Date.now()){
- if(isOpenAccessMock(day))return !!stats&&(!!stats.preview||now>=Date.parse(openAccessMockOpensAt(day)!));
+ if(day===46)return !!stats&&(!!stats.preview||now>=Date.parse(personalMockOpensAt(day)!));
  return challengeDayUnlocked(day,stats,today,now);
 }
 export default function DayPage(){
