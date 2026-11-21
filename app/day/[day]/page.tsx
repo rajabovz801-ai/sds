@@ -28,7 +28,7 @@ type ModuleAvailabilityKey=Exclude<AvailabilityKey,"progress">;
 type AvailabilityState=Record<AvailabilityKey,"checking"|"ready"|"error">;
 const EMPTY_AVAILABILITY:AvailabilityState={progress:"checking",reading:"checking",article:"checking",vocabulary:"checking",speaking:"checking",listening:"checking",writing:"checking",mock:"checking"};
 function progressUnlocked(day:number,stats:ProgressState|null,today:string,now=Date.now()){
- if(day===46)return !!stats&&(!!stats.preview||now>=Date.parse(personalMockOpensAt(day)!));
+ if((day===46||day===53))return !!stats&&(!!stats.preview||now>=Date.parse(personalMockOpensAt(day)!));
  return challengeDayUnlocked(day,stats,today,now);
 }
 export default function DayPage(){

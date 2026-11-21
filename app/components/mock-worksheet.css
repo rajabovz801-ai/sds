@@ -1,0 +1,12 @@
+.mock-worksheet{font-size:17px;line-height:1.7;color:inherit}
+.mock-worksheet .notes-block,.mock-worksheet .choice-box{border:1px solid #d9e3ee;border-radius:10px;padding:18px 20px;margin:14px 0;background:var(--surface,#fff)}
+.mock-worksheet .source-line{margin:8px 0}
+.mock-worksheet .section-title{font-weight:700;margin:0 0 12px}
+.mock-worksheet .help-select-row,.mock-worksheet .tfng-row{display:flex;align-items:center;gap:12px;border-bottom:1px solid #e5ecf3;padding:14px 0;flex-wrap:wrap}
+.mock-worksheet .prompt,.mock-worksheet .qtext{flex:1 1 240px}
+.mock-worksheet .qnum{font-size:14px;font-weight:700;border-radius:5px;padding:3px 9px;background:#edf3f8}
+.mock-worksheet .mock-worksheet-answer{display:inline-block;width:155px;max-width:100%;min-width:80px;height:38px;margin:2px 5px;vertical-align:middle;font:inherit;font-size:16px;border:1px solid #b7cbe0;border-radius:6px;padding:4px 9px;background:#fff;color:#142d48}
+.mock-worksheet select.mock-worksheet-answer{width:180px}
+.mock-worksheet img{display:block;width:100%;height:auto;max-width:950px;margin:14px auto}
+.mock-worksheet .choice-box>div{padding:3px 0}
+.mock-worksheet .task-img-wrap{margin:16px 0}

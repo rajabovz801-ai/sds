@@ -1,6 +1,6 @@
-export const requiresPersonalMockCode = (day:number) => day === 18 || day === 25 || day === 32 || day === 39 || day === 46;
-export const isAdminGrantedMock = (day:number) => day === 32 || day === 39 || day === 46;
-export const personalMockOpensAt = (day:number) => day === 18 ? '2026-10-18T09:00:00+05:00' : day === 25 ? '2026-10-25T09:00:00+05:00' : day === 32 ? '2026-11-01T09:00:00+05:00' : day === 39 ? '2026-11-08T09:00:00+05:00' : day === 46 ? '2026-11-15T09:00:00+05:00' : null;
+export const requiresPersonalMockCode = (day:number) => day === 18 || day === 25 || day === 32 || day === 39 || day === 46 || day === 53;
+export const isAdminGrantedMock = (day:number) => day === 32 || day === 39 || day === 46 || day === 53;
+export const personalMockOpensAt = (day:number) => day === 18 ? '2026-10-18T09:00:00+05:00' : day === 25 ? '2026-10-25T09:00:00+05:00' : day === 32 ? '2026-11-01T09:00:00+05:00' : day === 39 ? '2026-11-08T09:00:00+05:00' : day === 46 ? '2026-11-15T09:00:00+05:00' : day === 53 ? '2026-11-22T09:00:00+05:00' : null;
 type Grant={student_id:string;day_number:number;redeemed_at:string|null;revoked_at:string|null};
 export function decideMockEntry(input:{day:number;studentId:string;preview:boolean;now:number;grant:Grant|null}):'legacy'|'preview'|'scheduled'|'code_required'|'allowed'{
  if(!requiresPersonalMockCode(input.day))return 'legacy';

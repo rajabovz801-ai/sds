@@ -204,18 +204,18 @@ export default function Dashboard(){
  const preview=Boolean(stats?.preview);
  const planDayNumber=currentDay||(today>"2026-11-29"?60:1);
  const planDay=DAYS[planDayNumber-1];
- const planMock=planDayNumber===46;
- const planMockOpen=preview||clock>=Date.parse(personalMockOpensAt(46)!);
- const planMockDone=stats?.completed_mock_days?.includes(46)===true;
+ const planMock=requiresPersonalMockCode(planDayNumber);
+ const planMockOpen=preview||clock>=Date.parse(personalMockOpensAt(planDayNumber)!);
+ const planMockDone=stats?.completed_mock_days?.includes(planDayNumber)===true;
  const planRequired=stats?.required_by_day?.[String(planDayNumber)]||[];
  const planModules=modulesFor(planDay).filter(x=>planRequired.includes(x.name.toLowerCase()));
  const planDone=stats?planRequired.filter(module=>stats.completed.some(x=>x.day_number===planDayNumber&&x.module===module)).length:0;
  const planLive=progressUnlocked(planDayNumber,stats,today,clock);
 
  const chosen=DAYS[selected-1];
- const chosenMock=chosen.n===46;
- const chosenMockOpen=preview||clock>=Date.parse(personalMockOpensAt(46)!);
- const chosenMockDone=stats?.completed_mock_days?.includes(46)===true;
+ const chosenMock=requiresPersonalMockCode(chosen.n);
+ const chosenMockOpen=preview||clock>=Date.parse(personalMockOpensAt(chosen.n)!);
+ const chosenMockDone=stats?.completed_mock_days?.includes(chosen.n)===true;
  const personalMockEntry=requiresPersonalMockCode(chosen.n)&&unlocked(chosen,today)&&clock>=Date.parse(personalMockOpensAt(chosen.n)!);
  const live=chosenMock?chosenMockOpen:personalMockEntry||progressUnlocked(chosen.n,stats,today,clock);
  // Days 18 and 25 use student-bound personal codes. Its material rows are intentionally draft,
@@ -299,7 +299,7 @@ export default function Dashboard(){
        {!planMock&&<div className="today-progress"><strong>{planDone}/{planRequired.length||0}</strong><span>completed</span></div>}
       </div>
       <div className="today-task-list">
-       {planMock?<div className="detail-item dashboard-task task-ready"><span className="task-icon"><ShieldCheck size={20}/></span><div className="task-copy"><strong>Full Mock</strong><small>Listening · Reading · Writing</small></div><button type="button" className="task-action can-open" onClick={()=>location.assign(moduleHref(46,"Listening"))}>{planMockDone?"Natijani ko‘rish":"Mockni ochish"}<ChevronRight size={15}/></button></div>:planModules.length?planModules.map(({name,detail,icon:Icon,tone})=>{
+       {planMock?<div className="detail-item dashboard-task task-ready"><span className="task-icon"><ShieldCheck size={20}/></span><div className="task-copy"><strong>Full Mock</strong><small>Listening · Reading · Writing</small></div><button type="button" className="task-action can-open" onClick={()=>location.assign(moduleHref(planDayNumber,"Listening"))}>{planMockDone?"Natijani ko‘rish":"Mockni ochish"}<ChevronRight size={15}/></button></div>:planModules.length?planModules.map(({name,detail,icon:Icon,tone})=>{
         const done=stats?.completed.some(x=>x.day_number===planDayNumber&&x.module===name.toLowerCase());
         return <div key={name} className={"detail-item dashboard-task "+(done?"task-completed ":"")+(planLive?"task-ready":"task-pending")}>
          <span className={"task-icon "+tone}><Icon size={20} strokeWidth={1.8}/></span>
@@ -357,7 +357,7 @@ export default function Dashboard(){
          </button>
         </div>;
        })}</div>
-       {chosenMock?<div className="day-detail-footer"><button className="detail-btn" onClick={()=>location.assign(moduleHref(46,"Listening"))}>{chosenMockDone?"Natijani ko‘rish":"Mockni ochish"}<ChevronRight size={16}/></button></div>:<div className="day-detail-footer"><div><span>DAY STATUS</span><b>{live?(chosenRequired.length?chosenRequired.length+" published modules":"Materials pending upload"):unlocked(chosen,today)?(stats?.membership?.enforced?"Active package required":"Earlier tasks incomplete"):"Available on "+format(chosen.date,{day:"numeric",month:"short"})}</b></div><button disabled={!live&&!(stats?.membership?.enforced&&unlocked(chosen,today))} className="detail-btn" onClick={()=>{if(live)location.href="/day/"+chosen.n;else setLockedDay(chosen.n)}}>{live?"View study day":stats?.membership?.enforced&&unlocked(chosen,today)?"Paket tanlash":unlocked(chosen,today)?"Complete earlier tasks":"Future day locked"}<ChevronRight size={16}/></button></div>}
+       {chosenMock?<div className="day-detail-footer"><button className="detail-btn" onClick={()=>location.assign(moduleHref(chosen.n,"Listening"))}>{chosenMockDone?"Natijani ko‘rish":"Mockni ochish"}<ChevronRight size={16}/></button></div>:<div className="day-detail-footer"><div><span>DAY STATUS</span><b>{live?(chosenRequired.length?chosenRequired.length+" published modules":"Materials pending upload"):unlocked(chosen,today)?(stats?.membership?.enforced?"Active package required":"Earlier tasks incomplete"):"Available on "+format(chosen.date,{day:"numeric",month:"short"})}</b></div><button disabled={!live&&!(stats?.membership?.enforced&&unlocked(chosen,today))} className="detail-btn" onClick={()=>{if(live)location.href="/day/"+chosen.n;else setLockedDay(chosen.n)}}>{live?"View study day":stats?.membership?.enforced&&unlocked(chosen,today)?"Paket tanlash":unlocked(chosen,today)?"Complete earlier tasks":"Future day locked"}<ChevronRight size={16}/></button></div>}
       </aside>
      </div>
 

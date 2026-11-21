@@ -386,7 +386,7 @@ export async function GET(req:NextRequest){
   let src:Obj|null=null;
   if(requiresPersonalMockCode(day)&&!action.startsWith("admin_")){
    const preview=!!viewer&&isPreview(viewer),opened=Date.now()>=mockStartMs(day);
-   if(action==="availability")return json({published:day===46?!!(await source(day,true)):preview||opened,open:preview||opened,opens_at:mockOpensAt(day),code_required:!preview});
+   if(action==="availability")return json({published:(day===46||day===53)?!!(await source(day,true)):preview||opened,open:preview||opened,opens_at:mockOpensAt(day),code_required:!preview});
    if(!viewer)return json({detail:"Please sign in."},401);
    const entry=await mockEntryForStudent(day,viewer);
    if(entry==="scheduled")return json({detail:`Mock ${new Date(START_UTC+(day-1)*DAY_MS).toLocaleDateString('uz-UZ',{timeZone:'UTC',day:'numeric',month:'long'})} soat 09:00 da ochiladi (Toshkent vaqti).`,scheduled:true,opens_at:mockOpensAt(day)},403);
